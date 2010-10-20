@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Handler" default="dist" basedir=".">
+	<description>
+		This script will build the Handler.
+	</description>
+
+	<property name="src" location="src" />
+	<property name="build" location="build" />
+	<property name="build.classes" location="${build}/classes" />
+<property name="lib" location="lib" />
+
+	<path id="classpath">
+		<fileset dir="${lib}">
+			<include name="minecraft_server.jar" />
+			<include name="Minecraft_Mod.jar" />
+		</fileset>
+	</path>
+	
+	<target name="verifyRequirements" description="Checks if the necessary requirements for building Handler are fulfilled">
+		<available classname="javax.script.ScriptContext" property="JDK6.present" />
+		<fail unless="JDK6.present" message="JDK 6 or greater is required." />
+	</target>
+
+	<target name="init" depends="clean, verifyRequirements" description="Create the output directories.">
+		<mkdir dir="${build}" />
+		<mkdir dir="${build.classes}" />
+	</target>
+
+	<target name="compile" depends="version" description="Compile the source.">
+		<javac destdir="${build.classes}" optimize="on" debug="on" source="1.6" target="1.6" nowarn="off">
+			<src path="${src}" />
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile" description="Create the jar file">
+		<jar destfile="${build}/Zones.jar">
+			<fileset dir="${build.classes}" />
+		</jar>
+	</target>
+
+	<target name="dist" depends="jar">
+		<copy todir="C:\Users\Joseph Verburg\Desktop\s7\plugins">
+			<fileset dir="build">
+				<include name="Zones.jar" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="version" depends="init" description="--">
+
+	</target>
+	
+	<target name="clean" description="Remove the output directories">
+		<delete dir="${build}" />
+	</target>
+</project>
