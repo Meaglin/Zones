@@ -38,14 +38,6 @@
 			<fileset dir="${build.classes}" />
 		</jar>
 	</target>
-
-	<target name="dist" depends="jar">
-		<copy todir="C:\Users\Joseph Verburg\Desktop\s7\plugins">
-			<fileset dir="build">
-				<include name="Zones.jar" />
-			</fileset>
-		</copy>
-	</target>
 	
 	<target name="version" depends="init" description="--">
 

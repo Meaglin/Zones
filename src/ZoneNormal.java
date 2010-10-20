@@ -1,4 +1,3 @@
-
 public class ZoneNormal extends ZoneType {
 
 	public ZoneNormal(int id) {
