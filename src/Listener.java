@@ -16,7 +16,7 @@ public class Listener extends PluginListener{
 
 	
 	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) { 
-		if(canDoBlockModify(player,blockPlaced.getX(),blockPlaced.getZ(),blockPlaced.getY(),Rights.BUILD)){
+		if(canDoBlockModify(player,blockPlaced.getX(),blockPlaced.getZ(),blockPlaced.getY(),Access.Rights.BUILD)){
 			//player.giveItem(blockPlaced.getType(), 0);
 			player.getInventory().updateInventory();
 			//etc.getServer().setBlockAt(0, blockPlaced.getX(), blockPlaced.getY(), blockPlaced.getZ());
@@ -51,7 +51,7 @@ public class Listener extends PluginListener{
 	
 	public boolean onBlockDestroy(Player player, Block block) { 
 		
-		if(canDoBlockModify(player,block.getX(),block.getZ(),block.getY(),Rights.DESTROY)){
+		if(canDoBlockModify(player,block.getX(),block.getZ(),block.getY(),Access.Rights.DESTROY)){
 			player.sendMessage(Colors.Red + "You cannot destroy blocks in this zone!");
 			return true;
 		}else{
@@ -76,17 +76,17 @@ public class Listener extends PluginListener{
 	
 	}
 	
-	public boolean onComplexBlockChange(Player player, ComplexBlock block) { return canDoBlockModify(player,block.getX(),block.getZ(),block.getY(),Rights.MODIFY); }
+	public boolean onComplexBlockChange(Player player, ComplexBlock block) { return canDoBlockModify(player,block.getX(),block.getZ(),block.getY(),Access.Rights.MODIFY); }
 	
 	public boolean onSendComplexBlock(Player player, ComplexBlock block) { 
 		if(block instanceof Sign)
 			return false;
 		
-		return canDoBlockModify(player,block.getX(),block.getZ(),block.getY(),Rights.MODIFY); 
+		return canDoBlockModify(player,block.getX(),block.getZ(),block.getY(),Access.Rights.MODIFY); 
 	
 	}
 	
-	public boolean canDoBlockModify(Player player, int x,int y, int z,Rights doen){
+	public boolean canDoBlockModify(Player player, int x,int y, int z,Access.Rights doen){
 		//Region reg = World.getInstance().getRegion(x, y);
 		
 		ArrayList<ZoneType> _zones = new ArrayList<ZoneType>();

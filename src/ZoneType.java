@@ -387,4 +387,12 @@ public abstract class ZoneType
 			}catch(Exception e){}
 		}
 	}
+
+	public void addUser(String string) {
+		addUser(string,new Access("*"));		
+	}
+
+	public void addGroup(String string) {
+		addGroup(string,new Access("*"));
+	}
 }
