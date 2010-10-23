@@ -46,8 +46,7 @@ public class World {
 	}
 
 	public Region getRegion(int x, int y) {
-		System.out.println("get region " + ((x - minx) >> shiftsize) + " "
-				+ ((y - miny) >> shiftsize));
+		System.out.println("get region " + ((x - minx) >> shiftsize) + " " + ((y - miny) >> shiftsize));
 		return regions[(x - minx) >> shiftsize][(y - miny) >> shiftsize];
 	}
 

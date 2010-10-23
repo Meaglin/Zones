@@ -11,8 +11,7 @@ public class DB {
 
 	public Connection getConnection() {
 		try {
-			return DriverManager.getConnection(db + "?autoReconnect=true&user="
-					+ username + "&password=" + password);
+			return DriverManager.getConnection(db + "?autoReconnect=true&user=" + username + "&password=" + password);
 		} catch (SQLException ex) {
 			log.log(Level.SEVERE, "Unable to retreive connection", ex);
 		}
@@ -25,8 +24,7 @@ public class DB {
 		driver = properties.getString("driver", "com.mysql.jdbc.Driver");
 		username = properties.getString("user", "root");
 		password = properties.getString("pass", "root");
-		db = properties
-				.getString("db", "jdbc:mysql://localhost:3306/minecraft");
+		db = properties.getString("db", "jdbc:mysql://localhost:3306/minecraft");
 
 		try {
 			Class.forName(driver);

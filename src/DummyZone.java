@@ -26,8 +26,7 @@ public class DummyZone {
 	}
 
 	public void addDeleteBlock(Block block) {
-		_deleteBlocks
-				.add(new int[] { block.getX(), block.getY(), block.getZ() });
+		_deleteBlocks.add(new int[] { block.getX(), block.getY(), block.getZ() });
 
 	}
 }

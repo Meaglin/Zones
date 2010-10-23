@@ -12,8 +12,7 @@ import java.util.logging.Logger;
  * @author durgus, Meaglin
  */
 public abstract class ZoneType {
-	protected static final Logger		log	= Logger.getLogger(ZoneType.class
-													.getName());
+	protected static final Logger		log	= Logger.getLogger(ZoneType.class.getName());
 
 	private final int					_id;
 	protected List<ZoneForm>			_zone;
@@ -87,8 +86,7 @@ public abstract class ZoneType {
 						_admingroups.add(item[1]);
 						break;
 					default:
-						log.info("Unknown admin grouptype in zone id: "
-								+ getId());
+						log.info("Unknown admin grouptype in zone id: " + getId());
 						break;
 				}
 			}
@@ -125,16 +123,14 @@ public abstract class ZoneType {
 						_groups.put(itemname, new Access(itemrights));
 						break;
 					default:
-						log.info("Unknown admin grouptype in zone id: "
-								+ getId());
+						log.info("Unknown admin grouptype in zone id: " + getId());
 						break;
 				}
 			}
 		} else if (name.equals("name")) {
 			_name = value;
 		} else
-			log.info(getClass().getSimpleName() + ": Unknown parameter - "
-					+ name + " in zone: " + getId());
+			log.info(getClass().getSimpleName() + ": Unknown parameter - " + name + " in zone: " + getId());
 	}
 
 	/**
@@ -210,8 +206,7 @@ public abstract class ZoneType {
 	 * @param object
 	 */
 	public boolean isInsideZone(Player object) {
-		return isInsideZone((int) Math.floor(object.getX()), (int) Math
-				.floor(object.getZ()), (int) Math.floor(object.getY()));
+		return isInsideZone((int) Math.floor(object.getX()), (int) Math.floor(object.getZ()), (int) Math.floor(object.getY()));
 	}
 
 	public double getDistanceToZone(int x, int y) {
@@ -219,8 +214,7 @@ public abstract class ZoneType {
 	}
 
 	public double getDistanceToZone(Player object) {
-		return getZone().getDistanceToZone((int) Math.floor(object.getX()),
-				(int) Math.floor(object.getZ()));
+		return getZone().getDistanceToZone((int) Math.floor(object.getX()), (int) Math.floor(object.getZ()));
 	}
 
 	public void revalidateInZone(Player character) {
@@ -230,8 +224,7 @@ public abstract class ZoneType {
 			return;
 
 		// If the object is inside the zone...
-		if (isInsideZone((int) Math.floor(character.getX()), (int) Math
-				.floor(character.getZ()), (int) Math.floor(character.getY()))) {
+		if (isInsideZone((int) Math.floor(character.getX()), (int) Math.floor(character.getZ()), (int) Math.floor(character.getY()))) {
 			// Was the character not yet inside this zone?
 			if (!_characterList.containsKey(character.getName())) {
 				_characterList.put(character.getName(), character);
@@ -284,13 +277,11 @@ public abstract class ZoneType {
 
 	public boolean canModify(Player player, Access.Rights right) {
 
-		if (_users.containsKey(player.getName().toLowerCase())
-				&& _users.get(player.getName().toLowerCase()).canDo(right))
+		if (_users.containsKey(player.getName().toLowerCase()) && _users.get(player.getName().toLowerCase()).canDo(right))
 			return true;
 
 		for (String group : player.getGroups())
-			if (_groups.containsKey(group.toLowerCase())
-					&& _groups.get(group.toLowerCase()).canDo(right))
+			if (_groups.containsKey(group.toLowerCase()) && _groups.get(group.toLowerCase()).canDo(right))
 				return true;
 
 		// Admins always have full access to the zone.
@@ -361,8 +352,7 @@ public abstract class ZoneType {
 		PreparedStatement st = null;
 		try {
 			conn = DB.getInstance().getConnection();
-			st = conn
-					.prepareStatement("UPDATE zones SET users = ?,admins = ? WHERE id = ?");
+			st = conn.prepareStatement("UPDATE zones SET users = ?,admins = ? WHERE id = ?");
 			st.setString(1, users);
 			st.setString(2, admins);
 			st.setInt(3, getId());

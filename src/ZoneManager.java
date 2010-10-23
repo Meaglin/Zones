@@ -26,8 +26,7 @@ public class ZoneManager {
 		try {
 			conn = DB.getInstance().getConnection();
 			PreparedStatement st = conn.prepareStatement("SELECT * FROM zones");
-			PreparedStatement st2 = conn
-					.prepareStatement("SELECT `x`,`y` FROM zones_vertices WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
+			PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM zones_vertices WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
 			ResultSet rset = st.executeQuery();
 
 			int id, type, size, minz, maxz;
@@ -49,12 +48,10 @@ public class ZoneManager {
 				try {
 					newZone = Class.forName(zoneClass);
 				} catch (ClassNotFoundException e) {
-					log.warning("No such zone class: " + zoneClass + " id: "
-							+ id);
+					log.warning("No such zone class: " + zoneClass + " id: " + id);
 					continue;
 				}
-				Constructor<?> zoneConstructor = newZone
-						.getConstructor(int.class);
+				Constructor<?> zoneConstructor = newZone.getConstructor(int.class);
 				ZoneType temp = (ZoneType) zoneConstructor.newInstance(id);
 
 				points.clear();
@@ -79,12 +76,9 @@ public class ZoneManager {
 				switch (type) {
 					case 1:
 						if (points.size() == 2) {
-							temp.setZone(new ZoneCuboid(coords[0][0],
-									coords[1][0], coords[0][1], coords[1][1],
-									minz, maxz));
+							temp.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], minz, maxz));
 						} else {
-							log.info("Missing zone vertex for cuboid zone id: "
-									+ id);
+							log.info("Missing zone vertex for cuboid zone id: " + id);
 							continue;
 						}
 						break;
@@ -103,8 +97,7 @@ public class ZoneManager {
 						}
 						break;
 					default:
-						log.severe("Unknown zone form " + type + " for id "
-								+ id);
+						log.severe("Unknown zone form " + type + " for id " + id);
 						break;
 				}
 
@@ -124,11 +117,9 @@ public class ZoneManager {
 			}
 		}
 		if (_zones.size() == 1)
-			System.out.println("ZoneManager: Loaded " + _zones.size()
-					+ " Zone.");
+			System.out.println("ZoneManager: Loaded " + _zones.size() + " Zone.");
 		else
-			System.out.println("ZoneManager: Loaded " + _zones.size()
-					+ " Zones.");
+			System.out.println("ZoneManager: Loaded " + _zones.size() + " Zones.");
 	}
 
 	public void addZone(ZoneType zone) {
