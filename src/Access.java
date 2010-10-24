@@ -32,7 +32,7 @@ public class Access {
 		public String getTextual() { return textual; }
 		public static ArrayList<Rights> getRights() { return rights; }
 		public boolean canDo(int rights) {
-			return (rights & flag) != 0;
+			return (rights & flag) == flag;
 		}
 	}
 
