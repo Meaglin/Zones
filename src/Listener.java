@@ -488,17 +488,17 @@ public class Listener extends PluginListener {
 	public static final Map<String, String> commands;
 	static {
 		commands = new LinkedHashMap<String,String>();
-		commands.put("/zcreate", "[zone name] - creates at temp zone with name [zone name] and starts zone creation mode for that player.");
-		commands.put("/zadd", "- adds the current player location as a point to the temp zone.");
-		commands.put("/zremove", "- removes the current player location as a point from the temp zone.");
-		commands.put("/zsetplot", "- sets the height and depth of this zone as ones of a plot.");
-		commands.put("/zhelp", "<page id> - shows <page id> page from the zone help list.");
-		commands.put("/zsetheight", "[height] - sets the max z of the temp zone as [height] + z of the block ur standing on.");
-		commands.put("/zsetdepth", "[depth] - sets the minz of the temp zone as player z - [depth].");
+		commands.put("/zcreate", "[zone name] - starts zone creation in a new zone.");
+		commands.put("/zadd", "- adds the current location to the temp zone.");
+		commands.put("/zremove", "- removes the current location from the temp zone.");
+		commands.put("/zsetplot", "- set height and depth to according to plot specs.");
+		commands.put("/zhelp", "<page id> - shows <page id> page from the zone help.");
+		commands.put("/zsetheight", "[height] - sets maxz to current z + [height].");
+		commands.put("/zsetdepth", "[depth] - sets minz to current z - [depth].");
 		commands.put("/zsave", "- saves the temp zone after confirmation.");
-		commands.put("/zconfirm", "- confirms the last action wich needed confirmation.");
-		commands.put("/zsetz", "[minz] [maxz] - sets the min and max z of the temp zone, Range: [0-127].");
-		commands.put("/zstop", "- stops the zone creation after confirmation and deletes the temp zone.");
+		commands.put("/zconfirm", "- confirms confirmations.");
+		commands.put("/zsetz", "[minz] [maxz] - sets minz, maxz, range [0-127].");
+		commands.put("/zstop", "- stop creation and delete zone (asks confirmation).");
 		commands.put("/zadduser", "[user name] <zone id>");
 		commands.put("/zaddgroup", "[group name] <zone id>");
 		commands.put("/zaddadmin", "[user name] <zone id>");
