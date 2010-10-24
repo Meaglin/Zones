@@ -113,10 +113,11 @@ public class Listener extends PluginListener {
 
 	}
 
+	private static final int ITEMS_PER_PAGE = 7;
 	public boolean onCommand(Player player, String[] split) {
-		String cmd = split[0];
+		String cmd = split[0].toLowerCase();
 
-		if (inArray(getCommands().keySet().toArray(new String[getCommands().size()]), cmd)) {
+		if (getCommands().containsKey(cmd)) {
 			if (cmd.equalsIgnoreCase("/zcreate") && player.canUseCommand(cmd)) {
 				if (split.length < 2) {
 					player.sendMessage("Usage: /zcreate [zone name]");
@@ -139,30 +140,23 @@ public class Listener extends PluginListener {
 					}
 				}
 
-				player.sendMessage(Colors.Blue + "Available commands (Page " + (split.length == 2 ? split[1] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) 7) + ") [] = required <> = optional:");
-				if (split.length == 2) {
+				player.sendMessage(Colors.Blue + "Available commands (Page " + (split.length == 2 ? split[1] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") [] = required <> = optional:");
+				int amount = 0;
+				if (split.length > 1) {
 					try {
-						int amount = Integer.parseInt(split[1]);
-
-						if (amount > 0) {
-							amount = (amount - 1) * 7;
-						} else {
-							amount = 0;
-						}
-
-						for (int i = amount; i < amount + 7; i++) {
-							if (availableCommands.size() > i) {
-								player.sendMessage(Colors.Rose + availableCommands.get(i));
-							}
-						}
+						amount = Integer.parseInt(split[1]);
 					} catch (NumberFormatException ex) {
 						player.sendMessage(Colors.Rose + "Not a valid page number.");
 					}
-				} else {
-					for (int i = 0; i < 7; i++) {
-						if (availableCommands.size() > i) {
-							player.sendMessage(Colors.Rose + availableCommands.get(i));
-						}
+					if (amount > 1)
+						amount = (amount - 1) * ITEMS_PER_PAGE;
+					else
+						amount = 0;
+				}
+
+				for (int i = amount; i < amount + ITEMS_PER_PAGE; i++) {
+					if (availableCommands.size() > i) {
+						player.sendMessage(Colors.Rose + availableCommands.get(i));
 					}
 				}
 			} else if (cmd.equalsIgnoreCase("/zadduser")) {
@@ -490,19 +484,9 @@ public class Listener extends PluginListener {
 			zone.revalidateInZone(player);
 	}
 
-	private boolean inArray(String[] arr, String item) {
-
-		for (String str : arr)
-			if (str.equals(item))
-				return true;
-
-		return false;
-	}
-
-	public static final String[]	commands	= new String[] { "/zcreate", "/zadd", "/zremove", "/zsetplot", "/zhelp", "/zsetheight", "/zsetdepth", "/zsave", "/zconfirm", "/zsetz", "/zstop", "/zadduser", "/zaddgroup", "/zaddadmin" };
-
-	private HashMap<String, String> getCommands() {
-		HashMap<String, String> commands = new HashMap<String, String>();
+	public static final HashMap<String, String> commands;
+	static {
+		commands = new HashMap<String,String>();
 		commands.put("/zcreate", "[zone name] - creates at temp zone with name [zone name] and starts zone creation mode for that player.");
 		commands.put("/zadd", "- adds the current player location as a point to the temp zone.");
 		commands.put("/zremove", "- removes the current player location as a point from the temp zone.");
@@ -517,6 +501,6 @@ public class Listener extends PluginListener {
 		commands.put("/zadduser", "[user name] <zone id>");
 		commands.put("/zaddgroup", "[group name] <zone id>");
 		commands.put("/zaddadmin", "[user name] <zone id>");
-		return commands;
 	}
+	private HashMap<String, String> getCommands() { return commands; }
 }
