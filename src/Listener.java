@@ -21,7 +21,7 @@ public class Listener extends PluginListener {
 			player.sendMessage(Colors.Red + "You cannot place blocks in this zone!");
 			return true;
 		} else {
-			if (blockPlaced.getType() == 4) {
+			if (blockPlaced.getType() == 4 || itemInHand == 280) {
 				DummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy != null) {
 					if (dummy._type == 1 && dummy._coords.size() == 2) {
@@ -29,8 +29,16 @@ public class Listener extends PluginListener {
 						return true;
 					}
 					int[] p = new int[2];
-					p[0] = (int) Math.floor(blockPlaced.getX());
-					p[1] = (int) Math.floor(blockPlaced.getZ());
+					
+					// Clicked block if we had stuff in hand
+					if (itemInHand == 280) {
+						p[0] = (int) Math.floor(blockClicked.getX());
+						p[1] = (int) Math.floor(blockClicked.getZ());
+					} else {
+						p[0] = (int) Math.floor(blockPlaced.getX());
+						p[1] = (int) Math.floor(blockPlaced.getZ());
+						dummy.addDeleteBlock(blockPlaced);
+					}
 					for (int[] point : dummy._coords) {
 						if (p[0] == point[0] && p[1] == point[1]) {
 							player.sendMessage("Already added this point.");
@@ -39,8 +47,6 @@ public class Listener extends PluginListener {
 					}
 					player.sendMessage("Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
 					dummy._coords.add(p);
-					dummy.addDeleteBlock(blockPlaced);
-					// blockPlaced.setType(0);
 				}
 			}
 			return false;
