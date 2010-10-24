@@ -1,113 +1,99 @@
+import java.util.ArrayList;
+
 public class Access {
 	public enum Rights {
-		BUILD, DESTROY, MODIFY, ENTER
+		BUILD(1, "b", "Build blocks"),
+		DESTROY(2, "d", "Destroy blocks"),
+		MODIFY(4, "m", "Chest access"),
+		ENTER(8, "e", "Enter zone"),
+		ALL(15, "*", "Anything & everything");
+		
+		private int flag;
+		private String code;
+		private String textual;
+		private static ArrayList<Rights> rights;
+		
+		private Rights(int flag, String code, String textual) {
+			this.flag = flag;
+			this.code = code;
+			put(this);
+		}
+		
+		private static void put(Rights right) {
+			// No nullpointer exceptions please :D
+			if (rights == null)
+				rights = new ArrayList<Rights>();
+			
+			rights.add(right);
+		}
+
+		public int getFlag() { return flag; }
+		public String getCode() { return code; }
+		public String getTextual() { return textual; }
+		public static ArrayList<Rights> getRights() { return rights; }
+		public boolean canDo(int rights) {
+			return (rights & flag) != 0;
+		}
 	}
 
 	private int	_rights	= 0;
 
-	public Access(String right) {
-		if (right.equalsIgnoreCase("*"))
-			_rights = 15;
-
-		if (right.toLowerCase().contains("b"))
-			_rights |= 1;
-		if (right.toLowerCase().contains("d"))
-			_rights |= 2;
-		if (right.toLowerCase().contains("m"))
-			_rights |= 4;
-		if (right.toLowerCase().contains("e"))
-			_rights |= 8;
+	public Access(int right) {
+		_rights = right;
+	}
+	
+	public Access(String rightsString) {
+		for (Rights right: Rights.getRights())
+			if (rightsString.toLowerCase().contains(right.getCode()))
+				_rights |= right.getFlag();
+			
 		// actually to return if some1 has NO rights could be usefull ;).
 		// if(canNothing())
 		// System.out.println("Access invoked without any access ???? POTENTIALY FATAL ERROR IN SERVER!!");
 	}
 
-	public boolean canBuild() {
-		return ((_rights & 1) != 0);
-	}
-
-	public boolean canDestroy() {
-		return ((_rights & 2) != 0);
-	}
-
-	public boolean canModify() {
-		return ((_rights & 4) != 0);
-	}
-
-	public boolean canEnter() {
-		return ((_rights & 8) != 0);
-	}
-
-	public boolean canAll() {
-		return (canBuild() && canModify() && canDestroy() && canEnter());
-	}
-
+	public boolean canDo(Rights right) { return right.canDo(_rights); }
+	public boolean canBuild() { return canDo(Rights.BUILD); }
+	public boolean canDestroy() { return canDo(Rights.DESTROY); }
+	public boolean canModify() { return canDo(Rights.MODIFY); }
+	public boolean canEnter() { return canDo(Rights.ENTER); }
+	public boolean canAll() { return canDo(Rights.ALL); }
 	public boolean canNothing() {
-		return (!canBuild() && !canModify() && !canDestroy() && !canEnter());
+		return (_rights & Rights.ALL.flag) == 0;
 	}
 
-	public boolean canDo(Rights r) {
-		switch (r) {
-			case BUILD:
-				return canBuild();
-			case DESTROY:
-				return canDestroy();
-			case MODIFY:
-				return canModify();
-			case ENTER:
-				return canEnter();
-				// prevent problems, just check for everything :D.
-			default:
-				return canAll();
-		}
-	}
 
 	@Override
 	public String toString() {
+		// Short circuit on 'all'
+		if (canDo(Rights.ALL))
+			return Rights.ALL.getCode();
+		
+		// Build list of access codes.
 		String rights = "";
-
-		if (canBuild() && canModify() && canDestroy() && canEnter())
-			return "*";
-
-		if (canBuild())
-			rights += "b";
-		if (canDestroy())
-			rights += "d";
-		if (canModify())
-			rights += "m";
-		if (canEnter())
-			rights += "e";
+		for (Rights right: Rights.getRights())
+			if (canDo( right ))
+				rights += right.getCode();
 
 		return rights;
 	}
 
 	public String textual() {
+		
+		// Short circuit on 'all'
+		if (canDo(Rights.ALL))
+			return Rights.ALL.getTextual();
+		
+		// Build list of access codes.
 		String text = "";
+		for (Rights right: Rights.getRights())
+			if (canDo( right ))
+				text += right.getCode() + ", ";
 
-		if (canBuild())
-			text += "Build blocks,";
-		if (canDestroy())
-			text += "Destroy blocks,";
-		if (canModify())
-			text += "Chest Access,";
-		if (canEnter())
-			text += "Enter zone,";
-
-		text = text.substring(0, text.length() - 1);
-
-		String Proper = "";
-		String[] split = text.split(",");
-
-		if (split.length == 1)
-			return text;
-
-		for (int i = 0; i < split.length; i++) {
-			if (i == split.length - 1) {
-				Proper = Proper.substring(0, -2);
-				Proper += " and " + split[i];
-			} else
-				Proper += split[i] + ", ";
-		}
-		return Proper;
+		// Remove last comma.
+		text = text.substring(0, text.length() - 2);
+		
+		// Replace last comma with "and"
+		return text.substring(0, text.lastIndexOf(',')) + " and" + text.substring( text.lastIndexOf(',')+1, text.length());
 	}
 }
