@@ -23,19 +23,19 @@ public class Access {
 	}
 
 	public boolean canBuild() {
-		return ((_rights & 1) == 1);
+		return ((_rights & 1) != 0);
 	}
 
 	public boolean canDestroy() {
-		return ((_rights & 2) == 1);
+		return ((_rights & 2) != 0);
 	}
 
 	public boolean canModify() {
-		return ((_rights & 4) == 1);
+		return ((_rights & 4) != 0);
 	}
 
 	public boolean canEnter() {
-		return ((_rights & 8) == 1);
+		return ((_rights & 8) != 0);
 	}
 
 	public boolean canAll() {
