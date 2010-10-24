@@ -5,8 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class Listener extends PluginListener {
@@ -484,9 +485,9 @@ public class Listener extends PluginListener {
 			zone.revalidateInZone(player);
 	}
 
-	public static final HashMap<String, String> commands;
+	public static final Map<String, String> commands;
 	static {
-		commands = new HashMap<String,String>();
+		commands = new LinkedHashMap<String,String>();
 		commands.put("/zcreate", "[zone name] - creates at temp zone with name [zone name] and starts zone creation mode for that player.");
 		commands.put("/zadd", "- adds the current player location as a point to the temp zone.");
 		commands.put("/zremove", "- removes the current player location as a point from the temp zone.");
@@ -502,5 +503,5 @@ public class Listener extends PluginListener {
 		commands.put("/zaddgroup", "[group name] <zone id>");
 		commands.put("/zaddadmin", "[user name] <zone id>");
 	}
-	private HashMap<String, String> getCommands() { return commands; }
+	private Map<String, String> getCommands() { return commands; }
 }
