@@ -20,13 +20,29 @@ public class DummyZone {
 	}
 
 	public void deleteBlocks() {
-		for (int[] block : _deleteBlocks) {
-			etc.getServer().setBlockAt(0, block[0], block[1], block[2]);
-		}
+		for (int[] block : _deleteBlocks) 
+			etc.getServer().setBlockAt(block[3], block[0], block[1], block[2]);
+		
+		_deleteBlocks.clear();
 	}
 
 	public void addDeleteBlock(Block block) {
-		_deleteBlocks.add(new int[] { block.getX(), block.getY(), block.getZ() });
+		_deleteBlocks.add(new int[] { block.getX(), block.getY(), block.getZ(),block.getType() });
 
+	}
+	public boolean containsDeleteBlock(Block block){
+		
+		for(int[] b : _deleteBlocks)
+			if(b[0] == block.getX() && b[1] == block.getY() && b[2] == block.getZ())
+				return true;
+		
+		return false;
+	}
+	public void fix(int x,int y){
+		for (int[] block : _deleteBlocks) 
+			if(block[0] == x && block[2] == y){
+				etc.getServer().setBlockAt(block[3], block[0], block[1], block[2]);
+				_deleteBlocks.remove(block);
+			}
 	}
 }

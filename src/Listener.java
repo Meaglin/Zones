@@ -13,16 +13,24 @@ import java.util.Map.Entry;
 
 public class Listener extends PluginListener {
 
+	public static final int _pilonHeight = 2;
+	//bedrock
+	public static final int _pilonType = 7;
+	
+	public static final int _placerType = 280;
+	public static final int _removerType = 281;
+	
 	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
 		if (canDoBlockModify(player, blockPlaced.getX(), blockPlaced.getZ(), blockPlaced.getY(), Access.Rights.BUILD)) {
 			// player.giveItem(blockPlaced.getType(), 0);
 			player.getInventory().updateInventory();
 			// etc.getServer().setBlockAt(0, blockPlaced.getX(),
 			// blockPlaced.getY(), blockPlaced.getZ());
+			blockPlaced.update();
 			player.sendMessage(Colors.Red + "You cannot place blocks in this zone!");
 			return true;
 		} else {
-			if (blockPlaced.getType() == 4 || itemInHand == 280) {
+			if (itemInHand == _placerType) {
 				DummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy != null) {
 					if (dummy._type == 1 && dummy._coords.size() == 2) {
@@ -31,21 +39,23 @@ public class Listener extends PluginListener {
 					}
 					int[] p = new int[2];
 					
-					// Clicked block if we had stuff in hand
-					if (itemInHand == 280) {
-						p[0] = (int) Math.floor(blockClicked.getX());
-						p[1] = (int) Math.floor(blockClicked.getZ());
-					} else {
-						p[0] = (int) Math.floor(blockPlaced.getX());
-						p[1] = (int) Math.floor(blockPlaced.getZ());
-						dummy.addDeleteBlock(blockPlaced);
-					}
-					for (int[] point : dummy._coords) {
-						if (p[0] == point[0] && p[1] == point[1]) {
-							player.sendMessage("Already added this point.");
-							return true;
+					
+					p[0] = World.toInt(blockClicked.getX());
+					p[1] = World.toInt(blockClicked.getZ());
+					
+					if(blockClicked.getY() < World.MAX_Z-_pilonHeight){
+						for(int i = 1;i <= _pilonHeight;i++){
+							Block t = etc.getServer().getBlockAt(blockClicked.getX(), blockClicked.getY()+i, blockClicked.getZ());
+							dummy.addDeleteBlock(t);
+							t.setType(_pilonType);
+							t.update();
 						}
 					}
+					if(dummy._coords.contains(p)){
+						player.sendMessage("Already added this point.");
+						return true;
+					}
+					
 					player.sendMessage("Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
 					dummy._coords.add(p);
 				}
@@ -57,23 +67,31 @@ public class Listener extends PluginListener {
 	public boolean onBlockDestroy(Player player, Block block) {
 
 		if (canDoBlockModify(player, block.getX(), block.getZ(), block.getY(), Access.Rights.DESTROY)) {
-			player.sendMessage(Colors.Red + "You cannot destroy blocks in this zone!");
+			
+			if(block.getStatus() == 0)
+				player.sendMessage(Colors.Red + "You cannot destroy blocks in this zone!");
+			
 			return true;
 		} else {
-			if (block.getType() == 4) {
+			if (player.getItemInHand() == _removerType) {
+				
+				//if some genius ever thinks of doing this ....
+				if(_removerType == _placerType)
+					return false;
+				
 				DummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy != null) {
-					int[] p = new int[2];
-					p[0] = World.toInt(player.getX());
-					p[1] = World.toInt(player.getZ());
-					for (int[] point : dummy._coords) {
-						if (p[0] == point[0] && p[1] == point[1]) {
-							dummy._coords.remove(point);
-							player.sendMessage("Removed point [" + p[0] + "," + p[1] + "] from temp zone.");
-							return false;
-						}
+					if(dummy.containsDeleteBlock(block)){
+						int[] p = new int[2];
+						p[0] = block.getX();
+						p[1] = block.getZ();
+						dummy._coords.remove(p);
+						dummy.fix(block.getX(), block.getZ());
+						player.sendMessage("Removed point [" + p[0] + "," + p[1] + "] from temp zone.");
+						
+					}else{						
+						player.sendMessage("Couldn't find point in zone so nothing could be removed");
 					}
-					player.sendMessage("Couldn't find point in zone so nothing could be removed");
 				}
 			}
 			return false;
