@@ -24,11 +24,44 @@ public class Region {
 	}
 
 	public void revalidateZones(Player character) {
-		System.out.println("Revalidating zones.");
+		//debugging only ;).
+		//System.out.println("Revalidating zones.");
 		for (ZoneType z : getZones()) {
 			if (z != null)
 				z.revalidateInZone(character);
 		}
+	}
+	public ZoneType getActiveZone(Player player){
+		return getActiveZone(player.getX(),player.getY(),player.getZ());
+	}
+	public ZoneType getActiveZone(double x,double y,double z){
+		return getActiveZone(World.toInt(x),World.toInt(y),World.toInt(z));
+	}
+	public ZoneType getActiveZone(int x,int y, int z){
+		ZoneType primary = null;
+		
+		for(ZoneType zone : getZones())
+			if(zone.isInsideZone(x, y, z) && (primary == null || primary.getZone().getSize() > zone.getZone().getSize()))
+				primary = zone;
+		
+		return primary;
+	}
+	public ArrayList<ZoneType> getActiveZones(Player player){
+		return getActiveZones(player.getX(),player.getY(),player.getZ());
+	}
+	
+	public ArrayList<ZoneType> getActiveZones(double x,double y, double z){
+		return getActiveZones(World.toInt(x),World.toInt(y),World.toInt(z));
+	}
+	
+	public ArrayList<ZoneType> getActiveZones(int x,int y, int z){
+		ArrayList<ZoneType> zones = new ArrayList<ZoneType>();
+		
+		for(ZoneType zone : getZones())
+			if(zone.isInsideZone(x, y, z))
+				zones.add(zone);
+		
+		return zones;
 	}
 
 }

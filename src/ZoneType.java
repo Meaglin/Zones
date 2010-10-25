@@ -97,10 +97,12 @@ public abstract class ZoneType {
 				int type = Integer.parseInt(item[0]);
 
 				String itemname = item[1];
-				String itemrights = item[2];
+				String itemrights = "";
 				// compatibility with old system.
-				if (itemrights == null)
+				if (item.length < 3)
 					itemrights = "*";
+				else
+					itemrights = item[2];
 
 				switch (type) {
 					// user

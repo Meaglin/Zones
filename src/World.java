@@ -1,40 +1,42 @@
 public class World {
-	public static final int	minx			= -32000000;
-	public static final int	maxx			= 32000000;
+	public static final int	MIN_X			= -5000;
+	public static final int	MAX_X			= 5000;
 
-	public static final int	miny			= -32000000;
-	public static final int	maxy			= 32000000;
+	public static final int	MIN_Y			= -5000;
+	public static final int	MAX_Y			= 5000;
 
-	public static final int	minz			= 0;
-	public static final int	maxz			= 127;
+	public static final int	MIN_Z 			= 0;
+	public static final int	MAX_Z			= 127;
 
-	public static final int	shiftsize		= 16;
-	public static final int	blocksize		= (int) (Math.pow(2, shiftsize) - 1);
+	public static final int	SHIFT_SIZE		= 8;
+	public static final int	BLOCK_SIZE		= (int) (Math.pow(2, SHIFT_SIZE) - 1);
 
-	public static final int	xregions		= ((maxx - minx) >> shiftsize) + 1;
-	public static final int	yregions		= ((maxy - miny) >> shiftsize) + 1;
+	public static final int	X_REGIONS		= ((MAX_X - MIN_X) >> SHIFT_SIZE) + 1;
+	public static final int	Y_REGIONS		= ((MAX_Y - MIN_Y) >> SHIFT_SIZE) + 1;
 
-	public static final int	xregionoffset	= minx >> shiftsize;
-	public static final int	yregionoffset	= miny >> shiftsize;
+	public static final int XMOD = (MIN_X < 0 ? -1 : 1);
+	public static final int YMOD = (MIN_Y < 0 ? -1 : 1);
+	
+	public static final int OFFSET_X = ((MIN_X * XMOD) >> SHIFT_SIZE)*XMOD;
+	public static final int OFFSET_Y = ((MIN_Y * YMOD) >> SHIFT_SIZE)*YMOD;
+	
 
-	private Region[][]		regions;
+
+	private Region[][]		_regions;
 
 	public World() {
-		System.out.println("init world");
+		
 		try {
-			regions = new Region[xregions][yregions];
-			System.out.println("init world2");
-			for (int x = 0; x < xregions; x++) {
-				for (int y = 0; y < yregions; y++) {
-					if (x == 1 && y == 0)
-						System.out.println("init world3");
-					regions[x][y] = new Region();
+			_regions = new Region[X_REGIONS][Y_REGIONS];
+			for (int x = 0; x < X_REGIONS; x++) {
+				for (int y = 0; y < Y_REGIONS; y++) {
+					_regions[x][y] = new Region();
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("done world");
+		System.out.println("Loaded " + X_REGIONS*Y_REGIONS  + " regions.");
 	}
 
 	public Region getRegion(Player player) {
@@ -46,12 +48,13 @@ public class World {
 	}
 
 	public Region getRegion(int x, int y) {
-		System.out.println("get region " + ((x - minx) >> shiftsize) + " " + ((y - miny) >> shiftsize));
-		return regions[(x - minx) >> shiftsize][(y - miny) >> shiftsize];
+		//debug only ;) .
+		//System.out.println("get region " + ((x - MIN_X) >> SHIFT_SIZE) + " " + ((y - MIN_Y) >> SHIFT_SIZE));
+		return _regions[(x - MIN_X) >> SHIFT_SIZE][(y - MIN_Y) >> SHIFT_SIZE];
 	}
 
 	public void addZone(int x, int y, ZoneType zone) {
-		regions[x][y].addZone(zone);
+		_regions[x][y].addZone(zone);
 	}
 
 	public static final World getInstance() {
@@ -61,5 +64,21 @@ public class World {
 	@SuppressWarnings("synthetic-access")
 	private static class SingletonHolder {
 		protected static final World	_instance	= new World();
+	}
+
+	public void revalidateZones(Player player, int ax, int ay, int bx, int by) {
+		
+		//region changes.
+		if(!((ax - MIN_X) >> SHIFT_SIZE == (bx - MIN_X) >> SHIFT_SIZE && (ay - MIN_X) >> SHIFT_SIZE == (by - MIN_X) >> SHIFT_SIZE)){
+			getRegion(ax,ay).revalidateZones(player);
+		}
+		//default revalidation.
+		getRegion(player).revalidateZones(player);
+		
+		
+	}
+
+	public static int toInt(double b){
+		return (int) Math.floor(b);
 	}
 }

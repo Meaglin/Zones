@@ -21,7 +21,7 @@ public class ZoneManager {
 	}
 
 	private void load() {
-		// World.getInstance();
+		World.getInstance();
 		Connection conn = null;
 		try {
 			conn = DB.getInstance().getConnection();
@@ -124,13 +124,16 @@ public class ZoneManager {
 
 	public void addZone(ZoneType zone) {
 		int ax, ay, bx, by;
-		for (int x = 0; x < World.xregions; x++) {
-			for (int y = 0; y < World.yregions; y++) {
-				ax = (x - World.xregionoffset) << World.shiftsize;
-				bx = ((x + 1) - World.xregionoffset) << World.shiftsize;
-				ay = (y - World.yregionoffset) << World.shiftsize;
-				by = ((y + 1) - World.yregionoffset) << World.shiftsize;
-
+		for (int x = 0; x < World.X_REGIONS; x++) {
+			for (int y = 0; y < World.Y_REGIONS; y++) {
+				
+				ax = (x + World.OFFSET_X) << World.SHIFT_SIZE;
+				bx = ((x + 1) + World.OFFSET_X) << World.SHIFT_SIZE;
+				ay = (y + World.OFFSET_Y) << World.SHIFT_SIZE;
+				by = ((y + 1) + World.OFFSET_Y) << World.SHIFT_SIZE;
+				
+				//System.out.println(ax + " " + bx +  " " + ay + " " + by);
+				
 				if (zone.getZone().intersectsRectangle(ax, bx, ay, by)) {
 					World.getInstance().addZone(x, y, zone);
 					System.out.println("adding zone to region " + x + " " + y);

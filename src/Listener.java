@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+
 public class Listener extends PluginListener {
 
 	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
@@ -56,8 +57,8 @@ public class Listener extends PluginListener {
 				DummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy != null) {
 					int[] p = new int[2];
-					p[0] = (int) Math.floor(player.getX());
-					p[1] = (int) Math.floor(player.getZ());
+					p[0] = World.toInt(player.getX());
+					p[1] = World.toInt(player.getZ());
 					for (int[] point : dummy._coords) {
 						if (p[0] == point[0] && p[1] == point[1]) {
 							dummy._coords.remove(point);
@@ -276,8 +277,8 @@ public class Listener extends PluginListener {
 						return true;
 					}
 					int[] p = new int[2];
-					p[0] = (int) Math.floor(player.getX());
-					p[1] = (int) Math.floor(player.getZ());
+					p[0] = World.toInt(player.getX());
+					p[1] = World.toInt(player.getZ());
 					for (int[] point : dummy._coords) {
 						if (p[0] == point[0] && p[1] == point[1]) {
 							player.sendMessage("Already added this point.");
@@ -288,8 +289,8 @@ public class Listener extends PluginListener {
 					dummy._coords.add(p);
 				} else if (cmd.equalsIgnoreCase("/zremove")) {
 					int[] p = new int[2];
-					p[0] = (int) Math.floor(player.getX());
-					p[1] = (int) Math.floor(player.getZ());
+					p[0] = World.toInt(player.getX());
+					p[1] = World.toInt(player.getZ());
 					for (int[] point : dummy._coords) {
 						if (p[0] == point[0] && p[1] == point[1]) {
 							dummy._coords.remove(point);
@@ -312,7 +313,7 @@ public class Listener extends PluginListener {
 					if (split.length < 2 || Integer.parseInt(split[1]) < 1) {
 						player.sendMessage("Usage: /zsetheight [height]");
 					} else {
-						dummy._maxz = (int) Math.floor(player.getY()) + Integer.parseInt(split[1]) - 1;
+						dummy._maxz = World.toInt(player.getY()) + Integer.parseInt(split[1]) - 1;
 						if (dummy._maxz < 0)
 							dummy._maxz = 0;
 						if (dummy._maxz > 127)
@@ -323,7 +324,7 @@ public class Listener extends PluginListener {
 					if (split.length < 2 || Integer.parseInt(split[1]) < 1) {
 						player.sendMessage("Usage: /zsetdepth [depth]");
 					} else {
-						dummy._minz = (int) Math.floor(player.getY()) - Integer.parseInt(split[1]);
+						dummy._minz = World.toInt(player.getY()) - Integer.parseInt(split[1]);
 						if (dummy._minz < 0)
 							dummy._minz = 0;
 						if (dummy._minz > 127)
@@ -472,16 +473,28 @@ public class Listener extends PluginListener {
 		// no actual change,just within the block.
 		if (Math.floor(from.x) == Math.floor(to.x) && Math.floor(from.y) == Math.floor(to.y) && Math.floor(from.z) == Math.floor(to.z))
 			return;
-		System.out.println("Moving from [" + Math.floor(from.x) + "," + Math.floor(from.y) + "," + Math.floor(from.z) + "] to [" + Math.floor(to.x) + "," + Math.floor(to.y) + "," + Math.floor(to.z) + "]" + "  [" + (Math.floor(to.x) - Math.floor(from.x)) + "," + (Math.floor(to.y) - Math.floor(from.y)) + "," + (Math.floor(to.z) - Math.floor(from.z)) + "]");
-		/*
-		 * Region f = World.getInstance().getRegion(from.x, from.z); Region t =
-		 * World.getInstance().getRegion(to.x, to.z);
-		 * 
-		 * if(f == t){ t.revalidateZones(player); }else{
-		 * f.revalidateZones(player); t.revalidateZones(player); }
-		 */
-		for (ZoneType zone : ZoneManager.getInstance().getAllZones())
-			zone.revalidateInZone(player);
+		
+		
+		//debug only ;).
+		//System.out.println("Moving from [" + Math.floor(from.x) + "," + Math.floor(from.y) + "," + Math.floor(from.z) + "] to [" + Math.floor(to.x) + "," + Math.floor(to.y) + "," + Math.floor(to.z) + "]" + "  [" + (Math.floor(to.x) - Math.floor(from.x)) + "," + (Math.floor(to.y) - Math.floor(from.y)) + "," + (Math.floor(to.z) - Math.floor(from.z)) + "]");
+		
+		//if the active zone changes we want to be sure the player can move into the zone.
+		ZoneType aZone = World.getInstance().getRegion(from.x,from.z).getActiveZone(from.x,from.z,from.y);
+		ZoneType bZone = World.getInstance().getRegion(to.x,to.z).getActiveZone(to.x,to.z,to.y);
+		if(bZone != null && 
+				(
+						(aZone != null  && aZone.getId() != bZone.getId() && !bZone.canModify(player, Access.Rights.ENTER)) 
+							|| 
+						(aZone == null && !bZone.canModify(player, Access.Rights.ENTER))
+				)
+		){
+			player.teleportTo(from);
+			//we don't have to do overall revalidation if the player gets warped back to his previous location.
+			return;
+		}
+		
+			
+		World.getInstance().revalidateZones(player,World.toInt(from.x),World.toInt(from.z),World.toInt(to.x),World.toInt(to.z));
 	}
 
 	public static final HashMap<String, String> commands;
