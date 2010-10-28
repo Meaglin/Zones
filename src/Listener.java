@@ -522,6 +522,30 @@ public class Listener extends PluginListener {
 		World.getInstance().revalidateZones(player,World.toInt(from.x),World.toInt(from.z),World.toInt(to.x),World.toInt(to.z));
 	}
 
+	public boolean onTeleport(Player player, Location from, Location to) { 
+		// no actual change,just within the block.
+		if (Math.floor(from.x) == Math.floor(to.x) && Math.floor(from.y) == Math.floor(to.y) && Math.floor(from.z) == Math.floor(to.z))
+			return false;
+		
+		//if the active zone changes we want to be sure the player can move into the zone.
+		ZoneType aZone = World.getInstance().getRegion(from.x,from.z).getActiveZone(from.x,from.z,from.y);
+		ZoneType bZone = World.getInstance().getRegion(to.x,to.z).getActiveZone(to.x,to.z,to.y);
+		if(bZone != null && 
+				(
+						(aZone != null  && aZone.getId() != bZone.getId() && !bZone.canModify(player, Access.Rights.ENTER)) 
+							|| 
+						(aZone == null && !bZone.canModify(player, Access.Rights.ENTER))
+				)
+		){
+			player.sendMessage("Due to a zone restriction you cannot warp to that zone.");
+			return true;
+		}
+		
+		World.getInstance().revalidateZones(player,World.toInt(from.x),World.toInt(from.z),World.toInt(to.x),World.toInt(to.z));
+		
+		return false; 
+	}
+	 
 	public static final Map<String, String> commands;
 	static {
 		commands = new LinkedHashMap<String,String>();

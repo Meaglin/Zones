@@ -1,9 +1,11 @@
-public class World {
-	public static final int	MIN_X			= -5000;
-	public static final int	MAX_X			= 5000;
+import java.util.logging.Logger;
 
-	public static final int	MIN_Y			= -5000;
-	public static final int	MAX_Y			= 5000;
+public class World {
+	public static final int	MIN_X			= -6000;
+	public static final int	MAX_X			= 6000;
+
+	public static final int	MIN_Y			= -6000;
+	public static final int	MAX_Y			= 6000;
 
 	public static final int	MIN_Z 			= 0;
 	public static final int	MAX_Z			= 127;
@@ -50,6 +52,11 @@ public class World {
 	public Region getRegion(int x, int y) {
 		//debug only ;) .
 		//System.out.println("get region " + ((x - MIN_X) >> SHIFT_SIZE) + " " + ((y - MIN_Y) >> SHIFT_SIZE));
+		if(x > MAX_X || x < MIN_X || y > MAX_Y || y < MIN_Y){
+			Logger.getLogger("Minecraft").warning("Warning: Player moving outside world!");
+			return new Region();
+		}
+		
 		return _regions[(x - MIN_X) >> SHIFT_SIZE][(y - MIN_Y) >> SHIFT_SIZE];
 	}
 
