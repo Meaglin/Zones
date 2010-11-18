@@ -389,17 +389,6 @@ public class ZonesListener extends PluginListener {
 	}
 
     @Override
-	public boolean onChat(Player player, String message) {
-
-		if (message.toLowerCase().contains("aziz light"))
-			etc.getServer().setTime(0);
-		else if (message.toLowerCase().contains("aziz no light"))
-			etc.getServer().setTime(13000);
-
-		return false;
-	}
-
-    @Override
 	public void onPlayerMove(Player player, Location from, Location to) {
 
 		// no actual change,just within the block.

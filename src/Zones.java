@@ -1,11 +1,16 @@
+
+import java.util.logging.Logger;
+
 public class Zones extends Plugin {
 
 	public static final int	_Rev	= 4;
+	protected static final Logger		log	= Logger.getLogger("Minecraft");
 
 	@Override
 	public void initialize() {
 
-		System.out.println("Zones Rev " + _Rev + "  Loading...");
+		log.info("Zones Rev " + _Rev + "  Loading...");
+
 		ZonesListener list = new ZonesListener();
 		ZoneManager.getInstance();
 
@@ -18,9 +23,7 @@ public class Zones extends Plugin {
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, list, this, PluginListener.Priority.HIGH);
 		etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, list, this, PluginListener.Priority.HIGH);
 		
-		etc.getLoader().addListener(PluginLoader.Hook.CHAT, list, this, PluginListener.Priority.LOW);
-		
-		System.out.println("Zones finished Loading.");
+		log.info("Zones finished Loading.");
 	}
 
 	@Override
