@@ -10,13 +10,14 @@ import java.util.logging.Logger;
 
 public class ZoneManager {
 	private HashMap<Integer, ZoneType>	_zones;
-	private HashMap<String, DummyZone>	_dummyZones;
-
+	private HashMap<String, ZonesDummyZone>	_dummyZones;
+    private HashMap<String,Integer> _selectedZones;
 	protected static final Logger		log	= Logger.getLogger("Minecraft");
 
 	private ZoneManager() {
 		_zones = new HashMap<Integer, ZoneType>();
-		_dummyZones = new HashMap<String, DummyZone>();
+		_dummyZones = new HashMap<String, ZonesDummyZone>();
+        _selectedZones = new HashMap<String , Integer>();
 		load();
 	}
 
@@ -24,7 +25,7 @@ public class ZoneManager {
 		World.getInstance();
 		Connection conn = null;
 		try {
-			conn = DB.getInstance().getConnection();
+			conn = etc.getSQLConnection();
 			PreparedStatement st = conn.prepareStatement("SELECT * FROM zones");
 			PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM zones_vertices WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
 			ResultSet rset = st.executeQuery();
@@ -117,9 +118,9 @@ public class ZoneManager {
 			}
 		}
 		if (_zones.size() == 1)
-			System.out.println("ZoneManager: Loaded " + _zones.size() + " Zone.");
+			log.info("ZoneManager: Loaded " + _zones.size() + " Zone.");
 		else
-			System.out.println("ZoneManager: Loaded " + _zones.size() + " Zones.");
+			log.info("ZoneManager: Loaded " + _zones.size() + " Zones.");
 	}
 
 	public void addZone(ZoneType zone) {
@@ -136,10 +137,11 @@ public class ZoneManager {
 				
 				if (zone.getZone().intersectsRectangle(ax, bx, ay, by)) {
 					World.getInstance().addZone(x, y, zone);
-					System.out.println("adding zone to region " + x + " " + y);
+					log.info("adding zone["+zone.getId()+"] to region " + x + " " + y);
 				}
 			}
 		}
+
 		_zones.put(zone.getId(), zone);
 	}
 
@@ -151,21 +153,108 @@ public class ZoneManager {
 		return SingletonHolder._instance;
 	}
 
+	public boolean delete(ZoneType toDelete) {
+		if(!_zones.containsKey(toDelete.getId()))
+			return false;
+
+
+
+		// first delete sql data.
+		Connection conn = null;
+		PreparedStatement st = null;
+		int u = 0;
+		try{
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("DELETE FROM zones_vertices WHERE id = ?");
+			st.setInt(1, toDelete.getId());
+
+			u = st.executeUpdate();
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			try{
+			if(conn != null)conn.close();
+			if(st != null)st.close();
+			}catch(Exception e){}
+		}
+
+		if(u == 0)
+			return false;
+
+		u = 0;
+		try{
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("DELETE FROM zones WHERE id = ?");
+			st.setInt(1, toDelete.getId());
+
+			u = st.executeUpdate();
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			try{
+			if(conn != null)conn.close();
+			if(st != null)st.close();
+			}catch(Exception e){}
+		}
+
+		if(u == 0)
+			return false;
+
+		// then delete the zone from all regions
+		int ax, ay, bx, by;
+		for (int x = 0; x < World.X_REGIONS; x++) {
+			for (int y = 0; y < World.Y_REGIONS; y++) {
+
+				ax = (x + World.OFFSET_X) << World.SHIFT_SIZE;
+				bx = ((x + 1) + World.OFFSET_X) << World.SHIFT_SIZE;
+				ay = (y + World.OFFSET_Y) << World.SHIFT_SIZE;
+				by = ((y + 1) + World.OFFSET_Y) << World.SHIFT_SIZE;
+
+				//System.out.println(ax + " " + bx +  " " + ay + " " + by);
+
+				if (toDelete.getZone().intersectsRectangle(ax, bx, ay, by)) {
+					World.getInstance().getRegion(ax, ay).removeZone(toDelete);
+					//log.info("adding zone["+zone.getId()+"] to region " + x + " " + y);
+				}
+			}
+		}
+
+		// finally remove the zone from the main zones list.
+		_zones.remove(toDelete.getId());
+
+		return true;
+	}
+
 	@SuppressWarnings("synthetic-access")
 	private static class SingletonHolder {
 		protected static final ZoneManager	_instance	= new ZoneManager();
 	}
 
-	public void addDummy(String name, DummyZone zone) {
+	public void addDummy(String name, ZonesDummyZone zone) {
 		_dummyZones.put(name, zone);
 	}
 
-	public DummyZone getDummy(String name) {
+	public ZonesDummyZone getDummy(String name) {
 		return _dummyZones.get(name);
 	}
-
+	public boolean zoneExists(int id) {
+		return _zones.containsKey(id);
+	}
 	public void removeDummy(String name) {
 		_dummyZones.remove(name);
+	}
+	public void setSelected(String name,int id){
+		if(_zones.containsKey(id))
+			_selectedZones.put(name, id);
+	}
+	public int getSelected(String name){
+		if(!_selectedZones.containsKey(name))
+			return 0;
+
+		return _selectedZones.get(name);
+	}
+	public void removeSelected(String name){
+		_selectedZones.remove(name);
 	}
 
 	public Collection<ZoneType> getAllZones() {

@@ -1,11 +1,12 @@
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class World {
-	public static final int	MIN_X			= -6000;
-	public static final int	MAX_X			= 6000;
+	public static final int	MIN_X			= -10240;
+	public static final int	MAX_X			= 10240;
 
-	public static final int	MIN_Y			= -6000;
-	public static final int	MAX_Y			= 6000;
+	public static final int	MIN_Y			= -10240;
+	public static final int	MAX_Y			= 10240;
 
 	public static final int	MIN_Z 			= 0;
 	public static final int	MAX_Z			= 127;
@@ -32,7 +33,7 @@ public class World {
 			_regions = new Region[X_REGIONS][Y_REGIONS];
 			for (int x = 0; x < X_REGIONS; x++) {
 				for (int y = 0; y < Y_REGIONS; y++) {
-					_regions[x][y] = new Region();
+					_regions[x][y] = new Region(x,y);
 				}
 			}
 		} catch (Exception e) {
@@ -49,12 +50,24 @@ public class World {
 		return getRegion((int) Math.floor(x), (int) Math.floor(y));
 	}
 
+	public ArrayList<ZoneType> getAdminZones(Player player){
+		return getRegion(player).getAdminZones(player);
+	}
+	
+	public ArrayList<ZoneType> getActiveZones(Player player){
+		return getRegion(player).getActiveZones(player);
+	}
+	
+	public ZoneType getActiveZone(Player player){
+		return getRegion(player).getActiveZone(player);
+	}
+	
 	public Region getRegion(int x, int y) {
 		//debug only ;) .
 		//System.out.println("get region " + ((x - MIN_X) >> SHIFT_SIZE) + " " + ((y - MIN_Y) >> SHIFT_SIZE));
 		if(x > MAX_X || x < MIN_X || y > MAX_Y || y < MIN_Y){
 			Logger.getLogger("Minecraft").warning("Warning: Player moving outside world!");
-			return new Region();
+			return new Region(0,0);
 		}
 		
 		return _regions[(x - MIN_X) >> SHIFT_SIZE][(y - MIN_Y) >> SHIFT_SIZE];

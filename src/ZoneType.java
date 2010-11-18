@@ -23,8 +23,8 @@ public abstract class ZoneType {
 	private List<String>				_admingroups;
 	private List<String>				_adminusers;
 
-	private HashMap<String, Access>		_groups;
-	private HashMap<String, Access>		_users;
+	private HashMap<String, ZonesAccess>		_groups;
+	private HashMap<String, ZonesAccess>		_users;
 
 	protected ZoneType(int id) {
 		_id = id;
@@ -34,8 +34,8 @@ public abstract class ZoneType {
 		_admingroups = new ArrayList<String>();
 		_adminusers = new ArrayList<String>();
 
-		_groups = new HashMap<String, Access>();
-		_users = new HashMap<String, Access>();
+		_groups = new HashMap<String, ZonesAccess>();
+		_users = new HashMap<String, ZonesAccess>();
 
 	}
 
@@ -72,18 +72,10 @@ public abstract class ZoneType {
 						break;
 					// group
 					case 2:
-						// boolean valid = false;
-
-						// for(Group g : etc.getLoader().)
-						// if(g.Name.equals(item[1]))
-						// valid = true;
-
-						// if(!valid){
-						// log.info("Invalid admin grouptype in zonde id: " +
-						// getId());
-						// continue;
-						// }
-						_admingroups.add(item[1]);
+						if (etc.getDataSource().getGroup(item[1]) != null)
+							_admingroups.add(item[1]);
+						else
+							log.info("Invalid admin grouptype in zone id: " + getId());
 						break;
 					default:
 						log.info("Unknown admin grouptype in zone id: " + getId());
@@ -107,25 +99,19 @@ public abstract class ZoneType {
 				switch (type) {
 					// user
 					case 1:
-						_users.put(itemname, new Access(itemrights));
+						//addUser(itemname,itemrights );
+						_users.put(itemname, new ZonesAccess(itemrights));
 						break;
 					// group
 					case 2:
-						// boolean valid = false;
-
-						// for(Group g : etc.getDataSource().groups)
-						// if(g.Name.equals(item[1]))
-						// valid = true;
-
-						// if(!valid){
-						// log.info("Invalid admin grouptype in zonde id: " +
-						// getId());
-						// continue;
-						// }
-						_groups.put(itemname, new Access(itemrights));
+						if (etc.getDataSource().getGroup(item[1]) != null)
+							//addGroup(itemname,itemrights);
+							_groups.put(itemname, new ZonesAccess(itemrights));
+						else
+							log.info("Invalid grouptype in zone id: " + getId());
 						break;
 					default:
-						log.info("Unknown admin grouptype in zone id: " + getId());
+						log.info("Unknown grouptype in zone id: " + getId());
 						break;
 				}
 			}
@@ -277,19 +263,41 @@ public abstract class ZoneType {
 		return getClass().getSimpleName() + "[" + _id + "]";
 	}
 
-	public boolean canModify(Player player, Access.Rights right) {
+	public boolean canModify(Player player, ZonesAccess.Rights right) {
 
 		if (_users.containsKey(player.getName().toLowerCase()) && _users.get(player.getName().toLowerCase()).canDo(right))
 			return true;
 
-		for (String group : player.getGroups())
-			if (_groups.containsKey(group.toLowerCase()) && _groups.get(group.toLowerCase()).canDo(right))
-				return true;
+		for (Entry<String,ZonesAccess> e : _groups.entrySet())
+			if(player.isInGroup(e.getKey())){
+				if(e.getValue().canDo(right))
+					return true;
+			}
+
 
 		// Admins always have full access to the zone.
 		return canAdministrate(player);
 	}
+	public ZonesAccess getAccess(Player player){
 
+		//admins can do anything ;).
+		if(canAdministrate(player))
+			return new ZonesAccess("*");
+
+		//default access with 0 access.
+		ZonesAccess base = new ZonesAccess("-");
+		String name = player.getName().toLowerCase();
+
+		if (_users.containsKey(name))
+			base = base.merge(_users.get(name));
+
+		for (Entry<String,ZonesAccess> e : _groups.entrySet())
+			if(player.isInGroup(e.getKey())){
+				base = base.merge(e.getValue());
+			}
+
+		return base;
+	}
 	public boolean canAdministrate(Player player) {
 
 		if (_adminusers.contains(player.getName().toLowerCase()))
@@ -302,22 +310,67 @@ public abstract class ZoneType {
 		return false;
 	}
 
-	public void addUser(String user, Access a) {
+	private String mapToString(HashMap<String,ZonesAccess> map){
+		String rt = "";
+
+		for(Entry<String,ZonesAccess> e: map.entrySet())
+			rt += e.getKey() + "[" + e.getValue().toColorCode() + "], ";
+
+		if(rt.equals(""))
+			return "";
+
+		rt = rt.substring(0, rt.length()-2);
+
+		return rt;
+	}
+	private String adminsToString(){
+		String rt = "";
+
+		for(String t : _adminusers)
+			rt += t + ", ";
+
+		if(rt.equals(""))
+			return "";
+
+		rt = rt.substring(0,rt.length()-2);
+
+		return rt;
+	}
+	public void sendAccess(Player player)
+	{
+		player.sendMessage("AccesList of " + getName() + ":");
+		player.sendMessage("   Users: " + mapToString(_users) + ".");
+		player.sendMessage("   Groups: " + mapToString(_groups) + ".");
+		player.sendMessage("   Admins: " + adminsToString() + ".");
+	}
+
+	public void addUser(String user, ZonesAccess a) {
 		user = user.toLowerCase();
 
 		if (_users.containsKey(user))
 			_users.remove(user);
 
+		if(a.canNothing())
+			return;
+		
 		_users.put(user, a);
 
 		updateRights();
 	}
 
-	public void addGroup(String group, Access a) {
+	public void addGroup(String group, ZonesAccess a) {
 		group = group.toLowerCase();
 
 		if (_groups.containsKey(group))
 			_groups.remove(group);
+
+		if(etc.getDataSource().getGroup(group) == null){
+			log.info("Trying to add an invalid group '" + group + "' in zone '" + getName() + "'["+getId()+"].");
+			return;
+		}
+
+		if(a.canNothing())
+			return;
 
 		_groups.put(group, a);
 
@@ -331,14 +384,32 @@ public abstract class ZoneType {
 		_adminusers.add(admin.toLowerCase());
 		updateRights();
 	}
+        public void addAdminGroup(String group) {
+            if (_admingroups.contains(group.toLowerCase()))
+				return;
 
+            if(etc.getDataSource().getGroup(group) == null){
+                log.info("Trying to add an invalid adminGroup '" + group + "' in zone '" + getName() + "'["+getId()+"].");
+                return;
+            }
+            _admingroups.add(group.toLowerCase());
+            updateRights();
+        }
+	public void removeAdmin(String admin){
+		if(_adminusers.contains(admin.toLowerCase())){
+			_adminusers.remove(admin.toLowerCase());
+			updateRights();
+		} else
+			return;
+
+	}
 	private void updateRights() {
 		String admins = "";
 		String users = "";
-		for (Entry<String, Access> e : _users.entrySet()) {
+		for (Entry<String, ZonesAccess> e : _users.entrySet()) {
 			users += "1," + e.getKey() + "," + e.getValue().toString() + ";";
 		}
-		for (Entry<String, Access> e : _groups.entrySet()) {
+		for (Entry<String, ZonesAccess> e : _groups.entrySet()) {
 			users += "2," + e.getKey() + "," + e.getValue().toString() + ";";
 		}
 		users = users.substring(0, users.length() - 1);
@@ -353,7 +424,7 @@ public abstract class ZoneType {
 		Connection conn = null;
 		PreparedStatement st = null;
 		try {
-			conn = DB.getInstance().getConnection();
+			conn = etc.getSQLConnection();
 			st = conn.prepareStatement("UPDATE zones SET users = ?,admins = ? WHERE id = ?");
 			st.setString(1, users);
 			st.setString(2, admins);
@@ -370,11 +441,19 @@ public abstract class ZoneType {
 		}
 	}
 
-	public void addUser(String string) {
-		addUser(string, new Access("*"));
+	public void addUser(String username) {
+		addUser(username, new ZonesAccess("*"));
 	}
 
-	public void addGroup(String string) {
-		addGroup(string, new Access("*"));
+	public void addUser(String username, String access) {
+		addUser(username, new ZonesAccess(access));
+	}
+
+	public void addGroup(String groupname) {
+		addGroup(groupname, new ZonesAccess("*"));
+	}
+
+	public void addGroup(String groupname, String access) {
+		addGroup(groupname, new ZonesAccess(access));
 	}
 }

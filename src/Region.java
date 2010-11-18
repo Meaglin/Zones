@@ -3,8 +3,10 @@ import java.util.ArrayList;
 public class Region {
 
 	private ArrayList<ZoneType>	_zones;
-
-	public Region() {
+	private int x,y;
+	public Region(int x, int y) {
+		this.x = x;
+		this.y = y;
 		_zones = new ArrayList<ZoneType>();
 	}
 
@@ -16,7 +18,11 @@ public class Region {
 	}
 
 	public void removeZone(ZoneType zone) {
-		_zones.remove(zone);
+		for(int i = 0;i < _zones.size();i++){
+			if(_zones.get(i).getId() == zone.getId())
+				_zones.remove(i);
+		}
+		//_zones.remove(zone);
 	}
 
 	public ArrayList<ZoneType> getZones() {
@@ -63,5 +69,19 @@ public class Region {
 		
 		return zones;
 	}
-
+	public ArrayList<ZoneType> getAdminZones(Player player){
+		ArrayList<ZoneType> zones = new ArrayList<ZoneType>();
+		
+		for(ZoneType zone : getZones())
+			if(zone.canAdministrate(player) && zone.isInsideZone(player))
+				zones.add(zone);
+		
+		return zones;
+	}
+	public int getX(){
+		return x;
+	}
+	public int getY(){
+		return y;
+	}
 }

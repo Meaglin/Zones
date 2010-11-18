@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class Access {
+public class ZonesAccess {
 	public enum Rights {
 		BUILD(1, "b", "Build blocks"),
 		DESTROY(2, "d", "Destroy blocks"),
@@ -11,38 +11,42 @@ public class Access {
 		private int flag;
 		private String code;
 		private String textual;
-		private static ArrayList<Rights> rights;
+		
 		
 		private Rights(int flag, String code, String textual) {
 			this.flag = flag;
 			this.code = code;
-			put(this);
-		}
-		
-		private static void put(Rights right) {
-			// No nullpointer exceptions please :D
-			if (rights == null)
-				rights = new ArrayList<Rights>();
-			
-			rights.add(right);
+			this.textual = textual;
 		}
 
 		public int getFlag() { return flag; }
 		public String getCode() { return code; }
 		public String getTextual() { return textual; }
-		public static ArrayList<Rights> getRights() { return rights; }
+		
 		public boolean canDo(int rights) {
 			return (rights & flag) == flag;
 		}
+		private final static ArrayList<Rights> rights;
+		static {
+			rights = new ArrayList<Rights>();
+			rights.add(Rights.BUILD);
+			rights.add(Rights.DESTROY);
+			rights.add(Rights.MODIFY);
+			rights.add(Rights.ENTER);
+			rights.add(Rights.ALL);
+		}
+		public static ArrayList<Rights> getRights() { return rights; }
 	}
+
+	
 
 	private int	_rights	= 0;
 
-	public Access(int right) {
+	public ZonesAccess(int right) {
 		_rights = right;
 	}
 	
-	public Access(String rightsString) {
+	public ZonesAccess(String rightsString) {
 		for (Rights right: Rights.getRights())
 			if (rightsString.toLowerCase().contains(right.getCode()))
 				_rights |= right.getFlag();
@@ -51,7 +55,10 @@ public class Access {
 		// if(canNothing())
 		// System.out.println("Access invoked without any access ???? POTENTIALY FATAL ERROR IN SERVER!!");
 	}
-
+	public ZonesAccess merge(ZonesAccess acs){
+		return new ZonesAccess(_rights | acs.getRights());
+	}
+	public int getRights() { return _rights; }
 	public boolean canDo(Rights right) { return right.canDo(_rights); }
 	public boolean canBuild() { return canDo(Rights.BUILD); }
 	public boolean canDestroy() { return canDo(Rights.DESTROY); }
@@ -68,7 +75,8 @@ public class Access {
 		// Short circuit on 'all'
 		if (canDo(Rights.ALL))
 			return Rights.ALL.getCode();
-		
+		if(canNothing())
+			return "-";
 		// Build list of access codes.
 		String rights = "";
 		for (Rights right: Rights.getRights())
@@ -83,6 +91,8 @@ public class Access {
 		// Short circuit on 'all'
 		if (canDo(Rights.ALL))
 			return Rights.ALL.getTextual();
+		if(canNothing())
+			return "Nothing";
 		
 		// Build list of access codes.
 		String text = "";
@@ -94,6 +104,42 @@ public class Access {
 		text = text.substring(0, text.length() - 2);
 		
 		// Replace last comma with "and"
-		return text.substring(0, text.lastIndexOf(',')) + " and" + text.substring( text.lastIndexOf(',')+1, text.length());
+		// when there is just 1 item we don't need a "," ;).
+		if(text.lastIndexOf(',') < 0)
+			return text;
+		else
+			return text.substring(0, text.lastIndexOf(',')) + " and" + text.substring( text.lastIndexOf(',')+1, text.length());
+	}
+
+	public String toColorCode(){
+		String rt = "";
+
+		if(canBuild())
+			rt += Colors.Green;
+		else
+			rt += Colors.Red;
+		rt += "B";
+
+		if(canModify())
+			rt += Colors.Green;
+		else
+			rt += Colors.Red;
+		rt += "M";
+
+		if(canDestroy())
+			rt += Colors.Green;
+		else
+			rt += Colors.Red;
+		rt += "D";
+
+		if(canEnter())
+			rt += Colors.Green;
+		else
+			rt += Colors.Red;
+		rt += "E";
+
+		rt += Colors.White;
+
+		return rt;
 	}
 }

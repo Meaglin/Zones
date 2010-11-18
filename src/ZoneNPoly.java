@@ -100,8 +100,22 @@ public class ZoneNPoly extends ZoneForm {
 	}
 
 	@Override
+	/*
+	 * see Greens theorem 
+	 * http://en.wikipedia.org/wiki/Green%27s_theorem
+	 * http://stackoverflow.com/questions/451426/how-do-i-calculate-the-surface-area-of-a-2d-polygon
+	 */
 	public int getSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		int size = 0;
+		for (int i = 0, j = _x.length - 1; i < _x.length; j = i++) {
+			int x0 = _x[j];
+			int y0 = _y[j];
+			int x1 = _x[i];
+			int y1 = _y[i];
+			size += x0*y1 - x1*y0;
+		}
+		size = (int) Math.round(Math.abs(size) * 0.5) * (_z2 - _z1);
+		
+		return size;
 	}
 }

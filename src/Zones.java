@@ -6,7 +6,7 @@ public class Zones extends Plugin {
 	public void initialize() {
 
 		System.out.println("Zones Rev " + _Rev + "  Loading...");
-		Listener list = new Listener();
+		ZonesListener list = new ZonesListener();
 		ZoneManager.getInstance();
 
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, list, this, PluginListener.Priority.CRITICAL);
