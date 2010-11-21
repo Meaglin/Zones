@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 public class World {
 	public static final int	MIN_X			= -10240;
@@ -39,7 +38,7 @@ public class World {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Loaded " + X_REGIONS*Y_REGIONS  + " regions.");
+		ZoneManager.log.info("Loaded " + X_REGIONS*Y_REGIONS  + " regions.");
 	}
 
 	public Region getRegion(Player player) {
@@ -61,12 +60,15 @@ public class World {
 	public ZoneType getActiveZone(Player player){
 		return getRegion(player).getActiveZone(player);
 	}
+	public ZoneType getActiveZone(double x,double y,double z){
+		return getRegion(x,y).getActiveZone(x, y, z);
+	}
 	
 	public Region getRegion(int x, int y) {
 		//debug only ;) .
 		//System.out.println("get region " + ((x - MIN_X) >> SHIFT_SIZE) + " " + ((y - MIN_Y) >> SHIFT_SIZE));
 		if(x > MAX_X || x < MIN_X || y > MAX_Y || y < MIN_Y){
-			Logger.getLogger("Minecraft").warning("Warning: Player moving outside world!");
+			ZoneManager.log.warning("Warning: Player moving outside world!");
 			return new Region(0,0);
 		}
 		

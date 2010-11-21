@@ -10,7 +10,7 @@ public class ZonesListener extends PluginListener {
 	public static final int _pilonHeight = 3;
 	//bedrock
 	public static final int _pilonType = 7;
-	
+	//stick
 	public static final int _toolType = 280;
 	
     @Override
@@ -435,12 +435,6 @@ public class ZonesListener extends PluginListener {
 
     @Override
 	public void onPlayerMove(Player player, Location from, Location to) {
-
-		// no actual change,just within the block.
-		// hMod already does this for us.
-		//if (Math.floor(from.x) == Math.floor(to.x) && Math.floor(from.y) == Math.floor(to.y) && Math.floor(from.z) == Math.floor(to.z))
-		//	return;
-		
 		
 		//debug only ;).
 		//System.out.println("Moving from [" + Math.floor(from.x) + "," + Math.floor(from.y) + "," + Math.floor(from.z) + "] to [" + Math.floor(to.x) + "," + Math.floor(to.y) + "," + Math.floor(to.z) + "]" + "  [" + (Math.floor(to.x) - Math.floor(from.x)) + "," + (Math.floor(to.y) - Math.floor(from.y)) + "," + (Math.floor(to.z) - Math.floor(from.z)) + "]");
@@ -460,18 +454,12 @@ public class ZonesListener extends PluginListener {
 			//we don't have to do overall revalidation if the player gets warped back to his previous location.
 			return;
 		}
-		// debug only ;).
-		//Logger.getLogger("Minecraft").info("revalidate.");
 
 		World.getInstance().revalidateZones(player,World.toInt(from.x),World.toInt(from.z),World.toInt(to.x),World.toInt(to.z));
 	}
 
     @Override
 	public boolean onTeleport(Player player, Location from, Location to) { 
-		// no actual change,just within the block.
-		//hMod already does this for us.
-		//if (Math.floor(from.x) == Math.floor(to.x) && Math.floor(from.y) == Math.floor(to.y) && Math.floor(from.z) == Math.floor(to.z))
-		//	return false;
 		
 		//if the active zone changes we want to be sure the player can move into the zone.
 		ZoneType aZone = World.getInstance().getRegion(from.x,from.z).getActiveZone(from.x,from.z,from.y);
@@ -497,12 +485,10 @@ public class ZonesListener extends PluginListener {
 		ZoneForm form = zone.getZone();
 		Server serv = etc.getServer();
 		
-		//System.out.println(" meh : " + form.getLowX() + "|" + form.getHighX() + "," + form.getLowY() + "|" + form.getHighY() + "," + form.getLowZ() + "|" + form.getHighZ());
 		for (int i = form.getLowX(); i <= form.getHighX(); i++)
 			for (int j = form.getLowY(); j <= form.getHighY(); j++)
 				for (int k = form.getLowZ(); k <= form.getHighZ(); k++)
 					if (serv.getComplexBlock(i, k, j) != null){
-						//System.out.println("Update cblock [" + i + "," + j + "," + k + "] .");
 						serv.getComplexBlock(i, k, j).update();
 					}
 
@@ -663,5 +649,60 @@ public class ZonesListener extends PluginListener {
 		});
 		
 	}
+	    /*
+     * Called when a dynamite block or a creeper is triggerd.
+     * block status depends on explosive compound:
+     * 1 = dynamite.
+     * 2 = creeper.
+     * @param block
+     *          dynamite block/creeper location block.
+     *
+     * @return true if you dont the block to explode.
+     */
+    public boolean onExplode(Block block) {
+
+
+		ZoneType zone = World.getInstance().getActiveZone(block.getX(), block.getZ(), block.getY());
+		if(zone != null && !zone.allowDynamite(block))
+			return true;
+		else
+			return false;
+    }
+
+    /*
+     * Called when fluid wants to flow to a certain block.
+     * (10 & 11 for lava and 8 & 9 for water)
+     *
+     * @param blockFrom
+     *              the block where the fluid came from.
+     *              (blocktype = fluid type)
+     * @param blockTo
+     *              the block where fluid wants to flow to.
+     *
+     *
+     * @return true if you dont want the substance to flow.
+     */
+    public boolean onFlow(Block blockFrom,Block blockTo) {
+		if(blockFrom.getType() == 8 && blockFrom.getType() == 9){
+
+			ZoneType fromZone = World.getInstance().getActiveZone(blockFrom.getX(), blockFrom.getZ(), blockFrom.getY());
+			ZoneType toZone = World.getInstance().getActiveZone(blockTo.getX(), blockTo.getZ(), blockTo.getY());
+
+			if(toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && toZone.allowWater(blockTo))
+				return true;
+		}
+
+		if(blockFrom.getType() == 10 && blockFrom.getType() == 11){
+
+			ZoneType fromZone = World.getInstance().getActiveZone(blockFrom.getX(), blockFrom.getZ(), blockFrom.getY());
+			ZoneType toZone = World.getInstance().getActiveZone(blockTo.getX(), blockTo.getZ(), blockTo.getY());
+
+			if(toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && toZone.allowLava(blockTo))
+				return true;
+		}
+		
+        return false;
+    }
+
 	private Map<String, String[]> getCommands() { return commands; }
 }

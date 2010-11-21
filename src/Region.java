@@ -22,7 +22,6 @@ public class Region {
 			if(_zones.get(i).getId() == zone.getId())
 				_zones.remove(i);
 		}
-		//_zones.remove(zone);
 	}
 
 	public ArrayList<ZoneType> getZones() {
@@ -30,8 +29,6 @@ public class Region {
 	}
 
 	public void revalidateZones(Player character) {
-		//debugging only ;).
-		//System.out.println("Revalidating zones.");
 		for (ZoneType z : getZones()) {
 			if (z != null)
 				z.revalidateInZone(character);

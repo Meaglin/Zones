@@ -50,10 +50,6 @@ public class ZonesAccess {
 		for (Rights right: Rights.getRights())
 			if (rightsString.toLowerCase().contains(right.getCode()))
 				_rights |= right.getFlag();
-			
-		// actually to return if some1 has NO rights could be usefull ;).
-		// if(canNothing())
-		// System.out.println("Access invoked without any access ???? POTENTIALY FATAL ERROR IN SERVER!!");
 	}
 	public ZonesAccess merge(ZonesAccess acs){
 		return new ZonesAccess(_rights | acs.getRights());

@@ -20,4 +20,19 @@ public class ZoneNormal extends ZoneType {
 
 	}
 
+	@Override
+	public boolean allowWater(Block b) {
+		return allowWater;
+	}
+
+	@Override
+	public boolean allowLava(Block b) {
+		return allowLava;
+	}
+
+	@Override
+	public boolean allowDynamite(Block b) {
+		return allowDynamite;
+	}
+
 }

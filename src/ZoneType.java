@@ -26,6 +26,10 @@ public abstract class ZoneType {
 	private HashMap<String, ZonesAccess>		_groups;
 	private HashMap<String, ZonesAccess>		_users;
 
+	protected boolean allowLava = false;
+	protected boolean allowWater = false;
+	protected boolean allowDynamite = false;
+
 	protected ZoneType(int id) {
 		_id = id;
 		_characterList = new HashMap<String, Player>();
@@ -117,6 +121,16 @@ public abstract class ZoneType {
 			}
 		} else if (name.equals("name")) {
 			_name = value;
+		} else if (name.equalsIgnoreCase("water")) {
+			if(value.equalsIgnoreCase("1"))
+				allowWater = true;
+			else
+				allowWater = false;
+		} else if(name.equalsIgnoreCase("lava")) {
+			if(value.equalsIgnoreCase("1"))
+				allowLava = true;
+			else
+				allowLava = false;
 		} else
 			log.info(getClass().getSimpleName() + ": Unknown parameter - " + name + " in zone: " + getId());
 	}
@@ -254,6 +268,10 @@ public abstract class ZoneType {
 
 	protected abstract void onExit(Player character);
 
+	public abstract boolean allowWater(Block b);
+	public abstract boolean allowLava(Block b);
+	public abstract boolean allowDynamite(Block b);
+
 	public HashMap<String, Player> getCharactersInside() {
 		return _characterList;
 	}
@@ -347,34 +365,37 @@ public abstract class ZoneType {
 	public void addUser(String user, ZonesAccess a) {
 		user = user.toLowerCase();
 
-		if (_users.containsKey(user))
+		if (_users.containsKey(user)){
 			_users.remove(user);
-
-		if(a.canNothing())
-			return;
+			if(a.canNothing())
+				return;
+		}
 		
-		_users.put(user, a);
+		if(!a.canNothing())
+			_users.put(user, a);
 
-		updateRights();
+		updateUsers();
 	}
 
 	public void addGroup(String group, ZonesAccess a) {
 		group = group.toLowerCase();
 
-		if (_groups.containsKey(group))
+		if (_groups.containsKey(group)){
 			_groups.remove(group);
+			
+			if(a.canNothing())
+				return;
+		}
 
 		if(etc.getDataSource().getGroup(group) == null){
 			log.info("Trying to add an invalid group '" + group + "' in zone '" + getName() + "'["+getId()+"].");
 			return;
 		}
 
-		if(a.canNothing())
-			return;
+		if(!a.canNothing())
+			_groups.put(group, a);
 
-		_groups.put(group, a);
-
-		updateRights();
+		updateUsers();
 	}
 
 	public void addAdmin(String admin) {
@@ -382,7 +403,7 @@ public abstract class ZoneType {
 			return;
 
 		_adminusers.add(admin.toLowerCase());
-		updateRights();
+		updateAdmins();
 	}
         public void addAdminGroup(String group) {
             if (_admingroups.contains(group.toLowerCase()))
@@ -393,15 +414,75 @@ public abstract class ZoneType {
                 return;
             }
             _admingroups.add(group.toLowerCase());
-            updateRights();
+            updateAdmins();
         }
 	public void removeAdmin(String admin){
 		if(_adminusers.contains(admin.toLowerCase())){
 			_adminusers.remove(admin.toLowerCase());
-			updateRights();
+			updateAdmins();
 		} else
 			return;
 
+	}
+	private void updateAdmins() {
+		String admins = "";
+
+		for (String user : _adminusers) {
+			admins += "1," + user + ";";
+		}
+		for (String group : _admingroups) {
+			admins += "2," + group + ";";
+		}
+		
+		if(admins.length() > 0) 
+			admins = admins.substring(0, admins.length() - 1);
+		
+		Connection conn = null;
+		PreparedStatement st = null;
+		try {
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("UPDATE zones SET admins = ? WHERE id = ?");
+			st.setString(1, admins);
+			st.setInt(2, getId());
+			st.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if(conn != null)conn.close();
+				if(st != null)st.close();
+			} catch (Exception e) {}
+		}
+	}
+	private void updateUsers() {
+		String users = "";
+
+		for (Entry<String, ZonesAccess> e : _users.entrySet()) {
+			users += "1," + e.getKey() + "," + e.getValue().toString() + ";";
+		}
+		for (Entry<String, ZonesAccess> e : _groups.entrySet()) {
+			users += "2," + e.getKey() + "," + e.getValue().toString() + ";";
+		}
+
+		if(users.length() > 0)
+			users = users.substring(0, users.length() - 1);
+
+		Connection conn = null;
+		PreparedStatement st = null;
+		try {
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("UPDATE zones SET users = ? WHERE id = ?");
+			st.setString(1, users);
+			st.setInt(2, getId());
+			st.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if(conn != null)conn.close();
+				if(st != null)st.close();
+			} catch (Exception e) {}
+		}
 	}
 	private void updateRights() {
 		String admins = "";
@@ -412,7 +493,9 @@ public abstract class ZoneType {
 		for (Entry<String, ZonesAccess> e : _groups.entrySet()) {
 			users += "2," + e.getKey() + "," + e.getValue().toString() + ";";
 		}
-		users = users.substring(0, users.length() - 1);
+
+		if(users.length() > 0)
+			users = users.substring(0, users.length() - 1);
 
 		for (String user : _adminusers) {
 			admins += "1," + user + ";";
@@ -420,7 +503,10 @@ public abstract class ZoneType {
 		for (String group : _admingroups) {
 			admins += "2," + group + ";";
 		}
-		admins = admins.substring(0, admins.length() - 1);
+
+		if(admins.length() > 0) 
+			admins = admins.substring(0, admins.length() - 1);
+
 		Connection conn = null;
 		PreparedStatement st = null;
 		try {
@@ -434,10 +520,9 @@ public abstract class ZoneType {
 			e.printStackTrace();
 		} finally {
 			try {
-				conn.close();
-				st.close();
-			} catch (Exception e) {
-			}
+				if(conn != null)conn.close();
+				if(st != null)st.close();
+			} catch (Exception e) {}
 		}
 	}
 

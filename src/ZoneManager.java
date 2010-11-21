@@ -30,7 +30,7 @@ public class ZoneManager {
 			PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM zones_vertices WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
 			ResultSet rset = st.executeQuery();
 
-			int id, type, size, minz, maxz;
+			int id, type, size, minz, maxz, water, lava;
 			String zoneClass, admins, users, name;
 			ArrayList<int[]> points = new ArrayList<int[]>();
 
@@ -44,6 +44,8 @@ public class ZoneManager {
 				users = rset.getString("users");
 				minz = rset.getInt("minz");
 				maxz = rset.getInt("maxz");
+				water = rset.getInt("allowwater");
+				lava = rset.getInt("allowlava");
 
 				Class<?> newZone;
 				try {
@@ -105,6 +107,8 @@ public class ZoneManager {
 				temp.setParameter("admins", admins);
 				temp.setParameter("users", users);
 				temp.setParameter("name", name);
+				temp.setParameter("water", Integer.toString(water));
+				temp.setParameter("lava", Integer.toString(lava));
 				addZone(temp);
 			}
 			rset.close();
@@ -133,11 +137,9 @@ public class ZoneManager {
 				ay = (y + World.OFFSET_Y) << World.SHIFT_SIZE;
 				by = ((y + 1) + World.OFFSET_Y) << World.SHIFT_SIZE;
 				
-				//System.out.println(ax + " " + bx +  " " + ay + " " + by);
-				
 				if (zone.getZone().intersectsRectangle(ax, bx, ay, by)) {
 					World.getInstance().addZone(x, y, zone);
-					log.info("adding zone["+zone.getId()+"] to region " + x + " " + y);
+					//log.info("adding zone["+zone.getId()+"] to region " + x + " " + y);
 				}
 			}
 		}
