@@ -118,4 +118,40 @@ public class ZoneNPoly extends ZoneForm {
 		
 		return size;
 	}
+
+	@Override
+	public int getLowX() {
+		int rt = 0;
+		for(int x : _x)
+			if(rt == 0 || x < rt)
+				rt = x;
+		return rt;
+	}
+
+	@Override
+	public int getHighX() {
+		int rt = 0;
+		for(int x : _x)
+			if(rt == 0 || x > rt)
+				rt = x;
+		return rt;
+	}
+
+	@Override
+	public int getLowY() {
+		int rt = 0;
+		for(int y : _y)
+			if(rt == 0 || y < rt)
+				rt = y;
+		return rt;
+	}
+
+	@Override
+	public int getHighY() {
+		int rt = 0;
+		for(int y : _y)
+			if(rt == 0 || y > rt)
+				rt = y;
+		return rt;
+	}
 }

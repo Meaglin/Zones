@@ -456,4 +456,36 @@ public abstract class ZoneType {
 	public void addGroup(String groupname, String access) {
 		addGroup(groupname, new ZonesAccess(access));
 	}
+
+	public boolean setName(String name) {
+
+		Connection conn = null;
+		PreparedStatement st = null;
+		int u = 0;
+		try {
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("UPDATE zones SET name = ? WHERE id = ?");
+			st.setString(1, name);
+			st.setInt(2, getId());
+			u = st.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+				st.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		if(u < 1)
+			return false;
+
+
+		_name = name;
+
+
+		return true;
+		//throw new UnsupportedOperationException("Not yet implemented");
+	}
 }

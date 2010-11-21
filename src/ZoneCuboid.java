@@ -125,4 +125,24 @@ public class ZoneCuboid extends ZoneForm {
 
 		return ((_x2 - _x1) * (_y2 - _y1) * (_z2 - _z1));
 	}
+
+	@Override
+	public int getLowX() {
+		return _x1;
+	}
+
+	@Override
+	public int getHighX() {
+		return _x2;
+	}
+
+	@Override
+	public int getLowY() {
+		return _y1;
+	}
+
+	@Override
+	public int getHighY() {
+		return _y2;
+	}
 }

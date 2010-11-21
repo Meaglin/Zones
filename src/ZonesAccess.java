@@ -98,7 +98,7 @@ public class ZonesAccess {
 		String text = "";
 		for (Rights right: Rights.getRights())
 			if (canDo( right ))
-				text += right.getCode() + ", ";
+				text += right.getTextual() + ", ";
 
 		// Remove last comma.
 		text = text.substring(0, text.length() - 2);

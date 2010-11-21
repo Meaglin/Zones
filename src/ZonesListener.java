@@ -3,7 +3,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 
 public class ZonesListener extends PluginListener {
@@ -19,14 +18,18 @@ public class ZonesListener extends PluginListener {
 		ZoneType zone = World.getInstance().getRegion(blockPlaced.getX(),blockPlaced.getZ()).getActiveZone(blockPlaced.getX(),blockPlaced.getZ(),blockPlaced.getY());
 		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
 			player.getInventory().updateInventory();
-			player.sendMessage(Colors.Red + "You cannot place blocks in '" + zone.getName() + "' !");
+			player.sendMessage(Colors.Rose + "You cannot place blocks in '" + zone.getName() + "' !");
+			return true;
+		}else if(zone != null && (blockPlaced.getType() == 54 || blockPlaced.getType() == 61 || blockPlaced.getType() == 62 ) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)){
+			player.getInventory().updateInventory();
+			player.sendMessage(Colors.Rose + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
 			return true;
 		} else {
 			if (itemInHand == _toolType) {
 				ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy != null) {
 					if (dummy._type == 1 && dummy._coords.size() == 2) {
-						player.sendMessage(Colors.Red + "You can only use 2 points to define a cuboid zone.");
+						player.sendMessage(Colors.Rose + "You can only use 2 points to define a cuboid zone.");
 						return true;
 					}
 					int[] p = new int[2];
@@ -44,7 +47,7 @@ public class ZonesListener extends PluginListener {
 						}
 					}
 					if(dummy.getCoords().contains(p)){
-						player.sendMessage(Colors.Red + "Already added this point.");
+						player.sendMessage(Colors.Rose + "Already added this point.");
 						return true;
 					}
 					
@@ -59,17 +62,21 @@ public class ZonesListener extends PluginListener {
     @Override
 	public boolean onBlockDestroy(Player player, Block block) {
 
-		if(block.getType() == 54)
-			return true;
-
 		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
-		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.DESTROY)) {
+		if (zone != null && !zone.canModify(player, ZonesAccess.Rights.DESTROY)) {
 			
+
+				if(block.getStatus() == 0)
+					player.sendMessage(Colors.Rose + "You cannot destroy blocks in '" + zone.getName() + "' !");
+				return true;	
+
+		}else if(zone != null && (block.getType() == 54 || block.getType() == 61 || block.getType() == 62 ) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)){
+
 			if(block.getStatus() == 0)
-				player.sendMessage(Colors.Red + "You cannot destroy blocks in '" + zone.getName() + "' !");
-			
+				player.sendMessage(Colors.Rose + "You cannot destroy a chest/furnace in '" + zone.getName() + "' since you dont have modify rights!");
+
 			return true;
-		} else {
+		}else{
 			if (player.getItemInHand() == _toolType) {
 				
 				
@@ -84,7 +91,7 @@ public class ZonesListener extends PluginListener {
 						player.sendMessage(Colors.Green + "Removed point [" + p[0] + "," + p[1] + "] from temp zone.");
 						
 					}else{						
-						player.sendMessage(Colors.Red + "Couldn't find point in zone so nothing could be removed");
+						player.sendMessage(Colors.Rose + "Couldn't find point in zone so nothing could be removed");
 					}
 				}
 			}
@@ -99,7 +106,7 @@ public class ZonesListener extends PluginListener {
 		//Logger.getLogger("Minecraft").info("C modf " + block.getX() + "," + block.getY() + "," + block.getZ() +  "   " + player.getX() + "," + player.getY() + "," + player.getZ() +  "  ");
 		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
 		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.MODIFY)) {
-			player.sendMessage(Colors.Red + "You cannot change chests or furnaces in '" + zone.getName() + "' !");
+			player.sendMessage(Colors.Rose + "You cannot change chests or furnaces in '" + zone.getName() + "' !");
 			return true;
 		}
 		return false;
@@ -109,7 +116,6 @@ public class ZonesListener extends PluginListener {
 	public boolean onSendComplexBlock(Player player, ComplexBlock block) {
 		if (block instanceof Sign)
 			return false;
-
 		//Logger.getLogger("Minecraft").info("C send " + block.getX() + "," + block.getY() + "," + block.getZ() +  "   " + player.getX() + "," + player.getY() + "," + player.getZ() +  "  ");
 		//you don't need a message here ;).
 		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
@@ -132,35 +138,55 @@ public class ZonesListener extends PluginListener {
 						name += " " + split[i];
 
 					name = name.substring(1);
+					if(name.length() < 4)
+					{
+						player.sendMessage(Colors.Rose + "Too short zone name.");
+						return true;
+					}
 					ZoneManager.getInstance().addDummy(player.getName(), new ZonesDummyZone(name));
 					player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
 					//					ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
 					player.sendMessage("You can start adding the zone points of this zone by             " +
-						    Colors.Red + " hitting blocks with a stick(280)" +
-							Colors.White + " or using " + Colors.Red + " /zadd");
+						    Colors.Rose + " hitting blocks with a stick(280)" +
+							Colors.White + " or using " + Colors.Rose + " /zadd");
 				}
 			} else if (cmd.equalsIgnoreCase("/zhelp")) {
 				List<String> availableCommands = new ArrayList<String>();
 
-				for (Entry<String, String> entry : getCommands().entrySet()) 
-					if (player.canUseCommand(entry.getKey())) 
-						availableCommands.add(entry.getKey() + " " + entry.getValue());
-				
+				for (Entry<String, String[]> entry : getCommands().entrySet()) 
+					if (entry.getValue()[0].equals("0") || player.canUseCommand("/zcreate"))
+						availableCommands.add(entry.getKey() + " " + entry.getValue()[1]);
 
-				player.sendMessage(Colors.Blue + "Available commands (Page " + (split.length == 2 ? split[1] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") [] = required <> = optional:");
 				int amount = 0;
+				boolean isCommand = false;
 				if (split.length > 1) {
 					try {
 						amount = Integer.parseInt(split[1]);
 					} catch (NumberFormatException ex) {
-						player.sendMessage(Colors.Rose + "Not a valid page number.");
+
+						if(getCommands().containsKey("/" + split[1].toLowerCase()) && (getCommands().get("/" + split[1].toLowerCase())[0].equals("0") || player.canUseCommand("/zcreate")))
+							isCommand = true;
+						else
+							player.sendMessage(Colors.Rose + "Not a valid page number.");
 					}
 					if (amount > 1)
 						amount = (amount - 1) * ITEMS_PER_PAGE;
 					else
 						amount = 0;
 				}
+				if(isCommand){
+					String[] info = getCommands().get("/" + split[1].toLowerCase())[2].split("\n");
+					String command = "/" + split[1].toLowerCase();
 
+					player.sendMessage(Colors.Blue + "Description of " + command + " :");
+					for(String part : info)
+						player.sendMessage(Colors.LightBlue + part);
+
+					return true;
+				}
+
+				player.sendMessage(Colors.Blue + "Available commands (Page " + (split.length == 2 ? split[1] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") [] = required <> = optional:");
+				player.sendMessage(Colors.Blue + "For more info: /zhelp <command name>");
 				for (int i = amount; i < amount + ITEMS_PER_PAGE; i++)
 					if (availableCommands.size() > i)
 						player.sendMessage(Colors.Rose + availableCommands.get(i));
@@ -170,7 +196,7 @@ public class ZonesListener extends PluginListener {
 					if (zone == null)
 						player.sendMessage(Colors.Yellow + "No zone found with id : " + Integer.parseInt(split[1]));
 					else if (!zone.canAdministrate(player))
-						player.sendMessage(Colors.Red + "You don't have rights to administrate this zone.");
+						player.sendMessage(Colors.Rose + "You don't have rights to administrate this zone.");
 					else {
 						ZoneManager.getInstance().setSelected(player.getName(), zone.getId());
 						player.sendMessage(Colors.Green + "Selected zone '" + zone.getName() + "' .");
@@ -193,20 +219,15 @@ public class ZonesListener extends PluginListener {
 			} else if (cmd.equalsIgnoreCase("/zsetuser")) {
 				if (split.length == 3) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Red + "Please select a zone first with /zselect.");
+						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 					else{
 						ZoneType zone = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						ZonesAccess z = new ZonesAccess(split[2]);
-						Player tmp = etc.getServer().matchPlayer(split[1]);
-						if(tmp != null && !zone.getAccess(tmp).canModify() && z.canModify() && zone.getDistanceToZone(tmp) < 200)
-						{
-							Location loc = tmp.getLocation();
-							Location spawn = etc.getServer().getSpawnLocation();
-							tmp.teleportTo(spawn);
-							tmp.teleportTo(loc);
-							tmp.sendMessage("Your chest access of a zone close to you changed, so your chunk info needed to be refreshed.");
-						}
 						zone.addUser(split[1], split[2]);
+						
+						
+						fixChests(zone);
+						
 						player.sendMessage(Colors.Green + "Succesfully changed access of user " + split[1] + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
 					}
 				} else {
@@ -215,11 +236,15 @@ public class ZonesListener extends PluginListener {
 			} else if (cmd.equalsIgnoreCase("/zsetgroup")) {
 				if (split.length == 3) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Red + "Please select a zone first with /zselect.");
+						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						zone.addGroup(split[1], split[2]);
 						ZonesAccess z = new ZonesAccess(split[2]);
+
+						
+						fixChests(zone);
+
 						player.sendMessage(Colors.Green + "Succesfully changed access of group '" + split[1] + "' of zone '" + zone.getName() + "' to access " + z.textual() + ".");
 					}
 
@@ -229,19 +254,15 @@ public class ZonesListener extends PluginListener {
 			} else if (cmd.equalsIgnoreCase("/zaddadmin")) {
 				if (split.length == 2) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Red + "Please select a zone first with /zselect.");
+						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						Player tmp = etc.getServer().matchPlayer(split[1]);
-						if(tmp != null && !zone.getAccess(tmp).canModify() && zone.getDistanceToZone(tmp) < 200)
-						{
-							Location loc = tmp.getLocation();
-							Location spawn = etc.getServer().getSpawnLocation();
-							tmp.teleportTo(spawn);
-							tmp.teleportTo(loc);
-							tmp.sendMessage("Your chest access of a zone close to you changed, so your chunk info needed to be refreshed.");
-						}
+
 						zone.addAdmin(split[1]);
+
+						fixChests(zone);
+
 						player.sendMessage(Colors.Green + "Succesfully added player " + split[1] + " as an admin of zone "  + zone.getName() +  " .");
 					}
 				} else {
@@ -250,7 +271,7 @@ public class ZonesListener extends PluginListener {
 			}else if (cmd.equalsIgnoreCase("/zremoveadmin")) {
 				if (split.length == 2) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Red + "Please select a zone first with /zselect.");
+						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						zone.removeAdmin(split[1]);
@@ -261,7 +282,7 @@ public class ZonesListener extends PluginListener {
 				}
 			} else if (cmd.equalsIgnoreCase("/zgetaccess")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Red + "Please select a zone first with /zselect.");
+					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 				else{
 					ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName())).sendAccess(player);
 				}
@@ -270,21 +291,45 @@ public class ZonesListener extends PluginListener {
 				player.sendMessage("Region[" + r.getX() + "," + r.getY() + "] Zone count: " + r.getZones().size() + ".");
 			}else if(cmd.equalsIgnoreCase("/zdelete") && player.canUseCommand("/zcreate")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Red + "Please select a zone first with /zselect.");
+					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 				else{
 					ZoneType toDelete = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
-					boolean succes = ZoneManager.getInstance().delete(toDelete);
-					if(succes)
+					if(ZoneManager.getInstance().delete(toDelete))
 						player.sendMessage(Colors.Green + "Succesfully deleted zone " + toDelete.getName() + ".");
 					else
-						player.sendMessage(Colors.Red + "Problems while deleting zone, please contact admin.");
+						player.sendMessage(Colors.Rose + "Problems while deleting zone, please contact admin.");
+				}
+			}else if (cmd.equalsIgnoreCase("/zsetname")){
+				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
+					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+				else{
+					if(split.length < 2)
+						player.sendMessage(Colors.Yellow + "Usage: /zsetname [zone name]");
+					else {
+						String name = "";
+						for (int i = 1; i < split.length; i++)
+							name += " " + split[i];
+
+						name = name.substring(1);
+
+						if(name.length() < 4)
+							player.sendMessage(Colors.Rose + "Too short zone name.");
+						else if(name.length() > 40)
+							player.sendMessage(Colors.Rose + "Too long zone name.");
+						else if(ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName())).setName(name))
+							player.sendMessage(Colors.Green + "Succesfully changed zone name to " + name + ".");
+						else
+							player.sendMessage(Colors.Rose + "Unable to change zone name, please contact a admin.");
+
+					}
+
 				}
 			} else {
 
 				ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy == null) {
-					player.sendMessage(Colors.Red + "First create a zone with:");
-					player.sendMessage(Colors.Red + "/zcreate [zone name]");
+					player.sendMessage(Colors.Rose + "First create a zone with:");
+					player.sendMessage(Colors.Rose + "/zcreate [zone name]");
 					return true;
 				}
 				//revert confirms after a different command is used.
@@ -293,7 +338,7 @@ public class ZonesListener extends PluginListener {
 
 				if (cmd.equalsIgnoreCase("/zadd")) {
 					if (dummy._type == 1 && dummy._coords.size() == 2) {
-						player.sendMessage(Colors.Red + "You can only use 2 points to define a cuboid zone.");
+						player.sendMessage(Colors.Rose + "You can only use 2 points to define a cuboid zone.");
 						return true;
 					}
 					int[] p = new int[2];
@@ -318,7 +363,7 @@ public class ZonesListener extends PluginListener {
 							return true;
 						}
 					}
-					player.sendMessage(Colors.Red + "Couldn't find point in zone so nothing could be removed");
+					player.sendMessage(Colors.Rose + "Couldn't find point in zone so nothing could be removed");
 				} else if (cmd.equalsIgnoreCase("/zsetplot")) {
 					dummy.makePlot(player);
 				} else if (cmd.equalsIgnoreCase("/zsetheight")) {
@@ -346,14 +391,14 @@ public class ZonesListener extends PluginListener {
 					}
 				} else if (cmd.equalsIgnoreCase("/zsave")) {
 					if (dummy._type == 1 && dummy.getCoords().size() != 2) {
-						player.sendMessage(Colors.Red + "Not enough coordinates set for this zone type, you need 2.");
+						player.sendMessage(Colors.Rose + "Not enough coordinates set for this zone type, you need 2.");
 						return true;
 					}else if(dummy._type == 2 && dummy.getCoords().size() < 3){
-						player.sendMessage(Colors.Red + "Not enough coordinates set for this zone type, you need atleast 3.");
+						player.sendMessage(Colors.Rose + "Not enough coordinates set for this zone type, you need atleast 3.");
 						return true;
 					}
 					if (dummy.getMax() == 127 && dummy.getMin() == 0)
-						player.sendMessage(Colors.Red + "WARNING: default z values not changed!");
+						player.sendMessage(Colors.Rose + "WARNING: default z values not changed!");
 					
 					player.sendMessage(Colors.Yellow + "If you are sure you want to save this zone do /zconfirm");
 					
@@ -411,7 +456,7 @@ public class ZonesListener extends PluginListener {
 				)
 		){
 			player.teleportTo(from);
-			player.sendMessage(Colors.Red + "You can't enter " + bZone.getName() + ".");
+			player.sendMessage(Colors.Rose + "You can't enter " + bZone.getName() + ".");
 			//we don't have to do overall revalidation if the player gets warped back to his previous location.
 			return;
 		}
@@ -438,7 +483,7 @@ public class ZonesListener extends PluginListener {
 						(aZone == null && !bZone.canModify(player, ZonesAccess.Rights.ENTER))
 				)
 		){
-			player.sendMessage(Colors.Red + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");
+			player.sendMessage(Colors.Rose + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");
 			return true;
 		}
 		
@@ -446,29 +491,177 @@ public class ZonesListener extends PluginListener {
 		
 		return false; 
 	}
-	 
-	public static final Map<String, String> commands;
-	static {
-		commands = new LinkedHashMap<String,String>();
-		commands.put("/zcreate", "[zone name] - starts zone creation in a new zone.");
-		commands.put("/zadd", "- adds the current location to the temp zone.");
-		commands.put("/zremove", "- removes the current location from the temp zone.");
-		commands.put("/zsetplot", "- set height and depth to according to plot specs.");
-		commands.put("/zhelp", "<page id> - shows <page id> page from the zone help.");
-		commands.put("/zsetheight", "[height] - sets maxz to current z + [height].");
-		commands.put("/zsetdepth", "[depth] - sets minz to current z - [depth].");
-		commands.put("/zsave", "- saves the temp zone after confirmation.");
-		commands.put("/zconfirm", "- confirms confirmations.");
-		commands.put("/zsetz", "[minz] [maxz] - sets minz, maxz, range [0-127].");
-		commands.put("/zstop", "- stop creation and delete zone (asks confirmation).");
-		commands.put("/zsetuser", "[user name] b|d|m|e|*|- (combination of these)");
-		commands.put("/zsetgroup", "[group name] b|d|m|e|*|- (combination of these)");
-		commands.put("/zaddadmin", "[user name]");
-		commands.put("/zremoveadmin", "[user name]");
-		commands.put("/zselect", "<zone id>");
-		commands.put("/zsettype", "Cuboid|NPoly - changes zone type.");
-		commands.put("/zregion", " returns region info.");
-		commands.put("/zgetaccess", "- sends a access list of the selected zone.");
+
+	private void fixChests(ZoneType zone) {
+
+		ZoneForm form = zone.getZone();
+		Server serv = etc.getServer();
+		
+		//System.out.println(" meh : " + form.getLowX() + "|" + form.getHighX() + "," + form.getLowY() + "|" + form.getHighY() + "," + form.getLowZ() + "|" + form.getHighZ());
+		for (int i = form.getLowX(); i <= form.getHighX(); i++)
+			for (int j = form.getLowY(); j <= form.getHighY(); j++)
+				for (int k = form.getLowZ(); k <= form.getHighZ(); k++)
+					if (serv.getComplexBlock(i, k, j) != null){
+						//System.out.println("Update cblock [" + i + "," + j + "," + k + "] .");
+						serv.getComplexBlock(i, k, j).update();
+					}
+
 	}
-	private Map<String, String> getCommands() { return commands; }
+
+	public static final Map<String, String[]> commands;
+	static {
+		commands = new LinkedHashMap<String,String[]>();
+		commands.put("/zcreate", new String[] {
+			"1",
+			"[zone name] - starts zone creation in a new zone.",
+			
+			"Starts Zone creation mode in which you can set the \n zones perimiter and type and height en depth."
+		});
+		
+		commands.put("/zadd", new String[] {
+			"1",
+			"- adds the current location to the temp zone.",
+			"Adds the current player x and y as a point of the  \n zone you are making."
+		});
+		
+		commands.put("/zremove", new String[] {
+			"1",
+			"- removes the current location from the temp zone.",
+			"If the current player location is a point of \n the zone you are making it will be removed from the zone \n you are making. "
+		});
+		
+		commands.put("/zsetplot", new String[] {
+			"1",
+			"- set height and depth to according to plot specs.",
+			"Changes the zone you are making to a plot type \n with the related height and depth of the zone relative to \n your z position."
+		});
+		
+		commands.put("/zhelp",new String[] { 
+			"0",
+			"<cmd> - shows <cmd> page/command from the zone help.",
+			"Shows <cmd> page or command description from the \n zone help file."
+		});
+		
+		commands.put("/zsetheight",new String[] {
+			"1",
+			 "[height] - sets maxz to current z + [height].",
+			"Sets the zone you are creating height to your \n current z position + [height]"
+		});
+		
+		commands.put("/zsetdepth",new String[] {
+			"1",
+			 "[depth] - sets minz to current z - [depth].",
+			"Sets the depth of the zone you are creating \n to your current z position - [depth]"
+		});
+		
+		commands.put("/zsave",new String[] { 
+			"1",
+			"- saves the temp zone after confirmation.",
+			"Initiates saving of the zone you were creating \n you will need to confirm this with \n /zconfirm to make it actually save the zone."
+		});
+		
+		commands.put("/zconfirm",new String[] { 
+			"1",
+			"- confirms confirmations.",
+			"Confirms the last action that needs confirmation \n needed when /zsave or /zstop is used."
+		});
+		
+		commands.put("/zsetz",new String[] { 
+			"1",
+			"[minz] [maxz] - sets minz, maxz, range [0-127].",
+			"Sets the depth and height of the zone according to \n [minz] and [maxz] limited by the max \n and min height of the map [0-127]."
+		});
+		
+		commands.put("/zstop",new String[] { 
+			"1",
+			"- stop creation and delete zone (asks confirmation).",
+			"Stops the creation of the current zone and deletes \n all relative data this needs to be confirmed \n with /zconfirm though."
+		});
+			//ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
+		commands.put("/zsetuser",new String[] { 
+			"0",
+			"[user name] b|m|d|e|*|- (combination of these)",
+			"Sets the access of [user name] to what is specified \n "
+			+ "b = Build(placing blocks),\n"
+			+ "m = Modify(accessing chest/furnaces),\n "
+			+ "d = Destroy(destroying blocks),\n"
+			+ "e = Enter(entering your zone), \n"
+			+ "* = full access(all of the above) and - = remove all access. \n"
+			+ "Example: /zsetuser Meaglin bde this will give meaglin access \n"
+			+ " to build,destroy and walk around in your zone but not to \n"
+			+ "access your chests."
+		});
+		
+		commands.put("/zsetgroup",new String[] {  
+			"0",
+			"[group name] b|m|d|e|*|- (combination of these)",
+			"Sets the access of [group name] to what is specified \n "
+			+ "Possible group names: beunhaas, default, builder and vip \n"
+			+ "b = Build(placing blocks),\n"
+			+ "m = Modify(accessing chest/furnaces),\n "
+			+ "d = Destroy(destroying blocks),\n"
+			+ "e = Enter(entering your zone), \n"
+			+ "* = full access(all of the above) and - = remove all access. \n"
+			+ "Example: /zsetuser default bde this will give all users access \n"
+			+ " to build,destroy and walk around in your zone but not to \n"
+			+ "access your chests."
+			
+		});
+		
+		commands.put("/zaddadmin",new String[] {  
+			"0",
+			"[user name]",
+			"Adds [user name] as admin to your zone which gives \n"
+			+ "[user name] rights to build,modify,destroy,enter your zone \n"
+			+ "and to give other people rights to do so . (access to \n"
+			+ "/zsetuser and /zsetgroup in your zone)"
+		});
+		
+		commands.put("/zremoveadmin",new String[] {  
+			"1",
+			"[user name]",
+			"bleh"
+		});
+		
+		commands.put("/zselect",new String[] {  
+			"0",
+			"<zone id>",
+			"Selects a zone so you can modify the rights of the zone and \n"
+			+ "or modify other properties of the zone."
+		});
+		
+		commands.put("/zsettype",new String[] {  
+			"1",
+			"Cuboid|NPoly - changes zone type.",
+			"bleh"
+		});
+		
+		commands.put("/zregion",new String[] { 
+			"1",
+			" returns region info.",
+			"bleh"
+		});
+		
+		commands.put("/zgetaccess",new String[] { 
+			"0",
+			"- sends a access list of the selected zone.",
+			"Sends you a list of all the access given in your currently \n"
+			+ "selected zone."
+		});
+		
+		commands.put("/zdelete",new String[] { 
+			"1",
+			"- deletes selected zone.",
+			"Deletes the currently selected zone, No confirmation!"
+		});
+		
+		commands.put("/zsetname",new String[] {  
+			"0",
+			"[zone name] - changes zone name.",
+			"Changes your current selected zones name to [zone name] \n"
+			+ "(note: [zone name] is allowed to have spaces)."
+		});
+		
+	}
+	private Map<String, String[]> getCommands() { return commands; }
 }
