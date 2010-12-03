@@ -12,20 +12,10 @@ public class ZonesListener extends PluginListener {
 	public static final int _pilonType = 7;
 	//stick
 	public static final int _toolType = 280;
-	
-    @Override
+
+	@Override
 	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
-		ZoneType zone = World.getInstance().getRegion(blockPlaced.getX(),blockPlaced.getZ()).getActiveZone(blockPlaced.getX(),blockPlaced.getZ(),blockPlaced.getY());
-		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
-			player.getInventory().updateInventory();
-			player.sendMessage(Colors.Rose + "You cannot place blocks in '" + zone.getName() + "' !");
-			return true;
-		}else if(zone != null && (blockPlaced.getType() == 54 || blockPlaced.getType() == 61 || blockPlaced.getType() == 62 ) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)){
-			player.getInventory().updateInventory();
-			player.sendMessage(Colors.Rose + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
-			return true;
-		} else {
-			if (itemInHand == _toolType) {
+		if (itemInHand == _toolType) {
 				ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy != null) {
 					if (dummy._type == 1 && dummy._coords.size() == 2) {
@@ -33,11 +23,11 @@ public class ZonesListener extends PluginListener {
 						return true;
 					}
 					int[] p = new int[2];
-					
-					
+
+
 					p[0] = World.toInt(blockClicked.getX());
 					p[1] = World.toInt(blockClicked.getZ());
-					
+
 					if(blockClicked.getY() < World.MAX_Z-_pilonHeight){
 						for(int i = 1;i <= _pilonHeight;i++){
 							Block t = etc.getServer().getBlockAt(blockClicked.getX(), blockClicked.getY()+i, blockClicked.getZ());
@@ -50,36 +40,15 @@ public class ZonesListener extends PluginListener {
 						player.sendMessage(Colors.Rose + "Already added this point.");
 						return true;
 					}
-					
+
 					player.sendMessage(Colors.Green + "Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
 					dummy.addCoords(p);
 				}
 			}
-			return false;
-		}
+		return false;
 	}
-
-    @Override
 	public boolean onBlockDestroy(Player player, Block block) {
-
-		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
-		if (zone != null && !zone.canModify(player, ZonesAccess.Rights.DESTROY)) {
-			
-
-				if(block.getStatus() == 0)
-					player.sendMessage(Colors.Rose + "You cannot destroy blocks in '" + zone.getName() + "' !");
-				return true;	
-
-		}else if(zone != null && (block.getType() == 54 || block.getType() == 61 || block.getType() == 62 ) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)){
-
-			if(block.getStatus() == 0)
-				player.sendMessage(Colors.Rose + "You cannot destroy a chest/furnace in '" + zone.getName() + "' since you dont have modify rights!");
-
-			return true;
-		}else{
-			if (player.getItemInHand() == _toolType) {
-				
-				
+		if (player.getItemInHand() == _toolType) {
 				ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy != null) {
 					if(dummy.containsDeleteBlock(block)){
@@ -89,14 +58,49 @@ public class ZonesListener extends PluginListener {
 						dummy.removeCoords(p);
 						dummy.fix(block.getX(), block.getZ());
 						player.sendMessage(Colors.Green + "Removed point [" + p[0] + "," + p[1] + "] from temp zone.");
-						
-					}else{						
+
+					}else{
 						player.sendMessage(Colors.Rose + "Couldn't find point in zone so nothing could be removed");
 					}
 				}
 			}
+        return false;
+    }
+    @Override
+	public boolean onBlockPlace(Player player, Block blockPlaced, Block blockClicked, Item itemInHand) {
+
+
+		ZoneType zone = World.getInstance().getRegion(blockPlaced.getX(),blockPlaced.getZ()).getActiveZone(blockPlaced.getX(),blockPlaced.getZ(),blockPlaced.getY());
+		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
+			player.getInventory().updateInventory();
+			player.sendMessage(Colors.Rose + "You cannot place blocks in '" + zone.getName() + "' !");
+			return true;
+		}else if(zone != null && (blockPlaced.getType() == 54 || blockPlaced.getType() == 61 || blockPlaced.getType() == 62 ) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)){
+			player.getInventory().updateInventory();
+			player.sendMessage(Colors.Rose + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
+			return true;
+		} else 
 			return false;
-		}
+		
+	}
+
+    @Override
+	public boolean onBlockBreak(Player player, Block block) {
+
+		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
+		if (zone != null && !zone.canModify(player, ZonesAccess.Rights.DESTROY)) {
+					player.sendMessage(Colors.Rose + "You cannot destroy blocks in '" + zone.getName() + "' !");
+				return true;	
+
+		}else if(zone != null && (block.getType() == 54 || block.getType() == 61 || block.getType() == 62 ) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)){
+
+			if(block.getStatus() == 0)
+				player.sendMessage(Colors.Rose + "You cannot destroy a chest/furnace in '" + zone.getName() + "' since you dont have modify rights!");
+
+			return true;
+		}else
+			return false;
+		
 
 	}
 
@@ -223,6 +227,11 @@ public class ZonesListener extends PluginListener {
 					else{
 						ZoneType zone = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						ZonesAccess z = new ZonesAccess(split[2]);
+
+						Player p = etc.getServer().matchPlayer(split[1]);
+						if(p != null)
+							split[1] = p.getName();
+
 						zone.addUser(split[1], split[2]);
 						
 						
@@ -257,7 +266,10 @@ public class ZonesListener extends PluginListener {
 						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
-						Player tmp = etc.getServer().matchPlayer(split[1]);
+						
+						Player p = etc.getServer().matchPlayer(split[1]);
+						if(p != null)
+							split[1] = p.getName();
 
 						zone.addAdmin(split[1]);
 
@@ -606,7 +618,7 @@ public class ZonesListener extends PluginListener {
 		commands.put("/zremoveadmin",new String[] {  
 			"1",
 			"[user name]",
-			"bleh"
+			"Removes [user name] as an admin from the zone."
 		});
 		
 		commands.put("/zselect",new String[] {  
@@ -619,13 +631,14 @@ public class ZonesListener extends PluginListener {
 		commands.put("/zsettype",new String[] {  
 			"1",
 			"Cuboid|NPoly - changes zone type.",
-			"bleh"
+			"changes the zone type to a square(cuboid) or polygon(NPoly)."
 		});
 		
 		commands.put("/zregion",new String[] { 
 			"1",
 			" returns region info.",
-			"bleh"
+			"Return the region x and y index and the amount of zones in \n"
+			+ " the region"
 		});
 		
 		commands.put("/zgetaccess",new String[] { 
@@ -682,22 +695,23 @@ public class ZonesListener extends PluginListener {
      *
      * @return true if you dont want the substance to flow.
      */
-    public boolean onFlow(Block blockFrom,Block blockTo) {
-		if(blockFrom.getType() == 8 && blockFrom.getType() == 9){
+	@Override
+    public boolean onFlow(Block blockFrom, Block blockTo) {
+		if(blockFrom.getType() == 8 || blockFrom.getType() == 9){
 
 			ZoneType fromZone = World.getInstance().getActiveZone(blockFrom.getX(), blockFrom.getZ(), blockFrom.getY());
 			ZoneType toZone = World.getInstance().getActiveZone(blockTo.getX(), blockTo.getZ(), blockTo.getY());
 
-			if(toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && toZone.allowWater(blockTo))
+			if(toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowWater(blockTo))
 				return true;
 		}
 
-		if(blockFrom.getType() == 10 && blockFrom.getType() == 11){
+		if(blockFrom.getType() == 10 || blockFrom.getType() == 11){
 
 			ZoneType fromZone = World.getInstance().getActiveZone(blockFrom.getX(), blockFrom.getZ(), blockFrom.getY());
 			ZoneType toZone = World.getInstance().getActiveZone(blockTo.getX(), blockTo.getZ(), blockTo.getY());
 
-			if(toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && toZone.allowLava(blockTo))
+			if(toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowLava(blockTo))
 				return true;
 		}
 		
