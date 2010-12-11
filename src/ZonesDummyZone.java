@@ -18,22 +18,23 @@ public class ZonesDummyZone {
 	public int				_minz, _maxz;
 	private String			_confirm;
 	protected static final Logger		log	= Logger.getLogger("Minecraft");
-	
+	public boolean allowHealth = false;
+
 	public ZonesDummyZone(String name) {
 		_name = name;
 		_type = 1;
 		_minz = 0;
-		_maxz = 127;
+		_maxz = 130;
 		_class = "ZoneNormal";
 		_coords = new ArrayList<int[]>();
 		_deleteBlocks = new ArrayList<int[]>();
 	}
 	
 	public void setZ(int min,int max){
-		if(min > 127)min = 127;
+		if(min > 130)min = 130;
 		if(min < 0)min = 0;
 		
-		if(max > 127)max = 127;
+		if(max > 130)max = 130;
 		if(max < 0)max = 0;
 		
 		if(min > max){
@@ -46,7 +47,13 @@ public class ZonesDummyZone {
 	}
 	public int getMax(){return _maxz; }
 	public int getMin(){return _minz; }
-	
+
+	public boolean healthAllowed() {
+		return allowHealth;
+	}
+	public void toggleHealth(){
+		allowHealth = !allowHealth;
+	}
 	public ArrayList<int[]> getCoords() { return _coords; }
 	public void addCoords(int[] c ) { _coords.add(c); }
 	public void removeCoords(int[] r ) { 
@@ -105,14 +112,14 @@ public class ZonesDummyZone {
 		int id = -1;
 		try {
 			conn = etc.getSQLConnection();
-			st = conn.prepareStatement("INSERT INTO zones (name,class,type,admins,users,minz,maxz,size) VALUES (?,?,?,'2,admin;2,serveradmin','2,default,e',?,?,?) ", Statement.RETURN_GENERATED_KEYS);
+			st = conn.prepareStatement("INSERT INTO zones (name,class,type,admins,users,minz,maxz,size,enablehealth) VALUES (?,?,?,'2,admin;2,serveradmin','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
 			st.setString(1, _name);
 			st.setString(2, _class);
 			st.setInt(3, _type);
 			st.setInt(4, _minz);
 			st.setInt(5, _maxz);
 			st.setInt(6, _coords.size());
-
+			st.setInt(7, allowHealth ? 1 : 0);
 			st.executeUpdate();
 
 			rs = st.getGeneratedKeys();
@@ -197,6 +204,7 @@ public class ZonesDummyZone {
 		temp.setParameter("admins", "2,admin;2,serveradmin");
 		temp.setParameter("users", "2,default,e");
 		temp.setParameter("name",_name);
+		temp.setParameter("health", allowHealth ? "1" : "0");
 		ZoneManager.getInstance().addZone(temp);
 		revertBlocks();
 		

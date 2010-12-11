@@ -30,7 +30,7 @@ public class ZoneManager {
 			PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM zones_vertices WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
 			ResultSet rset = st.executeQuery();
 
-			int id, type, size, minz, maxz, water, lava;
+			int id, type, size, minz, maxz, water, lava, health;
 			String zoneClass, admins, users, name;
 			ArrayList<int[]> points = new ArrayList<int[]>();
 
@@ -46,7 +46,7 @@ public class ZoneManager {
 				maxz = rset.getInt("maxz");
 				water = rset.getInt("allowwater");
 				lava = rset.getInt("allowlava");
-
+				health = rset.getInt("enablehealth");
 				Class<?> newZone;
 				try {
 					newZone = Class.forName(zoneClass);
@@ -107,6 +107,7 @@ public class ZoneManager {
 				temp.setParameter("admins", admins);
 				temp.setParameter("users", users);
 				temp.setParameter("name", name);
+				temp.setParameter("health", Integer.toString(health));
 				temp.setParameter("water", Integer.toString(water));
 				temp.setParameter("lava", Integer.toString(lava));
 				addZone(temp);

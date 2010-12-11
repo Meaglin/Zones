@@ -29,7 +29,8 @@ public abstract class ZoneType {
 	protected boolean allowLava = false;
 	protected boolean allowWater = false;
 	protected boolean allowDynamite = false;
-
+	protected boolean allowHealth = false;
+	
 	protected ZoneType(int id) {
 		_id = id;
 		_characterList = new HashMap<String, Player>();
@@ -131,6 +132,11 @@ public abstract class ZoneType {
 				allowLava = true;
 			else
 				allowLava = false;
+		} else if(name.equalsIgnoreCase("health")) {
+			if(value.equalsIgnoreCase("1"))
+				allowHealth = true;
+			else
+				allowHealth = false;
 		} else
 			log.info(getClass().getSimpleName() + ": Unknown parameter - " + name + " in zone: " + getId());
 	}
@@ -271,7 +277,8 @@ public abstract class ZoneType {
 	public abstract boolean allowWater(Block b);
 	public abstract boolean allowLava(Block b);
 	public abstract boolean allowDynamite(Block b);
-
+	public abstract boolean allowHealth();
+	
 	public HashMap<String, Player> getCharactersInside() {
 		return _characterList;
 	}
@@ -295,6 +302,14 @@ public abstract class ZoneType {
 
 		// Admins always have full access to the zone.
 		return canAdministrate(player);
+	}
+	public ZonesAccess getAccess(String group){
+		ZonesAccess  z = new ZonesAccess("-");
+		for (Entry<String,ZonesAccess> e : _groups.entrySet()){
+			if(e.getKey().equalsIgnoreCase(group))
+				z = z.merge(e.getValue());
+		}
+		return z;
 	}
 	public ZonesAccess getAccess(Player player){
 

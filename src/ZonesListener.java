@@ -234,8 +234,8 @@ public class ZonesListener extends PluginListener {
 
 						zone.addUser(split[1], split[2]);
 						
-						
-						fixChests(zone);
+						if(p != null)
+							fixChests(p,zone);
 						
 						player.sendMessage(Colors.Green + "Succesfully changed access of user " + split[1] + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
 					}
@@ -248,13 +248,17 @@ public class ZonesListener extends PluginListener {
 						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+						ZonesAccess oldAccess = zone.getAccess(split[1]);
 						zone.addGroup(split[1], split[2]);
-						ZonesAccess z = new ZonesAccess(split[2]);
+						ZonesAccess newAccess = new ZonesAccess(split[2]);
+
+						if((oldAccess.canModify() && !newAccess.canModify()) || (!oldAccess.canModify() && newAccess.canModify()))
+							fixChests(zone);
+
 
 						
-						fixChests(zone);
 
-						player.sendMessage(Colors.Green + "Succesfully changed access of group '" + split[1] + "' of zone '" + zone.getName() + "' to access " + z.textual() + ".");
+						player.sendMessage(Colors.Green + "Succesfully changed access of group '" + split[1] + "' of zone '" + zone.getName() + "' to access " + newAccess.textual() + ".");
 					}
 
 				} else {
@@ -268,12 +272,14 @@ public class ZonesListener extends PluginListener {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						
 						Player p = etc.getServer().matchPlayer(split[1]);
+
 						if(p != null)
 							split[1] = p.getName();
 
 						zone.addAdmin(split[1]);
 
-						fixChests(zone);
+						if(p != null)
+							fixChests(p,zone);
 
 						player.sendMessage(Colors.Green + "Succesfully added player " + split[1] + " as an admin of zone "  + zone.getName() +  " .");
 					}
@@ -437,6 +443,9 @@ public class ZonesListener extends PluginListener {
 					}else
 						player.sendMessage(Colors.Yellow + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
 
+				} else if (cmd.equalsIgnoreCase("/ztogglehealth")) {
+					dummy.toggleHealth();
+					player.sendMessage(Colors.Green + "Health is now " + (dummy.healthAllowed() ? "enabled" : "disabled") + ".");
 				}
 			}
 			return true;
@@ -492,20 +501,43 @@ public class ZonesListener extends PluginListener {
 		return false; 
 	}
 
-	private void fixChests(ZoneType zone) {
+	private void fixChests(Player p,ZoneType zone) {
 
 		ZoneForm form = zone.getZone();
 		Server serv = etc.getServer();
 		
 		for (int i = form.getLowX(); i <= form.getHighX(); i++)
+			for (int j = form.getLowY(); j <= form.getHighY(); j++){
+					int distance = (int) Math.sqrt(Math.pow(i - p.getX(), 2) + Math.pow(j-p.getZ(), 2));
+					if(distance > 100)
+						continue;
+
+					for (int k = form.getLowZ(); k <= form.getHighZ(); k++){
+						ComplexBlock c = serv.getComplexBlock(i, k, j);
+						if (c != null)
+							c.update();
+						
+					}
+
+				}
+
+
+	}
+	private void fixChests(ZoneType zone) {
+
+		ZoneForm form = zone.getZone();
+		Server serv = etc.getServer();
+
+		for (int i = form.getLowX(); i <= form.getHighX(); i++)
 			for (int j = form.getLowY(); j <= form.getHighY(); j++)
-				for (int k = form.getLowZ(); k <= form.getHighZ(); k++)
-					if (serv.getComplexBlock(i, k, j) != null){
-						serv.getComplexBlock(i, k, j).update();
+				for (int k = form.getLowZ(); k <= form.getHighZ(); k++){
+						ComplexBlock c = serv.getComplexBlock(i, k, j);
+						if (c != null)
+							c.update();
+
 					}
 
 	}
-
 	public static final Map<String, String[]> commands;
 	static {
 		commands = new LinkedHashMap<String,String[]>();
@@ -660,9 +692,14 @@ public class ZonesListener extends PluginListener {
 			"Changes your current selected zones name to [zone name] \n"
 			+ "(note: [zone name] is allowed to have spaces)."
 		});
+		commands.put("/ztogglehealth", new String[] {
+			"1",
+			".",
+			""
+		});
 		
 	}
-	    /*
+	/*
      * Called when a dynamite block or a creeper is triggerd.
      * block status depends on explosive compound:
      * 1 = dynamite.
@@ -672,13 +709,57 @@ public class ZonesListener extends PluginListener {
      *
      * @return true if you dont the block to explode.
      */
+	@Override
     public boolean onExplode(Block block) {
-
+		if(block.getStatus() == 2)
+			return true;
 
 		ZoneType zone = World.getInstance().getActiveZone(block.getX(), block.getZ(), block.getY());
 		if(zone != null && !zone.allowDynamite(block))
 			return true;
 		else
+			return false;
+    }
+
+	@Override
+	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker, BaseEntity defender, int amount) {
+
+		if(!defender.isPlayer())
+			return false;
+		
+		if(PluginLoader.DamageType.FALL == type)
+			return true;
+
+		ZoneType zone = World.getInstance().getActiveZone(defender.getX(),defender.getZ(),defender.getY());
+		if(zone != null && zone.allowHealth())
+			return false;
+		else
+			return true;
+    }
+
+	/**
+     * @param mob Mob attempting to spawn.
+     * @return true if you dont want mob to spawn.
+     */
+	@Override
+    public boolean onMobSpawn(Mob mob) {
+		ZoneType zone = World.getInstance().getActiveZone(mob.getX(),mob.getZ(),mob.getY());
+		if(zone != null && zone.allowHealth())
+			return false;
+		else
+			return true;
+    }
+
+	@Override
+	public boolean onItemUse(Player player, Block blockPlaced, Block blockClicked, Item item) {
+		if(item.getItemId() != 326 && item.getItemId() != 327)
+			return false;
+
+		ZoneType zone = World.getInstance().getRegion(blockPlaced.getX(),blockPlaced.getZ()).getActiveZone(blockPlaced.getX(),blockPlaced.getZ(),blockPlaced.getY());
+		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
+			player.sendMessage(Colors.Rose + "You cannot place blocks in '" + zone.getName() + "' !");
+			return true;
+		}else
 			return false;
     }
 

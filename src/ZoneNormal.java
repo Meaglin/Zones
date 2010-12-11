@@ -35,4 +35,9 @@ public class ZoneNormal extends ZoneType {
 		return allowDynamite;
 	}
 
+	@Override
+	public boolean allowHealth() {
+		return allowHealth;
+	}
+
 }
