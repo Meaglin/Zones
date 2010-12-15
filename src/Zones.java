@@ -3,7 +3,7 @@ import java.util.logging.Logger;
 
 public class Zones extends Plugin {
 
-	public static final int	_Rev	= 17;
+	public static final int	_Rev	= 19;
 	protected static final Logger		log	= Logger.getLogger("Minecraft");
 
 	@Override

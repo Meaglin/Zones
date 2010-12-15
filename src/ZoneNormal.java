@@ -22,22 +22,22 @@ public class ZoneNormal extends ZoneType {
 
 	@Override
 	public boolean allowWater(Block b) {
-		return allowWater;
+		return isWaterAllowed();
 	}
 
 	@Override
 	public boolean allowLava(Block b) {
-		return allowLava;
+		return isLavaAllowed();
 	}
 
 	@Override
 	public boolean allowDynamite(Block b) {
-		return allowDynamite;
+		return isDynamiteAllowed();
 	}
 
 	@Override
 	public boolean allowHealth() {
-		return allowHealth;
+		return isHealthAllowed();
 	}
 
 }

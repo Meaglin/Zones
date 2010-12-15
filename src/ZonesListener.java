@@ -342,6 +342,46 @@ public class ZonesListener extends PluginListener {
 					}
 
 				}
+			}else if (cmd.equalsIgnoreCase("/ztogglehealth") && player.canUseCommand("/zcreate")){
+				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
+					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+				else{
+					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					if(z.toggleHealth())
+						player.sendMessage(Colors.Green + "Health is now "+(z.isHealthAllowed() ? "enabled" : "disabled" )+".");
+					else
+						player.sendMessage(Colors.Rose + "Unable to change health flag, please contact a admin.");
+				}
+			}else if (cmd.equalsIgnoreCase("/ztoggledynamite") && player.canUseCommand("/zcreate")){
+				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
+					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+				else{
+					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					if(z.toggleDynamite())
+						player.sendMessage(Colors.Green + "Dynamite is now "+(z.isDynamiteAllowed() ? "enabled" : "disabled" )+".");
+					else
+						player.sendMessage(Colors.Rose + "Unable to change dynamite flag, please contact a admin.");
+				}
+			}else if (cmd.equalsIgnoreCase("/ztogglelava")){
+				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
+					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+				else{
+					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					if(z.toggleLava())
+						player.sendMessage(Colors.Green + "Lava is now "+(z.isLavaAllowed() ? "allowed" : "blocked" )+".");
+					else
+						player.sendMessage(Colors.Rose + "Unable to change lava flag, please contact a admin.");
+				}
+			}else if (cmd.equalsIgnoreCase("/ztogglewater")){
+				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
+					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+				else{
+					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					if(z.toggleWater())
+						player.sendMessage(Colors.Green + "Water is now "+(z.isWaterAllowed() ? "allowed" : "blocked" )+".");
+					else
+						player.sendMessage(Colors.Rose + "Unable to change water flag, please contact a admin.");
+				}
 			} else {
 
 				ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
@@ -443,10 +483,12 @@ public class ZonesListener extends PluginListener {
 					}else
 						player.sendMessage(Colors.Yellow + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
 
-				} else if (cmd.equalsIgnoreCase("/ztogglehealth")) {
-					dummy.toggleHealth();
-					player.sendMessage(Colors.Green + "Health is now " + (dummy.healthAllowed() ? "enabled" : "disabled") + ".");
 				}
+				// disabled until i think of a better name.
+//				else if (cmd.equalsIgnoreCase("/ztogglehealth")) {
+//					dummy.toggleHealth();
+//					player.sendMessage(Colors.Green + "Health is now " + (dummy.healthAllowed() ? "enabled" : "disabled") + ".");
+//				}
 			}
 			return true;
 		}
@@ -694,7 +736,22 @@ public class ZonesListener extends PluginListener {
 		});
 		commands.put("/ztogglehealth", new String[] {
 			"1",
-			".",
+			"Enables or disables health in the selected zone.",
+			""
+		});
+		commands.put("/ztoggledynamite", new String[] {
+			"1",
+			"Enables or disables dynamite in the selected zone.",
+			""
+		});
+		commands.put("/ztogglelava", new String[] {
+			"0",
+			"Prevents or allowes lava flow into the zone.",
+			""
+		});
+		commands.put("/ztogglewater", new String[] {
+			"0",
+			"Prevents or allowes water flow into the zone..",
 			""
 		});
 		
@@ -711,14 +768,12 @@ public class ZonesListener extends PluginListener {
      */
 	@Override
     public boolean onExplode(Block block) {
-		if(block.getStatus() == 2)
-			return true;
 
 		ZoneType zone = World.getInstance().getActiveZone(block.getX(), block.getZ(), block.getY());
-		if(zone != null && !zone.allowDynamite(block))
-			return true;
-		else
+		if(zone != null && zone.allowDynamite(block))
 			return false;
+		else
+			return true;
     }
 
 	@Override

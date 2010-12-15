@@ -17,7 +17,6 @@ public abstract class ZoneType {
 	private final int					_id;
 	protected List<ZoneForm>			_zone;
 	protected HashMap<String, Player>	_characterList;
-	protected HashMap<Integer, Integer>	_zones;
 
 	private String						_name;
 	private List<String>				_admingroups;
@@ -34,7 +33,6 @@ public abstract class ZoneType {
 	protected ZoneType(int id) {
 		_id = id;
 		_characterList = new HashMap<String, Player>();
-		_zones = new HashMap<Integer, Integer>();
 
 		_admingroups = new ArrayList<String>();
 		_adminusers = new ArrayList<String>();
@@ -137,6 +135,11 @@ public abstract class ZoneType {
 				allowHealth = true;
 			else
 				allowHealth = false;
+		} else if(name.equalsIgnoreCase("dynamite")) {
+			if(value.equalsIgnoreCase("1"))
+				allowDynamite = true;
+			else
+				allowDynamite = false;
 		} else
 			log.info(getClass().getSimpleName() + ": Unknown parameter - " + name + " in zone: " + getId());
 	}
@@ -586,6 +589,119 @@ public abstract class ZoneType {
 
 
 		return true;
-		//throw new UnsupportedOperationException("Not yet implemented");
 	}
+
+	public boolean toggleHealth() {
+		Connection conn = null;
+		PreparedStatement st = null;
+		int u = 0;
+		try {
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("UPDATE zones SET enablehealth = ? WHERE id = ?");
+			st.setInt(1, (!allowHealth) ? 1 : 0);
+			st.setInt(2, getId());
+			u = st.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+				st.close();
+			} catch (Exception e) {
+			}
+		}
+
+		if(u < 1)
+			return false;
+
+		allowHealth = !allowHealth;
+
+		return true;
+	}
+	public boolean toggleWater() {
+		Connection conn = null;
+		PreparedStatement st = null;
+		int u = 0;
+		try {
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("UPDATE zones SET allowwater = ? WHERE id = ?");
+			st.setInt(1, (!allowWater) ? 1 : 0);
+			st.setInt(2, getId());
+			u = st.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+				st.close();
+			} catch (Exception e) {
+			}
+		}
+
+		if(u < 1)
+			return false;
+
+		allowWater = !allowWater;
+
+		return true;
+	}
+	public boolean toggleLava() {
+		Connection conn = null;
+		PreparedStatement st = null;
+		int u = 0;
+		try {
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("UPDATE zones SET allowlava = ? WHERE id = ?");
+			st.setInt(1, (!allowLava) ? 1 : 0);
+			st.setInt(2, getId());
+			u = st.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+				st.close();
+			} catch (Exception e) {
+			}
+		}
+
+		if(u < 1)
+			return false;
+
+		allowLava = !allowLava;
+
+		return true;
+	}
+	public boolean toggleDynamite() {
+		Connection conn = null;
+		PreparedStatement st = null;
+		int u = 0;
+		try {
+			conn = etc.getSQLConnection();
+			st = conn.prepareStatement("UPDATE zones SET allowdynamite = ? WHERE id = ?");
+			st.setInt(1, (!allowDynamite) ? 1 : 0);
+			st.setInt(2, getId());
+			u = st.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+				st.close();
+			} catch (Exception e) {
+			}
+		}
+
+		if(u < 1)
+			return false;
+
+		allowDynamite = !allowDynamite;
+
+		return true;
+	}
+	public boolean isHealthAllowed()  { return allowHealth; }
+	public boolean isWaterAllowed()  { return allowWater; }
+	public boolean isLavaAllowed()  { return allowLava; }
+	public boolean isDynamiteAllowed()  { return allowDynamite; }
+
 }
