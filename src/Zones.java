@@ -3,7 +3,7 @@ import java.util.logging.Logger;
 
 public class Zones extends Plugin {
 
-	public static final int	_Rev	= 19;
+	public static final int	_Rev	= 20;
 	protected static final Logger		log	= Logger.getLogger("Minecraft");
 
 	@Override
@@ -28,6 +28,8 @@ public class Zones extends Plugin {
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, list, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_DESTROYED, list, this, PluginListener.Priority.MEDIUM);
 
+		etc.getLoader().addListener(PluginLoader.Hook.DISCONNECT, list, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.LOGIN, list, this, PluginListener.Priority.LOW);
 		etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, list, this, PluginListener.Priority.HIGH);
 		
 		log.info("Zones finished Loading.");

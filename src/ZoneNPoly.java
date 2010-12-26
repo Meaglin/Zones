@@ -9,12 +9,13 @@ public class ZoneNPoly extends ZoneForm {
 	private int[]	_y;
 	private int		_z1;
 	private int		_z2;
-
+	private int		_size;
 	public ZoneNPoly(int[] x, int[] y, int z1, int z2) {
 		_x = x;
 		_y = y;
 		_z1 = z1;
 		_z2 = z2;
+		calculateSize();
 	}
 
 	@Override
@@ -100,12 +101,16 @@ public class ZoneNPoly extends ZoneForm {
 	}
 
 	@Override
+	public int getSize() {
+		return _size;
+	}
+
 	/*
-	 * see Greens theorem 
+	 * see Greens theorem
 	 * http://en.wikipedia.org/wiki/Green%27s_theorem
 	 * http://stackoverflow.com/questions/451426/how-do-i-calculate-the-surface-area-of-a-2d-polygon
 	 */
-	public int getSize() {
+	private void calculateSize(){
 		int size = 0;
 		for (int i = 0, j = _x.length - 1; i < _x.length; j = i++) {
 			int x0 = _x[j];
@@ -114,9 +119,7 @@ public class ZoneNPoly extends ZoneForm {
 			int y1 = _y[i];
 			size += x0*y1 - x1*y0;
 		}
-		size = (int) Math.round(Math.abs(size) * 0.5) * (_z2 - _z1);
-		
-		return size;
+		_size = (int) Math.round(Math.abs(size) * 0.5) * (_z2 - _z1);
 	}
 
 	@Override
@@ -153,5 +156,11 @@ public class ZoneNPoly extends ZoneForm {
 			if(rt == 0 || y > rt)
 				rt = y;
 		return rt;
+	}
+	public int[] getX(){
+		return _x;
+	}
+	public int[] getY(){
+		return _y;
 	}
 }

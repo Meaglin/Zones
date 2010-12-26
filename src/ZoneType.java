@@ -335,7 +335,9 @@ public abstract class ZoneType {
 		return base;
 	}
 	public boolean canAdministrate(Player player) {
-
+		if (player.canUseCommand("/zcreate"))
+			return true;
+		
 		if (_adminusers.contains(player.getName().toLowerCase()))
 			return true;
 

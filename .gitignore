@@ -5,3 +5,8 @@
 /.classpath
 /.project
 /.settings
+/nbbuild
+/nbproject
+/build.xml
+/.gitignore
+/dist

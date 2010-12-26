@@ -10,15 +10,15 @@ import java.util.logging.Logger;
 
 public class ZonesDummyZone {
 
-	public String			_name;
+	private String			_name;
 	private String _class;
-	public int				_type;
-	public final ArrayList<int[]>	_coords;
-	public final ArrayList<int[]>	_deleteBlocks;
-	public int				_minz, _maxz;
+	private int				_type;
+	private final ArrayList<int[]>	_coords;
+	private final ArrayList<int[]>	_deleteBlocks;
+	private int				_minz, _maxz;
 	private String			_confirm;
 	protected static final Logger		log	= Logger.getLogger("Minecraft");
-	public boolean allowHealth = false;
+	private boolean allowHealth = false,edit = false;
 
 	public ZonesDummyZone(String name) {
 		_name = name;
@@ -79,6 +79,13 @@ public class ZonesDummyZone {
 			ZoneManager.getInstance().removeDummy(p.getName());
 			Delete();
 			p.sendMessage(Colors.Red + "Zone mode stopped, temp zone deleted.");
+		} else if (_confirm.equals("merge")) {
+			if(merge(ZoneManager.getInstance().getSelected(p.getName()))){
+				p.sendMessage(Colors.Green + "Zone merged.");
+				ZoneManager.getInstance().removeDummy(p.getName());
+			}
+			else
+				p.sendMessage(Colors.Red + "Error merging zone.");
 		}
 	}
 	
@@ -98,6 +105,10 @@ public class ZonesDummyZone {
 	
 	
 	private boolean Save(){
+		// you can only merge a zone which you are editting.
+		if(edit)
+			return false;
+
 		int[][] points = _coords.toArray(new int[_coords.size()][]);
 
 		Class<?> newZone = null;
@@ -271,5 +282,113 @@ public class ZonesDummyZone {
 		else{
 			log.info("Trying to set a invalid zone shape in dummyZone, type: " + string);
 		}
+	}
+
+	public void loadEdit(ZoneType z) {
+		edit = true;
+		ZoneForm form = z.getZone();
+		_minz = form.getLowZ();
+		_maxz = form.getLowZ();
+		if(form instanceof ZoneCuboid){
+			addCoords(new int[] { form.getLowX() , form.getLowY() });
+			addCoords(new int[] { form.getHighX() , form.getHighY() });
+			_type = 1;
+		}else if(form instanceof ZoneNPoly){
+			int[] x = ((ZoneNPoly) form).getX();
+			int[] y = ((ZoneNPoly) form).getY();
+			for(int i = 0;i < x.length;i++){
+				addCoords(new int[] { x[i] , y[i] });
+			}
+			_type = 2;
+		}else{
+			//wut?
+		}
+	}
+	public boolean merge(int id){
+		ZoneType z = ZoneManager.getInstance().getZone(id);
+		if(z == null)
+			return false;
+
+		int[][] points = _coords.toArray(new int[_coords.size()][]);
+
+		Connection conn = null;
+		PreparedStatement st = null;
+		try {
+				conn = etc.getSQLConnection();
+				st = conn.prepareStatement("DELETE FROM zones_vertices WHERE id = ?");
+				st.setInt(1, id);
+
+				st.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (st != null)	st.close();
+				if (conn != null)	conn.close();
+			} catch (SQLException ex) {}
+		}
+
+		for (int i = 0; i < points.length; i++) {
+			if (points[i] == null)
+				continue;
+			PreparedStatement st2 = null;
+			Connection conn2 = null;
+			try {
+				conn2 = etc.getSQLConnection();
+				st2 = conn2.prepareStatement("INSERT INTO zones_vertices (`id`,`order`,`x`,`y`) VALUES (?,?,?,?) ");
+				st2.setInt(1, id);
+				st2.setInt(2, i);
+				st2.setInt(3, points[i][0]);
+				st2.setInt(4, points[i][1]);
+
+				st2.execute();
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					if (st2 != null)	st2.close();
+					if (conn2 != null)	conn2.close();
+				} catch (SQLException ex) {}
+			}
+		}
+		int[][] coords = _coords.toArray(new int[_coords.size()][]);
+		switch (_type) {
+			case 1:
+				if (_coords.size() == 2) {
+					z.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], _minz, _maxz));
+				} else {
+					log.info("Missing zone vertex for cuboid zone id: " + id);
+					return false;
+				}
+				break;
+			case 2:
+				if (coords.length > 2) {
+					final int[] aX = new int[coords.length];
+					final int[] aY = new int[coords.length];
+					for (int i = 0; i < coords.length; i++) {
+						aX[i] = coords[i][0];
+						aY[i] = coords[i][1];
+					}
+					z.setZone(new ZoneNPoly(aX, aY, _minz, _maxz));
+				} else {
+					log.warning("Bad data for zone: " + id);
+					return false;
+				}
+				break;
+			default:
+				log.severe("Unknown zone form " + _type + " for id " + id);
+				break;
+		}
+
+		revertBlocks();
+
+		return true;
+	}
+	public int getType() {
+		return _type;
+	}
+
+	public void remove(int[] point) {
+		_coords.remove(point);
 	}
 }

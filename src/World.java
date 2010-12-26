@@ -95,7 +95,7 @@ public class World {
 			getRegion(ax,ay).revalidateZones(player);
 		}
 		//default revalidation.
-		getRegion(player).revalidateZones(player);
+		getRegion(bx,by).revalidateZones(player);
 		
 		
 	}

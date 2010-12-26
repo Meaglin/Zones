@@ -7,11 +7,13 @@ public class ZoneNormal extends ZoneType {
 	@Override
 	public void onEnter(Player character) {
 		ZoneType zone = World.getInstance().getActiveZone(character);
-		if(zone == null || zone.getZone().getSize() > this.getZone().getSize())
+		if(zone == null || zone.getZone().getSize() > getZone().getSize())
 			zone = this;
 
 		character.sendMessage("You have just entered " + getName() + "["+zone.getAccess(character).toColorCode()+"].");
-		
+		if(zone.allowHealth()){
+			character.sendMessage(Colors.Rose + "WARNING: you can die in this zone!");
+		}
 	}
 
 	@Override
