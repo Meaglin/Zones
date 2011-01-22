@@ -3,7 +3,7 @@ import java.util.logging.Logger;
 
 public class Zones extends Plugin {
 
-	public static final int	_Rev	= 20;
+	public static final int	_Rev	= 22;
 	protected static final Logger		log	= Logger.getLogger("Minecraft");
 
 	@Override
@@ -15,8 +15,7 @@ public class Zones extends Plugin {
 		ZoneManager.getInstance();
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_PLACE, list, this, PluginListener.Priority.HIGH);
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_BROKEN, list, this, PluginListener.Priority.HIGH);
-		etc.getLoader().addListener(PluginLoader.Hook.COMPLEX_BLOCK_CHANGE, list, this, PluginListener.Priority.HIGH);
-		etc.getLoader().addListener(PluginLoader.Hook.COMPLEX_BLOCK_SEND, list, this, PluginListener.Priority.HIGH);
+		etc.getLoader().addListener(PluginLoader.Hook.OPEN_INVENTORY, list, this, PluginListener.Priority.HIGH);
 		etc.getLoader().addListener(PluginLoader.Hook.TELEPORT, list, this, PluginListener.Priority.HIGH);
 		etc.getLoader().addListener(PluginLoader.Hook.FLOW, list, this, PluginListener.Priority.HIGH);
 		etc.getLoader().addListener(PluginLoader.Hook.EXPLODE, list, this, PluginListener.Priority.HIGH);

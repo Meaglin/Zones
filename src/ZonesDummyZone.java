@@ -227,8 +227,13 @@ public class ZonesDummyZone {
 	
 	private void revertBlocks() {
 
-			for (int[] block : _deleteBlocks)
+			for (int[] block : _deleteBlocks){
 				etc.getServer().setBlockAt(block[3], block[0], block[1], block[2]);
+
+				if(block[4] != 0)
+					etc.getServer().setBlockData(block[0], block[1], block[2], block[4]);
+
+			}
 
 			_deleteBlocks.clear();
 		
@@ -236,7 +241,7 @@ public class ZonesDummyZone {
 
 	public void addDeleteBlock(Block block) {
 
-			_deleteBlocks.add(new int[] { block.getX(), block.getY(), block.getZ(),block.getType() });
+			_deleteBlocks.add(new int[] { block.getX(), block.getY(), block.getZ(),block.getType(),block.getData() });
 		
 	}
 	public boolean containsDeleteBlock(Block block){

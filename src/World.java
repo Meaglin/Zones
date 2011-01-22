@@ -101,6 +101,7 @@ public class World {
 	}
 
 	public static int toInt(double b){
-		return (int) Math.floor(b);
+		int r = (int) b;
+		return b < r ? r - 1 : r;
 	}
 }

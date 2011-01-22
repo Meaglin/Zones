@@ -1,15 +1,9 @@
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 
 public class ZonesListener extends PluginListener {
 
-	public static final int _pilonHeight = 3;
+	public static final int _pilonHeight = 4;
 	//bedrock
-	public static final int _pilonType = 7;
+	public static final int _pilonType = 80;
 	//stick
 	public static final int _toolType = 280;
 
@@ -73,11 +67,11 @@ public class ZonesListener extends PluginListener {
 
 		ZoneType zone = World.getInstance().getRegion(blockPlaced.getX(),blockPlaced.getZ()).getActiveZone(blockPlaced.getX(),blockPlaced.getZ(),blockPlaced.getY());
 		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
-			player.getInventory().updateInventory();
+			player.getInventory().update();
 			player.sendMessage(Colors.Rose + "You cannot place blocks in '" + zone.getName() + "' !");
 			return true;
 		}else if(zone != null && (blockPlaced.getType() == 54 || blockPlaced.getType() == 61 || blockPlaced.getType() == 62 ) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)){
-			player.getInventory().updateInventory();
+			player.getInventory().update();
 			player.sendMessage(Colors.Rose + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
 			return true;
 		} else if(player.canUseCommand("/build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.BUILD)))
@@ -105,45 +99,70 @@ public class ZonesListener extends PluginListener {
 		} else if(player.canUseCommand("/build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.DESTROY)))
 			return false;
 		else{
-			player.sendMessage(Colors.Rose + "You cannot build in the world.");
+			player.sendMessage(Colors.Rose + "You cannot destroy in the world.");
 			return true;
 		}
 		
 
 	}
 
-    @Override
-	public boolean onComplexBlockChange(Player player, ComplexBlock block) {
-
-		//Logger.getLogger("Minecraft").info("C modf " + block.getX() + "," + block.getY() + "," + block.getZ() +  "   " + player.getX() + "," + player.getY() + "," + player.getZ() +  "  ");
+	@Override
+	public boolean onOpenInventory(Player player, Inventory inventory) {
+		if(!(inventory instanceof ComplexBlock))
+			return false;
+		ComplexBlock block = (ComplexBlock)inventory;
 		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
 		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.MODIFY)) {
-			player.sendMessage(Colors.Rose + "You cannot change chests or furnaces in '" + zone.getName() + "' !");
+			if(inventory instanceof Chest || inventory instanceof DoubleChest)
+				player.sendMessage(Colors.Rose + "You cannot change chests in '" + zone.getName() + "' !");
+			else if(inventory instanceof Furnace)
+				player.sendMessage(Colors.Rose + "You cannot change furnaces in '" + zone.getName() + "' !");
+
 			return true;
 		} else if(player.canUseCommand("/build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.MODIFY)))
 			return false;
 		else{
-			player.sendMessage(Colors.Rose + "You cannot modify chests or furnaces in the world.");
+			
+			if(inventory instanceof Chest || inventory instanceof DoubleChest)
+				player.sendMessage(Colors.Rose + "You cannot change chests in the world !");
+			else if(inventory instanceof Furnace)
+				player.sendMessage(Colors.Rose + "You cannot change furnaces in the world !");
 			return true;
 		}
-	}
+    }
 
-    @Override
-	public boolean onSendComplexBlock(Player player, ComplexBlock block) {
-		if (block instanceof Sign)
-			return false;
-		//Logger.getLogger("Minecraft").info("C send " + block.getX() + "," + block.getY() + "," + block.getZ() +  "   " + player.getX() + "," + player.getY() + "," + player.getZ() +  "  ");
-		//you don't need a message here ;).
-		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
-		if(zone != null && !zone.canModify(player, ZonesAccess.Rights.MODIFY))
-			return true;
-		else if(player.canUseCommand("/build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.MODIFY)))
-			return false;
-		else
-			return true;
-		
-		
-	}
+//    @Override
+//	public boolean onComplexBlockChange(Player player, ComplexBlock block) {
+//
+//		//Logger.getLogger("Minecraft").info("C modf " + block.getX() + "," + block.getY() + "," + block.getZ() +  "   " + player.getX() + "," + player.getY() + "," + player.getZ() +  "  ");
+//		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
+//		if (zone != null &&  !zone.canModify(player, ZonesAccess.Rights.MODIFY)) {
+//			player.sendMessage(Colors.Rose + "You cannot change chests or furnaces in '" + zone.getName() + "' !");
+//			return true;
+//		} else if(player.canUseCommand("/build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.MODIFY)))
+//			return false;
+//		else{
+//			player.sendMessage(Colors.Rose + "You cannot modify chests or furnaces in the world.");
+//			return true;
+//		}
+//	}
+//
+//    @Override
+//	public boolean onSendComplexBlock(Player player, ComplexBlock block) {
+//		if (block instanceof Sign)
+//			return false;
+//		//Logger.getLogger("Minecraft").info("C send " + block.getX() + "," + block.getY() + "," + block.getZ() +  "   " + player.getX() + "," + player.getY() + "," + player.getZ() +  "  ");
+//		//you don't need a message here ;).
+//		ZoneType zone = World.getInstance().getRegion(block.getX(),block.getZ()).getActiveZone(block.getX(),block.getZ(),block.getY());
+//		if(zone != null && !zone.canModify(player, ZonesAccess.Rights.MODIFY))
+//			return true;
+//		else if(player.canUseCommand("/build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.MODIFY)))
+//			return false;
+//		else
+//			return true;
+//
+//
+//	}
 
 	@Override
 	public boolean onItemUse(Player player, Block blockPlaced, Block blockClicked, Item item) {
@@ -298,17 +317,16 @@ public class ZonesListener extends PluginListener {
 
 	@Override
 	public boolean onVehicleDamage(BaseVehicle vehicle, BaseEntity attacker, int damage) {
-//		if(!attacker.isPlayer())
-//			return false;
-//
-//        ZoneType z = World.getInstance().getActiveZone(vehicle.getX(), vehicle.getZ(), vehicle.getY());
-//		if(z != null && !z.canModify(attacker.getPlayer(), ZonesAccess.Rights.DESTROY)){
-//			attacker.getPlayer().sendMessage("You cannot destroy vehicles in '" + z.getName() + "'!");
-//			return true;
-//		}else{
-//			return false;
-//		}
-		return false;
+		if(!attacker.isPlayer())
+			return false;
+
+        ZoneType z = World.getInstance().getActiveZone(vehicle.getX(), vehicle.getZ(), vehicle.getY());
+		if(z != null && !z.canModify(attacker.getPlayer(), ZonesAccess.Rights.DESTROY)){
+			attacker.getPlayer().sendMessage("You cannot destroy vehicles in '" + z.getName() + "'!");
+			return true;
+		}else{
+			return false;
+		}
     }
 	    /**
      * Called during the later login process

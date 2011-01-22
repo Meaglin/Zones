@@ -274,6 +274,7 @@ public class ZonesCommandsHandler {
 					ZonesDummyZone dummy = new ZonesDummyZone(z.getName());
 					dummy.loadEdit(z);
 					ZoneManager.getInstance().addDummy(player.getName(), dummy);
+					player.sendMessage(Colors.Green + " Loaded zone " + z.getName() + " into a dummy zone.");
 				}
 			} else {
 
@@ -326,7 +327,7 @@ public class ZonesCommandsHandler {
 						player.sendMessage(Colors.Green + "Max z is now : " + dummy.getMax());
 					}
 				} else if (cmd.equalsIgnoreCase("/zsetdepth")) {
-					if (split.length < 2 || Integer.parseInt(split[1]) < 1) {
+					if (split.length < 2 || Integer.parseInt(split[1]) < 0) {
 						player.sendMessage(Colors.Yellow + "Usage: /zsetdepth [depth]");
 					} else {
 						dummy.setZ(World.toInt(player.getY()) - Integer.parseInt(split[1]),dummy.getMax());
@@ -455,7 +456,7 @@ public class ZonesCommandsHandler {
 		commands.put("/zsave",new String[] {
 			"1",
 			"- saves the temp zone after confirmation.",
-			"Initiates saving of the zone you were creating \n you will need to confirm this with \n /zconfirm to make it actually save the zone."
+			"Initiates saving of the zone you were creating \n you will need to confirm this with \n /zconfirm to make it actually save the zone. \n THIS CANNOT BE USED WHEN EDITTING A ZONE USE /zmerge!!!! "
 		});
 
 		commands.put("/zconfirm",new String[] {
@@ -584,12 +585,13 @@ public class ZonesCommandsHandler {
 			"1",
 			"see extended help.",
 			"loads the current selected zone into a dummy \n"
-					+ "zone so it can be editted and merged with a zone."
+			+ "zone so it can be editted and merged with a zone.\n"
+			+ "Edited zones CAN'T be saved as new zones but have to be MERGED!"
 		});
 		commands.put("/zmerge", new String[] {
 			"1",
 			"merges the dummy zone points/form with the selected zone.",
-			"Replaces the selectes zones \"form\" with the dummy zones \"form\" ."
+			"Changes the 'area'/'form' of the zone you selected \n with your current dummy zone 'area'/'form'."
 		});
 		
 	}

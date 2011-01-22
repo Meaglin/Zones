@@ -387,8 +387,6 @@ public abstract class ZoneType {
 
 		if (_users.containsKey(user)){
 			_users.remove(user);
-			if(a.canNothing())
-				return;
 		}
 		
 		if(!a.canNothing())
@@ -402,9 +400,6 @@ public abstract class ZoneType {
 
 		if (_groups.containsKey(group)){
 			_groups.remove(group);
-			
-			if(a.canNothing())
-				return;
 		}
 
 		if(etc.getDataSource().getGroup(group) == null){
