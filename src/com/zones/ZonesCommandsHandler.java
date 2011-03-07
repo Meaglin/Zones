@@ -1,9 +1,15 @@
+package com.zones;
+
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 
 /**
@@ -12,14 +18,16 @@ import java.util.Map.Entry;
  */
 public class ZonesCommandsHandler {
 
-	private static final int ITEMS_PER_PAGE = 7;
-	public static boolean onCommand(Player player,String[] split){
+
+    private static final int ITEMS_PER_PAGE = 7;
+    
+	public static boolean onCommand(Zones plugin,Player player,String[] split){
 		String cmd = split[0].toLowerCase();
 
 		if (getCommands().containsKey(cmd)) {
 			if (cmd.equalsIgnoreCase("/zcreate") && player.canUseCommand(cmd)) {
 				if (split.length < 2) {
-					player.sendMessage(Colors.Yellow + "Usage: /zcreate [zone name]");
+					player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zcreate [zone name]");
 				} else {
 					String name = "";
 					for (int i = 1; i < split.length; i++)
@@ -28,15 +36,15 @@ public class ZonesCommandsHandler {
 					name = name.substring(1);
 					if(name.length() < 4)
 					{
-						player.sendMessage(Colors.Rose + "Too short zone name.");
+						player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
 						return true;
 					}
-					ZoneManager.getInstance().addDummy(player.getName(), new ZonesDummyZone(name));
+					ZoneManager.getInstance().addDummy(player.getName(), new ZonesDummyZone(plugin,player.getWorld(),name));
 					player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
 					//					ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
 					player.sendMessage("You can start adding the zone points of this zone by             " +
-						    Colors.Rose + " hitting blocks with a stick(280)" +
-							Colors.White + " or using " + Colors.Rose + " /zadd");
+						    ChatColor.RED.toString() + " hitting blocks with a stick(280)" +
+							ChatColor.WHITE.toString() + " or using " + ChatColor.RED.toString() + " /zadd");
 				}
 			} else if (cmd.equalsIgnoreCase("/zhelp")) {
 				List<String> availableCommands = new ArrayList<String>();
@@ -55,7 +63,7 @@ public class ZonesCommandsHandler {
 						if(getCommands().containsKey("/" + split[1].toLowerCase()) && (getCommands().get("/" + split[1].toLowerCase())[0].equals("0") || player.canUseCommand("/zcreate")))
 							isCommand = true;
 						else
-							player.sendMessage(Colors.Rose + "Not a valid page number.");
+							player.sendMessage(ChatColor.RED.toString() + "Not a valid page number.");
 					}
 					if (amount > 1)
 						amount = (amount - 1) * ITEMS_PER_PAGE;
@@ -66,38 +74,38 @@ public class ZonesCommandsHandler {
 					String[] info = getCommands().get("/" + split[1].toLowerCase())[2].split("\n");
 					String command = "/" + split[1].toLowerCase();
 
-					player.sendMessage(Colors.Blue + "Description of " + command + " :");
+					player.sendMessage(ChatColor.BLUE.toString() + "Description of " + command + " :");
 					for(String part : info)
-						player.sendMessage(Colors.LightBlue + part);
+						player.sendMessage(ChatColor.AQUA.toString() + part);
 
 					return true;
 				}
 
-				player.sendMessage(Colors.Blue + "Available commands (Page " + (split.length == 2 ? split[1] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") [] = required <> = optional:");
-				player.sendMessage(Colors.Blue + "For more info: /zhelp <command name>");
+				player.sendMessage(ChatColor.BLUE.toString() + "Available commands (Page " + (split.length == 2 ? split[1] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") [] = required <> = optional:");
+				player.sendMessage(ChatColor.BLUE.toString() + "For more info: /zhelp <command name>");
 				for (int i = amount; i < amount + ITEMS_PER_PAGE; i++)
 					if (availableCommands.size() > i)
-						player.sendMessage(Colors.Rose + availableCommands.get(i));
+						player.sendMessage(ChatColor.RED.toString() + availableCommands.get(i));
 			} else if (cmd.equalsIgnoreCase("/zselect")) {
 				if(split.length == 2){
 					ZoneType zone = ZoneManager.getInstance().getZone(Integer.parseInt(split[1]));
 					if (zone == null)
-						player.sendMessage(Colors.Yellow + "No zone found with id : " + Integer.parseInt(split[1]));
+						player.sendMessage(ChatColor.YELLOW.toString() + "No zone found with id : " + Integer.parseInt(split[1]));
 					else if (!zone.canAdministrate(player))
-						player.sendMessage(Colors.Rose + "You don't have rights to administrate this zone.");
+						player.sendMessage(ChatColor.RED.toString() + "You don't have rights to administrate this zone.");
 					else {
 						ZoneManager.getInstance().setSelected(player.getName(), zone.getId());
-						player.sendMessage(Colors.Green + "Selected zone '" + zone.getName() + "' .");
+						player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zone.getName() + "' .");
 					}
 				}else{
 					ArrayList<ZoneType> zones = World.getInstance().getAdminZones(player);
 					if(zones.size() < 1)
-						player.sendMessage(Colors.Yellow + "No zones found in your current area(which you can modify).");
+						player.sendMessage(ChatColor.YELLOW.toString() + "No zones found in your current area(which you can modify).");
 					else if(zones.size() == 1){
 						ZoneManager.getInstance().setSelected(player.getName(), zones.get(0).getId());
-						player.sendMessage(Colors.Green + "Selected zone '" + zones.get(0).getName() + "' .");
+						player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zones.get(0).getName() + "' .");
 					} else {
-						player.sendMessage(Colors.Yellow +  "Too much zones found, please specify a zone id.(/zselect <id>)");
+						player.sendMessage(ChatColor.YELLOW.toString() +  "Too much zones found, please specify a zone id.(/zselect <id>)");
 						String temp = "";
 						for (ZoneType zone : zones)
 							temp += zone.getName() + "[" + zone.getId() + "]";
@@ -107,84 +115,74 @@ public class ZonesCommandsHandler {
 			} else if (cmd.equalsIgnoreCase("/zsetuser")) {
 				if (split.length == 3) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else{
 						ZoneType zone = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						ZonesAccess z = new ZonesAccess(split[2]);
 
-						Player p = etc.getServer().matchPlayer(split[1]);
+						Player p = plugin.getServer().getPlayer(split[1]);
+
 						if(p != null)
 							split[1] = p.getName();
 
 						zone.addUser(split[1], split[2]);
 
-						if(p != null)
-							fixChests(p,zone);
+						
 
-						player.sendMessage(Colors.Green + "Succesfully changed access of user " + split[1] + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
+						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed access of user " + split[1] + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
 					}
 				} else {
-					player.sendMessage(Colors.Yellow + "Usage: /zsetuser [user name] b|d|m|e|*|- (combination of these) ");
+					player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetuser [user name] b|d|m|e|*|- (combination of these) ");
 				}
 			} else if (cmd.equalsIgnoreCase("/zsetgroup")) {
 				if (split.length == 3) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
-						ZonesAccess oldAccess = zone.getAccess(split[1]);
 						zone.addGroup(split[1], split[2]);
 						ZonesAccess newAccess = new ZonesAccess(split[2]);
 
-						if((oldAccess.canModify() && !newAccess.canModify()) || (!oldAccess.canModify() && newAccess.canModify()))
-							fixChests(zone);
-
-
-
-
-						player.sendMessage(Colors.Green + "Succesfully changed access of group '" + split[1] + "' of zone '" + zone.getName() + "' to access " + newAccess.textual() + ".");
+						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed access of group '" + split[1] + "' of zone '" + zone.getName() + "' to access " + newAccess.textual() + ".");
 					}
 
 				} else {
-					player.sendMessage(Colors.Yellow + "Usage: /zsetgroup [group name] b|d|m|e|*|- (combination of these)");
+					player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetgroup [group name] b|d|m|e|*|- (combination of these)");
 				}
 			} else if (cmd.equalsIgnoreCase("/zaddadmin")) {
 				if (split.length == 2) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 
-						Player p = etc.getServer().matchPlayer(split[1]);
+						Player p = plugin.getServer().getPlayer(split[1]);
 
 						if(p != null)
 							split[1] = p.getName();
 
 						zone.addAdmin(split[1]);
 
-						if(p != null)
-							fixChests(p,zone);
-
-						player.sendMessage(Colors.Green + "Succesfully added player " + split[1] + " as an admin of zone "  + zone.getName() +  " .");
+						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully added player " + split[1] + " as an admin of zone "  + zone.getName() +  " .");
 					}
 				} else {
-					player.sendMessage(Colors.Yellow + "Usage: /zaddadmim [user name]");
+					player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zaddadmim [user name]");
 				}
 			}else if (cmd.equalsIgnoreCase("/zremoveadmin")) {
 				if (split.length == 2) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						zone.removeAdmin(split[1]);
-						player.sendMessage(Colors.Green + "Succesfully removed player " + split[1] + " as an admin of zone "  + zone.getName() +  " .");
+						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully removed player " + split[1] + " as an admin of zone "  + zone.getName() +  " .");
 					}
 				} else {
-					player.sendMessage(Colors.Yellow + "Usage: /zaddadmim [user name]");
+					player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zaddadmim [user name]");
 				}
 			} else if (cmd.equalsIgnoreCase("/zgetaccess")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName())).sendAccess(player);
 				}
@@ -193,20 +191,20 @@ public class ZonesCommandsHandler {
 				player.sendMessage("Region[" + r.getX() + "," + r.getY() + "] Zone count: " + r.getZones().size() + ".");
 			}else if(cmd.equalsIgnoreCase("/zdelete") && player.canUseCommand("/zcreate")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneType toDelete = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(ZoneManager.getInstance().delete(toDelete))
-						player.sendMessage(Colors.Green + "Succesfully deleted zone " + toDelete.getName() + ".");
+						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully deleted zone " + toDelete.getName() + ".");
 					else
-						player.sendMessage(Colors.Rose + "Problems while deleting zone, please contact admin.");
+						player.sendMessage(ChatColor.RED.toString() + "Problems while deleting zone, please contact admin.");
 				}
 			}else if (cmd.equalsIgnoreCase("/zsetname")){
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					if(split.length < 2)
-						player.sendMessage(Colors.Yellow + "Usage: /zsetname [zone name]");
+						player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetname [zone name]");
 					else {
 						String name = "";
 						for (int i = 1; i < split.length; i++)
@@ -215,73 +213,73 @@ public class ZonesCommandsHandler {
 						name = name.substring(1);
 
 						if(name.length() < 4)
-							player.sendMessage(Colors.Rose + "Too short zone name.");
+							player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
 						else if(name.length() > 40)
-							player.sendMessage(Colors.Rose + "Too long zone name.");
+							player.sendMessage(ChatColor.RED.toString() + "Too long zone name.");
 						else if(ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName())).setName(name))
-							player.sendMessage(Colors.Green + "Succesfully changed zone name to " + name + ".");
+							player.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed zone name to " + name + ".");
 						else
-							player.sendMessage(Colors.Rose + "Unable to change zone name, please contact a admin.");
+							player.sendMessage(ChatColor.RED.toString() + "Unable to change zone name, please contact a admin.");
 
 					}
 
 				}
 			}else if (cmd.equalsIgnoreCase("/ztogglehealth") && player.canUseCommand("/zcreate")){
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(z.toggleHealth())
-						player.sendMessage(Colors.Green + "Health is now "+(z.isHealthAllowed() ? "enabled" : "disabled" )+".");
+						player.sendMessage(ChatColor.GREEN.toString() + "Health is now "+(z.isHealthAllowed() ? "enabled" : "disabled" )+".");
 					else
-						player.sendMessage(Colors.Rose + "Unable to change health flag, please contact a admin.");
+						player.sendMessage(ChatColor.RED.toString() + "Unable to change health flag, please contact a admin.");
 				}
 			}else if (cmd.equalsIgnoreCase("/ztoggledynamite") && player.canUseCommand("/zcreate")){
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(z.toggleDynamite())
-						player.sendMessage(Colors.Green + "Dynamite is now "+(z.isDynamiteAllowed() ? "enabled" : "disabled" )+".");
+						player.sendMessage(ChatColor.GREEN.toString() + "Dynamite is now "+(z.isDynamiteAllowed() ? "enabled" : "disabled" )+".");
 					else
-						player.sendMessage(Colors.Rose + "Unable to change dynamite flag, please contact a admin.");
+						player.sendMessage(ChatColor.RED.toString() + "Unable to change dynamite flag, please contact a admin.");
 				}
 			}else if (cmd.equalsIgnoreCase("/ztogglelava")){
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(z.toggleLava())
-						player.sendMessage(Colors.Green + "Lava is now "+(z.isLavaAllowed() ? "allowed" : "blocked" )+".");
+						player.sendMessage(ChatColor.GREEN.toString() + "Lava is now "+(z.isLavaAllowed() ? "allowed" : "blocked" )+".");
 					else
-						player.sendMessage(Colors.Rose + "Unable to change lava flag, please contact a admin.");
+						player.sendMessage(ChatColor.RED.toString() + "Unable to change lava flag, please contact a admin.");
 				}
 			} else if (cmd.equalsIgnoreCase("/ztogglewater")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(z.toggleWater())
-						player.sendMessage(Colors.Green + "Water is now "+(z.isWaterAllowed() ? "allowed" : "blocked" )+".");
+						player.sendMessage(ChatColor.GREEN.toString() + "Water is now "+(z.isWaterAllowed() ? "allowed" : "blocked" )+".");
 					else
-						player.sendMessage(Colors.Rose + "Unable to change water flag, please contact a admin.");
+						player.sendMessage(ChatColor.RED.toString() + "Unable to change water flag, please contact a admin.");
 				}
 			} else if (cmd.equalsIgnoreCase("/zedit") && player.canUseCommand("/zcreate")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-					player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
-					ZonesDummyZone dummy = new ZonesDummyZone(z.getName());
+					ZonesDummyZone dummy = new ZonesDummyZone(plugin,player.getWorld(),z.getName());
 					dummy.loadEdit(z);
 					ZoneManager.getInstance().addDummy(player.getName(), dummy);
-					player.sendMessage(Colors.Green + " Loaded zone " + z.getName() + " into a dummy zone.");
+					player.sendMessage(ChatColor.GREEN.toString() + " Loaded zone " + z.getName() + " into a dummy zone.");
 				}
 			} else {
 
 				ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy == null) {
-					player.sendMessage(Colors.Rose + "First create a zone with:");
-					player.sendMessage(Colors.Rose + "/zcreate [zone name]");
+					player.sendMessage(ChatColor.RED.toString() + "First create a zone with:");
+					player.sendMessage(ChatColor.RED.toString() + "/zcreate [zone name]");
 					return true;
 				}
 				//revert confirms after a different command is used.
@@ -290,74 +288,74 @@ public class ZonesCommandsHandler {
 
 				if (cmd.equalsIgnoreCase("/zadd")) {
 					if (dummy.getType() == 1 && dummy.getCoords().size() == 2) {
-						player.sendMessage(Colors.Rose + "You can only use 2 points to define a cuboid zone.");
+						player.sendMessage(ChatColor.RED.toString() + "You can only use 2 points to define a cuboid zone.");
 						return true;
 					}
 					int[] p = new int[2];
-					p[0] = World.toInt(player.getX());
-					p[1] = World.toInt(player.getZ());
+					p[0] = World.toInt(player.getLocation().getX());
+					p[1] = World.toInt(player.getLocation().getZ());
 					for (int[] point : dummy.getCoords()) {
 						if (p[0] == point[0] && p[1] == point[1]) {
-							player.sendMessage(Colors.Yellow + "Already added this point.");
+							player.sendMessage(ChatColor.YELLOW.toString() + "Already added this point.");
 							return true;
 						}
 					}
-					player.sendMessage(Colors.Green + "Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
+					player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
 					dummy.addCoords(p);
 				} else if (cmd.equalsIgnoreCase("/zremove")) {
 					int[] p = new int[2];
-					p[0] = World.toInt(player.getX());
-					p[1] = World.toInt(player.getZ());
+					p[0] = World.toInt(player.getLocation().getX());
+					p[1] = World.toInt(player.getLocation().getZ());
 					for (int[] point : dummy.getCoords()) {
 						if (p[0] == point[0] && p[1] == point[1]) {
 							dummy.remove(point);
-							player.sendMessage(Colors.Green + "Removed point[" + p[0] + "," + p[1] + "]  from temp zone.");
+							player.sendMessage(ChatColor.GREEN.toString() + "Removed point[" + p[0] + "," + p[1] + "]  from temp zone.");
 							return true;
 						}
 					}
-					player.sendMessage(Colors.Rose + "Couldn't find point in zone so nothing could be removed");
+					player.sendMessage(ChatColor.RED.toString() + "Couldn't find point in zone so nothing could be removed");
 				} else if (cmd.equalsIgnoreCase("/zsetplot")) {
 					dummy.makePlot(player);
 				} else if (cmd.equalsIgnoreCase("/zsetheight")) {
 					if (split.length < 2 || Integer.parseInt(split[1]) < 1) {
-						player.sendMessage(Colors.Yellow + "Usage: /zsetheight [height]");
+						player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetheight [height]");
 					} else {
-						dummy.setZ(dummy.getMin(),World.toInt(player.getY()) + Integer.parseInt(split[1]) - 1);
+						dummy.setZ(dummy.getMin(),World.toInt(player.getLocation().getY()) + Integer.parseInt(split[1]) - 1);
 
-						player.sendMessage(Colors.Green + "Max z is now : " + dummy.getMax());
+						player.sendMessage(ChatColor.GREEN.toString() + "Max z is now : " + dummy.getMax());
 					}
 				} else if (cmd.equalsIgnoreCase("/zsetdepth")) {
 					if (split.length < 2 || Integer.parseInt(split[1]) < 0) {
-						player.sendMessage(Colors.Yellow + "Usage: /zsetdepth [depth]");
+						player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetdepth [depth]");
 					} else {
-						dummy.setZ(World.toInt(player.getY()) - Integer.parseInt(split[1]),dummy.getMax());
+						dummy.setZ(World.toInt(player.getLocation().getY()) - Integer.parseInt(split[1]),dummy.getMax());
 
-						player.sendMessage(Colors.Green + "Min z is now : " + dummy.getMin());
+						player.sendMessage(ChatColor.GREEN.toString() + "Min z is now : " + dummy.getMin());
 					}
 				} else if (cmd.equalsIgnoreCase("/zsetz")) {
 					if (split.length < 3 || Integer.parseInt(split[1]) < 0 || Integer.parseInt(split[1]) > 127 || Integer.parseInt(split[2]) < 0 || Integer.parseInt(split[2]) > 127) {
-						player.sendMessage(Colors.Yellow + "Usage: /zsetz [min Z] [max Z]");
+						player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetz [min Z] [max Z]");
 					} else {
 						dummy.setZ(Integer.parseInt(split[1]),Integer.parseInt(split[2]) );
-						player.sendMessage(Colors.Green + "Min z and Max z now changed to : " + dummy.getMin() + " and " + dummy.getMax());
+						player.sendMessage(ChatColor.GREEN.toString() + "Min z and Max z now changed to : " + dummy.getMin() + " and " + dummy.getMax());
 					}
 				} else if (cmd.equalsIgnoreCase("/zsave")) {
 					if (dummy.getType() == 1 && dummy.getCoords().size() != 2) {
-						player.sendMessage(Colors.Rose + "Not enough coordinates set for this zone type, you need 2.");
+						player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need 2.");
 						return true;
 					}else if(dummy.getType() == 2 && dummy.getCoords().size() < 3){
-						player.sendMessage(Colors.Rose + "Not enough coordinates set for this zone type, you need atleast 3.");
+						player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need atleast 3.");
 						return true;
 					}
 					if (dummy.getMax() == 130 && dummy.getMin() == 0)
-						player.sendMessage(Colors.Rose + "WARNING: default z values not changed!");
+						player.sendMessage(ChatColor.RED.toString() + "WARNING: default z values not changed!");
 
-					player.sendMessage(Colors.Yellow + "If you are sure you want to save this zone do /zconfirm");
+					player.sendMessage(ChatColor.YELLOW.toString() + "If you are sure you want to save this zone do /zconfirm");
 
 					dummy.setConfirm("save");
 				} else if (cmd.equalsIgnoreCase("/zstop")) {
 
-					player.sendMessage(Colors.Yellow + "Delete the zone? If yes do /zconfirm");
+					player.sendMessage(ChatColor.YELLOW.toString() + "Delete the zone? If yes do /zconfirm");
 					dummy.setConfirm("stop");
 
 				} else if (cmd.equalsIgnoreCase("/zconfirm")) {
@@ -369,29 +367,29 @@ public class ZonesCommandsHandler {
 						else if(split[1].equals("NPoly"))
 							dummy.setType(split[1]);
 						else{
-							player.sendMessage(Colors.Yellow + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
+							player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
 							return true;
 						}
-						player.sendMessage(Colors.Green + "Succesfully changed zone type to '" + split[1] + "' .");
+						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed zone type to '" + split[1] + "' .");
 
 					}else
-						player.sendMessage(Colors.Yellow + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
+						player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
 
 				} else if (cmd.equalsIgnoreCase("/zmerge")) {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
-						player.sendMessage(Colors.Rose + "Please select a zone first with /zselect.");
+						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else{
 						if (dummy.getType() == 1 && dummy.getCoords().size() != 2) {
-							player.sendMessage(Colors.Rose + "Not enough coordinates set for this zone type, you need 2.");
+							player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need 2.");
 							return true;
 						}else if(dummy.getType() == 2 && dummy.getCoords().size() < 3){
-							player.sendMessage(Colors.Rose + "Not enough coordinates set for this zone type, you need atleast 3.");
+							player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need atleast 3.");
 							return true;
 						}
 						if (dummy.getMax() == 130 && dummy.getMin() == 0)
-							player.sendMessage(Colors.Rose + "WARNING: default z values not changed!");
+							player.sendMessage(ChatColor.RED.toString() + "WARNING: default z values not changed!");
 
-						player.sendMessage(Colors.Yellow + "If you are sure you want to save this zone do /zconfirm");
+						player.sendMessage(ChatColor.YELLOW.toString() + "If you are sure you want to save this zone do /zconfirm");
 
 						dummy.setConfirm("merge");
 					}
@@ -399,7 +397,7 @@ public class ZonesCommandsHandler {
 				// disabled until i think of a better name.
 //				else if (cmd.equalsIgnoreCase("/ztogglehealth")) {
 //					dummy.toggleHealth();
-//					player.sendMessage(Colors.Green + "Health is now " + (dummy.healthAllowed() ? "enabled" : "disabled") + ".");
+//					player.sendMessage(ChatColor.GREEN.toString() + "Health is now " + (dummy.healthAllowed() ? "enabled" : "disabled") + ".");
 //				}
 			}
 			return true;
@@ -479,16 +477,19 @@ public class ZonesCommandsHandler {
 			//ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
 		commands.put("/zsetuser",new String[] {
 			"0",
-			"[user name] b|m|d|e|*|- (combination of these)",
-			"Sets the access of [user name] to what is specified \n "
+			"[user name] b|m|d|e|h|*|- (combination of these)",
+			"Sets the access of [user name] to what is specified\n "
 			+ "b = Build(placing blocks),\n"
 			+ "m = Modify(accessing chest/furnaces),\n "
 			+ "d = Destroy(destroying blocks),\n"
-			+ "e = Enter(entering your zone), \n"
+			+ "e = Enter(entering your zone),\n"
+			+ "h = Hit Entity's(killing mobs/destroying minecarts or boats),\n"
 			+ "* = full access(all of the above) and - = remove all access. \n"
 			+ "Example: /zsetuser Meaglin bde this will give meaglin access \n"
 			+ " to build,destroy and walk around in your zone but not to \n"
 			+ "access your chests."
+			+ "[developers note: 'killing mobs' is not yet implemented \n"
+			+ "due to the lack of certain hooks in the bukkit API.] \n"
 		});
 
 		commands.put("/zsetgroup",new String[] {
@@ -598,42 +599,6 @@ public class ZonesCommandsHandler {
 
 
 	private static Map<String, String[]> getCommands() { return commands; }
-	private static void fixChests(Player p,ZoneType zone) {
 
-		ZoneForm form = zone.getZone();
-		Server serv = etc.getServer();
-
-		for (int i = form.getLowX(); i <= form.getHighX(); i++)
-			for (int j = form.getLowY(); j <= form.getHighY(); j++){
-					int distance = (int) Math.sqrt(Math.pow(i - p.getX(), 2) + Math.pow(j-p.getZ(), 2));
-					if(distance > 100)
-						continue;
-
-					for (int k = form.getLowZ(); k <= form.getHighZ(); k++){
-						ComplexBlock c = serv.getComplexBlock(i, k, j);
-						if (c != null)
-							c.update();
-
-					}
-
-				}
-
-
-	}
-	private static void fixChests(ZoneType zone) {
-
-		ZoneForm form = zone.getZone();
-		Server serv = etc.getServer();
-
-		for (int i = form.getLowX(); i <= form.getHighX(); i++)
-			for (int j = form.getLowY(); j <= form.getHighY(); j++)
-				for (int k = form.getLowZ(); k <= form.getHighZ(); k++){
-						ComplexBlock c = serv.getComplexBlock(i, k, j);
-						if (c != null)
-							c.update();
-
-					}
-
-	}
 
 }

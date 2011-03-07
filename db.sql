@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS `zones` (
   `allowlava` int(1) NOT NULL DEFAULT '0',
   `allowdynamite` int(1) NOT NULL DEFAULT '0',
   `enablehealth` int(1) NOT NULL DEFAULT '0',
+  `allowmobs` int(1) NOT NULL DEFAULT '0',
+  `allowanimals` int(1) NOT NULL DEFAULT '0',
   `size` int(10) DEFAULT '2',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;

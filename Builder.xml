@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Handler" default="dist" basedir=".">
+<project name="Zones" default="jar" basedir=".">
 	<description>
-		This script will build the Handler.
+		This script will build the plugin.
 	</description>
 
 	<property name="src" location="src" />
@@ -11,8 +11,8 @@
 
 	<path id="classpath">
 		<fileset dir="${lib}">
-			<include name="minecraft_server.jar" />
-			<include name="Minecraft_Mod.jar" />
+			<include name="craftbukkit-0.0.1-SNAPSHOT.jar" />
+			<include name="Permissions.jar" />
 		</fileset>
 	</path>
 	
@@ -26,7 +26,7 @@
 		<mkdir dir="${build.classes}" />
 	</target>
 
-	<target name="compile" depends="version" description="Compile the source.">
+	<target name="compile" depends="init" description="Compile the source.">
 		<javac destdir="${build.classes}" optimize="on" debug="on" source="1.6" target="1.6" nowarn="off">
 			<src path="${src}" />
 			<classpath refid="classpath" />
@@ -36,11 +36,10 @@
 	<target name="jar" depends="compile" description="Create the jar file">
 		<jar destfile="${build}/Zones.jar">
 			<fileset dir="${build.classes}" />
+			<zipfileset dir="${src}/main/java/com/zones/config/" prefix="com/zones/config/" >
+				<include name="Zones.properties" />
+			</zipfileset >
 		</jar>
-	</target>
-	
-	<target name="version" depends="init" description="--">
-
 	</target>
 	
 	<target name="clean" description="Remove the output directories">
