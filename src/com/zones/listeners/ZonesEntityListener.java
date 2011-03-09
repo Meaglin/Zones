@@ -5,7 +5,6 @@ import com.zones.ZoneType;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 
-import org.bukkit.Location;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
@@ -26,6 +25,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
  */
 public class ZonesEntityListener extends EntityListener {
 
+    @SuppressWarnings("unused")
     private Zones zones;
 
     public ZonesEntityListener(Zones zones) {
@@ -50,8 +50,7 @@ public class ZonesEntityListener extends EntityListener {
     }
 
     public void onEntityExplode(EntityExplodeEvent event) {
-        Location loc = event.getLocation();
-        ZoneType zone = World.getInstance().getActiveZone(loc.getX(), loc.getZ(), loc.getY());
+        ZoneType zone = World.getInstance().getActiveZone(event.getLocation());
         if (zone == null) {
             if (!ZonesConfig.TNT_ENABLED)
                 event.setCancelled(true);
@@ -63,8 +62,7 @@ public class ZonesEntityListener extends EntityListener {
     }
 
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        Location loc = event.getLocation();
-        ZoneType zone = World.getInstance().getActiveZone(loc.getX(), loc.getZ(), loc.getY());
+        ZoneType zone = World.getInstance().getActiveZone(event.getLocation());
         if (zone == null) {
             if (event.getEntity() instanceof Animals && !ZonesConfig.ANIMALS_ENABLED)
                 event.setCancelled(true);

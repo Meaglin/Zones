@@ -10,8 +10,8 @@ import org.bukkit.entity.Player;
 
 public class ZoneNormal extends ZoneType {
 
-    protected ZoneNormal(Zones zones, int id) {
-        super(zones, id);
+    public ZoneNormal(Zones zones, String world, int id) {
+        super(zones, world, id);
     }
 
     @Override

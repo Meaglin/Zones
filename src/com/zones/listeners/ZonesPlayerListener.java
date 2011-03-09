@@ -27,7 +27,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.inventory.Inventory;
 
 /**
  * 
@@ -86,21 +85,27 @@ public class ZonesPlayerListener extends PlayerListener {
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
-        ZoneType aZone = World.getInstance().getRegion(from.getBlockX(), from.getBlockZ()).getActiveZone(from.getBlockX(), from.getBlockZ(), from.getBlockY());
-        ZoneType bZone = World.getInstance().getRegion(to.getBlockX(), to.getBlockZ()).getActiveZone(to.getBlockX(), to.getBlockZ(), to.getBlockY());
+        //do nothing when we don't actually change from 1 block to another.
+        if(from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ())
+            return;
+        
+        ZoneType aZone = World.getInstance().getActiveZone(from);
+        ZoneType bZone = World.getInstance().getActiveZone(to);
         if (bZone != null && ((aZone != null && aZone.getId() != bZone.getId() && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) || (aZone == null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)))) {
-            player.teleportTo(from);
+            event.setCancelled(true);
             player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
             // we don't have to do overall revalidation if the player gets
             // warped back to his previous location.
             return;
         }
         if (bZone != null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) {
-            player.teleportTo(player.getWorld().getSpawnLocation());
+            event.setFrom(player.getWorld().getSpawnLocation());
+            event.setCancelled(true);
+            //player.teleportTo(player.getWorld().getSpawnLocation());
             player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
         }
 
-        World.getInstance().revalidateZones(player, from.getBlockX(), from.getBlockZ(), from.getBlockY(), to.getBlockX(), to.getBlockZ(), to.getBlockY());
+        World.getInstance().revalidateZones(player, from, to);
     }
 
     /**
@@ -114,14 +119,14 @@ public class ZonesPlayerListener extends PlayerListener {
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
-        ZoneType aZone = World.getInstance().getRegion(from.getBlockX(), from.getBlockZ()).getActiveZone(from.getBlockX(), from.getBlockZ(), from.getBlockY());
-        ZoneType bZone = World.getInstance().getRegion(to.getBlockX(), to.getBlockZ()).getActiveZone(to.getBlockX(), to.getBlockZ(), to.getBlockY());
+        ZoneType aZone = World.getInstance().getActiveZone(from);
+        ZoneType bZone = World.getInstance().getActiveZone(to);
         if (bZone != null && ((aZone != null && aZone.getId() != bZone.getId() && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) || (aZone == null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)))) {
             player.sendMessage(ChatColor.RED.toString() + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");
             event.setCancelled(true);
         }
 
-        World.getInstance().revalidateZones(player, from.getBlockX(), from.getBlockZ(), from.getBlockY(), to.getBlockX(), to.getBlockZ(), to.getBlockY());
+        World.getInstance().revalidateZones(player, from, to);
 
     }
 
@@ -139,11 +144,11 @@ public class ZonesPlayerListener extends PlayerListener {
 
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockClicked();
-        ZoneType zone = World.getInstance().getActiveZone(blockPlaced.getX(), blockPlaced.getZ(), blockPlaced.getY());
+        ZoneType zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
         if (zone != null && !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
             player.sendMessage(ChatColor.RED.toString() + "You cannot place blocks in '" + zone.getName() + "' !");
             event.setCancelled(true);
-        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || player.canUseCommand("/build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.BUILD)))
+        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.BUILD)))
             return;
         else
             event.setCancelled(true);

@@ -40,40 +40,36 @@ public class World {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ZoneManager.log.info("Loaded " + X_REGIONS * Y_REGIONS + " regions.");
+        ZoneManager.log.info("[Zones]Loaded " + X_REGIONS * Y_REGIONS + " regions.");
     }
 
-    public Region getRegion(Player player) {
-        Location loc = player.getLocation();
-        return getRegion(loc.getX(), loc.getZ());
-    }
+    public Region getRegion(Player player)      {return getRegion(player.getLocation());}
+    public Region getRegion(Location loc)       {return getRegion(loc.getX(),loc.getZ()); }
+    public Region getRegion(double x, double y) {return getRegion(toInt(x), toInt(y));}
+    
+    
+    public ArrayList<ZoneType> getAdminZones(Player player)                     {return getRegion(player).getAdminZones(player);}
 
-    public Region getRegion(double x, double y) {
-        return getRegion((int) Math.floor(x), (int) Math.floor(y));
-    }
+    public ArrayList<ZoneType> getAdminZones(Player player,Location loc)        {return getRegion(loc).getAdminZones(player,loc);}
+    
+    public ArrayList<ZoneType> getActiveZones(Player player)                    {return getRegion(player).getActiveZones(player);}
 
-    public ArrayList<ZoneType> getAdminZones(Player player) {
-        return getRegion(player).getAdminZones(player);
-    }
+    public ZoneType getActiveZone(Player player)                                {return getRegion(player).getActiveZone(player);}
+    public ZoneType getActiveZone(double x, double y, double z,String world)    {return getRegion(x, y).getActiveZone(x, y, z,world);}
+    public ZoneType getActiveZone(Location loc)                                 {return getRegion(loc).getActiveZone(loc);}
 
-    public ArrayList<ZoneType> getActiveZones(Player player) {
-        return getRegion(player).getActiveZones(player);
-    }
-
-    public ZoneType getActiveZone(Player player) {
-        return getRegion(player).getActiveZone(player);
-    }
-
-    public ZoneType getActiveZone(double x, double y, double z) {
-        return getRegion(x, y).getActiveZone(x, y, z);
-    }
-
+    public boolean regionChange(Location from,Location to)                       {return regionChange(from.getX(),from.getZ(),to.getX(),to.getZ());}
+    public boolean regionChange(double fromx,double fromy,double tox,double toy) {return regionChange(toInt(fromx),toInt(fromy),toInt(tox),toInt(toy));}
+    public boolean regionChange(int fromx,int fromy,int tox,int toy)             {return !(((fromx - MIN_X) >> SHIFT_SIZE) == ((tox - MIN_X) >> SHIFT_SIZE) && ((fromy - MIN_Y) >> SHIFT_SIZE) == ((toy - MIN_Y) >> SHIFT_SIZE));}
+    
+    public void revalidateZones(Player player) {getRegion(player).revalidateZones(player);}
+    
     public Region getRegion(int x, int y) {
         // debug only ;) .
         // System.out.println("get region " + ((x - MIN_X) >> SHIFT_SIZE) + " "
         // + ((y - MIN_Y) >> SHIFT_SIZE));
         if (x > MAX_X || x < MIN_X || y > MAX_Y || y < MIN_Y) {
-            ZoneManager.log.warning("Warning: Player moving outside world!");
+            ZoneManager.log.warning("[Zones]Warning: Player moving outside world!");
             return new Region(0, 0);
         }
 
@@ -93,15 +89,13 @@ public class World {
         protected static final World _instance = new World();
     }
 
-    public void revalidateZones(Player player, int ax, int ay, int az, int bx, int by, int bz) {
-
+    public void revalidateZones(Player player, Location from, Location to) {
         // region changes.
-        if (!((ax - MIN_X) >> SHIFT_SIZE == (bx - MIN_X) >> SHIFT_SIZE && (ay - MIN_X) >> SHIFT_SIZE == (by - MIN_X) >> SHIFT_SIZE)) {
-            getRegion(ax, ay).revalidateZones(player, ax, ay, az);
+        if (regionChange(from,to)) {
+            getRegion(from).revalidateZones(player, from);
         }
         // default revalidation.
-        getRegion(bx, by).revalidateZones(player, bx, by, bz);
-
+        getRegion(to).revalidateZones(player, to);
     }
 
     public static int toInt(double b) {

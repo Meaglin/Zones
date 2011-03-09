@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS `zones` (
   `name` varchar(255) DEFAULT NULL,
   `class` varchar(255) DEFAULT NULL,
   `type` int(11) DEFAULT '1',
+  `world` varchar(255) NOT NULL DEFAULT 'world',
   `admins` text,
   `users` text,
   `minz` int(10) DEFAULT NULL,

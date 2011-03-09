@@ -33,46 +33,29 @@ public class Region {
         return _zones;
     }
 
-    public void revalidateZones(Player character) {
-        for (ZoneType z : getZones()) {
-            if (z != null)
-                z.revalidateInZone(character);
-        }
-    }
+    public ZoneType getActiveZone(Player player)                             {return getActiveZone(player.getLocation());}
+    public ZoneType getActiveZone(Location loc)                              {return getActiveZone(loc.getX(), loc.getZ(), loc.getY(),loc.getWorld().getName());}
+    public ZoneType getActiveZone(double x, double y, double z,String world) {return getActiveZone(World.toInt(x), World.toInt(y), World.toInt(z),world);}
 
-    public ZoneType getActiveZone(Player player) {
-        Location loc = player.getLocation();
-        return getActiveZone(loc.getX(), loc.getY(), loc.getZ());
-    }
+    public ArrayList<ZoneType> getActiveZones(Player player)                             {return getActiveZones(player.getLocation());}
+    public ArrayList<ZoneType> getActiveZones(Location loc)                              {return getActiveZones(loc.getX(), loc.getZ(), loc.getY(),loc.getWorld().getName());}
+    public ArrayList<ZoneType> getActiveZones(double x, double y, double z,String world) {return getActiveZones(World.toInt(x), World.toInt(y), World.toInt(z),world);}
 
-    public ZoneType getActiveZone(double x, double y, double z) {
-        return getActiveZone(World.toInt(x), World.toInt(y), World.toInt(z));
-    }
-
-    public ZoneType getActiveZone(int x, int y, int z) {
+    public ZoneType getActiveZone(int x, int y, int z,String world) {
         ZoneType primary = null;
 
         for (ZoneType zone : getZones())
-            if (zone.isInsideZone(x, y, z) && (primary == null || primary.getZone().getSize() > zone.getZone().getSize()))
+            if (zone.isInsideZone(x, y, z,world) && (primary == null || primary.getZone().getSize() > zone.getZone().getSize()))
                 primary = zone;
 
         return primary;
     }
-
-    public ArrayList<ZoneType> getActiveZones(Player player) {
-        Location loc = player.getLocation();
-        return getActiveZones(loc.getX(), loc.getY(), loc.getZ());
-    }
-
-    public ArrayList<ZoneType> getActiveZones(double x, double y, double z) {
-        return getActiveZones(World.toInt(x), World.toInt(y), World.toInt(z));
-    }
-
-    public ArrayList<ZoneType> getActiveZones(int x, int y, int z) {
+    
+    public ArrayList<ZoneType> getActiveZones(int x, int y, int z,String world) {
         ArrayList<ZoneType> zones = new ArrayList<ZoneType>();
 
         for (ZoneType zone : getZones())
-            if (zone.isInsideZone(x, y, z))
+            if (zone.isInsideZone(x, y, z,world))
                 zones.add(zone);
 
         return zones;
@@ -82,12 +65,22 @@ public class Region {
         ArrayList<ZoneType> zones = new ArrayList<ZoneType>();
 
         for (ZoneType zone : getZones())
-            if (zone.canAdministrate(player) && zone.isInsideZone(player))
+            if (zone.isInsideZone(player) && zone.canAdministrate(player))
                 zones.add(zone);
 
         return zones;
     }
 
+    public ArrayList<ZoneType> getAdminZones(Player player, Location loc) {
+        ArrayList<ZoneType> zones = new ArrayList<ZoneType>();
+
+        for (ZoneType zone : getZones())
+            if (zone.isInsideZone(loc) && zone.canAdministrate(player))
+                zones.add(zone);
+
+        return zones;
+    }
+    
     public int getX() {
         return x;
     }
@@ -95,11 +88,18 @@ public class Region {
     public int getY() {
         return y;
     }
-
-    public void revalidateZones(Player player, int ax, int ay, int az) {
+    
+    public void revalidateZones(Player player) {
         for (ZoneType z : getZones()) {
             if (z != null)
-                z.revalidateInZone(player, ax, ay, az);
+                z.revalidateInZone(player);
+        }
+    }
+    
+    public void revalidateZones(Player player, Location loc) {
+        for (ZoneType z : getZones()) {
+            if (z != null)
+                z.revalidateInZone(player, loc);
         }
     }
 }

@@ -8,7 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
 import org.bukkit.event.vehicle.VehicleCreateEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
@@ -24,6 +23,7 @@ import org.bukkit.event.vehicle.VehicleMoveEvent;
  */
 public class ZonesVehicleListener extends VehicleListener {
 
+    @SuppressWarnings("unused")
     private Zones plugin;
 
     public ZonesVehicleListener(Zones zones) {
@@ -49,9 +49,7 @@ public class ZonesVehicleListener extends VehicleListener {
         if (!(attacker instanceof Player))
             return;
 
-        Vehicle vehicle = event.getVehicle();
-        Location loc = vehicle.getLocation();
-        ZoneType z = World.getInstance().getActiveZone(loc.getX(), loc.getZ(), loc.getY());
+        ZoneType z = World.getInstance().getActiveZone(event.getVehicle().getLocation());
         if (z != null && !z.canModify((Player) attacker, ZonesAccess.Rights.HIT)) {
             ((Player) attacker).sendMessage("You cannot damage vehicles in '" + z.getName() + "'!");
             event.setCancelled(true);
@@ -103,8 +101,8 @@ public class ZonesVehicleListener extends VehicleListener {
 
         Location from = event.getFrom();
         Location to = event.getTo();
-        ZoneType aZone = World.getInstance().getRegion(from.getBlockX(), from.getBlockZ()).getActiveZone(from.getBlockX(), from.getBlockZ(), from.getBlockY());
-        ZoneType bZone = World.getInstance().getRegion(to.getBlockX(), to.getBlockZ()).getActiveZone(to.getBlockX(), to.getBlockZ(), to.getBlockY());
+        ZoneType aZone = World.getInstance().getActiveZone(from);
+        ZoneType bZone = World.getInstance().getActiveZone(to);
         if (bZone != null && ((aZone != null && aZone.getId() != bZone.getId() && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) || (aZone == null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)))) {
             player.teleportTo(from);
             player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
@@ -118,6 +116,6 @@ public class ZonesVehicleListener extends VehicleListener {
             player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
         }
 
-        World.getInstance().revalidateZones(player, from.getBlockX(), from.getBlockZ(), from.getBlockY(), to.getBlockX(), to.getBlockZ(), to.getBlockY());
+        World.getInstance().revalidateZones(player, from, to);
     }
 }

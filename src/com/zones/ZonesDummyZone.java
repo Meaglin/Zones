@@ -142,7 +142,7 @@ public class ZonesDummyZone {
 
         Class<?> newZone = null;
         try {
-            newZone = Class.forName(_class);
+            newZone = Class.forName("com.zones.types."+_class);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -152,14 +152,15 @@ public class ZonesDummyZone {
         int id = -1;
         try {
             conn = zones.getConnection();
-            st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,admins,users,minz,maxz,size,enablehealth) VALUES (?,?,?,'2,admin;2,serveradmin','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
+            st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,world,admins,users,minz,maxz,size,enablehealth) VALUES (?,?,?,?,'','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
             st.setString(1, _name);
             st.setString(2, _class);
             st.setInt(3, _type);
-            st.setInt(4, _minz);
-            st.setInt(5, _maxz);
-            st.setInt(6, _coords.size());
-            st.setInt(7, allowHealth ? 1 : 0);
+            st.setString(4, this.w.getName());
+            st.setInt(5, _minz);
+            st.setInt(6, _maxz);
+            st.setInt(7, _coords.size());
+            st.setInt(8, allowHealth ? 1 : 0);
             st.executeUpdate();
 
             rs = st.getGeneratedKeys();
@@ -186,8 +187,8 @@ public class ZonesDummyZone {
         Constructor<?> zoneConstructor;
         ZoneType temp = null;
         try {
-            zoneConstructor = newZone.getConstructor(Zones.class, int.class);
-            temp = (ZoneType) zoneConstructor.newInstance(zones, id);
+            zoneConstructor = newZone.getConstructor(Zones.class,String.class, int.class);
+            temp = (ZoneType) zoneConstructor.newInstance(zones,w.getName(), id);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -294,7 +295,8 @@ public class ZonesDummyZone {
 
     public void fix(int x, int y) {
 
-        ArrayList<int[]> list = ((ArrayList<int[]>) _deleteBlocks.clone());
+        ArrayList<int[]> list = new ArrayList<int[]>();
+        list.addAll(_deleteBlocks);
         for (int[] block : list)
             if (block[0] == x && block[2] == y) {
                 w.getBlockAt(block[0], block[1], block[2]).setTypeId(block[3]);

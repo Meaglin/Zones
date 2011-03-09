@@ -39,6 +39,7 @@ public class ZonesConfig {
             FIRE_ENABLED = zp.getBool("FireEnabled", false);
             HEALTH_ENABLED = zp.getBool("HealthEnabled", false);
             MOBS_ENABLED = zp.getBool("MobsEnabled", false);
+            ANIMALS_ENABLED = zp.getBool("AnimalsEnabled", true);
             LIMIT_BY_BUILD_ENABLED = zp.getBool("ManageWorldBuild", true);
             FALL_DAMAGE_ENABLED = zp.getBool("FallDamageEnabled", false);
             TNT_ENABLED = zp.getBool("TntEnabled", false);

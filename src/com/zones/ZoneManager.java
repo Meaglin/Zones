@@ -36,13 +36,14 @@ public class ZoneManager {
             ResultSet rset = st.executeQuery();
 
             int id, type, size, minz, maxz, water, lava, dynamite, health, mobs, animals;
-            String zoneClass, admins, users, name;
+            String zoneClass, admins, users, name, world;
             ArrayList<int[]> points = new ArrayList<int[]>();
 
             while (rset.next()) {
                 id = rset.getInt("id");
                 name = rset.getString("name");
                 zoneClass = rset.getString("class");
+                world = rset.getString("world");
                 type = rset.getInt("type");
                 size = rset.getInt("size");
                 admins = rset.getString("admins");
@@ -57,13 +58,13 @@ public class ZoneManager {
                 animals = rset.getInt("allowanimals");
                 Class<?> newZone;
                 try {
-                    newZone = Class.forName(zoneClass);
+                    newZone = Class.forName("com.zones.types."+zoneClass);
                 } catch (ClassNotFoundException e) {
-                    log.warning("No such zone class: " + zoneClass + " id: " + id);
+                    log.warning("[Zones]No such zone class: " + zoneClass + " id: " + id);
                     continue;
                 }
-                Constructor<?> zoneConstructor = newZone.getConstructor(int.class);
-                ZoneType temp = (ZoneType) zoneConstructor.newInstance(id);
+                Constructor<?> zoneConstructor = newZone.getConstructor(Zones.class, String.class, int.class);
+                ZoneType temp = (ZoneType) zoneConstructor.newInstance(zones,world,id);
 
                 points.clear();
 
@@ -89,7 +90,7 @@ public class ZoneManager {
                         if (points.size() == 2) {
                             temp.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], minz, maxz));
                         } else {
-                            log.info("Missing zone vertex for cuboid zone id: " + id);
+                            log.info("[Zones]Missing zone vertex for cuboid zone id: " + id);
                             continue;
                         }
                         break;
@@ -103,12 +104,12 @@ public class ZoneManager {
                             }
                             temp.setZone(new ZoneNPoly(aX, aY, minz, maxz));
                         } else {
-                            log.warning("Bad data for zone: " + id);
+                            log.warning("[Zones]Bad data for zone: " + id);
                             continue;
                         }
                         break;
                     default:
-                        log.severe("Unknown zone form " + type + " for id " + id);
+                        log.severe("[Zones]Unknown zone form " + type + " for id " + id);
                         break;
                 }
 
@@ -134,9 +135,9 @@ public class ZoneManager {
             }
         }
         if (_zones.size() == 1)
-            log.info("ZoneManager: Loaded " + _zones.size() + " Zone.");
+            log.info("[Zones]Loaded " + _zones.size() + " Zone.");
         else
-            log.info("ZoneManager: Loaded " + _zones.size() + " Zones.");
+            log.info("[Zones]Loaded " + _zones.size() + " Zones.");
     }
 
     public void addZone(ZoneType zone) {

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 
@@ -21,11 +19,11 @@ public class ZonesCommandsHandler {
 
     private static final int ITEMS_PER_PAGE = 7;
     
-	public static boolean onCommand(Zones plugin,Player player,String[] split){
+	public static boolean onCommand(Zones zones,Player player,String[] split){
 		String cmd = split[0].toLowerCase();
 
 		if (getCommands().containsKey(cmd)) {
-			if (cmd.equalsIgnoreCase("/zcreate") && player.canUseCommand(cmd)) {
+			if (cmd.equalsIgnoreCase("/zcreate") && zones.getP().permission(player, "zones.create")) {
 				if (split.length < 2) {
 					player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zcreate [zone name]");
 				} else {
@@ -39,7 +37,7 @@ public class ZonesCommandsHandler {
 						player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
 						return true;
 					}
-					ZoneManager.getInstance().addDummy(player.getName(), new ZonesDummyZone(plugin,player.getWorld(),name));
+					ZoneManager.getInstance().addDummy(player.getName(), new ZonesDummyZone(zones,player.getWorld(),name));
 					player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
 					//					ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
 					player.sendMessage("You can start adding the zone points of this zone by             " +
@@ -50,7 +48,7 @@ public class ZonesCommandsHandler {
 				List<String> availableCommands = new ArrayList<String>();
 
 				for (Entry<String, String[]> entry : getCommands().entrySet())
-					if (entry.getValue()[0].equals("0") || player.canUseCommand("/zcreate"))
+					if (entry.getValue()[0] == null || zones.getP().permission(player, entry.getValue()[0]))
 						availableCommands.add(entry.getKey() + " " + entry.getValue()[1]);
 
 				int amount = 0;
@@ -60,7 +58,7 @@ public class ZonesCommandsHandler {
 						amount = Integer.parseInt(split[1]);
 					} catch (NumberFormatException ex) {
 
-						if(getCommands().containsKey("/" + split[1].toLowerCase()) && (getCommands().get("/" + split[1].toLowerCase())[0].equals("0") || player.canUseCommand("/zcreate")))
+						if(getCommands().containsKey("/" + split[1].toLowerCase()) && (getCommands().get("/" + split[1].toLowerCase())[0] == null || zones.getP().permission(player, getCommands().get("/" + split[1].toLowerCase())[0])))
 							isCommand = true;
 						else
 							player.sendMessage(ChatColor.RED.toString() + "Not a valid page number.");
@@ -98,16 +96,16 @@ public class ZonesCommandsHandler {
 						player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zone.getName() + "' .");
 					}
 				}else{
-					ArrayList<ZoneType> zones = World.getInstance().getAdminZones(player);
-					if(zones.size() < 1)
+					ArrayList<ZoneType> zoneslist = World.getInstance().getAdminZones(player);
+					if(zoneslist.size() < 1)
 						player.sendMessage(ChatColor.YELLOW.toString() + "No zones found in your current area(which you can modify).");
-					else if(zones.size() == 1){
-						ZoneManager.getInstance().setSelected(player.getName(), zones.get(0).getId());
-						player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zones.get(0).getName() + "' .");
+					else if(zoneslist.size() == 1){
+						ZoneManager.getInstance().setSelected(player.getName(), zoneslist.get(0).getId());
+						player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zoneslist.get(0).getName() + "' .");
 					} else {
 						player.sendMessage(ChatColor.YELLOW.toString() +  "Too much zones found, please specify a zone id.(/zselect <id>)");
 						String temp = "";
-						for (ZoneType zone : zones)
+						for (ZoneType zone : zoneslist)
 							temp += zone.getName() + "[" + zone.getId() + "]";
 						player.sendMessage("Zones found: " + temp);
 					}
@@ -120,7 +118,7 @@ public class ZonesCommandsHandler {
 						ZoneType zone = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						ZonesAccess z = new ZonesAccess(split[2]);
 
-						Player p = plugin.getServer().getPlayer(split[1]);
+						Player p = zones.getServer().getPlayer(split[1]);
 
 						if(p != null)
 							split[1] = p.getName();
@@ -156,7 +154,7 @@ public class ZonesCommandsHandler {
 					else {
 						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 
-						Player p = plugin.getServer().getPlayer(split[1]);
+						Player p = zones.getServer().getPlayer(split[1]);
 
 						if(p != null)
 							split[1] = p.getName();
@@ -189,7 +187,7 @@ public class ZonesCommandsHandler {
 			} else if (cmd.equalsIgnoreCase("/zregion")) {
 				Region r = World.getInstance().getRegion(player);
 				player.sendMessage("Region[" + r.getX() + "," + r.getY() + "] Zone count: " + r.getZones().size() + ".");
-			}else if(cmd.equalsIgnoreCase("/zdelete") && player.canUseCommand("/zcreate")) {
+			}else if(cmd.equalsIgnoreCase("/zdelete") && zones.getP().permission(player, "zones.create")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
@@ -224,7 +222,7 @@ public class ZonesCommandsHandler {
 					}
 
 				}
-			}else if (cmd.equalsIgnoreCase("/ztogglehealth") && player.canUseCommand("/zcreate")){
+			}else if (cmd.equalsIgnoreCase("/ztogglehealth") && zones.getP().permission(player, "zones.toggle.health")){
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
@@ -234,7 +232,7 @@ public class ZonesCommandsHandler {
 					else
 						player.sendMessage(ChatColor.RED.toString() + "Unable to change health flag, please contact a admin.");
 				}
-			}else if (cmd.equalsIgnoreCase("/ztoggledynamite") && player.canUseCommand("/zcreate")){
+			}else if (cmd.equalsIgnoreCase("/ztoggledynamite") && zones.getP().permission(player, "zones.toggle.tnt")){
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
@@ -244,7 +242,7 @@ public class ZonesCommandsHandler {
 					else
 						player.sendMessage(ChatColor.RED.toString() + "Unable to change dynamite flag, please contact a admin.");
 				}
-			}else if (cmd.equalsIgnoreCase("/ztogglelava")){
+			}else if (cmd.equalsIgnoreCase("/ztogglelava") && zones.getP().permission(player, "zones.toggle.lava")){
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
@@ -254,7 +252,7 @@ public class ZonesCommandsHandler {
 					else
 						player.sendMessage(ChatColor.RED.toString() + "Unable to change lava flag, please contact a admin.");
 				}
-			} else if (cmd.equalsIgnoreCase("/ztogglewater")) {
+			} else if (cmd.equalsIgnoreCase("/ztogglewater") && zones.getP().permission(player, "zones.toggle.water")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
@@ -264,12 +262,32 @@ public class ZonesCommandsHandler {
 					else
 						player.sendMessage(ChatColor.RED.toString() + "Unable to change water flag, please contact a admin.");
 				}
-			} else if (cmd.equalsIgnoreCase("/zedit") && player.canUseCommand("/zcreate")) {
+			} else if (cmd.equalsIgnoreCase("/ztogglemobs") && zones.getP().permission(player, "zones.toggle.mobs")) {
+                if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
+                    player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
+                else{
+                    ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+                    if(z.toggleMobs())
+                        player.sendMessage(ChatColor.GREEN.toString() + "Mob spawning is now "+(z.isMobsAllowed() ? "enabled" : "disabled" )+".");
+                    else
+                        player.sendMessage(ChatColor.RED.toString() + "Unable to change mobs flag, please contact a admin.");
+                }
+            } else if (cmd.equalsIgnoreCase("/ztoggleanimals") && zones.getP().permission(player, "zones.toggle.animals")) {
+                if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
+                    player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
+                else{
+                    ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+                    if(z.toggleAnimals())
+                        player.sendMessage(ChatColor.GREEN.toString() + "Animal spawning is now "+(z.isAnimalsAllowed() ? "enabled" : "disabled" )+".");
+                    else
+                        player.sendMessage(ChatColor.RED.toString() + "Unable to change animals flag, please contact a admin.");
+                }
+            } else if (cmd.equalsIgnoreCase("/zedit") && zones.getP().permission(player, "zones.create")) {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
 					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
-					ZonesDummyZone dummy = new ZonesDummyZone(plugin,player.getWorld(),z.getName());
+					ZonesDummyZone dummy = new ZonesDummyZone(zones,player.getWorld(),z.getName());
 					dummy.loadEdit(z);
 					ZoneManager.getInstance().addDummy(player.getName(), dummy);
 					player.sendMessage(ChatColor.GREEN.toString() + " Loaded zone " + z.getName() + " into a dummy zone.");
@@ -278,8 +296,12 @@ public class ZonesCommandsHandler {
 
 				ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
 				if (dummy == null) {
-					player.sendMessage(ChatColor.RED.toString() + "First create a zone with:");
-					player.sendMessage(ChatColor.RED.toString() + "/zcreate [zone name]");
+				    if(zones.getP().permission(player, "zones.create")) {
+				        player.sendMessage(ChatColor.RED.toString() + "First create a zone with:");
+					    player.sendMessage(ChatColor.RED.toString() + "/zcreate [zone name]");
+				    } else {
+				        player.sendMessage(ChatColor.RED + "You are not allowed to create zones.");
+				    }
 					return true;
 				}
 				//revert confirms after a different command is used.
@@ -409,74 +431,74 @@ public class ZonesCommandsHandler {
 	static {
 		commands = new LinkedHashMap<String,String[]>();
 		commands.put("/zcreate", new String[] {
-			"1",
+			"zones.create",
 			"[zone name] - starts zone creation in a new zone.",
 
 			"Starts Zone creation mode in which you can set the \n zones perimiter and type and height en depth."
 		});
 
 		commands.put("/zadd", new String[] {
-			"1",
+			"zones.create",
 			"- adds the current location to the temp zone.",
 			"Adds the current player x and y as a point of the  \n zone you are making."
 		});
 
 		commands.put("/zremove", new String[] {
-			"1",
+			"zones.create",
 			"- removes the current location from the temp zone.",
 			"If the current player location is a point of \n the zone you are making it will be removed from the zone \n you are making. "
 		});
 
 		commands.put("/zsetplot", new String[] {
-			"1",
+			"zones.create",
 			"- set height and depth to according to plot specs.",
 			"Changes the zone you are making to a plot type \n with the related height and depth of the zone relative to \n your z position."
 		});
 
 		commands.put("/zhelp",new String[] {
-			"0",
+			null,
 			"<cmd> - shows <cmd> page/command from the zone help.",
 			"Shows <cmd> page or command description from the \n zone help file."
 		});
 
 		commands.put("/zsetheight",new String[] {
-			"1",
+			"zones.create",
 			 "[height] - sets maxz to current z + [height].",
 			"Sets the zone you are creating height to your \n current z position + [height]"
 		});
 
 		commands.put("/zsetdepth",new String[] {
-			"1",
+			"zones.create",
 			 "[depth] - sets minz to current z - [depth].",
 			"Sets the depth of the zone you are creating \n to your current z position - [depth]"
 		});
 
 		commands.put("/zsave",new String[] {
-			"1",
+			"zones.create",
 			"- saves the temp zone after confirmation.",
 			"Initiates saving of the zone you were creating \n you will need to confirm this with \n /zconfirm to make it actually save the zone. \n THIS CANNOT BE USED WHEN EDITTING A ZONE USE /zmerge!!!! "
 		});
 
 		commands.put("/zconfirm",new String[] {
-			"1",
+			"zones.create",
 			"- confirms confirmations.",
 			"Confirms the last action that needs confirmation \n needed when /zsave or /zstop is used."
 		});
 
 		commands.put("/zsetz",new String[] {
-			"1",
+			"zones.create",
 			"[minz] [maxz] - sets minz, maxz, range [0-127].",
 			"Sets the depth and height of the zone according to \n [minz] and [maxz] limited by the max \n and min height of the map [0-127]."
 		});
 
 		commands.put("/zstop",new String[] {
-			"1",
+			"zones.create",
 			"- stop creation and delete zone (asks confirmation).",
 			"Stops the creation of the current zone and deletes \n all relative data this needs to be confirmed \n with /zconfirm though."
 		});
 			//ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
 		commands.put("/zsetuser",new String[] {
-			"0",
+			null,
 			"[user name] b|m|d|e|h|*|- (combination of these)",
 			"Sets the access of [user name] to what is specified\n "
 			+ "b = Build(placing blocks),\n"
@@ -493,23 +515,26 @@ public class ZonesCommandsHandler {
 		});
 
 		commands.put("/zsetgroup",new String[] {
-			"0",
-			"[group name] b|m|d|e|*|- (combination of these)",
+			null,
+			"[group name] b|m|d|e|h|*|- (combination of these)",
 			"Sets the access of [group name] to what is specified \n "
 			+ "Possible group names: beunhaas, default, builder and vip \n"
 			+ "b = Build(placing blocks),\n"
 			+ "m = Modify(accessing chest/furnaces),\n "
 			+ "d = Destroy(destroying blocks),\n"
 			+ "e = Enter(entering your zone), \n"
+			+ "h = Hit Entity's(killing mobs/destroying minecarts or boats),\n"
 			+ "* = full access(all of the above) and - = remove all access. \n"
 			+ "Example: /zsetuser default bde this will give all users access \n"
 			+ " to build,destroy and walk around in your zone but not to \n"
 			+ "access your chests."
+			+ "[developers note: 'killing mobs' is not yet implemented \n"
+            + "due to the lack of certain hooks in the bukkit API.] \n"
 
 		});
 
 		commands.put("/zaddadmin",new String[] {
-			"0",
+			null,
 			"[user name]",
 			"Adds [user name] as admin to your zone which gives \n"
 			+ "[user name] rights to build,modify,destroy,enter your zone \n"
@@ -518,79 +543,89 @@ public class ZonesCommandsHandler {
 		});
 
 		commands.put("/zremoveadmin",new String[] {
-			"1",
+			"zones.admin",
 			"[user name]",
 			"Removes [user name] as an admin from the zone."
 		});
 
 		commands.put("/zselect",new String[] {
-			"0",
+			null,
 			"<zone id>",
 			"Selects a zone so you can modify the rights of the zone and \n"
 			+ "or modify other properties of the zone."
 		});
 
 		commands.put("/zsettype",new String[] {
-			"1",
+			"zones.create",
 			"Cuboid|NPoly - changes zone type.",
 			"changes the zone type to a square(cuboid) or polygon(NPoly)."
 		});
 
 		commands.put("/zregion",new String[] {
-			"1",
+			"zones.info",
 			" returns region info.",
 			"Return the region x and y index and the amount of zones in \n"
 			+ " the region"
 		});
 
 		commands.put("/zgetaccess",new String[] {
-			"0",
+			null,
 			"- sends a access list of the selected zone.",
 			"Sends you a list of all the access given in your currently \n"
 			+ "selected zone."
 		});
 
 		commands.put("/zdelete",new String[] {
-			"1",
+			"zones.create",
 			"- deletes selected zone.",
 			"Deletes the currently selected zone, No confirmation!"
 		});
 
 		commands.put("/zsetname",new String[] {
-			"0",
+			null,
 			"[zone name] - changes zone name.",
 			"Changes your current selected zones name to [zone name] \n"
 			+ "(note: [zone name] is allowed to have spaces)."
 		});
 		commands.put("/ztogglehealth", new String[] {
-			"1",
+			"zones.toggle.health",
 			"Enables or disables health in the selected zone.",
 			""
 		});
 		commands.put("/ztoggledynamite", new String[] {
-			"1",
+			"zones.toggle.tnt",
 			"Enables or disables dynamite in the selected zone.",
 			""
 		});
 		commands.put("/ztogglelava", new String[] {
-			"0",
+			"zones.toggle.lava",
 			"Prevents or allowes lava flow into the zone.",
 			""
 		});
 		commands.put("/ztogglewater", new String[] {
-			"0",
+			"zones.toggle.water",
 			"Prevents or allowes water flow into the zone..",
 			""
 		});
+		commands.put("/ztogglemobs", new String[] {
+	            "zones.toggle.mobs",
+	            "Enables or disables mobs spawning inside the zone.",
+	            ""
+	        });
+		commands.put("/ztoggleanimals", new String[] {
+	            "zones.toggle.animals",
+	            "Enables or disables animals spawning inside the zone.",
+	            ""
+	        });
 		commands.put("/zedit", new String[] {
-			"1",
+			"zones.create",
 			"see extended help.",
 			"loads the current selected zone into a dummy \n"
 			+ "zone so it can be editted and merged with a zone.\n"
 			+ "Edited zones CAN'T be saved as new zones but have to be MERGED!"
 		});
 		commands.put("/zmerge", new String[] {
-			"1",
+			"zones.create",
 			"merges the dummy zone points/form with the selected zone.",
 			"Changes the 'area'/'form' of the zone you selected \n with your current dummy zone 'area'/'form'."
 		});

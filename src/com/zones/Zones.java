@@ -1,5 +1,7 @@
 package com.zones;
 
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 import com.zones.listeners.ZonesBlockListener;
 import com.zones.listeners.ZonesEntityListener;
 import com.zones.listeners.ZonesPlayerListener;
@@ -18,6 +20,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Zones extends JavaPlugin implements CommandExecutor {
@@ -34,39 +37,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     // stick
     public static final int            toolType        = 280;
 
+    PermissionHandler accessmanager;
+    
     public Zones() {
-        log.info("[Zones]Rev " + Rev + "  Loading...");
         
-        if(!(new File(ZonesConfig.ZONES_CONFIG_FILE)).exists()) {
-            try {
-            InputStream input = Zones.class.getResourceAsStream("/com/zones/config/Zones.properties");
-
-            //For Overwrite the file.
-            OutputStream output = new FileOutputStream(new File(ZonesConfig.ZONES_CONFIG_FILE));
-
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = input.read(buf)) > 0){
-              output.write(buf, 0, len);
-            }
-            input.close();
-            output.close();
-            
-            
-            } catch (Exception e) {
-                log.info("[Zones]Error while restorting configuration file.");
-                e.printStackTrace();
-            }
-            log.info("[Zones]Missing configuration file restored.");
-            log.info("-----------");
-            log.info("Zones will NOT finish loading since it has to be configured first to be able to load properly!");
-            log.info("-----------");            
-        } else {    
-            ZonesConfig.load();
-            ZoneManager.getInstance();
-            ZoneManager.getInstance().load(this);
-            log.info("[Zones]finished Loading.");
-        }
     }
 
     /**
@@ -123,7 +97,52 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     @Override
     public void onEnable() {
-        registerEvents();
-        log.info("[Zones]plugin enabled.");
+        log.info("[Zones]Rev " + Rev + "  Loading...");
+        
+        if(!(new File(ZonesConfig.ZONES_CONFIG_FILE)).exists()) {
+            try {
+            InputStream input = Zones.class.getResourceAsStream("/com/zones/config/Zones.properties");
+
+            //For Overwrite the file.
+            OutputStream output = new FileOutputStream(new File(ZonesConfig.ZONES_CONFIG_FILE));
+
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = input.read(buf)) > 0){
+              output.write(buf, 0, len);
+            }
+            input.close();
+            output.close();
+            
+            
+            } catch (Exception e) {
+                log.info("[Zones]Error while restorting configuration file.");
+                e.printStackTrace();
+            }
+            log.info("[Zones]Missing configuration file restored.");
+            log.info("----------------------");
+            log.info("Zones will NOT finish loading since it has to be configured first to be able to load properly!");
+            log.info("----------------------");            
+        } else {    
+            Plugin p = this.getServer().getPluginManager().getPlugin("Permissions");
+            
+            if(p != null && p instanceof Permissions) {
+                accessmanager = ((Permissions)p).getHandler();
+            } else {
+                log.info("----------------------");
+                log.info("Permissions manager NOT found, this will probably break the plugin!");
+                log.info("----------------------");                
+            }
+            
+            ZonesConfig.load();
+            ZoneManager.getInstance();
+            ZoneManager.getInstance().load(this);
+            registerEvents();
+            log.info("[Zones]finished Loading.");
+        }
+    }
+    
+    public PermissionHandler getP() {
+        return accessmanager;
     }
 }

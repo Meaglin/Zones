@@ -20,7 +20,7 @@ public abstract class ZoneType {
     protected static final Logger        log           = Logger.getLogger(ZoneType.class.getName());
 
     private final int                    _id;
-    protected List<ZoneForm>             _zone;
+    protected ZoneForm                  _zone;
     protected HashMap<String, Player>    _characterList;
 
     private String                       _name;
@@ -38,10 +38,12 @@ public abstract class ZoneType {
     protected boolean                    allowAnimals  = false;
 
     private Zones                        zones;
-
-    protected ZoneType(Zones zones, int id) {
+    private String                       world;
+    
+    protected ZoneType(Zones zones,String world, int id) {
         _id = id;
         this.zones = zones;
+        this.world = world;
         _characterList = new HashMap<String, Player>();
 
         _admingroups = new ArrayList<String>();
@@ -85,7 +87,7 @@ public abstract class ZoneType {
                         break;
                     // group
                     case 2:
-                        if (etc.getDataSource().getGroup(item[1]) != null)
+                        if (zones.getP().getGroup(world,item[1]) != null)
                             _admingroups.add(item[1]);
                         else
                             log.info("Invalid admin grouptype in zone id: " + getId());
@@ -117,7 +119,7 @@ public abstract class ZoneType {
                         break;
                     // group
                     case 2:
-                        if (etc.getDataSource().getGroup(item[1]) != null)
+                        if (zones.getP().getGroup(world,item[1]) != null)
                             // addGroup(itemname,itemrights);
                             _groups.put(itemname, new ZonesAccess(itemrights));
                         else
@@ -180,7 +182,7 @@ public abstract class ZoneType {
      * @param zone
      */
     public void setZone(ZoneForm zone) {
-        getZones().add(zone);
+        _zone = zone;
     }
 
     /**
@@ -190,15 +192,6 @@ public abstract class ZoneType {
      * @return
      */
     public ZoneForm getZone() {
-        for (ZoneForm zone : getZones()) {
-            return zone;
-        }
-        return null;
-    }
-
-    public final List<ZoneForm> getZones() {
-        if (_zone == null)
-            _zone = new ArrayList<ZoneForm>();
         return _zone;
     }
 
@@ -208,12 +201,11 @@ public abstract class ZoneType {
      * @param x
      * @param y
      */
-    public boolean isInsideZone(int x, int y) {
-        for (ZoneForm zone : getZones()) {
-            if (zone.isInsideZone(x, y, zone.getHighZ()))
-                return true;
-        }
-        return false;
+    public boolean isInsideZone(int x, int y,String world) {
+        if (this.world.equals(world) && _zone.isInsideZone(x, y, _zone.getHighZ()))
+            return true;
+        else
+            return false;
     }
 
     /**
@@ -223,53 +215,48 @@ public abstract class ZoneType {
      * @param y
      * @param z
      */
-    public boolean isInsideZone(int x, int y, int z) {
-        for (ZoneForm zone : getZones()) {
-            if (zone.isInsideZone(x, y, z))
-                return true;
-        }
-        return false;
+    public boolean isInsideZone(int x, int y, int z,String world) {
+        if (this.world.equals(world) && _zone.isInsideZone(x, y, z))
+            return true;
+        else
+            return false;
     }
 
     /**
      * Checks if the given object is inside the zone.
      * 
-     * @param object
+     * @param player
      */
-    public boolean isInsideZone(Player object) {
-        Location loc = object.getLocation();
-        return isInsideZone(World.toInt(loc.getX()), World.toInt(loc.getY()), World.toInt(loc.getZ()));
-    }
+    public boolean isInsideZone(Player player)      {return isInsideZone(player.getLocation());}
+    public boolean isInsideZone(Location loc)       {return isInsideZone(World.toInt(loc.getX()), World.toInt(loc.getZ()), World.toInt(loc.getY()),loc.getWorld().getName());}
+    
+    public double getDistanceToZone(int x, int y)   {return getZone().getDistanceToZone(x, y);}
 
-    public double getDistanceToZone(int x, int y) {
-        return getZone().getDistanceToZone(x, y);
-    }
-
-    public double getDistanceToZone(Player object) {
-        Location loc = object.getLocation();
+    public double getDistanceToZone(Player player) {
+        Location loc = player.getLocation();
         return getZone().getDistanceToZone(World.toInt(loc.getX()), World.toInt(loc.getZ()));
     }
 
-    public void revalidateInZone(Player character) {
+    public void revalidateInZone(Player player) {
 
-        Location loc = character.getLocation();
+        Location loc = player.getLocation();
 
         // System.out.println("Revalidating zone " + getId());
-        if (!isAffected(character))
+        if (!isAffected(player))
             return;
 
         // If the object is inside the zone...
-        if (isInsideZone(World.toInt(loc.getX()), World.toInt(loc.getY()), World.toInt(loc.getZ()))) {
+        if (isInsideZone(loc)) {
             // Was the character not yet inside this zone?
-            if (!_characterList.containsKey(character.getName())) {
-                _characterList.put(character.getName(), character);
-                onEnter(character);
+            if (!_characterList.containsKey(player.getName())) {
+                _characterList.put(player.getName(), player);
+                onEnter(player);
             }
         } else {
             // Was the character inside this zone?
-            if (_characterList.containsKey(character.getName())) {
-                _characterList.remove(character.getName());
-                onExit(character);
+            if (_characterList.containsKey(player.getName())) {
+                _characterList.remove(player.getName());
+                onExit(player);
             }
         }
     }
@@ -278,23 +265,23 @@ public abstract class ZoneType {
      * Force fully removes a character from the zone Should use during teleport
      * / logoff
      * 
-     * @param character
+     * @param player
      */
-    public void removeCharacter(Player character) {
-        if (_characterList.containsKey(character.getName())) {
-            _characterList.remove(character.getName());
-            onExit(character);
+    public void removeCharacter(Player player) {
+        if (_characterList.containsKey(player.getName())) {
+            _characterList.remove(player.getName());
+            onExit(player);
         }
     }
 
     /**
      * Will scan the zones char list for the character
      * 
-     * @param character
+     * @param player
      * @return
      */
-    public boolean isCharacterInZone(Player character) {
-        return _characterList.containsKey(character.getName());
+    public boolean isCharacterInZone(Player player) {
+        return _characterList.containsKey(player.getName());
     }
 
     protected abstract void onEnter(Player character);
@@ -324,7 +311,7 @@ public abstract class ZoneType {
             return true;
 
         for (Entry<String, ZonesAccess> e : _groups.entrySet())
-            if (player.isInGroup(e.getKey())) {
+            if (zones.getP().inGroup(world, player.getName(), e.getKey())) {
                 if (e.getValue().canDo(right))
                     return true;
             }
@@ -356,7 +343,7 @@ public abstract class ZoneType {
             base = base.merge(_users.get(name));
 
         for (Entry<String, ZonesAccess> e : _groups.entrySet())
-            if (player.isInGroup(e.getKey())) {
+            if (zones.getP().inGroup(world, player.getName(), e.getKey())) {
                 base = base.merge(e.getValue());
             }
 
@@ -364,13 +351,13 @@ public abstract class ZoneType {
     }
 
     public boolean canAdministrate(Player player) {
-        if (player.canUseCommand("/zcreate"))
+        if (zones.getP().permission(player, "zones.admin"))
             return true;
 
         if (_adminusers.contains(player.getName().toLowerCase()))
             return true;
 
-        for (String group : player.getGroups())
+        for (String group : zones.getP().getGroups(world, player.getName()))
             if (_admingroups.contains(group.toLowerCase()))
                 return true;
 
@@ -432,7 +419,7 @@ public abstract class ZoneType {
             _groups.remove(group);
         }
 
-        if (etc.getDataSource().getGroup(group) == null) {
+        if (zones.getP().getGroup(world, group) == null) {
             log.info("Trying to add an invalid group '" + group + "' in zone '" + getName() + "'[" + getId() + "].");
             return;
         }
@@ -455,7 +442,7 @@ public abstract class ZoneType {
         if (_admingroups.contains(group.toLowerCase()))
             return;
 
-        if (etc.getDataSource().getGroup(group) == null) {
+        if (zones.getP().getGroup(world, group) == null) {
             log.info("Trying to add an invalid adminGroup '" + group + "' in zone '" + getName() + "'[" + getId() + "].");
             return;
         }
@@ -540,6 +527,7 @@ public abstract class ZoneType {
         }
     }
 
+    @SuppressWarnings("unused")
     private void updateRights() {
         String admins = "";
         String users = "";
@@ -822,14 +810,14 @@ public abstract class ZoneType {
         return allowAnimals;
     }
 
-    public void revalidateInZone(Player player, int ax, int ay, int az) {
+    public void revalidateInZone(Player player, Location loc) {
 
         // System.out.println("Revalidating zone " + getId());
         if (!isAffected(player))
             return;
 
         // If the object is inside the zone...
-        if (isInsideZone(ax, ay, az)) {
+        if (isInsideZone(loc)) {
             // Was the character not yet inside this zone?
             if (!_characterList.containsKey(player.getName())) {
                 _characterList.put(player.getName(), player);
