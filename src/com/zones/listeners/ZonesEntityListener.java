@@ -1,18 +1,21 @@
 package com.zones.listeners;
 
 import com.zones.World;
-import com.zones.ZoneType;
+import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
+import com.zones.ZonesAccess.Rights;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ExplosionPrimedEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -32,25 +35,42 @@ public class ZonesEntityListener extends EntityListener {
         this.zones = zones;
     }
 
+    @Override
     public void onEntityDamage(EntityDamageEvent event) {
         Entity defender = event.getEntity();
+        Entity attacker = null;
+        if(event instanceof EntityDamageByEntityEvent) {
+            attacker = ((EntityDamageByEntityEvent)event).getDamager();
+        }
+        ZoneBase zone = World.getInstance().getActiveZone(defender.getLocation());
         if (defender instanceof Player) {
 
             if (event.getCause() == DamageCause.FALL && !ZonesConfig.FALL_DAMAGE_ENABLED)
                 event.setCancelled(true);
 
-            ZoneType zone = World.getInstance().getActiveZone((Player) defender);
-            if (zone == null && !ZonesConfig.HEALTH_ENABLED)
+            if (zone == null && !ZonesConfig.HEALTH_ENABLED) {
                 event.setCancelled(true);
-
-            if (zone != null && (!zone.allowHealth()))
+                return;
+            }
+            
+            if (zone != null && (!zone.allowHealth(((Player)defender)))) {
                 event.setCancelled(true);
+                return;
+            }
 
+        }
+        if(attacker != null && zone != null && attacker instanceof Player) {
+            Player att = (Player)attacker;
+            if(!zone.canModify(att, Rights.HIT)) {
+                att.sendMessage(ChatColor.RED + "You cannot kill entity's in " + zone.getName() + "!");
+                event.setCancelled(true);
+            }
         }
     }
 
+    @Override
     public void onEntityExplode(EntityExplodeEvent event) {
-        ZoneType zone = World.getInstance().getActiveZone(event.getLocation());
+        ZoneBase zone = World.getInstance().getActiveZone(event.getLocation());
         if (zone == null) {
             if (!ZonesConfig.TNT_ENABLED)
                 event.setCancelled(true);
@@ -61,8 +81,9 @@ public class ZonesEntityListener extends EntityListener {
 
     }
 
+    @Override
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        ZoneType zone = World.getInstance().getActiveZone(event.getLocation());
+        ZoneBase zone = World.getInstance().getActiveZone(event.getLocation());
         if (zone == null) {
             if (event.getEntity() instanceof Animals && !ZonesConfig.ANIMALS_ENABLED)
                 event.setCancelled(true);
@@ -79,7 +100,7 @@ public class ZonesEntityListener extends EntityListener {
     public void onEntityCombust(EntityCombustEvent event) {
     }
 
-    public void onExplosionPrimed(ExplosionPrimedEvent event) {
+    public void onExplosionPrime(ExplosionPrimeEvent event) {
     }
 
     public void onEntityDeath(EntityDeathEvent event) {

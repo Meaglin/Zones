@@ -185,10 +185,10 @@ public class ZonesDummyZone {
             return false;
 
         Constructor<?> zoneConstructor;
-        ZoneType temp = null;
+        ZoneBase temp = null;
         try {
             zoneConstructor = newZone.getConstructor(Zones.class,String.class, int.class);
-            temp = (ZoneType) zoneConstructor.newInstance(zones,w.getName(), id);
+            temp = (ZoneBase) zoneConstructor.newInstance(zones,w.getName(), id);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -329,7 +329,7 @@ public class ZonesDummyZone {
         }
     }
 
-    public void loadEdit(ZoneType z) {
+    public void loadEdit(ZoneBase z) {
         edit = true;
         ZoneForm form = z.getZone();
         _minz = form.getLowZ();
@@ -351,7 +351,7 @@ public class ZonesDummyZone {
     }
 
     public boolean merge(int id) {
-        ZoneType z = ZoneManager.getInstance().getZone(id);
+        ZoneBase z = ZoneManager.getInstance().getZone(id);
         if (z == null)
             return false;
 

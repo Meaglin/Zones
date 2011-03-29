@@ -86,7 +86,7 @@ public class ZonesCommandsHandler {
 						player.sendMessage(ChatColor.RED.toString() + availableCommands.get(i));
 			} else if (cmd.equalsIgnoreCase("/zselect")) {
 				if(split.length == 2){
-					ZoneType zone = ZoneManager.getInstance().getZone(Integer.parseInt(split[1]));
+					ZoneBase zone = ZoneManager.getInstance().getZone(Integer.parseInt(split[1]));
 					if (zone == null)
 						player.sendMessage(ChatColor.YELLOW.toString() + "No zone found with id : " + Integer.parseInt(split[1]));
 					else if (!zone.canAdministrate(player))
@@ -96,7 +96,7 @@ public class ZonesCommandsHandler {
 						player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zone.getName() + "' .");
 					}
 				}else{
-					ArrayList<ZoneType> zoneslist = World.getInstance().getAdminZones(player);
+					ArrayList<ZoneBase> zoneslist = World.getInstance().getAdminZones(player);
 					if(zoneslist.size() < 1)
 						player.sendMessage(ChatColor.YELLOW.toString() + "No zones found in your current area(which you can modify).");
 					else if(zoneslist.size() == 1){
@@ -105,7 +105,7 @@ public class ZonesCommandsHandler {
 					} else {
 						player.sendMessage(ChatColor.YELLOW.toString() +  "Too much zones found, please specify a zone id.(/zselect <id>)");
 						String temp = "";
-						for (ZoneType zone : zoneslist)
+						for (ZoneBase zone : zoneslist)
 							temp += zone.getName() + "[" + zone.getId() + "]";
 						player.sendMessage("Zones found: " + temp);
 					}
@@ -115,7 +115,7 @@ public class ZonesCommandsHandler {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else{
-						ZoneType zone = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+						ZoneBase zone = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						ZonesAccess z = new ZonesAccess(split[2]);
 
 						Player p = zones.getServer().getPlayer(split[1]);
@@ -137,7 +137,7 @@ public class ZonesCommandsHandler {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else {
-						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+						ZoneBase zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						zone.addGroup(split[1], split[2]);
 						ZonesAccess newAccess = new ZonesAccess(split[2]);
 
@@ -152,7 +152,7 @@ public class ZonesCommandsHandler {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else {
-						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+						ZoneBase zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 
 						Player p = zones.getServer().getPlayer(split[1]);
 
@@ -171,7 +171,7 @@ public class ZonesCommandsHandler {
 					if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 						player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 					else {
-						ZoneType zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+						ZoneBase zone =	ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 						zone.removeAdmin(split[1]);
 						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully removed player " + split[1] + " as an admin of zone "  + zone.getName() +  " .");
 					}
@@ -191,7 +191,7 @@ public class ZonesCommandsHandler {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
-					ZoneType toDelete = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					ZoneBase toDelete = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(ZoneManager.getInstance().delete(toDelete))
 						player.sendMessage(ChatColor.GREEN.toString() + "Succesfully deleted zone " + toDelete.getName() + ".");
 					else
@@ -226,8 +226,8 @@ public class ZonesCommandsHandler {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
-					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
-					if(z.toggleHealth())
+					ZoneBase z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					if(z.toggleLava())
 						player.sendMessage(ChatColor.GREEN.toString() + "Health is now "+(z.isHealthAllowed() ? "enabled" : "disabled" )+".");
 					else
 						player.sendMessage(ChatColor.RED.toString() + "Unable to change health flag, please contact a admin.");
@@ -236,7 +236,7 @@ public class ZonesCommandsHandler {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
-					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					ZoneBase z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(z.toggleDynamite())
 						player.sendMessage(ChatColor.GREEN.toString() + "Dynamite is now "+(z.isDynamiteAllowed() ? "enabled" : "disabled" )+".");
 					else
@@ -246,7 +246,7 @@ public class ZonesCommandsHandler {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
-					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					ZoneBase z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(z.toggleLava())
 						player.sendMessage(ChatColor.GREEN.toString() + "Lava is now "+(z.isLavaAllowed() ? "allowed" : "blocked" )+".");
 					else
@@ -256,7 +256,7 @@ public class ZonesCommandsHandler {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
-					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					ZoneBase z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					if(z.toggleWater())
 						player.sendMessage(ChatColor.GREEN.toString() + "Water is now "+(z.isWaterAllowed() ? "allowed" : "blocked" )+".");
 					else
@@ -266,7 +266,7 @@ public class ZonesCommandsHandler {
                 if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
                     player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
                 else{
-                    ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+                    ZoneBase z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
                     if(z.toggleMobs())
                         player.sendMessage(ChatColor.GREEN.toString() + "Mob spawning is now "+(z.isMobsAllowed() ? "enabled" : "disabled" )+".");
                     else
@@ -276,7 +276,7 @@ public class ZonesCommandsHandler {
                 if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
                     player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
                 else{
-                    ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+                    ZoneBase z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
                     if(z.toggleAnimals())
                         player.sendMessage(ChatColor.GREEN.toString() + "Animal spawning is now "+(z.isAnimalsAllowed() ? "enabled" : "disabled" )+".");
                     else
@@ -286,7 +286,7 @@ public class ZonesCommandsHandler {
 				if(ZoneManager.getInstance().getSelected(player.getName()) == 0)
 					player.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
 				else{
-					ZoneType z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
+					ZoneBase z = ZoneManager.getInstance().getZone(ZoneManager.getInstance().getSelected(player.getName()));
 					ZonesDummyZone dummy = new ZonesDummyZone(zones,player.getWorld(),z.getName());
 					dummy.loadEdit(z);
 					ZoneManager.getInstance().addDummy(player.getName(), dummy);
@@ -510,8 +510,6 @@ public class ZonesCommandsHandler {
 			+ "Example: /zsetuser Meaglin bde this will give meaglin access \n"
 			+ " to build,destroy and walk around in your zone but not to \n"
 			+ "access your chests."
-			+ "[developers note: 'killing mobs' is not yet implemented \n"
-			+ "due to the lack of certain hooks in the bukkit API.] \n"
 		});
 
 		commands.put("/zsetgroup",new String[] {
@@ -528,8 +526,6 @@ public class ZonesCommandsHandler {
 			+ "Example: /zsetuser default bde this will give all users access \n"
 			+ " to build,destroy and walk around in your zone but not to \n"
 			+ "access your chests."
-			+ "[developers note: 'killing mobs' is not yet implemented \n"
-            + "due to the lack of certain hooks in the bukkit API.] \n"
 
 		});
 

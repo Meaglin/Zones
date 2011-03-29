@@ -5,7 +5,12 @@ import org.bukkit.ChatColor;
 
 public class ZonesAccess {
     public enum Rights {
-        BUILD(1, "b", "Build blocks"), DESTROY(2, "d", "Destroy blocks"), MODIFY(4, "m", "Chest access"), ENTER(8, "e", "Enter zone"), HIT(16, "h", "Hit Entity's"), ALL(31, "*", "Anything & everything");
+        BUILD(1, "b", "Build blocks"),//
+        DESTROY(2, "d", "Destroy blocks"),//
+        MODIFY(4, "m", "Chest access"),//
+        ENTER(8, "e", "Enter zone"),//
+        HIT(16, "h", "Hit Entity's"),//
+        ALL(31, "*", "Anything & everything");
 
         private int    flag;
         private String code;

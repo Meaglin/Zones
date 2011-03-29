@@ -1,13 +1,18 @@
 package com.zones.listeners;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.zones.World;
 import com.zones.ZoneManager;
-import com.zones.ZoneType;
+import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.ZonesAccess;
 import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
+
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -41,6 +46,7 @@ public class ZonesBlockListener extends BlockListener {
      * @param event
      *            Relevant event details
      */
+    @Override
     public void onBlockDamage(BlockDamageEvent event) {
 
         Player player = event.getPlayer();
@@ -78,6 +84,7 @@ public class ZonesBlockListener extends BlockListener {
      * @param event
      *            Relevant event details
      */
+    @Override
     public void onBlockFlow(BlockFromToEvent event) {
 
         Block blockFrom = event.getBlock();
@@ -85,8 +92,8 @@ public class ZonesBlockListener extends BlockListener {
 
         if (blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
 
-            ZoneType fromZone = World.getInstance().getActiveZone(blockFrom.getLocation());
-            ZoneType toZone = World.getInstance().getActiveZone(blockTo.getLocation());
+            ZoneBase fromZone = World.getInstance().getActiveZone(blockFrom.getLocation());
+            ZoneBase toZone = World.getInstance().getActiveZone(blockTo.getLocation());
 
             if (toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowWater(blockTo))
                 event.setCancelled(true);
@@ -94,8 +101,8 @@ public class ZonesBlockListener extends BlockListener {
 
         if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
 
-            ZoneType fromZone = World.getInstance().getActiveZone(blockFrom.getLocation());
-            ZoneType toZone = World.getInstance().getActiveZone(blockTo.getLocation());
+            ZoneBase fromZone = World.getInstance().getActiveZone(blockFrom.getLocation());
+            ZoneBase toZone = World.getInstance().getActiveZone(blockTo.getLocation());
 
             if (toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowLava(blockTo))
                 event.setCancelled(true);
@@ -128,11 +135,12 @@ public class ZonesBlockListener extends BlockListener {
      * @param event
      *            Relevant event details
      */
+    @Override
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockPlaced();
 
-        ZoneType zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
+        ZoneBase zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
         if (zone != null && !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
             player.sendMessage(ChatColor.RED.toString() + "You cannot place blocks in '" + zone.getName() + "' !");
             event.setBuild(false);
@@ -148,50 +156,12 @@ public class ZonesBlockListener extends BlockListener {
     }
 
     /**
-     * Called when a block is interacted with
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    public void onBlockInteract(BlockInteractEvent event) {
-        if (!event.isPlayer())
-            return;
-
-        Block block = event.getBlock();
-        int type = block.getTypeId();
-
-        if (type != 54 && type != 61 && type != 62)
-            return;
-
-        Player player = (Player) event.getEntity();
-
-        ZoneType zone = World.getInstance().getActiveZone(block.getLocation());
-        if (zone != null && !zone.canModify(player, ZonesAccess.Rights.MODIFY)) {
-            if (type == 54)
-                player.sendMessage(ChatColor.RED.toString() + "You cannot change chests in '" + zone.getName() + "' !");
-            else if (type == 61 || type == 62)
-                player.sendMessage(ChatColor.RED.toString() + "You cannot change furnaces in '" + zone.getName() + "' !");
-
-            event.setCancelled(true);
-        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.MODIFY)))
-            return;
-        else {
-
-            if (type == 54)
-                player.sendMessage(ChatColor.RED.toString() + "You cannot change chests in the world !");
-            else if (type == 61 || type == 62)
-                player.sendMessage(ChatColor.RED.toString() + "You cannot change furnaces in the world !");
-
-            event.setCancelled(true);
-        }
-    }
-
-    /**
      * Called when a player right clicks a block
      * 
      * @param event
      *            Relevant event details
-     */
+     *
+    @Override
     public void onBlockRightClick(BlockRightClickEvent event) {
         int itemInHand = event.getItemInHand().getTypeId();
         Block blockClicked = event.getBlock();
@@ -260,12 +230,15 @@ public class ZonesBlockListener extends BlockListener {
      * @param event
      *            Relevant event details
      */
+    
+    @Override
     public void onBlockBreak(BlockBreakEvent event) {
 
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        ZoneType zone = World.getInstance().getActiveZone(block.getLocation());
+        
+        ZoneBase zone = World.getInstance().getActiveZone(block.getLocation());
         if (zone != null && !zone.canModify(player, ZonesAccess.Rights.DESTROY)) {
             player.sendMessage(ChatColor.RED.toString() + "You cannot destroy blocks in '" + zone.getName() + "' !");
             event.setCancelled(true);

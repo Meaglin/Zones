@@ -11,16 +11,18 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import com.zones.util.Settings;
+
 /**
  * Abstract base class for any zone type Handles basic operations
  * 
  * @author durgus, Meaglin
  */
-public abstract class ZoneType {
-    protected static final Logger        log           = Logger.getLogger(ZoneType.class.getName());
+public abstract class ZoneBase {
+    protected static final Logger        log           = Logger.getLogger(ZoneBase.class.getName());
 
     private final int                    _id;
-    protected ZoneForm                  _zone;
+    protected ZoneForm                  form;
     protected HashMap<String, Player>    _characterList;
 
     private String                       _name;
@@ -30,17 +32,22 @@ public abstract class ZoneType {
     private HashMap<String, ZonesAccess> _groups;
     private HashMap<String, ZonesAccess> _users;
 
-    protected boolean                    allowLava     = false;
-    protected boolean                    allowWater    = false;
-    protected boolean                    allowDynamite = false;
-    protected boolean                    allowHealth   = false;
-    protected boolean                    allowMobs     = false;
-    protected boolean                    allowAnimals  = false;
+    private Settings                    settings;
 
     private Zones                        zones;
     private String                       world;
     
-    protected ZoneType(Zones zones,String world, int id) {
+    
+    public static final String LAVA_ENABLED = "LavaEnabled";
+    public static final String WATER_ENABLED = "WaterEnabled";
+    public static final String HEALTH_ENABLED = "HealthEnabled";
+    public static final String DYNAMITE_ENABLED = "DynamiteEnabled";
+    public static final String SPAWN_MOBS = "SpawnMobs";
+    public static final String SPAWN_ANIMALS = "SpawnAnimals";
+    
+    
+    
+    protected ZoneBase(Zones zones,String world, int id) {
         _id = id;
         this.zones = zones;
         this.world = world;
@@ -51,9 +58,16 @@ public abstract class ZoneType {
 
         _groups = new HashMap<String, ZonesAccess>();
         _users = new HashMap<String, ZonesAccess>();
-
     }
 
+    public void loadSettings(String data) {
+        try {
+            settings = Settings.unserialize(data);
+        } catch(Exception e) {
+            log.warning("[Zones]Error loading settings of " + _name + "[" + _id + "]");
+            e.printStackTrace();
+        }
+    }
     /**
      * @return Returns the id.
      */
@@ -132,36 +146,6 @@ public abstract class ZoneType {
             }
         } else if (name.equals("name")) {
             _name = value;
-        } else if (name.equalsIgnoreCase("water")) {
-            if (value.equalsIgnoreCase("1"))
-                allowWater = true;
-            else
-                allowWater = false;
-        } else if (name.equalsIgnoreCase("lava")) {
-            if (value.equalsIgnoreCase("1"))
-                allowLava = true;
-            else
-                allowLava = false;
-        } else if (name.equalsIgnoreCase("health")) {
-            if (value.equalsIgnoreCase("1"))
-                allowHealth = true;
-            else
-                allowHealth = false;
-        } else if (name.equalsIgnoreCase("dynamite")) {
-            if (value.equalsIgnoreCase("1"))
-                allowDynamite = true;
-            else
-                allowDynamite = false;
-        } else if (name.equalsIgnoreCase("mobs")) {
-            if (value.equalsIgnoreCase("1"))
-                allowMobs = true;
-            else
-                allowMobs = false;
-        } else if (name.equalsIgnoreCase("animals")) {
-            if (value.equalsIgnoreCase("1"))
-                allowAnimals = true;
-            else
-                allowAnimals = false;
         } else
             log.info(getClass().getSimpleName() + ": Unknown parameter - " + name + " in zone: " + getId());
     }
@@ -182,7 +166,7 @@ public abstract class ZoneType {
      * @param zone
      */
     public void setZone(ZoneForm zone) {
-        _zone = zone;
+        form = zone;
     }
 
     /**
@@ -192,7 +176,7 @@ public abstract class ZoneType {
      * @return
      */
     public ZoneForm getZone() {
-        return _zone;
+        return form;
     }
 
     /**
@@ -202,7 +186,7 @@ public abstract class ZoneType {
      * @param y
      */
     public boolean isInsideZone(int x, int y,String world) {
-        if (this.world.equals(world) && _zone.isInsideZone(x, y, _zone.getHighZ()))
+        if (this.world.equals(world) && form.isInsideZone(x, y, form.getHighZ()))
             return true;
         else
             return false;
@@ -216,7 +200,7 @@ public abstract class ZoneType {
      * @param z
      */
     public boolean isInsideZone(int x, int y, int z,String world) {
-        if (this.world.equals(world) && _zone.isInsideZone(x, y, z))
+        if (this.world.equals(world) && form.isInsideZone(x, y, z))
             return true;
         else
             return false;
@@ -294,7 +278,7 @@ public abstract class ZoneType {
 
     public abstract boolean allowDynamite(Block b);
 
-    public abstract boolean allowHealth();
+    public abstract boolean allowHealth(Player player);
 
     public HashMap<String, Player> getCharactersInside() {
         return _characterList;
@@ -311,10 +295,10 @@ public abstract class ZoneType {
             return true;
 
         for (Entry<String, ZonesAccess> e : _groups.entrySet())
-            if (zones.getP().inGroup(world, player.getName(), e.getKey())) {
-                if (e.getValue().canDo(right))
+            if (e.getValue().canDo(right))
+                if (zones.getP().inGroup(world, player.getName(), e.getKey())) 
                     return true;
-            }
+            
 
         // Admins always have full access to the zone.
         return canAdministrate(player);
@@ -604,8 +588,8 @@ public abstract class ZoneType {
             e.printStackTrace();
         } finally {
             try {
-                conn.close();
-                st.close();
+                if(conn != null)    conn.close();
+                if(st != null)      st.close();
             } catch (Exception e) {
             }
         }
@@ -617,197 +601,60 @@ public abstract class ZoneType {
 
         return true;
     }
-
-    public boolean toggleHealth() {
+    
+    private boolean saveSettings() {
         Connection conn = null;
         PreparedStatement st = null;
         int u = 0;
         try {
             conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET enablehealth = ? WHERE id = ?");
-            st.setInt(1, (!allowHealth) ? 1 : 0);
+            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET settings = ? WHERE id = ?");
+            st.setString(1, settings.serialize());
             st.setInt(2, getId());
             u = st.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
-                conn.close();
-                st.close();
+                if(conn != null)    conn.close();
+                if(st != null)      st.close();
             } catch (Exception e) {
             }
         }
 
         if (u < 1)
             return false;
-
-        allowHealth = !allowHealth;
-
+        
         return true;
     }
 
-    public boolean toggleWater() {
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET allowwater = ? WHERE id = ?");
-            st.setInt(1, (!allowWater) ? 1 : 0);
-            st.setInt(2, getId());
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-                st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u < 1)
-            return false;
-
-        allowWater = !allowWater;
-
-        return true;
+    private boolean setSetting(String name,Object o) {
+        getSettings().set(name, o);
+        return saveSettings();
     }
-
-    public boolean toggleLava() {
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET allowlava = ? WHERE id = ?");
-            st.setInt(1, (!allowLava) ? 1 : 0);
-            st.setInt(2, getId());
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-                st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u < 1)
-            return false;
-
-        allowLava = !allowLava;
-
-        return true;
-    }
-
-    public boolean toggleDynamite() {
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET allowdynamite = ? WHERE id = ?");
-            st.setInt(1, (!allowDynamite) ? 1 : 0);
-            st.setInt(2, getId());
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-                st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u < 1)
-            return false;
-
-        allowDynamite = !allowDynamite;
-
-        return true;
-    }
-
-    public boolean toggleMobs() {
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET allowmobs = ? WHERE id = ?");
-            st.setInt(1, (!allowMobs) ? 1 : 0);
-            st.setInt(2, getId());
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-                st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u < 1)
-            return false;
-
-        allowMobs = !allowMobs;
-
-        return true;
-    }
-
-    public boolean toggleAnimals() {
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET allowanimals = ? WHERE id = ?");
-            st.setInt(1, (!allowAnimals) ? 1 : 0);
-            st.setInt(2, getId());
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-                st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u < 1)
-            return false;
-
-        allowAnimals = !allowAnimals;
-
-        return true;
-    }
-
+    
     public boolean isHealthAllowed() {
-        return allowHealth;
+        return getSettings().getBool(HEALTH_ENABLED);
     }
 
     public boolean isWaterAllowed() {
-        return allowWater;
+        return getSettings().getBool(WATER_ENABLED);
     }
 
     public boolean isLavaAllowed() {
-        return allowLava;
+        return getSettings().getBool(LAVA_ENABLED);
     }
 
     public boolean isDynamiteAllowed() {
-        return allowDynamite;
+        return getSettings().getBool(DYNAMITE_ENABLED);
     }
 
     public boolean isMobsAllowed() {
-        return allowMobs;
+        return getSettings().getBool(SPAWN_MOBS);
     }
 
     public boolean isAnimalsAllowed() {
-        return allowAnimals;
+        return getSettings().getBool(SPAWN_ANIMALS);
     }
 
     public void revalidateInZone(Player player, Location loc) {
@@ -830,6 +677,30 @@ public abstract class ZoneType {
                 onExit(player);
             }
         }
+    }
+    
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public boolean toggleAnimals() {
+        return setSetting(SPAWN_ANIMALS, !isAnimalsAllowed());
+    }
+
+    public boolean toggleWater() {
+        return setSetting(WATER_ENABLED, !isWaterAllowed());
+    }
+
+    public boolean toggleLava() {
+        return setSetting(LAVA_ENABLED, !isLavaAllowed());
+    }
+
+    public boolean toggleDynamite() {
+        return setSetting(DYNAMITE_ENABLED, !isDynamiteAllowed());
+    }
+
+    public boolean toggleMobs() {
+        return setSetting(SPAWN_MOBS, !isAnimalsAllowed());
     }
 
 }

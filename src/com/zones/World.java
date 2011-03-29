@@ -48,19 +48,17 @@ public class World {
     public Region getRegion(double x, double y) {return getRegion(toInt(x), toInt(y));}
     
     
-    public ArrayList<ZoneType> getAdminZones(Player player)                     {return getRegion(player).getAdminZones(player);}
+    public ArrayList<ZoneBase> getAdminZones(Player player)                     {return getRegion(player).getAdminZones(player);}
 
-    public ArrayList<ZoneType> getAdminZones(Player player,Location loc)        {return getRegion(loc).getAdminZones(player,loc);}
+    public ArrayList<ZoneBase> getAdminZones(Player player,Location loc)        {return getRegion(loc).getAdminZones(player,loc);}
     
-    public ArrayList<ZoneType> getActiveZones(Player player)                    {return getRegion(player).getActiveZones(player);}
+    public ArrayList<ZoneBase> getActiveZones(Player player)                    {return getRegion(player).getActiveZones(player);}
 
-    public ZoneType getActiveZone(Player player)                                {return getRegion(player).getActiveZone(player);}
-    public ZoneType getActiveZone(double x, double y, double z,String world)    {return getRegion(x, y).getActiveZone(x, y, z,world);}
-    public ZoneType getActiveZone(Location loc)                                 {return getRegion(loc).getActiveZone(loc);}
+    public ZoneBase getActiveZone(Player player)                                {return getRegion(player).getActiveZone(player);}
+    public ZoneBase getActiveZone(double x, double y, double z,String world)    {return getRegion(x, y).getActiveZone(x, y, z,world);}
+    public ZoneBase getActiveZone(Location loc)                                 {return getRegion(loc).getActiveZone(loc);}
 
-    public boolean regionChange(Location from,Location to)                       {return regionChange(from.getX(),from.getZ(),to.getX(),to.getZ());}
-    public boolean regionChange(double fromx,double fromy,double tox,double toy) {return regionChange(toInt(fromx),toInt(fromy),toInt(tox),toInt(toy));}
-    public boolean regionChange(int fromx,int fromy,int tox,int toy)             {return !(((fromx - MIN_X) >> SHIFT_SIZE) == ((tox - MIN_X) >> SHIFT_SIZE) && ((fromy - MIN_Y) >> SHIFT_SIZE) == ((toy - MIN_Y) >> SHIFT_SIZE));}
+    public boolean regionChange(Location from,Location to)                       {return getRegion(from).equals(getRegion(to)); }
     
     public void revalidateZones(Player player) {getRegion(player).revalidateZones(player);}
     
@@ -76,7 +74,7 @@ public class World {
         return _regions[(x - MIN_X) >> SHIFT_SIZE][(y - MIN_Y) >> SHIFT_SIZE];
     }
 
-    public void addZone(int x, int y, ZoneType zone) {
+    public void addZone(int x, int y, ZoneBase zone) {
         _regions[x][y].addZone(zone);
     }
 
@@ -92,7 +90,7 @@ public class World {
     public void revalidateZones(Player player, Location from, Location to) {
         // region changes.
         if (regionChange(from,to)) {
-            getRegion(from).revalidateZones(player, from);
+            getRegion(from).revalidateZones(player, to);
         }
         // default revalidation.
         getRegion(to).revalidateZones(player, to);

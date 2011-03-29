@@ -48,18 +48,16 @@ public class Zones extends JavaPlugin implements CommandExecutor {
      */
     private void registerEvents() {
 
-        registerEvent(Event.Type.BLOCK_DAMAGED, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_FLOW, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_INTERACT, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_DAMAGE, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_FROMTO, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Low);
+        registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Low);
 
-        registerEvent(Event.Type.ENTITY_DAMAGED, entityListener, Priority.High);
+        registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.High);
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.High);
         registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.High);
 
-        registerEvent(Event.Type.PLAYER_ITEM, playerListener, Priority.High);
+        registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.High);
@@ -101,6 +99,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         
         if(!(new File(ZonesConfig.ZONES_CONFIG_FILE)).exists()) {
             try {
+                (new File(ZonesConfig.ZONES_CONFIG_FILE)).mkdirs();
             InputStream input = Zones.class.getResourceAsStream("/com/zones/config/Zones.properties");
 
             //For Overwrite the file.
@@ -127,6 +126,9 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             Plugin p = this.getServer().getPluginManager().getPlugin("Permissions");
             
             if(p != null && p instanceof Permissions) {
+                if(!p.isEnabled()) {
+                    getPluginLoader().enablePlugin(p);
+                }
                 accessmanager = ((Permissions)p).getHandler();
             } else {
                 log.info("----------------------");
@@ -145,4 +147,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public PermissionHandler getP() {
         return accessmanager;
     }
+    
+    public World getWorldManager() {
+        return World.getInstance();
+    }
+    
 }
+

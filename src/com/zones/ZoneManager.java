@@ -13,16 +13,16 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 public class ZoneManager {
-    private HashMap<Integer, ZoneType>      _zones;
-    private HashMap<String, ZonesDummyZone> _dummyZones;
-    private HashMap<String, Integer>        _selectedZones;
+    private HashMap<Integer, ZoneBase>      _zones;
+    private HashMap<String, ZonesDummyZone> dummyZones;
+    private HashMap<String, Integer>        selectedZones;
     protected static final Logger           log = Logger.getLogger("Minecraft");
     private Zones                           zones;
 
     private ZoneManager() {
-        _zones = new HashMap<Integer, ZoneType>();
-        _dummyZones = new HashMap<String, ZonesDummyZone>();
-        _selectedZones = new HashMap<String, Integer>();
+        _zones = new HashMap<Integer, ZoneBase>();
+        dummyZones = new HashMap<String, ZonesDummyZone>();
+        selectedZones = new HashMap<String, Integer>();
     }
 
     public void load(Zones zones) {
@@ -35,8 +35,8 @@ public class ZoneManager {
             PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
             ResultSet rset = st.executeQuery();
 
-            int id, type, size, minz, maxz, water, lava, dynamite, health, mobs, animals;
-            String zoneClass, admins, users, name, world;
+            int id, type, size, minz, maxz;
+            String zoneClass, admins, users, name, world, settings;
             ArrayList<int[]> points = new ArrayList<int[]>();
 
             while (rset.next()) {
@@ -50,12 +50,7 @@ public class ZoneManager {
                 users = rset.getString("users");
                 minz = rset.getInt("minz");
                 maxz = rset.getInt("maxz");
-                water = rset.getInt("allowwater");
-                lava = rset.getInt("allowlava");
-                dynamite = rset.getInt("allowdynamite");
-                health = rset.getInt("enablehealth");
-                mobs = rset.getInt("allowmobs");
-                animals = rset.getInt("allowanimals");
+                settings = rset.getString("settings");
                 Class<?> newZone;
                 try {
                     newZone = Class.forName("com.zones.types."+zoneClass);
@@ -64,7 +59,7 @@ public class ZoneManager {
                     continue;
                 }
                 Constructor<?> zoneConstructor = newZone.getConstructor(Zones.class, String.class, int.class);
-                ZoneType temp = (ZoneType) zoneConstructor.newInstance(zones,world,id);
+                ZoneBase temp = (ZoneBase) zoneConstructor.newInstance(zones,world,id);
 
                 points.clear();
 
@@ -116,12 +111,7 @@ public class ZoneManager {
                 temp.setParameter("admins", admins);
                 temp.setParameter("users", users);
                 temp.setParameter("name", name);
-                temp.setParameter("health", Integer.toString(health));
-                temp.setParameter("water", Integer.toString(water));
-                temp.setParameter("lava", Integer.toString(lava));
-                temp.setParameter("dynamite", Integer.toString(dynamite));
-                temp.setParameter("animals", Integer.toString(animals));
-                temp.setParameter("mobs", Integer.toString(mobs));
+                temp.loadSettings(settings);
                 addZone(temp);
             }
             rset.close();
@@ -140,7 +130,7 @@ public class ZoneManager {
             log.info("[Zones]Loaded " + _zones.size() + " Zones.");
     }
 
-    public void addZone(ZoneType zone) {
+    public void addZone(ZoneBase zone) {
         int ax, ay, bx, by;
         for (int x = 0; x < World.X_REGIONS; x++) {
             for (int y = 0; y < World.Y_REGIONS; y++) {
@@ -161,7 +151,7 @@ public class ZoneManager {
         _zones.put(zone.getId(), zone);
     }
 
-    public ZoneType getZone(int id) {
+    public ZoneBase getZone(int id) {
         return _zones.get(id);
     }
 
@@ -169,7 +159,7 @@ public class ZoneManager {
         return SingletonHolder._instance;
     }
 
-    public boolean delete(ZoneType toDelete) {
+    public boolean delete(ZoneBase toDelete) {
         if (!_zones.containsKey(toDelete.getId()))
             return false;
 
@@ -252,11 +242,11 @@ public class ZoneManager {
     }
 
     public void addDummy(String name, ZonesDummyZone zone) {
-        _dummyZones.put(name, zone);
+        dummyZones.put(name, zone);
     }
 
     public ZonesDummyZone getDummy(String name) {
-        return _dummyZones.get(name);
+        return dummyZones.get(name);
     }
 
     public boolean zoneExists(int id) {
@@ -264,26 +254,26 @@ public class ZoneManager {
     }
 
     public void removeDummy(String name) {
-        _dummyZones.remove(name);
+        dummyZones.remove(name);
     }
 
     public void setSelected(String name, int id) {
         if (_zones.containsKey(id))
-            _selectedZones.put(name, id);
+            selectedZones.put(name, id);
     }
 
     public int getSelected(String name) {
-        if (!_selectedZones.containsKey(name))
+        if (!selectedZones.containsKey(name))
             return 0;
 
-        return _selectedZones.get(name);
+        return selectedZones.get(name);
     }
 
     public void removeSelected(String name) {
-        _selectedZones.remove(name);
+        selectedZones.remove(name);
     }
 
-    public Collection<ZoneType> getAllZones() {
+    public Collection<ZoneBase> getAllZones() {
         return _zones.values();
     }
 

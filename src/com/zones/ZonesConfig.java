@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import com.zones.util.Properties;
 
 public class ZonesConfig {
-    public static final String ZONES_CONFIG_FILE = "./config/Zones.properties";
+    public static final String ZONES_CONFIG_FILE = "./plugins/zones/Zones.properties";
 
     private static Logger      log               = Logger.getLogger(ZonesConfig.class.getName());
 

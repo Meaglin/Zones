@@ -1,28 +1,28 @@
 package com.zones.types;
 
 import com.zones.World;
-import com.zones.ZoneType;
+import com.zones.ZoneBase;
 import com.zones.Zones;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class ZoneNormal extends ZoneType {
+public class ZoneNormal extends ZoneBase {
 
     public ZoneNormal(Zones zones, String world, int id) {
         super(zones, world, id);
     }
 
     @Override
-    public void onEnter(Player character) {
-        ZoneType zone = World.getInstance().getActiveZone(character);
+    public void onEnter(Player player) {
+        ZoneBase zone = World.getInstance().getActiveZone(player);
         if (zone == null || zone.getZone().getSize() > getZone().getSize())
             zone = this;
 
-        character.sendMessage("You have just entered " + getName() + "[" + zone.getAccess(character).toColorCode() + "].");
-        if (zone.allowHealth()) {
-            character.sendMessage(ChatColor.RED.toString() + "WARNING: you can die in this zone!");
+        player.sendMessage("You have just entered " + getName() + "[" + zone.getAccess(player).toColorCode() + "].");
+        if (zone.allowHealth(player)) {
+            player.sendMessage(ChatColor.RED.toString() + "WARNING: you can die in this zone!");
         }
     }
 
@@ -48,7 +48,7 @@ public class ZoneNormal extends ZoneType {
     }
 
     @Override
-    public boolean allowHealth() {
+    public boolean allowHealth(Player player) {
         return isHealthAllowed();
     }
 
