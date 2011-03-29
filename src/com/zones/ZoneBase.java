@@ -62,11 +62,15 @@ public abstract class ZoneBase {
 
     public void loadSettings(String data) {
         try {
-            settings = Settings.unserialize(data);
+            loadSettings(Settings.unserialize(data));
         } catch(Exception e) {
             log.warning("[Zones]Error loading settings of " + _name + "[" + _id + "]");
             e.printStackTrace();
         }
+    }
+    
+    public void loadSettings(Settings settings) {
+        this.settings = settings;
     }
     /**
      * @return Returns the id.

@@ -2,6 +2,8 @@ package com.zones;
 
 import com.zones.forms.ZoneNPoly;
 import com.zones.forms.ZoneCuboid;
+import com.zones.util.Settings;
+
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -133,6 +135,18 @@ public class ZonesDummyZone {
         _class = name;
     }
 
+    private static Settings basicSettings() {
+        Settings st = new Settings();
+        st.set(ZoneBase.WATER_ENABLED, true);
+        st.set(ZoneBase.LAVA_ENABLED, true);
+        st.set(ZoneBase.DYNAMITE_ENABLED, ZonesConfig.TNT_ENABLED);
+        st.set(ZoneBase.HEALTH_ENABLED, ZonesConfig.HEALTH_ENABLED);
+        st.set(ZoneBase.SPAWN_ANIMALS, ZonesConfig.ANIMALS_ENABLED);
+        st.set(ZoneBase.SPAWN_MOBS, ZonesConfig.MOBS_ENABLED);
+        
+        return st;
+    }
+    
     private boolean Save() {
         // you can only merge a zone which you are editting.
         if (edit)
@@ -152,7 +166,7 @@ public class ZonesDummyZone {
         int id = -1;
         try {
             conn = zones.getConnection();
-            st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,world,admins,users,minz,maxz,size,enablehealth) VALUES (?,?,?,?,'','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
+            st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,world,admins,users,minz,maxz,size,settings) VALUES (?,?,?,?,'','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
             st.setString(1, _name);
             st.setString(2, _class);
             st.setInt(3, _type);
@@ -160,7 +174,7 @@ public class ZonesDummyZone {
             st.setInt(5, _minz);
             st.setInt(6, _maxz);
             st.setInt(7, _coords.size());
-            st.setInt(8, allowHealth ? 1 : 0);
+            st.setString(8, basicSettings().serialize());
             st.executeUpdate();
 
             rs = st.getGeneratedKeys();
@@ -249,10 +263,10 @@ public class ZonesDummyZone {
                 log.severe("Unknown zone form " + _type + " for id " + id);
                 break;
         }
-        temp.setParameter("admins", "2,admin;2,serveradmin");
+        temp.setParameter("admins", "");
         temp.setParameter("users", "2,default,e");
         temp.setParameter("name", _name);
-        temp.setParameter("health", allowHealth ? "1" : "0");
+        temp.loadSettings(basicSettings());
         ZoneManager.getInstance().addZone(temp);
         revertBlocks();
 
