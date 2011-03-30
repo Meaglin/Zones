@@ -2,6 +2,8 @@ package com.zones;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import com.zones.commands.ZoneCommand;
+import com.zones.commands.ZoneCommandMap;
 import com.zones.listeners.ZonesBlockListener;
 import com.zones.listeners.ZonesEntityListener;
 import com.zones.listeners.ZonesPlayerListener;
@@ -16,7 +18,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Listener;
@@ -36,7 +41,9 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public static final int            pilonType       = 80;
     // stick
     public static final int            toolType        = 280;
-
+    private final ZoneCommandMap      commandMap = new ZoneCommandMap(this);
+    
+    
     PermissionHandler accessmanager;
     
     public Zones() {
@@ -62,7 +69,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.High);
-        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
+        //registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.High);
         registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.High);
@@ -150,6 +157,18 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     public World getWorldManager() {
         return World.getInstance();
+    }
+    
+    public ZoneManager getZoneManager() {
+        return ZoneManager.getInstance();
+    }
+    
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        ZoneCommand cmd = commandMap.getCommand(label);
+        if(cmd != null) {
+            return cmd.execute(sender, label, args);
+        }
+        return false;
     }
     
 }

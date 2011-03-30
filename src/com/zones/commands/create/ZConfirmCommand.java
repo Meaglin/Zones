@@ -1,0 +1,20 @@
+package com.zones.commands.create;
+
+import org.bukkit.entity.Player;
+
+import com.zones.Zones;
+import com.zones.commands.ZoneCommand;
+
+public class ZConfirmCommand extends ZoneCommand {
+    
+    public ZConfirmCommand(Zones plugin) {
+        super("zconfirm", plugin);
+        this.setRequiresDummy(true);
+    }
+
+    @Override
+    public boolean run(Player player, String[] vars) {
+        getDummy(player).confirm(player);
+        return true;
+    }
+}

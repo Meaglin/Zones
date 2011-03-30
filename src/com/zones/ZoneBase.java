@@ -706,5 +706,9 @@ public abstract class ZoneBase {
     public boolean toggleMobs() {
         return setSetting(SPAWN_MOBS, !isAnimalsAllowed());
     }
+    
+    public boolean toggleHealth() {
+        return setSetting(HEALTH_ENABLED, !isHealthAllowed());
+    }
 
 }

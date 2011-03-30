@@ -3,14 +3,6 @@ package com.zones.listeners;
 import java.util.Arrays;
 import java.util.List;
 
-import com.zones.World;
-import com.zones.ZoneManager;
-import com.zones.ZoneBase;
-import com.zones.Zones;
-import com.zones.ZonesAccess;
-import com.zones.ZonesCommandsHandler;
-import com.zones.ZonesConfig;
-import com.zones.ZonesDummyZone;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,6 +25,14 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+
+import com.zones.World;
+import com.zones.ZoneBase;
+import com.zones.ZoneManager;
+import com.zones.Zones;
+import com.zones.ZonesAccess;
+import com.zones.ZonesConfig;
+import com.zones.ZonesDummyZone;
 
 /**
  * 
@@ -147,9 +147,11 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.SIGN.getId(),
             Material.REDSTONE.getId()
             );
+    /*
     private static List<Integer> blocks = Arrays.asList(
             Material.NOTE_BLOCK.getId()
             );
+    */
     private static List<Integer> containers = Arrays.asList(
             Material.FURNACE.getId(),
             Material.BURNING_FURNACE.getId(),
@@ -218,11 +220,11 @@ public class ZonesPlayerListener extends PlayerListener {
      * 
      * 
      */
-    @Override
+    /* @Override
     public void onPlayerCommandPreprocess(PlayerChatEvent event) {
         if(ZonesCommandsHandler.onCommand(plugin, event.getPlayer(), event.getMessage().split(" ")))
             event.setCancelled(true);
-    }
+    } */
 
     /**
      * Called when a player gets kicked from the server

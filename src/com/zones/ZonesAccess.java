@@ -7,7 +7,7 @@ public class ZonesAccess {
     public enum Rights {
         BUILD(1, "b", "Build blocks"),//
         DESTROY(2, "d", "Destroy blocks"),//
-        MODIFY(4, "m", "Chest access"),//
+        MODIFY(4, "c", "Chest access"),//
         ENTER(8, "e", "Enter zone"),//
         HIT(16, "h", "Hit Entity's"),//
         ALL(31, "*", "Anything & everything");
@@ -160,7 +160,7 @@ public class ZonesAccess {
             rt += ChatColor.GREEN.toString();
         else
             rt += ChatColor.RED.toString();
-        rt += "M";
+        rt += "C";
 
         if (canDestroy())
             rt += ChatColor.GREEN.toString();

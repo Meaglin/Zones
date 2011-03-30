@@ -39,7 +39,6 @@ public class ZonesCommandsHandler {
 					}
 					ZoneManager.getInstance().addDummy(player.getName(), new ZonesDummyZone(zones,player.getWorld(),name));
 					player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
-					//					ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
 					player.sendMessage("You can start adding the zone points of this zone by             " +
 						    ChatColor.RED.toString() + " hitting blocks with a stick(280)" +
 							ChatColor.WHITE.toString() + " or using " + ChatColor.RED.toString() + " /zadd");

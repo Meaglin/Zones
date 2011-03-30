@@ -1,9 +1,5 @@
 package com.zones.listeners;
 
-import com.zones.World;
-import com.zones.ZoneBase;
-import com.zones.Zones;
-import com.zones.ZonesAccess;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -16,6 +12,11 @@ import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleListener;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
+
+import com.zones.World;
+import com.zones.ZoneBase;
+import com.zones.Zones;
+import com.zones.ZonesAccess;
 
 /**
  * 

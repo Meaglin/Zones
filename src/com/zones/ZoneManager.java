@@ -13,24 +13,27 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 public class ZoneManager {
-    private HashMap<Integer, ZoneBase>      _zones;
+    private HashMap<Integer, ZoneBase>      zones;
     private HashMap<String, ZonesDummyZone> dummyZones;
     private HashMap<String, Integer>        selectedZones;
     protected static final Logger           log = Logger.getLogger("Minecraft");
-    private Zones                           zones;
+    private Zones                           plugin;
 
     private ZoneManager() {
-        _zones = new HashMap<Integer, ZoneBase>();
+        zones = new HashMap<Integer, ZoneBase>();
         dummyZones = new HashMap<String, ZonesDummyZone>();
         selectedZones = new HashMap<String, Integer>();
     }
 
-    public void load(Zones zones) {
-        this.zones = zones;
+    public void load(Zones plugin) {
+        zones.clear();
+        dummyZones.clear();
+        selectedZones.clear();
+        this.plugin = plugin;
         World.getInstance();
         Connection conn = null;
         try {
-            conn = zones.getConnection();
+            conn = plugin.getConnection();
             PreparedStatement st = conn.prepareStatement("SELECT * FROM " + ZonesConfig.ZONES_TABLE);
             PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
             ResultSet rset = st.executeQuery();
@@ -124,10 +127,10 @@ public class ZoneManager {
                 e.printStackTrace();
             }
         }
-        if (_zones.size() == 1)
-            log.info("[Zones]Loaded " + _zones.size() + " Zone.");
+        if (zones.size() == 1)
+            log.info("[Zones]Loaded " + zones.size() + " Zone.");
         else
-            log.info("[Zones]Loaded " + _zones.size() + " Zones.");
+            log.info("[Zones]Loaded " + zones.size() + " Zones.");
     }
 
     public void addZone(ZoneBase zone) {
@@ -148,11 +151,11 @@ public class ZoneManager {
             }
         }
 
-        _zones.put(zone.getId(), zone);
+        zones.put(zone.getId(), zone);
     }
 
     public ZoneBase getZone(int id) {
-        return _zones.get(id);
+        return zones.get(id);
     }
 
     public static final ZoneManager getInstance() {
@@ -160,7 +163,7 @@ public class ZoneManager {
     }
 
     public boolean delete(ZoneBase toDelete) {
-        if (!_zones.containsKey(toDelete.getId()))
+        if (!zones.containsKey(toDelete.getId()))
             return false;
 
         // first delete sql data.
@@ -168,7 +171,7 @@ public class ZoneManager {
         PreparedStatement st = null;
         int u = 0;
         try {
-            conn = zones.getConnection();
+            conn = plugin.getConnection();
             st = conn.prepareStatement("DELETE FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ?");
             st.setInt(1, toDelete.getId());
 
@@ -190,7 +193,7 @@ public class ZoneManager {
 
         u = 0;
         try {
-            conn = zones.getConnection();
+            conn = plugin.getConnection();
             st = conn.prepareStatement("DELETE FROM " + ZonesConfig.ZONES_TABLE + " WHERE id = ?");
             st.setInt(1, toDelete.getId());
 
@@ -231,7 +234,7 @@ public class ZoneManager {
         }
 
         // finally remove the zone from the main zones list.
-        _zones.remove(toDelete.getId());
+        zones.remove(toDelete.getId());
 
         return true;
     }
@@ -250,31 +253,35 @@ public class ZoneManager {
     }
 
     public boolean zoneExists(int id) {
-        return _zones.containsKey(id);
+        return zones.containsKey(id);
     }
 
     public void removeDummy(String name) {
         dummyZones.remove(name);
     }
 
-    public void setSelected(String name, int id) {
-        if (_zones.containsKey(id))
-            selectedZones.put(name, id);
+    public void setSelected(String playername, int id) {
+        if (zones.containsKey(id))
+            selectedZones.put(playername, id);
     }
 
-    public int getSelected(String name) {
-        if (!selectedZones.containsKey(name))
+    public int getSelected(String playername) {
+        if (!selectedZones.containsKey(playername))
             return 0;
 
-        return selectedZones.get(name);
+        return selectedZones.get(playername);
+    }
+    
+    public ZoneBase getSelectedZone(String playername) {
+        return getZone(getSelected(playername));
     }
 
-    public void removeSelected(String name) {
-        selectedZones.remove(name);
+    public void removeSelected(String playername) {
+        selectedZones.remove(playername);
     }
 
     public Collection<ZoneBase> getAllZones() {
-        return _zones.values();
+        return zones.values();
     }
 
 }

@@ -1,11 +1,5 @@
 package com.zones.listeners;
 
-import com.zones.World;
-import com.zones.ZoneBase;
-import com.zones.Zones;
-import com.zones.ZonesConfig;
-import com.zones.ZonesAccess.Rights;
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
@@ -15,12 +9,18 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+
+import com.zones.World;
+import com.zones.ZoneBase;
+import com.zones.Zones;
+import com.zones.ZonesAccess.Rights;
+import com.zones.ZonesConfig;
 
 /**
  * 

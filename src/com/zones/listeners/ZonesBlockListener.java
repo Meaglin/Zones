@@ -1,18 +1,6 @@
 package com.zones.listeners;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.zones.World;
-import com.zones.ZoneManager;
-import com.zones.ZoneBase;
-import com.zones.Zones;
-import com.zones.ZonesAccess;
-import com.zones.ZonesConfig;
-import com.zones.ZonesDummyZone;
-
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -21,12 +9,18 @@ import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.BlockRightClickEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
+
+import com.zones.World;
+import com.zones.ZoneBase;
+import com.zones.ZoneManager;
+import com.zones.Zones;
+import com.zones.ZonesAccess;
+import com.zones.ZonesConfig;
+import com.zones.ZonesDummyZone;
 
 /**
  * 
