@@ -137,12 +137,12 @@ public class ZonesDummyZone {
 
     private static Settings basicSettings() {
         Settings st = new Settings();
-        st.set(ZoneBase.WATER_ENABLED, true);
-        st.set(ZoneBase.LAVA_ENABLED, true);
-        st.set(ZoneBase.DYNAMITE_ENABLED, ZonesConfig.TNT_ENABLED);
-        st.set(ZoneBase.HEALTH_ENABLED, ZonesConfig.HEALTH_ENABLED);
-        st.set(ZoneBase.SPAWN_ANIMALS, ZonesConfig.ANIMALS_ENABLED);
-        st.set(ZoneBase.SPAWN_MOBS, ZonesConfig.MOBS_ENABLED);
+        st.set(ZonesConfig.WATER_ENABLED_NAME, true);
+        st.set(ZonesConfig.LAVA_ENABLED_NAME, true);
+        st.set(ZonesConfig.DYNAMITE_ENABLED_NAME, ZonesConfig.TNT_ENABLED);
+        st.set(ZonesConfig.HEALTH_ENABLED_NAME, ZonesConfig.HEALTH_ENABLED);
+        st.set(ZonesConfig.SPAWN_ANIMALS_NAME, ZonesConfig.ANIMALS_ENABLED);
+        st.set(ZonesConfig.SPAWN_MOBS_NAME, ZonesConfig.MOBS_ENABLED);
         
         return st;
     }

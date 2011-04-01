@@ -330,6 +330,16 @@ public abstract class ZoneCommand extends Command {
                 "Reloads the zones plugin and all it's zones.",
                 "Nothing extra here."
         });
+        commands.put("/ztoggle", new String[] {
+                "",
+                "[variable name] - toggles variable name.",
+                "[variable name] - toggles variable name, options: \n"
+                + "lava|water - Toggles lava/water flow into the zone. \n"
+                + "mobs|animals - Toggles mobs/animal spawning in the zone.\n"
+                + "health - Enables/Disables Health in the zone.\n"
+                + "tnt - Enables/Disables tnt explosions in the zone.\n"
+                + "leafdecay - Enables/Disables leave decay in the zone."
+        } );
         
     }
 

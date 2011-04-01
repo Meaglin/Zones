@@ -37,16 +37,6 @@ public abstract class ZoneBase {
     private Zones                        zones;
     private String                       world;
     
-    
-    public static final String LAVA_ENABLED = "LavaEnabled";
-    public static final String WATER_ENABLED = "WaterEnabled";
-    public static final String HEALTH_ENABLED = "HealthEnabled";
-    public static final String DYNAMITE_ENABLED = "DynamiteEnabled";
-    public static final String SPAWN_MOBS = "SpawnMobs";
-    public static final String SPAWN_ANIMALS = "SpawnAnimals";
-    
-    
-    
     protected ZoneBase(Zones zones,String world, int id) {
         _id = id;
         this.zones = zones;
@@ -284,6 +274,8 @@ public abstract class ZoneBase {
 
     public abstract boolean allowHealth(Player player);
 
+    public abstract boolean allowLeafDecay(Block b);
+    
     public HashMap<String, Player> getCharactersInside() {
         return _characterList;
     }
@@ -632,34 +624,7 @@ public abstract class ZoneBase {
         return true;
     }
 
-    private boolean setSetting(String name,Object o) {
-        getSettings().set(name, o);
-        return saveSettings();
-    }
-    
-    public boolean isHealthAllowed() {
-        return getSettings().getBool(HEALTH_ENABLED);
-    }
 
-    public boolean isWaterAllowed() {
-        return getSettings().getBool(WATER_ENABLED);
-    }
-
-    public boolean isLavaAllowed() {
-        return getSettings().getBool(LAVA_ENABLED);
-    }
-
-    public boolean isDynamiteAllowed() {
-        return getSettings().getBool(DYNAMITE_ENABLED);
-    }
-
-    public boolean isMobsAllowed() {
-        return getSettings().getBool(SPAWN_MOBS);
-    }
-
-    public boolean isAnimalsAllowed() {
-        return getSettings().getBool(SPAWN_ANIMALS);
-    }
 
     public void revalidateInZone(Player player, Location loc) {
 
@@ -686,29 +651,58 @@ public abstract class ZoneBase {
     public Settings getSettings() {
         return settings;
     }
+    
+    public boolean setSetting(String name, boolean b) {
+        getSettings().set(name, b);
+        return saveSettings();
+    } 
+    
+    public boolean isHealthAllowed() {
+        return getSettings().getBool(ZonesConfig.HEALTH_ENABLED_NAME);
+    }
+
+    public boolean isWaterAllowed() {
+        return getSettings().getBool(ZonesConfig.WATER_ENABLED_NAME);
+    }
+
+    public boolean isLavaAllowed() {
+        return getSettings().getBool(ZonesConfig.LAVA_ENABLED_NAME);
+    }
+
+    public boolean isDynamiteAllowed() {
+        return getSettings().getBool(ZonesConfig.DYNAMITE_ENABLED_NAME);
+    }
+
+    public boolean isMobsAllowed() {
+        return getSettings().getBool(ZonesConfig.SPAWN_MOBS_NAME);
+    }
+
+    public boolean isAnimalsAllowed() {
+        return getSettings().getBool(ZonesConfig.SPAWN_ANIMALS_NAME);
+    }
 
     public boolean toggleAnimals() {
-        return setSetting(SPAWN_ANIMALS, !isAnimalsAllowed());
+        return setSetting(ZonesConfig.SPAWN_ANIMALS_NAME, !isAnimalsAllowed());
     }
 
     public boolean toggleWater() {
-        return setSetting(WATER_ENABLED, !isWaterAllowed());
+        return setSetting(ZonesConfig.WATER_ENABLED_NAME, !isWaterAllowed());
     }
 
     public boolean toggleLava() {
-        return setSetting(LAVA_ENABLED, !isLavaAllowed());
+        return setSetting(ZonesConfig.LAVA_ENABLED_NAME, !isLavaAllowed());
     }
 
     public boolean toggleDynamite() {
-        return setSetting(DYNAMITE_ENABLED, !isDynamiteAllowed());
+        return setSetting(ZonesConfig.DYNAMITE_ENABLED_NAME, !isDynamiteAllowed());
     }
 
     public boolean toggleMobs() {
-        return setSetting(SPAWN_MOBS, !isAnimalsAllowed());
+        return setSetting(ZonesConfig.SPAWN_MOBS_NAME, !isAnimalsAllowed());
     }
     
     public boolean toggleHealth() {
-        return setSetting(HEALTH_ENABLED, !isHealthAllowed());
+        return setSetting(ZonesConfig.HEALTH_ENABLED_NAME, !isHealthAllowed());
     }
 
 }

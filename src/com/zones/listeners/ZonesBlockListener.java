@@ -66,20 +66,13 @@ public class ZonesBlockListener extends BlockListener {
     }
 
     /**
-     * Called when we try to place a block, to see if we can build it
-     */
-    public void onBlockCanBuild(BlockCanBuildEvent event) {
-
-    }
-
-    /**
      * Called when a block flows (water/lava)
      * 
      * @param event
      *            Relevant event details
      */
     @Override
-    public void onBlockFlow(BlockFromToEvent event) {
+    public void onBlockFromTo(BlockFromToEvent event) {
 
         Block blockFrom = event.getBlock();
         Block blockTo = event.getToBlock();
@@ -102,25 +95,6 @@ public class ZonesBlockListener extends BlockListener {
                 event.setCancelled(true);
         }
 
-    }
-
-    /**
-     * Called when a block gets ignited
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    public void onBlockIgnite(BlockIgniteEvent event) {
-
-    }
-
-    /**
-     * Called when block physics occurs
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    public void onBlockPhysics(BlockPhysicsEvent event) {
     }
 
     /**
@@ -191,6 +165,32 @@ public class ZonesBlockListener extends BlockListener {
     }
 
     /**
+     * Called when a block gets ignited
+     * 
+     * @param event
+     *            Relevant event details
+     */
+    public void onBlockIgnite(BlockIgniteEvent event) {
+
+    }
+
+    /**
+     * Called when we try to place a block, to see if we can build it
+     */
+    public void onBlockCanBuild(BlockCanBuildEvent event) {
+
+    }
+    
+    /**
+     * Called when block physics occurs
+     * 
+     * @param event
+     *            Relevant event details
+     */
+    public void onBlockPhysics(BlockPhysicsEvent event) {
+    }
+    
+    /**
      * Called when redstone changes From: the source of the redstone change To:
      * The redstone dust that changed
      * 
@@ -207,6 +207,10 @@ public class ZonesBlockListener extends BlockListener {
      *            Relevant event details
      */
     public void onLeavesDecay(LeavesDecayEvent event) {
+        ZoneBase zone = plugin.getWorldManager().getActiveZone(event.getBlock().getLocation());
+        if(zone != null && !zone.allowLeafDecay(event.getBlock())){
+            event.setCancelled(true);
+        }
     }
 
     /**

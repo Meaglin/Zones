@@ -3,6 +3,7 @@ package com.zones.types;
 import com.zones.World;
 import com.zones.ZoneBase;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -50,6 +51,11 @@ public class ZoneNormal extends ZoneBase {
     @Override
     public boolean allowHealth(Player player) {
         return isHealthAllowed();
+    }
+
+    @Override
+    public boolean allowLeafDecay(Block b) {
+        return getSettings().getBool(ZonesConfig.LEAF_DECAY_ENABLED_NAME);
     }
 
 }

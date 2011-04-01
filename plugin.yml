@@ -34,3 +34,4 @@ commands:
     zedit
     zmerge
     zreload
+    ztoggle

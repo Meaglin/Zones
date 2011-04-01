@@ -26,6 +26,15 @@ public class ZonesConfig {
     public static boolean      FALL_DAMAGE_ENABLED;
     public static boolean      TNT_ENABLED;
 
+    public static final String LAVA_ENABLED_NAME = "LavaEnabled";
+    public static final String WATER_ENABLED_NAME = "WaterEnabled";
+    public static final String HEALTH_ENABLED_NAME = "HealthEnabled";
+    public static final String DYNAMITE_ENABLED_NAME = "DynamiteEnabled";
+    public static final String SPAWN_MOBS_NAME = "SpawnMobs";
+    public static final String SPAWN_ANIMALS_NAME = "SpawnAnimals";
+    public static final String LEAF_DECAY_ENABLED_NAME = "LeafDecay";
+    
+    
     public static void load() {
         try {
             Properties zp = new Properties(new File(ZONES_CONFIG_FILE));

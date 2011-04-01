@@ -14,16 +14,18 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerInventoryEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.zones.World;
@@ -53,7 +55,7 @@ public class ZonesPlayerListener extends PlayerListener {
      *            Relevant event details
      */
     @Override
-    public void onPlayerJoin(PlayerEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         World.getInstance().getRegion(event.getPlayer()).revalidateZones(event.getPlayer());
     }
 
@@ -64,7 +66,7 @@ public class ZonesPlayerListener extends PlayerListener {
      *            Relevant event details
      */
     @Override
-    public void onPlayerQuit(PlayerEvent event) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
         if (dummy != null) {
@@ -114,7 +116,7 @@ public class ZonesPlayerListener extends PlayerListener {
      *            Relevant event details
      */
     @Override
-    public void onPlayerTeleport(PlayerMoveEvent event) {
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
 
         Player player = event.getPlayer();
         Location from = event.getFrom();
@@ -167,6 +169,34 @@ public class ZonesPlayerListener extends PlayerListener {
                 ZoneBase zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
                 int type = event.getItem().getTypeId();
                 Player player = event.getPlayer();
+                if (type == Zones.toolType) {
+                    ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
+                    if (dummy != null) {
+                        if (dummy.getType() == 1 && dummy.getCoords().size() == 2) {
+                            player.sendMessage(ChatColor.RED.toString() + "You can only use 2 points to define a cuboid zone.");
+                            return;
+                        }
+                        int[] p = new int[2];
+
+                        p[0] = World.toInt(event.getClickedBlock().getX());
+                        p[1] = World.toInt(event.getClickedBlock().getZ());
+
+                        if (event.getClickedBlock().getY() < World.MAX_Z - Zones.pilonHeight) {
+                            for (int i = 1; i <= Zones.pilonHeight; i++) {
+                                Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
+                                dummy.addDeleteBlock(t);
+                                t.setTypeId(Zones.pilonType);
+                            }
+                        }
+                        if (dummy.getCoords().contains(p)) {
+                            player.sendMessage(ChatColor.RED.toString() + "Already added this point.");
+                        }
+
+                        player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
+                        dummy.addCoords(p);
+                    }
+                }
+                
                 if (items.contains(type)){
                     if (zone != null && !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
                         player.sendMessage(ChatColor.RED.toString() + "You cannot place blocks in '" + zone.getName() + "' !");

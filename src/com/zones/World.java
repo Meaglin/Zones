@@ -20,9 +20,7 @@ public class World {
     public static final int X_REGIONS  = ((MAX_X - MIN_X) >> SHIFT_SIZE) + 1;
     public static final int Y_REGIONS  = ((MAX_Y - MIN_Y) >> SHIFT_SIZE) + 1;
 
-    @SuppressWarnings("unused")
     public static final int XMOD       = (MIN_X < 0 ? -1 : 1);
-    @SuppressWarnings("unused")
     public static final int YMOD       = (MIN_Y < 0 ? -1 : 1);
 
     public static final int OFFSET_X   = ((MIN_X * XMOD) >> SHIFT_SIZE) * XMOD;
