@@ -30,24 +30,40 @@ public class Settings {
         Object o = get(name);
         if(o != null && o instanceof Boolean)
             return ((Boolean)o).booleanValue();
-        else
+        else {
+            if(o == null)this.set(name, false);
             return false;
+        }
+    }
+    
+    public boolean getBool(String name, boolean def) {
+        Object o = get(name);
+        if(o != null && o instanceof Boolean)
+            return ((Boolean)o).booleanValue();
+        else {
+            if(o == null)this.set(name, def);
+            return def;
+        }
     }
     
     public int getInt(String name) {
         Object o = get(name);
         if(o != null && o instanceof Integer)
             return ((Integer)o).intValue();
-        else
+        else {
+            if(o == null)this.set(name, 0);
             return 0;
+        }
     }
     
     public String getString(String name) {
         Object o = get(name);
         if(o != null && o instanceof String)
             return ((String)o);
-        else
+        else {
+            if(o == null)this.set(name, "");
             return "";
+        }
     }
     
     public Object get(String name) {

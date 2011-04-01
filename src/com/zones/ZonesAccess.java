@@ -54,28 +54,31 @@ public class ZonesAccess {
         }
     }
 
-    private int _rights = 0;
+    private int rights = 0;
 
     public ZonesAccess(int right) {
-        _rights = right;
+        rights = right;
     }
 
     public ZonesAccess(String rightsString) {
         for (Rights right : Rights.getRights())
             if (rightsString.toLowerCase().contains(right.getCode()))
-                _rights |= right.getFlag();
+                rights |= right.getFlag();
+        
+        if(rightsString.contains("m"))
+            rights |= Rights.MODIFY.getFlag();
     }
 
     public ZonesAccess merge(ZonesAccess acs) {
-        return new ZonesAccess(_rights | acs.getRights());
+        return new ZonesAccess(rights | acs.getRights());
     }
 
     public int getRights() {
-        return _rights;
+        return rights;
     }
 
     public boolean canDo(Rights right) {
-        return right.canDo(_rights);
+        return right.canDo(rights);
     }
 
     public boolean canBuild() {
@@ -103,7 +106,7 @@ public class ZonesAccess {
     }
 
     public boolean canNothing() {
-        return (_rights & Rights.ALL.flag) == 0;
+        return (rights & Rights.ALL.flag) == 0;
     }
 
     @Override

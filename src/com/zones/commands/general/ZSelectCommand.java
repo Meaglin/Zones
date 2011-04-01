@@ -13,7 +13,7 @@ import com.zones.commands.ZoneCommand;
 public class ZSelectCommand extends ZoneCommand {
 
     public ZSelectCommand(Zones plugin) {
-        super("zcreate", plugin);
+        super("zselect", plugin);
     }
 
     @Override

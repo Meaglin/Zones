@@ -3,21 +3,22 @@ package com.zones.commands.admin;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
+import com.zones.types.ZoneNormal;
 
 public class ZAddAdminCommand extends ZoneCommand {
 
     public ZAddAdminCommand(Zones plugin) {
         super("zaddadmin", plugin);
         this.setRequiresSelected(true);
+        this.setRequiresZoneNormal(true);
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
         if (vars.length == 1) {
-            ZoneBase zone = getSelectedZone(player);
+            ZoneNormal zone = getSelectedNormalZone(player);
 
             Player p = getPlugin().getServer().getPlayer(vars[0]);
 

@@ -11,11 +11,12 @@ public class ZGetAccessCommand extends ZoneCommand {
     public ZGetAccessCommand(Zones plugin) {
         super("zgetaccess", plugin);
         this.setRequiresSelected(true);
+        this.setRequiresZoneNormal(true);
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
-        getSelectedZone(player).sendAccess(player);
+        getSelectedNormalZone(player).sendAccess(player);
         return true;
     }
 

@@ -32,7 +32,6 @@ import com.zones.World;
 import com.zones.ZoneBase;
 import com.zones.ZoneManager;
 import com.zones.Zones;
-import com.zones.ZonesAccess;
 import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
 
@@ -92,18 +91,17 @@ public class ZonesPlayerListener extends PlayerListener {
         
         ZoneBase aZone = World.getInstance().getActiveZone(from);
         ZoneBase bZone = World.getInstance().getActiveZone(to);
-        if (bZone != null && ((aZone != null && aZone.getId() != bZone.getId() && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) || (aZone == null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)))) {
+        if (bZone != null && !bZone.allowEnter(player, to)) {
             event.setCancelled(true);
             player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
+            if (aZone != null && !aZone.allowEnter(player, from)) {
+                event.setFrom(player.getWorld().getSpawnLocation());
+                player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
+                World.getInstance().revalidateZones(player, from, player.getWorld().getSpawnLocation());
+            } 
             // we don't have to do overall revalidation if the player gets
             // warped back to his previous location.
             return;
-        }
-        if (bZone != null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) {
-            event.setFrom(player.getWorld().getSpawnLocation());
-            event.setCancelled(true);
-            //player.teleportTo(player.getWorld().getSpawnLocation());
-            player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
         }
 
         World.getInstance().revalidateZones(player, from, to);
@@ -123,9 +121,20 @@ public class ZonesPlayerListener extends PlayerListener {
         Location to = event.getTo();
         ZoneBase aZone = World.getInstance().getActiveZone(from);
         ZoneBase bZone = World.getInstance().getActiveZone(to);
-        if (bZone != null && ((aZone != null && aZone.getId() != bZone.getId() && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) || (aZone == null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)))) {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");
-            event.setCancelled(true);
+        
+        if(aZone != null) {
+            if(!aZone.allowTeleport(player, from) && aZone.allowEnter(player, from)) {
+                player.sendMessage(ChatColor.RED + "Your area doesn't allow teleporting.");
+                event.setCancelled(true);
+                return;
+            }
+        }
+        if(bZone != null){
+            if(!bZone.allowTeleport(player, to)) {
+                player.sendMessage(ChatColor.RED + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");
+                event.setCancelled(true);
+                return;
+            }
         }
 
         World.getInstance().revalidateZones(player, from, to);
@@ -168,6 +177,7 @@ public class ZonesPlayerListener extends PlayerListener {
                 Block blockPlaced = event.getClickedBlock().getRelative(event.getBlockFace());
                 ZoneBase zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
                 int type = event.getItem().getTypeId();
+                int blocktype = event.getClickedBlock().getTypeId();
                 Player player = event.getPlayer();
                 if (type == Zones.toolType) {
                     ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
@@ -197,42 +207,50 @@ public class ZonesPlayerListener extends PlayerListener {
                     }
                 }
                 
-                if (items.contains(type)){
-                    if (zone != null && !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
-                        player.sendMessage(ChatColor.RED.toString() + "You cannot place blocks in '" + zone.getName() + "' !");
-                        event.setCancelled(true);
-                    } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.BUILD)))
-                        return;
-                    else
-                        event.setCancelled(true);
-                } else if(containers.contains(type) || type == Material.NOTE_BLOCK.getId()) {
-                    if(zone != null && !zone.canModify(player, ZonesAccess.Rights.MODIFY)) {
-                        if (type == Material.CHEST.getId())
-                            player.sendMessage(ChatColor.RED.toString() + "You cannot change chests in '" + zone.getName() + "' !");
-                        else if (type == Material.FURNACE.getId() || type == Material.BURNING_FURNACE.getId())
-                            player.sendMessage(ChatColor.RED.toString() + "You cannot change furnaces in '" + zone.getName() + "' !");
-                        else if (type == Material.DISPENSER.getId())
-                            player.sendMessage(ChatColor.RED.toString() + "You cannot change dispensers in '" + zone.getName() + "' !");
-                            
-                        event.setCancelled(true);
-                    } else if (zone != null && type == Material.NOTE_BLOCK.getId() && !zone.canModify(player, ZonesAccess.Rights.HIT)) {
+                
+                if(containers.contains(blocktype) || blocktype == Material.NOTE_BLOCK.getId()) {
+                    if(zone != null) {
                         
-                        player.sendMessage(ChatColor.RED.toString() + "You cannot change Note blocks in '" + zone.getName() + "' !");
-
-                        event.setCancelled(true);
-                    } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.MODIFY)))
-                        return;
-                    else {
-
-                        if (type == Material.CHEST.getId())
+                        if(blocktype == Material.NOTE_BLOCK.getId()) {
+                            if(!zone.allowBlockHit(player, event.getClickedBlock())) {
+                                player.sendMessage(ChatColor.RED.toString() + "You cannot change Note blocks in '" + zone.getName() + "' !");
+                                event.setCancelled(true);
+                            }
+                        } else {
+                            if(!zone.allowBlockModify(player, event.getClickedBlock())) {
+                                if (blocktype == Material.CHEST.getId())
+                                    player.sendMessage(ChatColor.RED.toString() + "You cannot change chests in '" + zone.getName() + "' !");
+                                else if (blocktype == Material.FURNACE.getId() || type == Material.BURNING_FURNACE.getId())
+                                    player.sendMessage(ChatColor.RED.toString() + "You cannot change furnaces in '" + zone.getName() + "' !");
+                                else if (blocktype == Material.DISPENSER.getId())
+                                    player.sendMessage(ChatColor.RED.toString() + "You cannot change dispensers in '" + zone.getName() + "' !");
+                                    
+                                event.setCancelled(true);
+                            }
+                        }
+                    } else if(ZonesConfig.LIMIT_BY_BUILD_ENABLED && !plugin.getP().permission(player, "zones.build")) {
+                        if (blocktype == Material.CHEST.getId())
                             player.sendMessage(ChatColor.RED.toString() + "You cannot change chests in the world !");
-                        else if (type == Material.FURNACE.getId() || type == Material.BURNING_FURNACE.getId())
+                        else if (blocktype == Material.FURNACE.getId() || type == Material.BURNING_FURNACE.getId())
                             player.sendMessage(ChatColor.RED.toString() + "You cannot change furnaces in the world !");
-                        else if (type == Material.DISPENSER.getId())
+                        else if (blocktype == Material.DISPENSER.getId())
                             player.sendMessage(ChatColor.RED.toString() + "You cannot change dispensers in the world !");
-                        
+                        else if (blocktype == Material.NOTE_BLOCK.getId())
+                            player.sendMessage(ChatColor.RED.toString() + "You cannot change Note blocks in the world !");
                         event.setCancelled(true);
-                    }
+                    } 
+                } else if (items.contains(type)){
+                    if (zone != null) {
+                        if(!zone.allowBlockCreate(player,blockPlaced)) {
+                            player.sendMessage(ChatColor.RED.toString() + "You cannot place blocks in '" + zone.getName() + "' !");
+                            event.setCancelled(true);
+                        } else if(ZonesConfig.LIMIT_BY_BUILD_ENABLED && !plugin.getP().permission(player, "zones.build")) {
+                            player.sendMessage(ChatColor.RED.toString() + "You cannot place blocks in the world !");
+                            event.setCancelled(true);
+                        }
+                    } else if (ZonesConfig.LIMIT_BY_BUILD_ENABLED && !plugin.getP().permission(player, "zones.build"))
+                        event.setCancelled(true);
+                    
                 }
                 break;
             case LEFT_CLICK_BLOCK:

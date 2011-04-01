@@ -26,6 +26,9 @@ public class ZonesConfig {
     public static boolean      FALL_DAMAGE_ENABLED;
     public static boolean      TNT_ENABLED;
 
+    public static final String ALLOW_TELEPORT_NAME = "PreventTeleport";
+    public static final String ALLOW_FIRE_NAME = "AllowFire";
+    
     public static final String LAVA_ENABLED_NAME = "LavaEnabled";
     public static final String WATER_ENABLED_NAME = "WaterEnabled";
     public static final String HEALTH_ENABLED_NAME = "HealthEnabled";

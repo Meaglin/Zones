@@ -143,7 +143,7 @@ public class ZonesDummyZone {
         st.set(ZonesConfig.HEALTH_ENABLED_NAME, ZonesConfig.HEALTH_ENABLED);
         st.set(ZonesConfig.SPAWN_ANIMALS_NAME, ZonesConfig.ANIMALS_ENABLED);
         st.set(ZonesConfig.SPAWN_MOBS_NAME, ZonesConfig.MOBS_ENABLED);
-        
+        st.set(ZonesConfig.LEAF_DECAY_ENABLED_NAME, true);
         return st;
     }
     

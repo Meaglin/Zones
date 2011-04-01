@@ -1,5 +1,5 @@
 package com.zones;
-
+/*
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 /**
  *
  * @author Meaglin
- */
+ *
 public class ZonesCommandsHandler {
 
 
@@ -632,3 +632,4 @@ public class ZonesCommandsHandler {
 
 
 }
+*/

@@ -10,7 +10,7 @@ import com.zones.commands.general.*;
 import com.zones.commands.settings.*;
 
 public class ZoneCommandMap {
-    private HashMap<String, ZoneCommand> commands;
+    private HashMap<String, ZoneCommand> commands = new HashMap<String, ZoneCommand>();;
     private Zones   plugin;
     protected static final Logger      log             = Logger.getLogger("Minecraft");
     
@@ -20,23 +20,25 @@ public class ZoneCommandMap {
     }
     
     public void load() {
-        commands = new HashMap<String, ZoneCommand>();
-        registerCommand(new ZSetNameCommand(plugin));
-        registerCommand(new ZGetAccessCommand(plugin));
+        commands.clear();
         
-        registerCommand(new ZDeleteCommand(plugin));
 
-        registerCommand(new ZSetUserCommand(plugin));
-        registerCommand(new ZSetGroupCommand(plugin));
         registerCommand(new ZAddAdminCommand(plugin));
+        registerCommand(new ZDeleteCommand(plugin));
+        registerCommand(new ZGetAccessCommand(plugin));
+        registerCommand(new ZReloadCommand(plugin));
         registerCommand(new ZRemoveAdminCommand(plugin));
+        registerCommand(new ZSetGroupCommand(plugin));
+        registerCommand(new ZSetUserCommand(plugin));
         
+        registerCommand(new ZSetNameCommand(plugin));
         registerCommand(new ZToggleAnimalsCommand(plugin));
         registerCommand(new ZToggleDynamiteCommand(plugin));
         registerCommand(new ZToggleHealthCommand(plugin));
         registerCommand(new ZToggleLavaCommand(plugin));
         registerCommand(new ZToggleMobsCommand(plugin));
         registerCommand(new ZToggleWaterCommand(plugin));
+        registerCommand(new ZToggleCommand(plugin));
         
         registerCommand(new ZAddCommand(plugin));
         registerCommand(new ZConfirmCommand(plugin));

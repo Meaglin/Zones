@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import com.zones.ZoneBase;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
 
 public class ZToggleMobsCommand extends ZoneCommand {
@@ -21,8 +22,8 @@ public class ZToggleMobsCommand extends ZoneCommand {
             return true;
         }
         ZoneBase z = getSelectedZone(player);
-        if(z.toggleMobs())
-            player.sendMessage(ChatColor.GREEN.toString() + "Mobs spawning is now "+(z.isMobsAllowed() ? "enabled" : "disabled" )+".");
+        if(z.setSetting(ZonesConfig.SPAWN_MOBS_NAME, !z.getSettings().getBool(ZonesConfig.SPAWN_MOBS_NAME, ZonesConfig.MOBS_ENABLED)))
+            player.sendMessage(ChatColor.GREEN.toString() + "Mobs spawning is now "+(z.getSettings().getBool(ZonesConfig.SPAWN_MOBS_NAME, ZonesConfig.MOBS_ENABLED) ? "enabled" : "disabled" )+".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Unable to change mobs flag, please contact a admin.");
         

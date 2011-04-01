@@ -9,17 +9,16 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 import com.zones.World;
 import com.zones.ZoneBase;
 import com.zones.Zones;
-import com.zones.ZonesAccess.Rights;
 import com.zones.ZonesConfig;
 
 /**
@@ -61,7 +60,7 @@ public class ZonesEntityListener extends EntityListener {
         }
         if(attacker != null && zone != null && attacker instanceof Player) {
             Player att = (Player)attacker;
-            if(!zone.canModify(att, Rights.HIT)) {
+            if(!zone.allowEntityHit(att, defender)) {
                 att.sendMessage(ChatColor.RED + "You cannot kill entity's in " + zone.getName() + "!");
                 event.setCancelled(true);
             }
@@ -90,9 +89,7 @@ public class ZonesEntityListener extends EntityListener {
             else if (event.getEntity() instanceof Monster && !ZonesConfig.MOBS_ENABLED)
                 event.setCancelled(true);
         } else {
-            if (event.getEntity() instanceof Animals && !zone.isAnimalsAllowed())
-                event.setCancelled(true);
-            else if (event.getEntity() instanceof Monster && !zone.isAnimalsAllowed())
+            if (!zone.allowSpawn(event.getEntity()))
                 event.setCancelled(true);
         }
     }

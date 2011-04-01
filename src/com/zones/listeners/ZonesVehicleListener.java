@@ -16,7 +16,6 @@ import org.bukkit.event.vehicle.VehicleMoveEvent;
 import com.zones.World;
 import com.zones.ZoneBase;
 import com.zones.Zones;
-import com.zones.ZonesAccess;
 
 /**
  * 
@@ -50,10 +49,12 @@ public class ZonesVehicleListener extends VehicleListener {
         Entity attacker = event.getAttacker();
         if (!(attacker instanceof Player))
             return;
+        
+        Player player = (Player)attacker;
 
-        ZoneBase z = World.getInstance().getActiveZone(event.getVehicle().getLocation());
-        if (z != null && !z.canModify((Player) attacker, ZonesAccess.Rights.HIT)) {
-            ((Player) attacker).sendMessage("You cannot damage vehicles in '" + z.getName() + "'!");
+        ZoneBase zone = World.getInstance().getActiveZone(event.getVehicle().getLocation());
+        if (zone != null && !zone.allowEntityHit(player, event.getVehicle())) {
+            player.sendMessage("You cannot damage vehicles in '" + zone.getName() + "'!");
             event.setCancelled(true);
         }
     }
@@ -101,22 +102,22 @@ public class ZonesVehicleListener extends VehicleListener {
         if (entity == null || !(entity instanceof Player))
             return;
         Player player = (Player) entity;
-
         Location from = event.getFrom();
         Location to = event.getTo();
+        
         ZoneBase aZone = World.getInstance().getActiveZone(from);
         ZoneBase bZone = World.getInstance().getActiveZone(to);
-        if (bZone != null && ((aZone != null && aZone.getId() != bZone.getId() && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) || (aZone == null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)))) {
-            player.teleport(from);
+        if (bZone != null && !bZone.allowEnter(player, to)) {
+            event.getVehicle().teleport(from);
             player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
+            if (aZone != null && !aZone.allowEnter(player, from)) {
+                event.getVehicle().teleport(player.getWorld().getSpawnLocation());
+                player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
+                World.getInstance().revalidateZones(player, from, player.getWorld().getSpawnLocation());
+            } 
             // we don't have to do overall revalidation if the player gets
             // warped back to his previous location.
             return;
-        }
-        if (bZone != null && !bZone.canModify(player, ZonesAccess.Rights.ENTER)) {
-            event.getVehicle().eject();
-            player.teleport(player.getWorld().getSpawnLocation());
-            player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
         }
 
         World.getInstance().revalidateZones(player, from, to);

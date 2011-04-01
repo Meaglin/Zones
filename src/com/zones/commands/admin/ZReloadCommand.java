@@ -14,9 +14,13 @@ public class ZReloadCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        getWorldManager().load();
-        getZoneManager().load(getPlugin());
-        player.sendMessage("Zones Revision " + Zones.Rev + " reloaded.");
+
+        if(!getPlugin().reload())
+            player.sendMessage("[Zones]Error while reloading, please contact an server admin.");
+        else
+            player.sendMessage("[Zones]Revision " + Zones.Rev + " reloaded.");
+
+        
         return true;
     }
 

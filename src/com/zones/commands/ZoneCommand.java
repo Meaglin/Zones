@@ -14,6 +14,7 @@ import com.zones.ZoneManager;
 import com.zones.Zones;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.create.ZConfirmCommand;
+import com.zones.types.ZoneNormal;
 
 public abstract class ZoneCommand extends Command {
 
@@ -22,6 +23,7 @@ public abstract class ZoneCommand extends Command {
     private boolean requiresDummy;
     private boolean requiresCreate;
     private boolean requiresAdmin;
+    private boolean requiresZoneNormal;
     
     public ZoneCommand(String name, Zones plugin) {
         super(name);
@@ -98,6 +100,10 @@ public abstract class ZoneCommand extends Command {
         return getZoneManager().getSelectedZone(p.getName().toLowerCase());
     }
     
+    protected ZoneNormal getSelectedNormalZone(Player p) {
+        return (ZoneNormal) getSelectedZone(p);
+    }
+    
     @Override
     public boolean execute(CommandSender sender, String alias, String[] vars) {
         if(sender instanceof Player) {
@@ -115,6 +121,8 @@ public abstract class ZoneCommand extends Command {
                     p.sendMessage(ChatColor.RED + "Please create a dummy zone first with:");
                     p.sendMessage(ChatColor.RED + "/zcreate [zone name]");
                 }
+            } else if(requiresZoneNormal() && (!hasSelected(p) || !(getSelectedZone(p) instanceof ZoneNormal))){
+                p.sendMessage(ChatColor.RED + "This zone doesn't allow this type of command.");
             } else {
                 if(requiresDummy() && !(this instanceof ZConfirmCommand)){
                     getDummy(p).setConfirm(null);
@@ -338,12 +346,23 @@ public abstract class ZoneCommand extends Command {
                 + "mobs|animals - Toggles mobs/animal spawning in the zone.\n"
                 + "health - Enables/Disables Health in the zone.\n"
                 + "tnt - Enables/Disables tnt explosions in the zone.\n"
-                + "leafdecay - Enables/Disables leave decay in the zone."
+                + "leafdecay - Enables/Disables leave decay in the zone.\n"
+                + "teleport - Enables/Disables teleporting in/out of the zone.\n"
+                + "fire - Enables/Disables fire in the zone."
+                
         } );
         
     }
 
 
     protected static Map<String, String[]> getCommands() { return commands; }
+
+    public void setRequiresZoneNormal(boolean requiresZoneNormal) {
+        this.requiresZoneNormal = requiresZoneNormal;
+    }
+
+    public boolean requiresZoneNormal() {
+        return requiresZoneNormal;
+    }
 
 }

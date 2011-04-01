@@ -18,7 +18,6 @@ import com.zones.World;
 import com.zones.ZoneBase;
 import com.zones.ZoneManager;
 import com.zones.Zones;
-import com.zones.ZonesAccess;
 import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
 
@@ -109,16 +108,16 @@ public class ZonesBlockListener extends BlockListener {
         Block blockPlaced = event.getBlockPlaced();
 
         ZoneBase zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
-        if (zone != null && !zone.canModify(player, ZonesAccess.Rights.BUILD)) {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot place blocks in '" + zone.getName() + "' !");
+        if (zone != null && !zone.allowBlockCreate(player, blockPlaced)) {
+            player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' .");
             event.setBuild(false);
-        } else if (zone != null && (blockPlaced.getTypeId() == 54 || blockPlaced.getTypeId() == 61 || blockPlaced.getTypeId() == 62) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)) {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
+        } else if (zone != null && (blockPlaced.getTypeId() == 54 || blockPlaced.getTypeId() == 61 || blockPlaced.getTypeId() == 62) && !zone.allowBlockModify(player, blockPlaced)) {
+            player.sendMessage(ChatColor.RED + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
             event.setBuild(false);
-        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.BUILD)))
+        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.allowBlockModify(player, blockPlaced)))
             return;
         else {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot build in the world.");
+            player.sendMessage(ChatColor.RED + "You cannot build in the world.");
             event.setBuild(false);
         }
     }
@@ -171,7 +170,9 @@ public class ZonesBlockListener extends BlockListener {
      *            Relevant event details
      */
     public void onBlockIgnite(BlockIgniteEvent event) {
-
+        ZoneBase zone = plugin.getWorldManager().getActiveZone(event.getBlock().getLocation());
+        if((zone != null && !zone.allowFire(event.getPlayer(), event.getBlock())) || !ZonesConfig.FIRE_ENABLED)
+            event.setCancelled(true);
     }
 
     /**
@@ -237,15 +238,15 @@ public class ZonesBlockListener extends BlockListener {
 
         
         ZoneBase zone = World.getInstance().getActiveZone(block.getLocation());
-        if (zone != null && !zone.canModify(player, ZonesAccess.Rights.DESTROY)) {
+        if (zone != null && !zone.allowBlockDestroy(player, block)) {
             player.sendMessage(ChatColor.RED.toString() + "You cannot destroy blocks in '" + zone.getName() + "' !");
             event.setCancelled(true);
-        } else if (zone != null && (block.getTypeId() == 54 || block.getTypeId() == 61 || block.getTypeId() == 62) && !zone.canModify(player, ZonesAccess.Rights.MODIFY)) {
+        } else if (zone != null && (block.getTypeId() == 54 || block.getTypeId() == 61 || block.getTypeId() == 62) && !zone.allowBlockModify(player, block)) {
 
             player.sendMessage(ChatColor.RED.toString() + "You cannot destroy a chest/furnace in '" + zone.getName() + "' since you dont have modify rights!");
 
             event.setCancelled(true);
-        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.canModify(player, ZonesAccess.Rights.DESTROY)))
+        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.allowBlockDestroy(player, block)))
             return;
         else {
             player.sendMessage(ChatColor.RED.toString() + "You cannot destroy in the world.");

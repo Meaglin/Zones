@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import com.zones.ZoneBase;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
 
 public class ZToggleAnimalsCommand extends ZoneCommand {
@@ -22,8 +23,8 @@ public class ZToggleAnimalsCommand extends ZoneCommand {
         }
         
         ZoneBase z = getSelectedZone(player);
-        if(z.toggleAnimals())
-            player.sendMessage(ChatColor.GREEN.toString() + "Animal spawning is now "+(z.isAnimalsAllowed() ? "enabled" : "disabled" )+".");
+        if(z.setSetting(ZonesConfig.SPAWN_ANIMALS_NAME, !z.getSettings().getBool(ZonesConfig.SPAWN_ANIMALS_NAME, ZonesConfig.ANIMALS_ENABLED)))
+            player.sendMessage(ChatColor.GREEN.toString() + "Animal spawning is now "+(z.getSettings().getBool(ZonesConfig.SPAWN_ANIMALS_NAME, ZonesConfig.ANIMALS_ENABLED) ? "enabled" : "disabled" )+".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Unable to change animals flag, please contact a admin.");
         

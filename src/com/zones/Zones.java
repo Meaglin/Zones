@@ -30,7 +30,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int            Rev             = 31;
+    public static final int            Rev             = 40;
     protected static final Logger      log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener  playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener   blockListener   = new ZonesBlockListener(this);
@@ -164,6 +164,17 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return ZoneManager.getInstance();
     }
     
+    public boolean reload() {
+        try {
+            getWorldManager().load();
+            getZoneManager().load(this);
+            commandMap.load();
+        } catch(Throwable t) {
+            t.printStackTrace();
+            return false;
+        }
+        return true;
+    }
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         ZoneCommand cmd = commandMap.getCommand(label);
         if(cmd != null) {
