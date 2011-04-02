@@ -10,6 +10,7 @@ commands:
     zremove
     zsetplot
     zsetheight
+    zimport
     zsetdepth
     zsave
     zconfirm

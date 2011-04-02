@@ -18,6 +18,7 @@ public class ZonesConfig {
     public static String       DATABASE_URL;
     public static String       DATABASE_LOGIN;
     public static String       DATABASE_PASSWORD;
+    public static boolean      WORLDEDIT_ENABLED;
 
     public static String       ZONES_TABLE;
     public static String       ZONES_VERTICES_TABLE;
@@ -49,6 +50,7 @@ public class ZonesConfig {
             DATABASE_URL = zp.getProperty("URL", "jdbc:mysql://localhost/Minecraft");
             DATABASE_LOGIN = zp.getProperty("Login", "root");
             DATABASE_PASSWORD = zp.getProperty("Password", "");
+            WORLDEDIT_ENABLED = zp.getBool("EnableWorldEdit", false);
 
             ZONES_TABLE = zp.getProperty("ZonesTable", "zones");
             ZONES_VERTICES_TABLE = zp.getProperty("ZonesVerticesTable", "zones_vertices");

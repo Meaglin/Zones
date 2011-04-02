@@ -2,6 +2,7 @@ package com.zones;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.zones.commands.ZoneCommand;
 import com.zones.commands.ZoneCommandMap;
 import com.zones.listeners.ZonesBlockListener;
@@ -48,8 +49,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public static final int            toolType        = 280;
     private final ZoneCommandMap      commandMap = new ZoneCommandMap(this);
     
-    
-    PermissionHandler accessmanager;
+    private WorldEditPlugin   worldedit;
+    private PermissionHandler accessmanager;
     
     public Zones() {
         
@@ -79,6 +80,13 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.High);
         registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.High);
+    }
+
+    public void registerWorldEdit() {
+        Plugin plugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
+        if(worldedit == null)
+            if(plugin != null)
+                worldedit = (WorldEditPlugin) plugin;
     }
 
     /**
@@ -159,6 +167,11 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     public PermissionHandler getP() {
         return accessmanager;
+    }
+
+    public WorldEditPlugin getWorldEdit()
+    {
+        return worldedit;
     }
     
     public World getWorldManager() {

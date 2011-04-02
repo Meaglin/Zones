@@ -50,6 +50,7 @@ public class ZoneCommandMap {
         registerCommand(new ZCreateCommand(plugin));
         registerCommand(new ZEditCommand(plugin));
         registerCommand(new ZMergeCommand(plugin));
+        registerCommand(new ZImportCommand(plugin));
         registerCommand(new ZRemoveCommand(plugin));
         registerCommand(new ZSaveCommand(plugin));
         registerCommand(new ZSetDepthCommand(plugin));
