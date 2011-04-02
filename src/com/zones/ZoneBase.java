@@ -18,17 +18,17 @@ import com.zones.util.Settings;
  * @author durgus, Meaglin
  */
 public abstract class ZoneBase {
-    protected static final Logger        log           = Logger.getLogger(ZoneBase.class.getName());
+    protected static final Logger     log = Logger.getLogger(ZoneBase.class.getName());
 
-    private final int                    id;
-    protected ZoneForm                  form;
-    protected HashMap<String, Player>    characterList;
+    private final int                 id;
+    protected ZoneForm                form;
+    protected HashMap<String, Player> characterList;
 
-    private String                       name;
-    private Settings                    settings;
+    private String                    name;
+    private Settings                  settings;
 
-    protected Zones                        zones;
-    protected String                       world;
+    protected Zones                   zones;
+    protected String                  world;
     
     protected ZoneBase(Zones zones,String world, int id) {
         this.id = id;

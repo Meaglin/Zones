@@ -6,7 +6,7 @@ import com.zones.ZoneForm;
  * A not so primitive npoly zone
  * 
  * 
- * @author durgus
+ * @author durgus, Meaglin
  */
 public class ZoneNPoly extends ZoneForm {
     private int[] _x;

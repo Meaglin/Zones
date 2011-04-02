@@ -5,6 +5,11 @@ import java.util.logging.Logger;
 
 import com.zones.util.Properties;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZonesConfig {
     public static final String ZONES_CONFIG_FILE = "./plugins/zones/Zones.properties";
 

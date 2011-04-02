@@ -6,6 +6,11 @@ import com.zones.Region;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZRegionInfoCommand extends ZoneCommand {
 
     public ZRegionInfoCommand(Zones plugin) {

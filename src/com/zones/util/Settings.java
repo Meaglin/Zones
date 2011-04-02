@@ -3,6 +3,11 @@ package com.zones.util;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class Settings {
     private HashMap<String, Object> settings;
     

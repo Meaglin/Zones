@@ -8,6 +8,11 @@ import com.zones.Zones;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZSetDepthCommand extends ZoneCommand {
     
     public ZSetDepthCommand(Zones plugin)  {

@@ -10,6 +10,11 @@ import com.zones.ZoneManager;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZSelectCommand extends ZoneCommand {
 
     public ZSelectCommand(Zones plugin) {

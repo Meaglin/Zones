@@ -22,6 +22,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZoneNormal extends ZoneBase {
 
     private List<String>                 admingroups;

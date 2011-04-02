@@ -9,6 +9,11 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public final class Properties extends java.util.Properties {
     private static final long serialVersionUID = 1L;
 

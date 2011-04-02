@@ -8,6 +8,11 @@ import com.zones.ZonesAccess;
 import com.zones.commands.ZoneCommand;
 import com.zones.types.ZoneNormal;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZSetUserCommand extends ZoneCommand {
 
     public ZSetUserCommand(Zones plugin) {

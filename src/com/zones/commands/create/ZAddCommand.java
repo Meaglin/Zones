@@ -8,6 +8,11 @@ import com.zones.Zones;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZAddCommand extends ZoneCommand{
 
     public ZAddCommand(Zones plugin) {

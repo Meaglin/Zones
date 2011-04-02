@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class World {
     public static final int MIN_X      = -10240;
     public static final int MAX_X      = 10240;

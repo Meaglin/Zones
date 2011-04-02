@@ -12,6 +12,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZoneManager {
     private HashMap<Integer, ZoneBase>      zones;
     private HashMap<String, ZonesDummyZone> dummyZones;

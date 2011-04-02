@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class Region {
 
     private ArrayList<ZoneBase> _zones;

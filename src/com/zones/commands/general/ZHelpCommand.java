@@ -10,6 +10,11 @@ import org.bukkit.entity.Player;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZHelpCommand extends ZoneCommand {
 
     public ZHelpCommand(Zones plugin) {

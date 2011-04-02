@@ -7,6 +7,11 @@ import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZDeleteCommand extends ZoneCommand {
 
     public ZDeleteCommand(Zones plugin) {

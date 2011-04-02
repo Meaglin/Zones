@@ -7,6 +7,11 @@ import com.zones.Zones;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZSaveCommand extends ZoneCommand {
     
     public ZSaveCommand(Zones plugin) {

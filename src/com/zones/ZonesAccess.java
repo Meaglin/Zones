@@ -3,6 +3,11 @@ package com.zones;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZonesAccess {
     public enum Rights {
         BUILD(1, "b", "Build blocks"),//

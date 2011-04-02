@@ -5,6 +5,11 @@ import org.bukkit.entity.Player;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZSetPlotCommand extends ZoneCommand {
     
     public ZSetPlotCommand(Zones plugin) {

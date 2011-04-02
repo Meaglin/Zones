@@ -7,6 +7,11 @@ import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 import com.zones.types.ZoneNormal;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZAddAdminCommand extends ZoneCommand {
 
     public ZAddAdminCommand(Zones plugin) {

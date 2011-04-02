@@ -6,7 +6,7 @@ import com.zones.ZoneForm;
  * A primitive rectangular zone
  * 
  * 
- * @author durgus
+ * @author durgus, Meaglin
  */
 public class ZoneCuboid extends ZoneForm {
     private int _x1, _x2, _y1, _y2, _z1, _z2;

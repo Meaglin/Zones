@@ -9,6 +9,11 @@ import com.zones.commands.create.*;
 import com.zones.commands.general.*;
 import com.zones.commands.settings.*;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZoneCommandMap {
     private HashMap<String, ZoneCommand> commands = new HashMap<String, ZoneCommand>();;
     private Zones   plugin;

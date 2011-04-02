@@ -8,6 +8,11 @@ import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZToggleLavaCommand extends ZoneCommand {
 
     public ZToggleLavaCommand(Zones plugin) {

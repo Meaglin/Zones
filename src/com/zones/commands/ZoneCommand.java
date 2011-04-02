@@ -16,6 +16,11 @@ import com.zones.ZonesDummyZone;
 import com.zones.commands.create.ZConfirmCommand;
 import com.zones.types.ZoneNormal;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public abstract class ZoneCommand extends Command {
 
     private Zones plugin;

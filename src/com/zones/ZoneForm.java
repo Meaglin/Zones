@@ -3,7 +3,7 @@ package com.zones;
 /**
  * Abstract base class for any zone form
  * 
- * @author durgus
+ * @author durgus , Meaglin
  */
 public abstract class ZoneForm {
     public abstract boolean isInsideZone(int x, int y, int z);

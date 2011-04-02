@@ -17,6 +17,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZonesDummyZone {
 
     private String                 _name;

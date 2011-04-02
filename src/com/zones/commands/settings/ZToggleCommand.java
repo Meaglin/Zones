@@ -11,6 +11,11 @@ import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
 import com.zones.util.Settings;
 
+/**
+ * 
+ * @author Meaglin
+ *
+ */
 public class ZToggleCommand extends ZoneCommand {
 
     private final HashMap<String,String[]> variables = new HashMap<String, String[]>();
