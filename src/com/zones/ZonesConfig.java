@@ -14,6 +14,8 @@ public class ZonesConfig {
     public static String       DATABASE_LOGIN;
     public static String       DATABASE_PASSWORD;
 
+    public static boolean      WORLDEDIT_ENABLED;
+
     public static String       ZONES_TABLE;
     public static String       ZONES_VERTICES_TABLE;
 
@@ -36,7 +38,7 @@ public class ZonesConfig {
     public static final String SPAWN_MOBS_NAME = "SpawnMobs";
     public static final String SPAWN_ANIMALS_NAME = "SpawnAnimals";
     public static final String LEAF_DECAY_ENABLED_NAME = "LeafDecay";
-    
+
     
     public static void load() {
         try {
@@ -44,6 +46,7 @@ public class ZonesConfig {
             DATABASE_URL = zp.getProperty("URL", "jdbc:mysql://localhost/Minecraft");
             DATABASE_LOGIN = zp.getProperty("Login", "root");
             DATABASE_PASSWORD = zp.getProperty("Password", "");
+            WORLDEDIT_ENABLED = zp.getBool("EnableWorldedit", false);
 
             ZONES_TABLE = zp.getProperty("ZonesTable", "zones");
             ZONES_VERTICES_TABLE = zp.getProperty("ZonesVerticesTable", "zones_vertices");
