@@ -30,6 +30,7 @@ public class ZoneCommandMap {
         registerCommand(new ZRemoveAdminCommand(plugin));
         registerCommand(new ZSetGroupCommand(plugin));
         registerCommand(new ZSetUserCommand(plugin));
+        registerCommand(new ZImportCommand(plugin));
         
         registerCommand(new ZSetNameCommand(plugin));
         registerCommand(new ZToggleAnimalsCommand(plugin));

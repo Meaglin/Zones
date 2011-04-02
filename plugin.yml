@@ -6,6 +6,7 @@ website: https://github.com/Meaglin/0xFFFF
 commands:
     zhelp
     zcreate
+    zimport
     zadd
     zremove
     zsetplot
