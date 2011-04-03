@@ -40,11 +40,11 @@ public class Region {
 
     public ZoneBase getActiveZone(Player player)                             {return getActiveZone(player.getLocation());}
     public ZoneBase getActiveZone(Location loc)                              {return getActiveZone(loc.getX(), loc.getZ(), loc.getY(),loc.getWorld().getName());}
-    public ZoneBase getActiveZone(double x, double y, double z,String world) {return getActiveZone(World.toInt(x), World.toInt(y), World.toInt(z),world);}
+    public ZoneBase getActiveZone(double x, double y, double z,String world) {return getActiveZone(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z),world);}
 
     public ArrayList<ZoneBase> getActiveZones(Player player)                             {return getActiveZones(player.getLocation());}
     public ArrayList<ZoneBase> getActiveZones(Location loc)                              {return getActiveZones(loc.getX(), loc.getZ(), loc.getY(),loc.getWorld().getName());}
-    public ArrayList<ZoneBase> getActiveZones(double x, double y, double z,String world) {return getActiveZones(World.toInt(x), World.toInt(y), World.toInt(z),world);}
+    public ArrayList<ZoneBase> getActiveZones(double x, double y, double z,String world) {return getActiveZones(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z),world);}
 
     public ZoneBase getActiveZone(int x, int y, int z,String world) {
         ZoneBase primary = null;

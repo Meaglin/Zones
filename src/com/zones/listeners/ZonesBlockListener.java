@@ -14,9 +14,7 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 
-import com.zones.World;
 import com.zones.ZoneBase;
-import com.zones.ZoneManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
@@ -47,7 +45,7 @@ public class ZonesBlockListener extends BlockListener {
         Block block = event.getBlock();
 
         if (player.getItemInHand().getTypeId() == Zones.toolType) {
-            ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
+            ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getName());
             if (dummy != null) {
                 if (dummy.containsDeleteBlock(block)) {
                     int[] p = new int[2];
@@ -79,8 +77,8 @@ public class ZonesBlockListener extends BlockListener {
 
         if (blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
 
-            ZoneBase fromZone = World.getInstance().getActiveZone(blockFrom.getLocation());
-            ZoneBase toZone = World.getInstance().getActiveZone(blockTo.getLocation());
+            ZoneBase fromZone = plugin.getWorldManager().getActiveZone(blockFrom.getLocation());
+            ZoneBase toZone = plugin.getWorldManager().getActiveZone(blockTo.getLocation());
 
             if (toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowWater(blockTo))
                 event.setCancelled(true);
@@ -88,8 +86,8 @@ public class ZonesBlockListener extends BlockListener {
 
         if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
 
-            ZoneBase fromZone = World.getInstance().getActiveZone(blockFrom.getLocation());
-            ZoneBase toZone = World.getInstance().getActiveZone(blockTo.getLocation());
+            ZoneBase fromZone = plugin.getWorldManager().getActiveZone(blockFrom.getLocation());
+            ZoneBase toZone = plugin.getWorldManager().getActiveZone(blockTo.getLocation());
 
             if (toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowLava(blockTo))
                 event.setCancelled(true);
@@ -108,7 +106,7 @@ public class ZonesBlockListener extends BlockListener {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockPlaced();
 
-        ZoneBase zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
+        ZoneBase zone = plugin.getWorldManager().getActiveZone(blockPlaced.getLocation());
         if (zone != null && !zone.allowBlockCreate(player, blockPlaced)) {
             player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' .");
             event.setBuild(false);
@@ -238,7 +236,7 @@ public class ZonesBlockListener extends BlockListener {
         Player player = event.getPlayer();
 
         
-        ZoneBase zone = World.getInstance().getActiveZone(block.getLocation());
+        ZoneBase zone = plugin.getWorldManager().getActiveZone(block.getLocation());
         if (zone != null && !zone.allowBlockDestroy(player, block)) {
             player.sendMessage(ChatColor.RED.toString() + "You cannot destroy blocks in '" + zone.getName() + "' !");
             event.setCancelled(true);

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.zones.World;
 import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.ZonesAccess;
@@ -321,7 +320,7 @@ public class ZoneNormal extends ZoneBase {
     
     @Override
     public void onEnter(Player player) {
-        ZoneBase zone = World.getInstance().getActiveZone(player);
+        ZoneBase zone = zones.getWorldManager().getActiveZone(player);
         if (zone == null || zone.getZone().getSize() > getZone().getSize())
             zone = this;
 

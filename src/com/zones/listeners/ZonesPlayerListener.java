@@ -28,9 +28,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
-import com.zones.World;
+import com.zones.WorldManager;
 import com.zones.ZoneBase;
-import com.zones.ZoneManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
@@ -57,7 +56,7 @@ public class ZonesPlayerListener extends PlayerListener {
      */
     @Override
     public void onPlayerJoin(PlayerJoinEvent event) {
-        World.getInstance().getRegion(event.getPlayer()).revalidateZones(event.getPlayer());
+        plugin.getWorldManager().getRegion(event.getPlayer()).revalidateZones(event.getPlayer());
     }
 
     /**
@@ -69,7 +68,11 @@ public class ZonesPlayerListener extends PlayerListener {
     @Override
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
+        List<ZoneBase> zones = plugin.getWorldManager().getActiveZones(player);
+        for(ZoneBase z : zones)
+            z.removeCharacter(player,true);
+        
+        ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getName());
         if (dummy != null) {
             dummy.setConfirm("stop");
             dummy.confirm(player);
@@ -91,22 +94,22 @@ public class ZonesPlayerListener extends PlayerListener {
         if(from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ())
             return;
         
-        ZoneBase aZone = World.getInstance().getActiveZone(from);
-        ZoneBase bZone = World.getInstance().getActiveZone(to);
+        ZoneBase aZone = plugin.getWorldManager().getActiveZone(from);
+        ZoneBase bZone = plugin.getWorldManager().getActiveZone(to);
         if (bZone != null && !bZone.allowEnter(player, to)) {
             event.setCancelled(true);
             player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
             if (aZone != null && !aZone.allowEnter(player, from)) {
                 event.setFrom(player.getWorld().getSpawnLocation());
                 player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
-                World.getInstance().revalidateZones(player, from, player.getWorld().getSpawnLocation());
+                plugin.getWorldManager().revalidateZones(player, from, player.getWorld().getSpawnLocation());
             } 
             // we don't have to do overall revalidation if the player gets
             // warped back to his previous location.
             return;
         }
 
-        World.getInstance().revalidateZones(player, from, to);
+        plugin.getWorldManager().revalidateZones(player, from, to);
     }
 
     /**
@@ -121,8 +124,8 @@ public class ZonesPlayerListener extends PlayerListener {
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
-        ZoneBase aZone = World.getInstance().getActiveZone(from);
-        ZoneBase bZone = World.getInstance().getActiveZone(to);
+        ZoneBase aZone = plugin.getWorldManager().getActiveZone(from);
+        ZoneBase bZone = plugin.getWorldManager().getActiveZone(to);
         
         if(aZone != null) {
             if(!aZone.allowTeleport(player, from) && aZone.allowEnter(player, from)) {
@@ -139,7 +142,7 @@ public class ZonesPlayerListener extends PlayerListener {
             }
         }
 
-        World.getInstance().revalidateZones(player, from, to);
+        plugin.getWorldManager().revalidateZones(player, from, to);
 
     }
 
@@ -177,12 +180,12 @@ public class ZonesPlayerListener extends PlayerListener {
         switch(event.getAction()) {
             case RIGHT_CLICK_BLOCK:
                 Block blockPlaced = event.getClickedBlock().getRelative(event.getBlockFace());
-                ZoneBase zone = World.getInstance().getActiveZone(blockPlaced.getLocation());
+                ZoneBase zone = plugin.getWorldManager().getActiveZone(blockPlaced.getLocation());
                 int type = event.getItem().getTypeId();
                 int blocktype = event.getClickedBlock().getTypeId();
                 Player player = event.getPlayer();
                 if (type == Zones.toolType) {
-                    ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
+                    ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getName());
                     if (dummy != null) {
                         if (dummy.getType() == 1 && dummy.getCoords().size() == 2) {
                             player.sendMessage(ChatColor.RED.toString() + "You can only use 2 points to define a cuboid zone.");
@@ -190,10 +193,10 @@ public class ZonesPlayerListener extends PlayerListener {
                         }
                         int[] p = new int[2];
 
-                        p[0] = World.toInt(event.getClickedBlock().getX());
-                        p[1] = World.toInt(event.getClickedBlock().getZ());
+                        p[0] = WorldManager.toInt(event.getClickedBlock().getX());
+                        p[1] = WorldManager.toInt(event.getClickedBlock().getZ());
 
-                        if (event.getClickedBlock().getY() < World.MAX_Z - Zones.pilonHeight) {
+                        if (event.getClickedBlock().getY() < WorldManager.MAX_Z - Zones.pilonHeight) {
                             for (int i = 1; i <= Zones.pilonHeight; i++) {
                                 Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
                                 dummy.addDeleteBlock(t);

@@ -42,15 +42,18 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private final ZonesBlockListener   blockListener   = new ZonesBlockListener(this);
     private final ZonesEntityListener  entityListener  = new ZonesEntityListener(this);
     private final ZonesVehicleListener vehicleListener = new ZonesVehicleListener(this);
+    
     public static final int            pilonHeight     = 4;
-    // snow
     public static final int            pilonType       = 80;
-    // stick
     public static final int            toolType        = 280;
+    
     private final ZoneCommandMap      commandMap = new ZoneCommandMap(this);
     
     private WorldEditPlugin   worldedit;
     private PermissionHandler accessmanager;
+    
+    private final WorldManager worldManager = new WorldManager();
+    private final ZoneManager zoneManager = new ZoneManager();
     
     public Zones() {
         
@@ -158,8 +161,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             }
             
             ZonesConfig.load();
-            ZoneManager.getInstance();
-            ZoneManager.getInstance().load(this);
+            getWorldManager().load();
+            getZoneManager().load(this);
             registerEvents();
             if(ZonesConfig.WORLDEDIT_ENABLED) {
                 log.info("[Zones] Loading worldedit support...");
@@ -178,12 +181,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return worldedit;
     }
     
-    public World getWorldManager() {
-        return World.getInstance();
+    public WorldManager getWorldManager() {
+        return worldManager;
     }
     
     public ZoneManager getZoneManager() {
-        return ZoneManager.getInstance();
+        return zoneManager;
     }
     
     public boolean reload() {

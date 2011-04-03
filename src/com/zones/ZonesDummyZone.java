@@ -35,11 +35,11 @@ public class ZonesDummyZone {
     private boolean                allowHealth = false, edit = false;
 
     private org.bukkit.World       w;
-    private Zones                  zones;
+    private Zones                  plugin;
 
     public ZonesDummyZone(Zones plugin, org.bukkit.World w, String name) {
         _name = name;
-        this.zones = plugin;
+        this.plugin = plugin;
         _type = 1;
         _minz = 0;
         _maxz = 130;
@@ -110,19 +110,19 @@ public class ZonesDummyZone {
         if (_confirm == null) {
             p.sendMessage("Nothing to confirm.");
         } else if (_confirm.equals("save")) {
-            ZoneManager.getInstance().removeDummy(p.getName());
+            plugin.getZoneManager().removeDummy(p.getName());
             if (Save())
                 p.sendMessage(ChatColor.GREEN.toString() + "Zone Saved.");
             else
                 p.sendMessage(ChatColor.RED.toString() + "Error saving zone.");
         } else if (_confirm.equals("stop")) {
-            ZoneManager.getInstance().removeDummy(p.getName());
+            plugin.getZoneManager().removeDummy(p.getName());
             Delete();
             p.sendMessage(ChatColor.RED.toString() + "Zone mode stopped, temp zone deleted.");
         } else if (_confirm.equals("merge")) {
-            if (merge(ZoneManager.getInstance().getSelected(p.getName()))) {
+            if (merge(plugin.getZoneManager().getSelected(p.getName()))) {
                 p.sendMessage(ChatColor.GREEN.toString() + "Zone merged.");
-                ZoneManager.getInstance().removeDummy(p.getName());
+                plugin.getZoneManager().removeDummy(p.getName());
             } else
                 p.sendMessage(ChatColor.RED.toString() + "Error merging zone.");
         }
@@ -170,7 +170,7 @@ public class ZonesDummyZone {
         ResultSet rs = null;
         int id = -1;
         try {
-            conn = zones.getConnection();
+            conn = plugin.getConnection();
             st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,world,admins,users,minz,maxz,size,settings) VALUES (?,?,?,?,'','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
             st.setString(1, _name);
             st.setString(2, _class);
@@ -207,7 +207,7 @@ public class ZonesDummyZone {
         ZoneBase temp = null;
         try {
             zoneConstructor = newZone.getConstructor(Zones.class,String.class, int.class);
-            temp = (ZoneBase) zoneConstructor.newInstance(zones,w.getName(), id);
+            temp = (ZoneBase) zoneConstructor.newInstance(plugin,w.getName(), id);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -220,7 +220,7 @@ public class ZonesDummyZone {
             PreparedStatement st2 = null;
             Connection conn2 = null;
             try {
-                conn2 = zones.getConnection();
+                conn2 = plugin.getConnection();
                 st2 = conn2.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_VERTICES_TABLE + " (`id`,`order`,`x`,`y`) VALUES (?,?,?,?) ");
                 st2.setInt(1, id);
                 st2.setInt(2, i);
@@ -272,7 +272,7 @@ public class ZonesDummyZone {
         temp.setParameter("users", "2,default,e");
         temp.setParameter("name", _name);
         temp.loadSettings(basicSettings());
-        ZoneManager.getInstance().addZone(temp);
+        plugin.getZoneManager().addZone(temp);
         revertBlocks();
 
         return true;
@@ -330,7 +330,7 @@ public class ZonesDummyZone {
             _class = "ZoneNormal";
             player.sendMessage("Reverted zone to default z and class.");
         } else {
-            setZ(World.toInt(player.getLocation().getY()) - 10, World.toInt(player.getLocation().getY()) + 10);
+            setZ(WorldManager.toInt(player.getLocation().getY()) - 10, WorldManager.toInt(player.getLocation().getY()) + 10);
             _class = "ZonePlot";
             player.sendMessage("Zone is now a plot zone.");
         }
@@ -370,7 +370,7 @@ public class ZonesDummyZone {
     }
 
     public boolean merge(int id) {
-        ZoneBase z = ZoneManager.getInstance().getZone(id);
+        ZoneBase z = plugin.getZoneManager().getZone(id);
         if (z == null)
             return false;
 
@@ -379,7 +379,7 @@ public class ZonesDummyZone {
         Connection conn = null;
         PreparedStatement st = null;
         try {
-            conn = zones.getConnection();
+            conn = plugin.getConnection();
             st = conn.prepareStatement("DELETE FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ?");
             st.setInt(1, id);
 
@@ -402,7 +402,7 @@ public class ZonesDummyZone {
             PreparedStatement st2 = null;
             Connection conn2 = null;
             try {
-                conn2 = zones.getConnection();
+                conn2 = plugin.getConnection();
                 st2 = conn2.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_VERTICES_TABLE + " (`id`,`order`,`x`,`y`) VALUES (?,?,?,?) ");
                 st2.setInt(1, id);
                 st2.setInt(2, i);

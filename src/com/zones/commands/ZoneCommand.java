@@ -8,7 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.zones.World;
+import com.zones.WorldManager;
 import com.zones.ZoneBase;
 import com.zones.ZoneManager;
 import com.zones.Zones;
@@ -45,7 +45,7 @@ public abstract class ZoneCommand extends Command {
         return getPlugin().getP().has(p, command);
     }
     
-    protected World getWorldManager() {
+    protected WorldManager getWorldManager() {
         return plugin.getWorldManager();
     }
     

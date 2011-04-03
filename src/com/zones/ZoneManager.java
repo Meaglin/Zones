@@ -24,7 +24,7 @@ public class ZoneManager {
     protected static final Logger           log = Logger.getLogger("Minecraft");
     private Zones                           plugin;
 
-    private ZoneManager() {
+    protected ZoneManager() {
         zones = new HashMap<Integer, ZoneBase>();
         dummyZones = new HashMap<String, ZonesDummyZone>();
         selectedZones = new HashMap<String, Integer>();
@@ -35,7 +35,6 @@ public class ZoneManager {
         dummyZones.clear();
         selectedZones.clear();
         this.plugin = plugin;
-        World.getInstance();
         Connection conn = null;
         try {
             conn = plugin.getConnection();
@@ -140,16 +139,16 @@ public class ZoneManager {
 
     public void addZone(ZoneBase zone) {
         int ax, ay, bx, by;
-        for (int x = 0; x < World.X_REGIONS; x++) {
-            for (int y = 0; y < World.Y_REGIONS; y++) {
+        for (int x = 0; x < WorldManager.X_REGIONS; x++) {
+            for (int y = 0; y < WorldManager.Y_REGIONS; y++) {
 
-                ax = (x + World.OFFSET_X) << World.SHIFT_SIZE;
-                bx = ((x + 1) + World.OFFSET_X) << World.SHIFT_SIZE;
-                ay = (y + World.OFFSET_Y) << World.SHIFT_SIZE;
-                by = ((y + 1) + World.OFFSET_Y) << World.SHIFT_SIZE;
+                ax = (x + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
+                bx = ((x + 1) + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
+                ay = (y + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
+                by = ((y + 1) + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
 
                 if (zone.getZone().intersectsRectangle(ax, bx, ay, by)) {
-                    World.getInstance().addZone(x, y, zone);
+                    plugin.getWorldManager().addZone(x, y, zone);
                     // log.info("adding zone["+zone.getId()+"] to region " + x +
                     // " " + y);
                 }
@@ -161,10 +160,6 @@ public class ZoneManager {
 
     public ZoneBase getZone(int id) {
         return zones.get(id);
-    }
-
-    public static final ZoneManager getInstance() {
-        return SingletonHolder._instance;
     }
 
     public boolean delete(ZoneBase toDelete) {
@@ -220,18 +215,18 @@ public class ZoneManager {
 
         // then delete the zone from all regions
         int ax, ay, bx, by;
-        for (int x = 0; x < World.X_REGIONS; x++) {
-            for (int y = 0; y < World.Y_REGIONS; y++) {
+        for (int x = 0; x < WorldManager.X_REGIONS; x++) {
+            for (int y = 0; y < WorldManager.Y_REGIONS; y++) {
 
-                ax = (x + World.OFFSET_X) << World.SHIFT_SIZE;
-                bx = ((x + 1) + World.OFFSET_X) << World.SHIFT_SIZE;
-                ay = (y + World.OFFSET_Y) << World.SHIFT_SIZE;
-                by = ((y + 1) + World.OFFSET_Y) << World.SHIFT_SIZE;
+                ax = (x + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
+                bx = ((x + 1) + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
+                ay = (y + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
+                by = ((y + 1) + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
 
                 // System.out.println(ax + " " + bx + " " + ay + " " + by);
 
                 if (toDelete.getZone().intersectsRectangle(ax, bx, ay, by)) {
-                    World.getInstance().getRegion(ax, ay).removeZone(toDelete);
+                    plugin.getWorldManager().getRegion(ax, ay).removeZone(toDelete);
                     // log.info("adding zone["+zone.getId()+"] to region " + x +
                     // " " + y);
                 }
@@ -242,11 +237,6 @@ public class ZoneManager {
         zones.remove(toDelete.getId());
 
         return true;
-    }
-
-    @SuppressWarnings("synthetic-access")
-    private static class SingletonHolder {
-        protected static final ZoneManager _instance = new ZoneManager();
     }
 
     public void addDummy(String name, ZonesDummyZone zone) {

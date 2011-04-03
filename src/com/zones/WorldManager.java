@@ -1,6 +1,7 @@
 package com.zones;
 
-import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -9,7 +10,7 @@ import org.bukkit.entity.Player;
  * @author Meaglin
  *
  */
-public class World {
+public class WorldManager {
     public static final int MIN_X      = -10240;
     public static final int MAX_X      = 10240;
 
@@ -34,9 +35,9 @@ public class World {
     private Region[][]      regions;
     private Region          emptyRegion = new Region(0,0);
     
-    public World() {
-        load();
+    public WorldManager() {
     }
+    
     public void load() {
         try {
             regions = new Region[X_REGIONS][Y_REGIONS];
@@ -56,12 +57,14 @@ public class World {
     public Region getRegion(double x, double y) {return getRegion(toInt(x), toInt(y));}
     
     
-    public ArrayList<ZoneBase> getAdminZones(Player player)                     {return getRegion(player).getAdminZones(player);}
-
-    public ArrayList<ZoneBase> getAdminZones(Player player,Location loc)        {return getRegion(loc).getAdminZones(player,loc);}
+    public List<ZoneBase> getAdminZones(Player player)                     {return getRegion(player).getAdminZones(player);}
+    public List<ZoneBase> getAdminZones(Player player,Location loc)        {return getRegion(loc).getAdminZones(player,loc);}
     
-    public ArrayList<ZoneBase> getActiveZones(Player player)                    {return getRegion(player).getActiveZones(player);}
-
+    public List<ZoneBase> getActiveZones(Player player)                             {return getActiveZones(player.getLocation());}
+    public List<ZoneBase> getActiveZones(Location loc)                              {return getActiveZones(loc.getX(),loc.getZ(),loc.getY(),loc.getWorld().getName()); } 
+    public List<ZoneBase> getActiveZones(double x,double y,double z,String world)   {return getActiveZones(toInt(x),toInt(y),toInt(z),world); }
+    public List<ZoneBase> getActiveZones(int x,int y,int z,String world)            {return getRegion(x,y).getActiveZones(x, y, z, world); }
+    
     public ZoneBase getActiveZone(Player player)                                {return getRegion(player).getActiveZone(player);}
     public ZoneBase getActiveZone(double x, double y, double z,String world)    {return getRegion(x, y).getActiveZone(x, y, z,world);}
     public ZoneBase getActiveZone(Location loc)                                 {return getRegion(loc).getActiveZone(loc);}
@@ -84,15 +87,6 @@ public class World {
 
     public void addZone(int x, int y, ZoneBase zone) {
         regions[x][y].addZone(zone);
-    }
-
-    public static final World getInstance() {
-        return SingletonHolder._instance;
-    }
-
-    @SuppressWarnings("synthetic-access")
-    private static class SingletonHolder {
-        protected static final World _instance = new World();
     }
 
     public void revalidateZones(Player player, Location from, Location to) {

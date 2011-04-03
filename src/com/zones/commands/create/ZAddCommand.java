@@ -3,7 +3,7 @@ package com.zones.commands.create;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.zones.World;
+import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
@@ -28,8 +28,8 @@ public class ZAddCommand extends ZoneCommand{
             return true;
         }
         int[] p = new int[2];
-        p[0] = World.toInt(player.getLocation().getX());
-        p[1] = World.toInt(player.getLocation().getZ());
+        p[0] = WorldManager.toInt(player.getLocation().getX());
+        p[1] = WorldManager.toInt(player.getLocation().getZ());
         for (int[] point : dummy.getCoords()) {
             if (p[0] == point[0] && p[1] == point[1]) {
                 player.sendMessage(ChatColor.YELLOW.toString() + "Already added this point.");

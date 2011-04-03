@@ -16,7 +16,6 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
-import com.zones.World;
 import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
@@ -29,11 +28,10 @@ import com.zones.ZonesConfig;
  */
 public class ZonesEntityListener extends EntityListener {
 
-    @SuppressWarnings("unused")
-    private Zones zones;
+    private Zones plugin;
 
     public ZonesEntityListener(Zones zones) {
-        this.zones = zones;
+        this.plugin = zones;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class ZonesEntityListener extends EntityListener {
         if(event instanceof EntityDamageByEntityEvent) {
             attacker = ((EntityDamageByEntityEvent)event).getDamager();
         }
-        ZoneBase zone = World.getInstance().getActiveZone(defender.getLocation());
+        ZoneBase zone = plugin.getWorldManager().getActiveZone(defender.getLocation());
         if (defender instanceof Player) {
 
             if (event.getCause() == DamageCause.FALL && !ZonesConfig.FALL_DAMAGE_ENABLED)
@@ -71,7 +69,7 @@ public class ZonesEntityListener extends EntityListener {
 
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
-        ZoneBase zone = World.getInstance().getActiveZone(event.getLocation());
+        ZoneBase zone = plugin.getWorldManager().getActiveZone(event.getLocation());
         if (zone == null) {
             if (!ZonesConfig.TNT_ENABLED)
                 event.setCancelled(true);
@@ -84,7 +82,7 @@ public class ZonesEntityListener extends EntityListener {
 
     @Override
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        ZoneBase zone = World.getInstance().getActiveZone(event.getLocation());
+        ZoneBase zone = plugin.getWorldManager().getActiveZone(event.getLocation());
         if (zone == null) {
             if (event.getEntity() instanceof Animals && !ZonesConfig.ANIMALS_ENABLED)
                 event.setCancelled(true);

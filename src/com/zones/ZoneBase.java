@@ -128,13 +128,13 @@ public abstract class ZoneBase {
      * @param player
      */
     public boolean isInsideZone(Player player)      {return isInsideZone(player.getLocation());}
-    public boolean isInsideZone(Location loc)       {return isInsideZone(World.toInt(loc.getX()), World.toInt(loc.getZ()), World.toInt(loc.getY()),loc.getWorld().getName());}
+    public boolean isInsideZone(Location loc)       {return isInsideZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()), WorldManager.toInt(loc.getY()),loc.getWorld().getName());}
     
     public double getDistanceToZone(int x, int y)   {return getZone().getDistanceToZone(x, y);}
 
     public double getDistanceToZone(Player player) {
         Location loc = player.getLocation();
-        return getZone().getDistanceToZone(World.toInt(loc.getX()), World.toInt(loc.getZ()));
+        return getZone().getDistanceToZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()));
     }
 
     /**
@@ -143,10 +143,11 @@ public abstract class ZoneBase {
      * 
      * @param player
      */
-    public void removeCharacter(Player player) {
+    public void removeCharacter(Player player) { removeCharacter(player,false); }
+    public void removeCharacter(Player player, boolean silent) {
         if (characterList.containsKey(player.getName())) {
             characterList.remove(player.getName());
-            onExit(player);
+            if(!silent)onExit(player);
         }
     }
 
