@@ -161,6 +161,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             ZoneManager.getInstance();
             ZoneManager.getInstance().load(this);
             registerEvents();
+            if(ZonesConfig.WORLDEDIT_ENABLED) {
+                log.info("[Zones] Loading worldedit support...");
+                registerWorldEdit();
+            }
             log.info("[Zones]finished Loading.");
         }
     }
