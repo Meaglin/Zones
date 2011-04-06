@@ -72,7 +72,7 @@ public class ZonesPlayerListener extends PlayerListener {
         for(ZoneBase z : zones)
             z.removeCharacter(player,true);
         
-        ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getName());
+        ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
         if (dummy != null) {
             dummy.setConfirm("stop");
             dummy.confirm(player);
@@ -185,7 +185,7 @@ public class ZonesPlayerListener extends PlayerListener {
                 int blocktype = event.getClickedBlock().getTypeId();
                 Player player = event.getPlayer();
                 if (type == Zones.toolType) {
-                    ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getName());
+                    ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
                     if (dummy != null) {
                         if (dummy.getType() == 1 && dummy.getCoords().size() == 2) {
                             player.sendMessage(ChatColor.RED.toString() + "You can only use 2 points to define a cuboid zone.");

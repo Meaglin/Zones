@@ -45,7 +45,7 @@ public class ZonesBlockListener extends BlockListener {
         Block block = event.getBlock();
 
         if (player.getItemInHand().getTypeId() == Zones.toolType) {
-            ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getName());
+            ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
             if (dummy != null) {
                 if (dummy.containsDeleteBlock(block)) {
                     int[] p = new int[2];

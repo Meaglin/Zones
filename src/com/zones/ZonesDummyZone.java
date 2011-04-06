@@ -110,19 +110,19 @@ public class ZonesDummyZone {
         if (_confirm == null) {
             p.sendMessage("Nothing to confirm.");
         } else if (_confirm.equals("save")) {
-            plugin.getZoneManager().removeDummy(p.getName());
+            plugin.getZoneManager().removeDummy(p.getEntityId());
             if (Save())
                 p.sendMessage(ChatColor.GREEN.toString() + "Zone Saved.");
             else
                 p.sendMessage(ChatColor.RED.toString() + "Error saving zone.");
         } else if (_confirm.equals("stop")) {
-            plugin.getZoneManager().removeDummy(p.getName());
+            plugin.getZoneManager().removeDummy(p.getEntityId());
             Delete();
             p.sendMessage(ChatColor.RED.toString() + "Zone mode stopped, temp zone deleted.");
         } else if (_confirm.equals("merge")) {
-            if (merge(plugin.getZoneManager().getSelected(p.getName()))) {
+            if (merge(plugin.getZoneManager().getSelected(p.getEntityId()))) {
                 p.sendMessage(ChatColor.GREEN.toString() + "Zone merged.");
-                plugin.getZoneManager().removeDummy(p.getName());
+                plugin.getZoneManager().removeDummy(p.getEntityId());
             } else
                 p.sendMessage(ChatColor.RED.toString() + "Error merging zone.");
         }

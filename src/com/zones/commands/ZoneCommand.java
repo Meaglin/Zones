@@ -90,7 +90,7 @@ public abstract class ZoneCommand extends Command {
     }
     
     protected ZonesDummyZone getDummy(Player p) {
-        return getZoneManager().getDummy(p.getName().toLowerCase());
+        return getZoneManager().getDummy(p.getEntityId());
     }
     
     protected boolean hasSelected(Player p) {
@@ -98,11 +98,11 @@ public abstract class ZoneCommand extends Command {
     }
     
     protected int getSelected(Player p) {
-        return getZoneManager().getSelected(p.getName().toLowerCase());
+        return getZoneManager().getSelected(p.getEntityId());
     }
     
     protected ZoneBase getSelectedZone(Player p) {
-        return getZoneManager().getSelectedZone(p.getName().toLowerCase());
+        return getZoneManager().getSelectedZone(p.getEntityId());
     }
     
     protected ZoneNormal getSelectedNormalZone(Player p) {

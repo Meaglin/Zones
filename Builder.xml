@@ -9,9 +9,11 @@
 	<property name="build.classes" location="${build}/classes" />
 
 	<path id="classpath">
-		<fileset dir="">
+		<fileset dir="libs">
 			<include name="craftbukkit-0.0.1-SNAPSHOT.jar" />
+			<include name="WorldEdit.jar" />
 			<include name="Permissions.jar" />
+			<include name="trove-2.1.0.jar" />
 		</fileset>
 	</path>
 	
@@ -41,6 +43,11 @@
 			<zipfileset dir="" prefix="" >
 				<include name="plugin.yml" />
 			</zipfileset >
+			
+			<zipfileset src="libs/trove-2.1.0.jar" prefix="" >
+				<include name="**" />
+				<exclude name="META-INF/*" />
+			</zipfileset>
 		</jar>
 	</target>
 	

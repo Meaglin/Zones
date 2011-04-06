@@ -2,14 +2,16 @@ package com.zones;
 
 import com.zones.forms.ZoneNPoly;
 import com.zones.forms.ZoneCuboid;
+
+import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntObjectHashMap;
+
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
@@ -18,16 +20,16 @@ import java.util.logging.Logger;
  *
  */
 public class ZoneManager {
-    private HashMap<Integer, ZoneBase>      zones;
-    private HashMap<String, ZonesDummyZone> dummyZones;
-    private HashMap<String, Integer>        selectedZones;
-    protected static final Logger           log = Logger.getLogger("Minecraft");
-    private Zones                           plugin;
+    private TIntObjectHashMap<ZoneBase>       zones;
+    private TIntObjectHashMap<ZonesDummyZone> dummyZones;
+    private TIntIntHashMap                    selectedZones;
+    protected static final Logger             log = Logger.getLogger("Minecraft");
+    private Zones                             plugin;
 
     protected ZoneManager() {
-        zones = new HashMap<Integer, ZoneBase>();
-        dummyZones = new HashMap<String, ZonesDummyZone>();
-        selectedZones = new HashMap<String, Integer>();
+        zones = new TIntObjectHashMap<ZoneBase>();
+        dummyZones = new TIntObjectHashMap<ZonesDummyZone>();
+        selectedZones = new TIntIntHashMap();
     }
 
     public void load(Zones plugin) {
@@ -239,44 +241,44 @@ public class ZoneManager {
         return true;
     }
 
-    public void addDummy(String name, ZonesDummyZone zone) {
-        dummyZones.put(name, zone);
+    public void addDummy(int playerId, ZonesDummyZone zone) {
+        dummyZones.put(playerId, zone);
     }
 
-    public ZonesDummyZone getDummy(String name) {
-        return dummyZones.get(name);
+    public ZonesDummyZone getDummy(int playerId) {
+        return dummyZones.get(playerId);
     }
 
     public boolean zoneExists(int id) {
         return zones.containsKey(id);
     }
 
-    public void removeDummy(String name) {
-        dummyZones.remove(name);
+    public void removeDummy(int playerId) {
+        dummyZones.remove(playerId);
     }
 
-    public void setSelected(String playername, int id) {
+    public void setSelected(int playerId, int id) {
         if (zones.containsKey(id))
-            selectedZones.put(playername, id);
+            selectedZones.put(playerId, id);
     }
 
-    public int getSelected(String playername) {
-        if (!selectedZones.containsKey(playername))
+    public int getSelected(int playerId) {
+        if (!selectedZones.containsKey(playerId))
             return 0;
 
-        return selectedZones.get(playername);
+        return selectedZones.get(playerId);
     }
     
-    public ZoneBase getSelectedZone(String playername) {
-        return getZone(getSelected(playername));
+    public ZoneBase getSelectedZone(int playerId) {
+        return getZone(getSelected(playerId));
     }
 
-    public void removeSelected(String playername) {
-        selectedZones.remove(playername);
+    public void removeSelected(int playerId) {
+        selectedZones.remove(playerId);
     }
 
-    public Collection<ZoneBase> getAllZones() {
-        return zones.values();
+    public ZoneBase[] getAllZones() {
+        return (ZoneBase[]) zones.getValues();
     }
 
 }

@@ -90,7 +90,7 @@ public class ZToggleCommand extends ZoneCommand {
     public boolean run(Player player, String[] vars) {
 
         if(vars.length < 1) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport] ");
             return true;
         }
         

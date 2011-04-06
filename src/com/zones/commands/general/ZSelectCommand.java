@@ -29,7 +29,7 @@ public class ZSelectCommand extends ZoneCommand {
             else if (!zone.canAdministrate(player))
                 player.sendMessage(ChatColor.RED.toString() + "You don't have rights to administrate this zone.");
             else {
-                getZoneManager().setSelected(player.getName(), zone.getId());
+                getZoneManager().setSelected(player.getEntityId(), zone.getId());
                 player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zone.getName() + "' .");
             }
         }else{
@@ -37,7 +37,7 @@ public class ZSelectCommand extends ZoneCommand {
             if(zoneslist.size() < 1)
                 player.sendMessage(ChatColor.YELLOW.toString() + "No zones found in your current area(which you can modify).");
             else if(zoneslist.size() == 1){
-                getZoneManager().setSelected(player.getName(), zoneslist.get(0).getId());
+                getZoneManager().setSelected(player.getEntityId(), zoneslist.get(0).getId());
                 player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zoneslist.get(0).getName() + "' .");
             } else {
                 player.sendMessage(ChatColor.YELLOW.toString() +  "Too much zones found, please specify a zone id.(/zselect <id>)");
