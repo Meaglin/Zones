@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import com.zones.Zones;
 import com.zones.ZonesAccess;
 import com.zones.commands.ZoneCommand;
-import com.zones.types.ZoneNormal;
+import com.zones.model.types.ZoneNormal;
 
 /**
  * 
@@ -18,13 +18,13 @@ public class ZSetUserCommand extends ZoneCommand {
     public ZSetUserCommand(Zones plugin) {
         super("zsetuser", plugin);
         this.setRequiresSelected(true);
-        this.setRequiresZoneNormal(true);
+        this.setRequiredClass(ZoneNormal.class);
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
         if (vars.length == 2) {
-                ZoneNormal zone = getSelectedNormalZone(player);
+                ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
                 ZonesAccess z = new ZonesAccess(vars[1]);
 
                 // TODO : update.

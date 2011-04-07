@@ -23,15 +23,6 @@ public class ZonesConfig {
     public static String       ZONES_TABLE;
     public static String       ZONES_VERTICES_TABLE;
 
-    public static boolean      FIRE_ENABLED;
-    public static boolean      HEALTH_ENABLED;
-    public static boolean      MOBS_ENABLED;
-    public static boolean      ANIMALS_ENABLED;
-
-    public static boolean      LIMIT_BY_BUILD_ENABLED;
-    public static boolean      FALL_DAMAGE_ENABLED;
-    public static boolean      TNT_ENABLED;
-
     public static final String ALLOW_TELEPORT_NAME = "PreventTeleport";
     public static final String ALLOW_FIRE_NAME = "AllowFire";
     
@@ -54,14 +45,6 @@ public class ZonesConfig {
 
             ZONES_TABLE = zp.getProperty("ZonesTable", "zones");
             ZONES_VERTICES_TABLE = zp.getProperty("ZonesVerticesTable", "zones_vertices");
-
-            FIRE_ENABLED = zp.getBool("FireEnabled", false);
-            HEALTH_ENABLED = zp.getBool("HealthEnabled", false);
-            MOBS_ENABLED = zp.getBool("MobsEnabled", false);
-            ANIMALS_ENABLED = zp.getBool("AnimalsEnabled", true);
-            LIMIT_BY_BUILD_ENABLED = zp.getBool("ManageWorldBuild", true);
-            FALL_DAMAGE_ENABLED = zp.getBool("FallDamageEnabled", false);
-            TNT_ENABLED = zp.getBool("TntEnabled", false);
         } catch (Exception e) {
             log.warning("[Zones]Error loading configurations.");
             e.printStackTrace();

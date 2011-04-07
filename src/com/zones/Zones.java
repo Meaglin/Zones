@@ -17,12 +17,17 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Listener;
@@ -36,7 +41,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int            Rev             = 40;
+    public static final int            Rev             = 42;
     protected static final Logger      log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener  playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener   blockListener   = new ZonesBlockListener(this);
@@ -52,7 +57,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private WorldEditPlugin   worldedit;
     private PermissionHandler accessmanager;
     
-    private final WorldManager worldManager = new WorldManager();
+    private final Map<String,WorldManager> worlds = new HashMap<String, WorldManager>();
     private final ZoneManager zoneManager = new ZoneManager();
     
     public Zones() {
@@ -72,6 +77,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
         registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.High);
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.High);
+        registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.High);
         registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.High);
 
         registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.High);
@@ -161,7 +167,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             }
             
             ZonesConfig.load();
-            getWorldManager().load();
+            loadWorlds();
             getZoneManager().load(this);
             registerEvents();
             if(ZonesConfig.WORLDEDIT_ENABLED) {
@@ -170,6 +176,13 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             }
             log.info("[Zones]finished Loading.");
         }
+    }
+    
+    private void loadWorlds() {
+        worlds.clear();
+        for(World world : getServer().getWorlds())
+            worlds.put(world.getName(),new WorldManager(this,world));
+        
     }
     
     public PermissionHandler getP() {
@@ -181,8 +194,27 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return worldedit;
     }
     
-    public WorldManager getWorldManager() {
-        return worldManager;
+    public WorldManager getWorldManager(Player p) { return getWorldManager(p.getWorld()); }
+    public WorldManager getWorldManager(Location l) { return getWorldManager(l.getWorld()); }
+    
+    public WorldManager getWorldManager(World world) {
+        if(!worlds.containsKey(world.getName())) {
+            worlds.put(world.getName(), new WorldManager(this,world));
+        }
+        return worlds.get(world.getName());
+    }
+    
+
+    public WorldManager getWorldManager(String world) {
+        if(!worlds.containsKey(world)) {
+            World w = getServer().getWorld(world);
+            if(w != null) {
+                worlds.put(w.getName(), new WorldManager(this,w));
+            } else {
+                log.warning("[Zones] Trying to find world '" + world + "' which doesn't exist !");
+            }
+        }
+        return worlds.get(world);
     }
     
     public ZoneManager getZoneManager() {
@@ -190,15 +222,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     public boolean reload() {
-        try {
-            getWorldManager().load();
-            getZoneManager().load(this);
-            commandMap.load();
-        } catch(Throwable t) {
-            t.printStackTrace();
-            return false;
-        }
-        return true;
+        return reloadConfig() && reloadZones();
     }
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         ZoneCommand cmd = commandMap.getCommand(label);
@@ -207,6 +231,33 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         }
         return false;
     }
+
+    public boolean reloadZones() {
+        try {
+            for(WorldManager w : worlds.values())
+                w.loadRegions();
+            
+            getZoneManager().load(this);
+            //commandMap.load();
+        } catch(Throwable t) {
+            t.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean reloadConfig() {
+        try {
+            ZonesConfig.load();
+            for(WorldManager w : worlds.values())
+                w.loadConfig();
+        } catch(Throwable t) {
+            t.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     
 }
 

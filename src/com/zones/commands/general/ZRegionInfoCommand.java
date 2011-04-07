@@ -19,7 +19,7 @@ public class ZRegionInfoCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        Region r = getWorldManager().getRegion(player);
+        Region r = getWorldManager(player).getRegion(player);
         player.sendMessage("Region[" + r.getX() + "," + r.getY() + "] Zone count: " + r.getZones().size() + ".");
         return true;
     }

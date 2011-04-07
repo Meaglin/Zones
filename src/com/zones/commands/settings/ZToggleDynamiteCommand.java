@@ -3,10 +3,10 @@ package com.zones.commands.settings;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
+import com.zones.model.ZoneBase;
 
 /**
  * 
@@ -28,8 +28,8 @@ public class ZToggleDynamiteCommand extends ZoneCommand {
         }
         
         ZoneBase z = getSelectedZone(player);
-        if(z.setSetting(ZonesConfig.DYNAMITE_ENABLED_NAME, !z.getSettings().getBool(ZonesConfig.DYNAMITE_ENABLED_NAME, ZonesConfig.TNT_ENABLED)))
-            player.sendMessage(ChatColor.GREEN + "Dynamite is now "+(z.getSettings().getBool(ZonesConfig.DYNAMITE_ENABLED_NAME, ZonesConfig.TNT_ENABLED) ? "enabled" : "disabled" )+".");
+        if(z.setSetting(ZonesConfig.DYNAMITE_ENABLED_NAME, !z.getSettings().getBool(ZonesConfig.DYNAMITE_ENABLED_NAME, z.getWorldManager().getConfig().ALLOW_TNT_TRIGGER)))
+            player.sendMessage(ChatColor.GREEN + "Dynamite is now "+(z.getSettings().getBool(ZonesConfig.DYNAMITE_ENABLED_NAME, z.getWorldManager().getConfig().ALLOW_TNT_TRIGGER) ? "enabled" : "disabled" )+".");
         else
             player.sendMessage(ChatColor.RED + "Unable to change dynamite flag, please contact a admin.");
         

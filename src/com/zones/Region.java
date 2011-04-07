@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import com.zones.model.ZoneBase;
+
 /**
  * 
  * @author Meaglin
@@ -39,28 +41,28 @@ public class Region {
     }
 
     public ZoneBase getActiveZone(Player player)                             {return getActiveZone(player.getLocation());}
-    public ZoneBase getActiveZone(Location loc)                              {return getActiveZone(loc.getX(), loc.getZ(), loc.getY(),loc.getWorld().getName());}
-    public ZoneBase getActiveZone(double x, double y, double z,String world) {return getActiveZone(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z),world);}
+    public ZoneBase getActiveZone(Location loc)                              {return getActiveZone(loc.getX(), loc.getZ(), loc.getY());}
+    public ZoneBase getActiveZone(double x, double y, double z) {return getActiveZone(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z));}
 
     public ArrayList<ZoneBase> getActiveZones(Player player)                             {return getActiveZones(player.getLocation());}
-    public ArrayList<ZoneBase> getActiveZones(Location loc)                              {return getActiveZones(loc.getX(), loc.getZ(), loc.getY(),loc.getWorld().getName());}
-    public ArrayList<ZoneBase> getActiveZones(double x, double y, double z,String world) {return getActiveZones(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z),world);}
+    public ArrayList<ZoneBase> getActiveZones(Location loc)                              {return getActiveZones(loc.getX(), loc.getZ(), loc.getY());}
+    public ArrayList<ZoneBase> getActiveZones(double x, double y, double z) {return getActiveZones(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z));}
 
-    public ZoneBase getActiveZone(int x, int y, int z,String world) {
+    public ZoneBase getActiveZone(int x, int y, int z) {
         ZoneBase primary = null;
 
         for (ZoneBase zone : getZones())
-            if (zone.isInsideZone(x, y, z,world) && (primary == null || primary.getZone().getSize() > zone.getZone().getSize()))
+            if (zone.isInsideZone(x, y, z) && (primary == null || primary.getZone().getSize() > zone.getZone().getSize()))
                 primary = zone;
 
         return primary;
     }
     
-    public ArrayList<ZoneBase> getActiveZones(int x, int y, int z,String world) {
+    public ArrayList<ZoneBase> getActiveZones(int x, int y, int z) {
         ArrayList<ZoneBase> zones = new ArrayList<ZoneBase>();
 
         for (ZoneBase zone : getZones())
-            if (zone.isInsideZone(x, y, z,world))
+            if (zone.isInsideZone(x, y, z))
                 zones.add(zone);
 
         return zones;

@@ -1,9 +1,15 @@
 package com.zones;
 
+import gnu.trove.TLongObjectHashMap;
+
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+
+import com.zones.model.WorldConfig;
+import com.zones.model.ZoneBase;
 
 /**
  * 
@@ -11,16 +17,16 @@ import org.bukkit.entity.Player;
  *
  */
 public class WorldManager {
-    public static final int MIN_X      = -10240;
-    public static final int MAX_X      = 10240;
+    public static final int MIN_X      = Integer.MIN_VALUE;
+    public static final int MAX_X      = Integer.MAX_VALUE;
 
-    public static final int MIN_Y      = -10240;
-    public static final int MAX_Y      = 10240;
+    public static final int MIN_Y      = Integer.MIN_VALUE;
+    public static final int MAX_Y      = Integer.MAX_VALUE;
 
     public static final int MIN_Z      = 0;
     public static final int MAX_Z      = 127;
 
-    public static final int SHIFT_SIZE = 8;
+    public static final int SHIFT_SIZE = 6;
     public static final int BLOCK_SIZE = (int) (Math.pow(2, SHIFT_SIZE) - 1);
 
     public static final int X_REGIONS  = ((MAX_X - MIN_X) >> SHIFT_SIZE) + 1;
@@ -32,24 +38,40 @@ public class WorldManager {
     public static final int OFFSET_X   = ((MIN_X * XMOD) >> SHIFT_SIZE) * XMOD;
     public static final int OFFSET_Y   = ((MIN_Y * YMOD) >> SHIFT_SIZE) * YMOD;
 
-    private Region[][]      regions;
-    private Region          emptyRegion = new Region(0,0);
+    private TLongObjectHashMap<Region>  regions = new TLongObjectHashMap<Region>();
+    private Region                      emptyRegion = new Region(0,0);
     
-    public WorldManager() {
+    private WorldConfig worldConfig;
+    
+    private World world;
+    private Zones plugin;
+    
+    public WorldManager(Zones plugin, World world) {
+        if(world == null) {
+            Zones.log.warning("[Zones] --------------------------");
+            Zones.log.warning("[Zones] Trying to create a RegionManager with a NULL world, this should NEVER occur!");
+            Zones.log.warning("[Zones] if this error occurs you have either a faulty plugin running or your server is seriously screwed up!");
+            Zones.log.warning("[Zones] restarting your server is highly recommended.");
+            Zones.log.warning("[Zones] --------------------------");
+        }
+        this.world = world;
+        this.plugin = plugin;
+        worldConfig = new WorldConfig(this, "./plugins/zones/" + world.getName() + ".properties");
+        load();
     }
     
     public void load() {
-        try {
-            regions = new Region[X_REGIONS][Y_REGIONS];
-            for (int x = 0; x < X_REGIONS; x++) {
-                for (int y = 0; y < Y_REGIONS; y++) {
-                    regions[x][y] = new Region(x, y);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        ZoneManager.log.info("[Zones]Loaded " + X_REGIONS * Y_REGIONS + " regions.");
+        regions.clear();
+        worldConfig.load();
+        //ZoneManager.log.info("[Zones]Loaded " + X_REGIONS * Y_REGIONS + " regions.");
+    }
+    
+    public void loadRegions() {
+        regions.clear();
+    }
+    
+    public void loadConfig() {
+        worldConfig.load();
     }
 
     public Region getRegion(Player player)      {return getRegion(player.getLocation());}
@@ -60,16 +82,16 @@ public class WorldManager {
     public List<ZoneBase> getAdminZones(Player player)                     {return getRegion(player).getAdminZones(player);}
     public List<ZoneBase> getAdminZones(Player player,Location loc)        {return getRegion(loc).getAdminZones(player,loc);}
     
-    public List<ZoneBase> getActiveZones(Player player)                             {return getActiveZones(player.getLocation());}
-    public List<ZoneBase> getActiveZones(Location loc)                              {return getActiveZones(loc.getX(),loc.getZ(),loc.getY(),loc.getWorld().getName()); } 
-    public List<ZoneBase> getActiveZones(double x,double y,double z,String world)   {return getActiveZones(toInt(x),toInt(y),toInt(z),world); }
-    public List<ZoneBase> getActiveZones(int x,int y,int z,String world)            {return getRegion(x,y).getActiveZones(x, y, z, world); }
+    public List<ZoneBase> getActiveZones(Player player)                         {return getActiveZones(player.getLocation());}
+    public List<ZoneBase> getActiveZones(Location loc)                          {return getActiveZones(loc.getX(),loc.getZ(),loc.getY()); } 
+    public List<ZoneBase> getActiveZones(double x,double y,double z)            {return getActiveZones(toInt(x),toInt(y),toInt(z)); }
+    public List<ZoneBase> getActiveZones(int x,int y,int z)                     {return getRegion(x,y).getActiveZones(x, y, z); }
     
     public ZoneBase getActiveZone(Player player)                                {return getRegion(player).getActiveZone(player);}
-    public ZoneBase getActiveZone(double x, double y, double z,String world)    {return getRegion(x, y).getActiveZone(x, y, z,world);}
+    public ZoneBase getActiveZone(double x, double y, double z)                 {return getRegion(x, y).getActiveZone(x, y, z);}
     public ZoneBase getActiveZone(Location loc)                                 {return getRegion(loc).getActiveZone(loc);}
 
-    public boolean regionChange(Location from,Location to)                       {return getRegion(from).equals(getRegion(to)); }
+    public boolean regionChange(Location from,Location to)                      {return getRegion(from).equals(getRegion(to)); }
     
     public void revalidateZones(Player player) {getRegion(player).revalidateZones(player);}
     
@@ -77,16 +99,27 @@ public class WorldManager {
         // debug only ;) .
         // System.out.println("get region " + ((x - MIN_X) >> SHIFT_SIZE) + " "
         // + ((y - MIN_Y) >> SHIFT_SIZE));
+        /*        
         if (x > MAX_X || x < MIN_X || y > MAX_Y || y < MIN_Y) {
             ZoneManager.log.warning("[Zones]Warning: Player moving outside world!");
             return emptyRegion;
-        }
+        }*/
 
-        return regions[(x - MIN_X) >> SHIFT_SIZE][(y - MIN_Y) >> SHIFT_SIZE];
+        long index = toLong((x - MIN_X) >> SHIFT_SIZE, (y - MIN_Y) >> SHIFT_SIZE);
+        if(regions.containsKey(index))
+            return regions.get(index);
+        else
+            return emptyRegion;
     }
 
     public void addZone(int x, int y, ZoneBase zone) {
-        regions[x][y].addZone(zone);
+        long index = toLong(x,y);
+        if(regions.containsKey(index)) {
+            regions.get(index).addZone(zone);
+        } else {
+            regions.put(index, new Region(x,y));
+            regions.get(index).addZone(zone);
+        }
     }
 
     public void revalidateZones(Player player, Location from, Location to) {
@@ -98,8 +131,29 @@ public class WorldManager {
         getRegion(to).revalidateZones(player, to);
     }
 
+    public void removeZone(ZoneBase toDelete) {
+        for(Region reg : regions.getValues(new Region[regions.size()]))
+            reg.removeZone(toDelete);
+    }
+    
+    public World getWorld() {
+        return world;
+    }
+    
+    public Zones getPlugin() {
+        return plugin;
+    }
+    
+    public WorldConfig getConfig() {
+        return worldConfig;
+    }
+    
     public static int toInt(double b) {
         int r = (int) b;
         return b < r ? r - 1 : r;
+    }
+    
+    public static long toLong(int x, int y) {
+        return (((long)x) << 32) + ((long)y);
     }
 }

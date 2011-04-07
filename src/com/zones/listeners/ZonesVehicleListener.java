@@ -13,8 +13,8 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleListener;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 
-import com.zones.ZoneBase;
 import com.zones.Zones;
+import com.zones.model.ZoneBase;
 
 
 /**
@@ -52,7 +52,7 @@ public class ZonesVehicleListener extends VehicleListener {
         
         Player player = (Player)attacker;
 
-        ZoneBase zone = plugin.getWorldManager().getActiveZone(event.getVehicle().getLocation());
+        ZoneBase zone = plugin.getWorldManager(player).getActiveZone(event.getVehicle().getLocation());
         if (zone != null && !zone.allowEntityHit(player, event.getVehicle())) {
             player.sendMessage("You cannot damage vehicles in '" + zone.getName() + "'!");
             event.setCancelled(true);
@@ -105,21 +105,21 @@ public class ZonesVehicleListener extends VehicleListener {
         Location from = event.getFrom();
         Location to = event.getTo();
         
-        ZoneBase aZone = plugin.getWorldManager().getActiveZone(from);
-        ZoneBase bZone = plugin.getWorldManager().getActiveZone(to);
-        if (bZone != null && !bZone.allowEnter(player, to)) {
+        ZoneBase aZone = plugin.getWorldManager(from).getActiveZone(from);
+        ZoneBase bZone = plugin.getWorldManager(to).getActiveZone(to);
+        if (bZone != null && !bZone.allowEnter(player, from)) {
             event.getVehicle().teleport(from);
             player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
-            if (aZone != null && !aZone.allowEnter(player, from)) {
+            if (aZone != null && !aZone.allowEnter(player, to)) {
                 event.getVehicle().teleport(player.getWorld().getSpawnLocation());
                 player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
-                plugin.getWorldManager().revalidateZones(player, from, player.getWorld().getSpawnLocation());
+                plugin.getWorldManager(player.getWorld()).revalidateZones(player, from, player.getWorld().getSpawnLocation());
             } 
             // we don't have to do overall revalidation if the player gets
             // warped back to his previous location.
             return;
         }
 
-        plugin.getWorldManager().revalidateZones(player, from, to);
+        plugin.getWorldManager(to).revalidateZones(player, from, to);
     }
 }

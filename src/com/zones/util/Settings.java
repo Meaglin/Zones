@@ -36,7 +36,6 @@ public class Settings {
         if(o != null && o instanceof Boolean)
             return ((Boolean)o).booleanValue();
         else {
-            if(o == null)this.set(name, false);
             return false;
         }
     }
@@ -46,7 +45,6 @@ public class Settings {
         if(o != null && o instanceof Boolean)
             return ((Boolean)o).booleanValue();
         else {
-            if(o == null)this.set(name, def);
             return def;
         }
     }
@@ -56,7 +54,6 @@ public class Settings {
         if(o != null && o instanceof Integer)
             return ((Integer)o).intValue();
         else {
-            if(o == null)this.set(name, 0);
             return 0;
         }
     }
@@ -66,7 +63,6 @@ public class Settings {
         if(o != null && o instanceof String)
             return ((String)o);
         else {
-            if(o == null)this.set(name, "");
             return "";
         }
     }

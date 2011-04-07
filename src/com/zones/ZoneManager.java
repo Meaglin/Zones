@@ -1,7 +1,8 @@
 package com.zones;
 
-import com.zones.forms.ZoneNPoly;
-import com.zones.forms.ZoneCuboid;
+import com.zones.model.ZoneBase;
+import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneNPoly;
 
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
@@ -62,13 +63,13 @@ public class ZoneManager {
                 settings = rset.getString("settings");
                 Class<?> newZone;
                 try {
-                    newZone = Class.forName("com.zones.types."+zoneClass);
+                    newZone = Class.forName("com.zones.model.types."+zoneClass);
                 } catch (ClassNotFoundException e) {
                     log.warning("[Zones]No such zone class: " + zoneClass + " id: " + id);
                     continue;
                 }
-                Constructor<?> zoneConstructor = newZone.getConstructor(Zones.class, String.class, int.class);
-                ZoneBase temp = (ZoneBase) zoneConstructor.newInstance(zones,world,id);
+                Constructor<?> zoneConstructor = newZone.getConstructor(Zones.class, WorldManager.class, int.class);
+                ZoneBase temp = (ZoneBase) zoneConstructor.newInstance(zones,plugin.getWorldManager(world),id);
 
                 points.clear();
 
@@ -150,7 +151,7 @@ public class ZoneManager {
                 by = ((y + 1) + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
 
                 if (zone.getZone().intersectsRectangle(ax, bx, ay, by)) {
-                    plugin.getWorldManager().addZone(x, y, zone);
+                    plugin.getWorldManager(zone.getWorld()).addZone(x, y, zone);
                     // log.info("adding zone["+zone.getId()+"] to region " + x +
                     // " " + y);
                 }
@@ -216,7 +217,7 @@ public class ZoneManager {
             return false;
 
         // then delete the zone from all regions
-        int ax, ay, bx, by;
+/*        int ax, ay, bx, by;
         for (int x = 0; x < WorldManager.X_REGIONS; x++) {
             for (int y = 0; y < WorldManager.Y_REGIONS; y++) {
 
@@ -228,12 +229,13 @@ public class ZoneManager {
                 // System.out.println(ax + " " + bx + " " + ay + " " + by);
 
                 if (toDelete.getZone().intersectsRectangle(ax, bx, ay, by)) {
-                    plugin.getWorldManager().getRegion(ax, ay).removeZone(toDelete);
+                    plugin.getWorldManager(toDelete.getWorld()).getRegion(ax, ay).removeZone(toDelete);
                     // log.info("adding zone["+zone.getId()+"] to region " + x +
                     // " " + y);
                 }
             }
-        }
+        }*/
+        plugin.getWorldManager(toDelete.getWorld()).removeZone(toDelete);
 
         // finally remove the zone from the main zones list.
         zones.remove(toDelete.getId());

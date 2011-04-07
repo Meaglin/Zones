@@ -1,6 +1,6 @@
-package com.zones.forms;
+package com.zones.model.forms;
 
-import com.zones.ZoneForm;
+import com.zones.model.ZoneForm;
 
 /**
  * A primitive rectangular zone

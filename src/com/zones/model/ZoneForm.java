@@ -1,4 +1,4 @@
-package com.zones;
+package com.zones.model;
 
 /**
  * Abstract base class for any zone form

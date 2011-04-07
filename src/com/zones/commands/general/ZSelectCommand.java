@@ -5,9 +5,9 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
+import com.zones.model.ZoneBase;
 
 /**
  * 
@@ -33,7 +33,7 @@ public class ZSelectCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.GREEN.toString() + "Selected zone '" + zone.getName() + "' .");
             }
         }else{
-            List<ZoneBase> zoneslist = getWorldManager().getAdminZones(player);
+            List<ZoneBase> zoneslist = getWorldManager(player).getAdminZones(player);
             if(zoneslist.size() < 1)
                 player.sendMessage(ChatColor.YELLOW.toString() + "No zones found in your current area(which you can modify).");
             else if(zoneslist.size() == 1){

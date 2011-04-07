@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
+import com.zones.model.types.ZoneNormal;
 
 /**
  * 
@@ -16,12 +17,12 @@ public class ZGetAccessCommand extends ZoneCommand {
     public ZGetAccessCommand(Zones plugin) {
         super("zgetaccess", plugin);
         this.setRequiresSelected(true);
-        this.setRequiresZoneNormal(true);
+        this.setRequiredClass(ZoneNormal.class);
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
-        getSelectedNormalZone(player).sendAccess(player);
+       ((ZoneNormal)getSelectedZone(player)).sendAccess(player);
         return true;
     }
 

@@ -9,12 +9,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.zones.WorldManager;
-import com.zones.ZoneBase;
 import com.zones.ZoneManager;
 import com.zones.Zones;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.create.ZConfirmCommand;
-import com.zones.types.ZoneNormal;
+import com.zones.model.ZoneBase;
+import com.zones.model.types.ZoneNormal;
 
 /**
  * 
@@ -28,7 +28,7 @@ public abstract class ZoneCommand extends Command {
     private boolean requiresDummy;
     private boolean requiresCreate;
     private boolean requiresAdmin;
-    private boolean requiresZoneNormal;
+    private Class<?> requiredClass;
     
     public ZoneCommand(String name, Zones plugin) {
         super(name);
@@ -45,8 +45,8 @@ public abstract class ZoneCommand extends Command {
         return getPlugin().getP().has(p, command);
     }
     
-    protected WorldManager getWorldManager() {
-        return plugin.getWorldManager();
+    protected WorldManager getWorldManager(Player p) {
+        return plugin.getWorldManager(p.getWorld());
     }
     
     protected ZoneManager getZoneManager() {
@@ -126,7 +126,7 @@ public abstract class ZoneCommand extends Command {
                     p.sendMessage(ChatColor.RED + "Please create a dummy zone first with:");
                     p.sendMessage(ChatColor.RED + "/zcreate [zone name]");
                 }
-            } else if(requiresZoneNormal() && (!hasSelected(p) || !(getSelectedZone(p) instanceof ZoneNormal))){
+            } else if(hasRequiredClass() && (!hasSelected(p) || !(requiredClass.isAssignableFrom(getSelectedZone(p).getClass())))){
                 p.sendMessage(ChatColor.RED + "This zone doesn't allow this type of command.");
             } else {
                 if(requiresDummy() && !(this instanceof ZConfirmCommand)){
@@ -336,12 +336,15 @@ public abstract class ZoneCommand extends Command {
         commands.put("/zmerge", new String[] {
             "zones.create",
             "merges the dummy zone points/form with the selected zone.",
-            "Changes the 'area'/'form' of the zone you selected \n with your current dummy zone 'area'/'form'."
+            "Changes the 'area'/'form' of the zone you selected \n" +
+            " with your current dummy zone 'area'/'form'."
         });
         commands.put("/zreload", new String[] {
                 "zones.admin",
-                "Reloads the zones plugin and all it's zones.",
-                "Nothing extra here."
+                "config|zones|all - reloads specified part of zones.",
+                "Config - reloads all the config files \n (main config file + each worlds config file).\n" +
+                "Zones - reloads all the zones and resets all dummy&selected zones." +
+                "All - reloads the whole plugin."
         });
         commands.put("/ztoggle", new String[] {
                 "",
@@ -362,12 +365,12 @@ public abstract class ZoneCommand extends Command {
 
     protected static Map<String, String[]> getCommands() { return commands; }
 
-    public void setRequiresZoneNormal(boolean requiresZoneNormal) {
-        this.requiresZoneNormal = requiresZoneNormal;
+    public void setRequiredClass(Class<?> requiredClass) {
+        this.requiredClass = requiredClass;
     }
 
-    public boolean requiresZoneNormal() {
-        return requiresZoneNormal;
+    public boolean hasRequiredClass() {
+        return requiredClass != null;
     }
 
 }

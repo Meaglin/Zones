@@ -1,4 +1,4 @@
-package com.zones;
+package com.zones.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,10 +6,16 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import com.zones.WorldManager;
+import com.zones.Zones;
+import com.zones.ZonesAccess;
+import com.zones.ZonesConfig;
 import com.zones.util.Settings;
 
 /**
@@ -28,12 +34,12 @@ public abstract class ZoneBase {
     private Settings                  settings;
 
     protected Zones                   zones;
-    protected String                  world;
+    protected WorldManager            worldManager;
     
-    protected ZoneBase(Zones zones,String world, int id) {
+    protected ZoneBase(Zones zones,WorldManager worldManager, int id) {
         this.id = id;
         this.zones = zones;
-        this.world = world;
+        this.worldManager = worldManager;
         characterList = new HashMap<String, Player>();
     }
     
@@ -60,6 +66,13 @@ public abstract class ZoneBase {
         return name;
     }
 
+    public WorldManager getWorldManager() {
+        return worldManager;
+    }
+    
+    public World getWorld() {
+        return getWorldManager().getWorld();
+    }
     /**
      * Setup new parameters for this zone
      * 
@@ -101,8 +114,8 @@ public abstract class ZoneBase {
      * @param x
      * @param y
      */
-    public boolean isInsideZone(int x, int y,String world) {
-        if (this.world.equals(world) && form.isInsideZone(x, y, form.getHighZ()))
+    public boolean isInsideZone(int x, int y) {
+        if (form.isInsideZone(x, y, form.getHighZ()))
             return true;
         else
             return false;
@@ -115,8 +128,8 @@ public abstract class ZoneBase {
      * @param y
      * @param z
      */
-    public boolean isInsideZone(int x, int y, int z,String world) {
-        if (this.world.equals(world) && form.isInsideZone(x, y, z))
+    public boolean isInsideZone(int x, int y, int z) {
+        if (form.isInsideZone(x, y, z))
             return true;
         else
             return false;
@@ -128,7 +141,7 @@ public abstract class ZoneBase {
      * @param player
      */
     public boolean isInsideZone(Player player)      {return isInsideZone(player.getLocation());}
-    public boolean isInsideZone(Location loc)       {return isInsideZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()), WorldManager.toInt(loc.getY()),loc.getWorld().getName());}
+    public boolean isInsideZone(Location loc)       {return isInsideZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()), WorldManager.toInt(loc.getY()));}
     
     public double getDistanceToZone(int x, int y)   {return getZone().getDistanceToZone(x, y);}
 
@@ -161,42 +174,32 @@ public abstract class ZoneBase {
         return characterList.containsKey(player.getName());
     }
 
-    protected abstract void onEnter(Player character);
-    protected abstract void onExit(Player character);
+    protected abstract void onEnter(Player player);
+    protected abstract void onExit(Player player);
 
-    public abstract boolean allowWater(Block b);
-    public abstract boolean allowLava(Block b);
-    public abstract boolean allowDynamite(Block b);
+    public abstract boolean allowWater(Block from, Block to);
+    public abstract boolean allowLava(Block from, Block to);
+    public abstract boolean allowDynamite(Block block);
     public abstract boolean allowHealth(Player player);
-    public abstract boolean allowLeafDecay(Block b);
-    /**
-     * 
-     * @param player not null when fire is started by player using flintandsteel(lighter).
-     * @param block
-     * @return
-     */
+    public abstract boolean allowLeafDecay(Block block);
     public abstract boolean allowFire(Player player, Block block);
     
-    public abstract boolean allowSpawn(Entity entity);
+    public abstract boolean allowSpawn(Entity entity,CreatureType type);
     
-    public abstract boolean allowBlockDestroy(Player player, Block block);
     public abstract boolean allowBlockCreate(Player player, Block block);
     public abstract boolean allowBlockModify(Player player, Block block);
-    public abstract boolean allowEnter(Player player, Location to);
-    public abstract boolean allowTeleport(Player player, Location to);
+    public abstract boolean allowBlockDestroy(Player player, Block block);
+    public abstract boolean allowBlockHit(Player attacker, Block defender);
     public abstract boolean allowEntityHit(Player attacker, Entity defender);
+    
+    public abstract boolean allowEnter(Player player,Location to);
+    public abstract boolean allowTeleport(Player player,Location to);
+    
     
     public abstract ZonesAccess getAccess(Player player);
     public abstract ZonesAccess getAccess(String group);
     
     public abstract boolean canAdministrate(Player player);
-    /**
-     * 
-     * @param attacker
-     * @param defender (music blocks, etc..)
-     * @return
-     */
-    public abstract boolean allowBlockHit(Player attacker, Block defender);
    
     
     public HashMap<String, Player> getCharactersInside() {

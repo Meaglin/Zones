@@ -14,10 +14,10 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 
-import com.zones.ZoneBase;
+import com.zones.WorldManager;
 import com.zones.Zones;
-import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
+import com.zones.model.ZoneBase;
 
 /**
  * 
@@ -75,24 +75,23 @@ public class ZonesBlockListener extends BlockListener {
         Block blockFrom = event.getBlock();
         Block blockTo = event.getToBlock();
 
-        if (blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
 
-            ZoneBase fromZone = plugin.getWorldManager().getActiveZone(blockFrom.getLocation());
-            ZoneBase toZone = plugin.getWorldManager().getActiveZone(blockTo.getLocation());
-
-            if (toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowWater(blockTo))
+        WorldManager wm = plugin.getWorldManager(blockFrom.getWorld());
+        ZoneBase toZone = wm.getActiveZone(blockTo.getLocation());
+        if(toZone == null) {
+            if(!wm.getConfig().canFlow(blockFrom, blockTo))
                 event.setCancelled(true);
+        } else {
+            if (blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
+                if (toZone != null && !toZone.allowWater(blockFrom,blockTo))
+                    event.setCancelled(true);
+            }
+    
+            if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
+                if (toZone != null && !toZone.allowLava(blockFrom,blockTo))
+                    event.setCancelled(true);
+            }
         }
-
-        if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
-
-            ZoneBase fromZone = plugin.getWorldManager().getActiveZone(blockFrom.getLocation());
-            ZoneBase toZone = plugin.getWorldManager().getActiveZone(blockTo.getLocation());
-
-            if (toZone != null && (fromZone == null || fromZone.getId() != toZone.getId()) && !toZone.allowLava(blockTo))
-                event.setCancelled(true);
-        }
-
     }
 
     /**
@@ -106,18 +105,28 @@ public class ZonesBlockListener extends BlockListener {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockPlaced();
 
-        ZoneBase zone = plugin.getWorldManager().getActiveZone(blockPlaced.getLocation());
-        if (zone != null && !zone.allowBlockCreate(player, blockPlaced)) {
-            player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' .");
-            event.setBuild(false);
-        } else if (zone != null && (blockPlaced.getTypeId() == 54 || blockPlaced.getTypeId() == 61 || blockPlaced.getTypeId() == 62) && !zone.allowBlockModify(player, blockPlaced)) {
-            player.sendMessage(ChatColor.RED + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
-            event.setBuild(false);
-        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.allowBlockModify(player, blockPlaced)))
-            return;
-        else {
-            player.sendMessage(ChatColor.RED + "You cannot build in the world.");
-            event.setBuild(false);
+        WorldManager wm = plugin.getWorldManager(player);
+        ZoneBase zone = wm.getActiveZone(blockPlaced.getLocation());
+        if(!wm.getConfig().isProtectedBreakBlock(player, blockPlaced)) {
+            if(zone == null){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player,"zones.build")){
+                    player.sendMessage(ChatColor.RED + "You cannot build in this world!");
+                    event.setBuild(false);
+                } else {
+                    wm.getConfig().logBlockPlace(player, blockPlaced);
+                }
+            } else  {
+                if (!zone.allowBlockCreate(player, blockPlaced)) {
+                    player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' .");
+                    event.setBuild(false);
+                } else if ((blockPlaced.getTypeId() == 54 || blockPlaced.getTypeId() == 61 || blockPlaced.getTypeId() == 62) && !zone.allowBlockModify(player, blockPlaced)) {
+                    player.sendMessage(ChatColor.RED + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
+                    event.setBuild(false);
+                } else {
+                    wm.getConfig().logBlockPlace(player, blockPlaced);
+                    event.setBuild(true);
+                }
+            }
         }
     }
 
@@ -169,9 +178,16 @@ public class ZonesBlockListener extends BlockListener {
      *            Relevant event details
      */
     public void onBlockIgnite(BlockIgniteEvent event) {
-        ZoneBase zone = plugin.getWorldManager().getActiveZone(event.getBlock().getLocation());
-        if((zone != null && !zone.allowFire(event.getPlayer(), event.getBlock())) || !ZonesConfig.FIRE_ENABLED)
-            event.setCancelled(true);
+        WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
+        ZoneBase zone = wm.getActiveZone(event.getBlock().getLocation());
+        if(zone == null) {
+            if(!wm.getConfig().canBurn(event.getPlayer(), event.getBlock(), event.getCause()))
+                event.setCancelled(true);
+        } else {
+            if(!zone.allowFire(event.getPlayer(), event.getBlock())) {
+                event.setCancelled(true);
+            }
+        }
     }
 
     /**
@@ -207,9 +223,14 @@ public class ZonesBlockListener extends BlockListener {
      *            Relevant event details
      */
     public void onLeavesDecay(LeavesDecayEvent event) {
-        ZoneBase zone = plugin.getWorldManager().getActiveZone(event.getBlock().getLocation());
-        if(zone != null && !zone.allowLeafDecay(event.getBlock())){
-            event.setCancelled(true);
+        WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
+        ZoneBase zone = wm.getActiveZone(event.getBlock().getLocation());
+        if(zone == null) {
+            if(!wm.getConfig().LEAF_DECAY_ENABLED)
+                event.setCancelled(true);
+        } else {
+            if(!zone.allowLeafDecay(event.getBlock()))
+                event.setCancelled(true);
         }
     }
 
@@ -235,21 +256,25 @@ public class ZonesBlockListener extends BlockListener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        
-        ZoneBase zone = plugin.getWorldManager().getActiveZone(block.getLocation());
-        if (zone != null && !zone.allowBlockDestroy(player, block)) {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot destroy blocks in '" + zone.getName() + "' !");
-            event.setCancelled(true);
-        } else if (zone != null && (block.getTypeId() == 54 || block.getTypeId() == 61 || block.getTypeId() == 62) && !zone.allowBlockModify(player, block)) {
-
-            player.sendMessage(ChatColor.RED.toString() + "You cannot destroy a chest/furnace in '" + zone.getName() + "' since you dont have modify rights!");
-
-            event.setCancelled(true);
-        } else if (!ZonesConfig.LIMIT_BY_BUILD_ENABLED || plugin.getP().permission(player, "zones.build") || (zone != null && zone.allowBlockDestroy(player, block)))
-            return;
-        else {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot destroy in the world.");
-            event.setCancelled(true);
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
+        ZoneBase zone = wm.getActiveZone(block.getLocation());
+        if(zone == null) {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player, "zones.build")){
+                player.sendMessage(ChatColor.RED + "You're not allowed to place blocks in this world!");
+                event.setCancelled(true);
+            } else {
+                wm.getConfig().logBlockPlace(player, block);
+            }
+        } else {
+            if (!zone.allowBlockDestroy(player, block)) {
+                player.sendMessage(ChatColor.RED + "You cannot destroy blocks in '" + zone.getName() + "' !");
+                event.setCancelled(true);
+            } else if ((block.getTypeId() == 54 || block.getTypeId() == 61 || block.getTypeId() == 62) && !zone.allowBlockModify(player, block)) {
+                player.sendMessage(ChatColor.RED + "You cannot destroy a chest/furnace in '" + zone.getName() + "' since you dont have modify rights!");
+                event.setCancelled(true);
+            } else {
+                wm.getConfig().logBlockBreak(player, block);
+            }
         }
 
     }

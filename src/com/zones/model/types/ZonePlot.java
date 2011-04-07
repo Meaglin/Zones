@@ -1,5 +1,6 @@
-package com.zones.types;
+package com.zones.model.types;
 
+import com.zones.WorldManager;
 import com.zones.Zones;
 
 /**
@@ -9,7 +10,7 @@ import com.zones.Zones;
  */
 public class ZonePlot extends ZoneNormal {
 
-    public ZonePlot(Zones zones, String world, int id) {
+    public ZonePlot(Zones zones, WorldManager world, int id) {
         super(zones, world, id);
     }
 

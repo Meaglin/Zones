@@ -5,10 +5,10 @@ import java.util.HashMap;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.zones.ZoneBase;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
+import com.zones.model.ZoneBase;
 import com.zones.util.Settings;
 
 /**
@@ -27,20 +27,17 @@ public class ZToggleCommand extends ZoneCommand {
         variables.put("dynamite" , new String[] { 
                 "zones.toggle.tnt",
                 "Dynamite",
-                ZonesConfig.DYNAMITE_ENABLED_NAME,
-                String.valueOf(ZonesConfig.TNT_ENABLED)
+                ZonesConfig.DYNAMITE_ENABLED_NAME
         } );
         variables.put("tnt" , new String[] { 
                 "zones.toggle.tnt",
                 "Tnt",
-                ZonesConfig.DYNAMITE_ENABLED_NAME,
-                String.valueOf(ZonesConfig.TNT_ENABLED)
+                ZonesConfig.DYNAMITE_ENABLED_NAME
         } );
         variables.put("health" , new String[] { 
                 "zones.toggle.health",
                 "Health",
-                ZonesConfig.HEALTH_ENABLED_NAME,
-                String.valueOf(ZonesConfig.HEALTH_ENABLED)
+                ZonesConfig.HEALTH_ENABLED_NAME
         } );
         variables.put("lava" , new String[] { 
                 "zones.toggle.lava",
@@ -57,20 +54,17 @@ public class ZToggleCommand extends ZoneCommand {
         variables.put("mobs" , new String[] { 
                 "zones.toggle.mobs",
                 "Mobs Spawning",
-                ZonesConfig.SPAWN_MOBS_NAME,
-                String.valueOf(ZonesConfig.MOBS_ENABLED)
+                ZonesConfig.SPAWN_MOBS_NAME
         } );
         variables.put("animals" , new String[] { 
                 "zones.toggle.animals",
                 "Animals Spawning",
-                ZonesConfig.SPAWN_ANIMALS_NAME,
-                String.valueOf(ZonesConfig.ANIMALS_ENABLED)
+                ZonesConfig.SPAWN_ANIMALS_NAME
         } );
         variables.put("leafdecay", new String[] {
                "zones.toggle.leafdecay",
                "Leaf Decay",
-               ZonesConfig.LEAF_DECAY_ENABLED_NAME,
-               Boolean.TRUE.toString()
+               ZonesConfig.LEAF_DECAY_ENABLED_NAME
         });
         variables.put("teleport", new String[] {
                "zones.toggle.teleport",
@@ -81,8 +75,7 @@ public class ZToggleCommand extends ZoneCommand {
         variables.put("fire", new String[] {
                 "zones.toggle.fire",
                 "Fire",
-                ZonesConfig.ALLOW_FIRE_NAME,
-                String.valueOf(ZonesConfig.FIRE_ENABLED)
+                ZonesConfig.ALLOW_FIRE_NAME
         });
     }
 
@@ -105,14 +98,32 @@ public class ZToggleCommand extends ZoneCommand {
         } else {
             ZoneBase zone = getSelectedZone(player);
             Settings settings = zone.getSettings();
-            if(zone.setSetting(variable[2], !settings.getBool(variable[2],Boolean.parseBoolean(variable[3])))) {
-                player.sendMessage(ChatColor.GREEN + variable[1] + " is now " + (settings.getBool(variable[2],Boolean.parseBoolean(variable[3])) ?  "allowed" : "blocked")+ " in this zone!");
+            if(zone.setSetting(variable[2], !settings.getBool(variable[2],getDefault(vars[0],zone)))) {
+                player.sendMessage(ChatColor.GREEN + variable[1] + " is now " + (settings.getBool(variable[2],getDefault(vars[0],zone)) ?  "allowed" : "blocked")+ " in this zone!");
             } else {
                 player.sendMessage(ChatColor.RED + "Error changing variable, contact an admin.");
             }
         }
         
         return false;
+    }
+    private static boolean getDefault(String name,ZoneBase zone) {
+        if(name.equalsIgnoreCase("tnt") || name.equalsIgnoreCase("dynamite"))
+            return zone.getWorldManager().getConfig().ALLOW_TNT_TRIGGER;
+        else if(name.equalsIgnoreCase("health"))
+            return zone.getWorldManager().getConfig().PLAYER_HEALTH_ENABLED;
+        else if(name.equalsIgnoreCase("lava"))
+            return true;
+        else if(name.equalsIgnoreCase("water"))
+            return true;
+        else if(name.equalsIgnoreCase("teleport"))
+            return true;
+        else if(name.equalsIgnoreCase("fire"))
+            return zone.getWorldManager().getConfig().FIRE_ENABLED;
+        else if(name.equalsIgnoreCase("leafdecay"))
+            return zone.getWorldManager().getConfig().LEAF_DECAY_ENABLED;
+        else 
+            return false;
     }
 
 }

@@ -1,7 +1,9 @@
 package com.zones;
 
-import com.zones.forms.ZoneNPoly;
-import com.zones.forms.ZoneCuboid;
+import com.zones.model.ZoneBase;
+import com.zones.model.ZoneForm;
+import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneNPoly;
 import com.zones.util.Settings;
 
 import java.lang.reflect.Constructor;
@@ -140,14 +142,14 @@ public class ZonesDummyZone {
         _class = name;
     }
 
-    private static Settings basicSettings() {
+    private Settings basicSettings() {
         Settings st = new Settings();
         st.set(ZonesConfig.WATER_ENABLED_NAME, true);
         st.set(ZonesConfig.LAVA_ENABLED_NAME, true);
-        st.set(ZonesConfig.DYNAMITE_ENABLED_NAME, ZonesConfig.TNT_ENABLED);
-        st.set(ZonesConfig.HEALTH_ENABLED_NAME, ZonesConfig.HEALTH_ENABLED);
-        st.set(ZonesConfig.SPAWN_ANIMALS_NAME, ZonesConfig.ANIMALS_ENABLED);
-        st.set(ZonesConfig.SPAWN_MOBS_NAME, ZonesConfig.MOBS_ENABLED);
+        st.set(ZonesConfig.DYNAMITE_ENABLED_NAME, plugin.getWorldManager(w).getConfig().ALLOW_TNT_TRIGGER);
+        st.set(ZonesConfig.HEALTH_ENABLED_NAME, plugin.getWorldManager(w).getConfig().PLAYER_HEALTH_ENABLED);
+        st.set(ZonesConfig.SPAWN_ANIMALS_NAME, plugin.getWorldManager(w).getConfig().ANIMAL_SPAWNING_ENABLED);
+        st.set(ZonesConfig.SPAWN_MOBS_NAME, plugin.getWorldManager(w).getConfig().MOB_SPAWNING_ENABLED);
         st.set(ZonesConfig.LEAF_DECAY_ENABLED_NAME, true);
         return st;
     }
@@ -161,7 +163,7 @@ public class ZonesDummyZone {
 
         Class<?> newZone = null;
         try {
-            newZone = Class.forName("com.zones.types."+_class);
+            newZone = Class.forName("com.zones.model.types."+_class);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -206,8 +208,8 @@ public class ZonesDummyZone {
         Constructor<?> zoneConstructor;
         ZoneBase temp = null;
         try {
-            zoneConstructor = newZone.getConstructor(Zones.class,String.class, int.class);
-            temp = (ZoneBase) zoneConstructor.newInstance(plugin,w.getName(), id);
+            zoneConstructor = newZone.getConstructor(Zones.class,WorldManager.class, int.class);
+            temp = (ZoneBase) zoneConstructor.newInstance(plugin,plugin.getWorldManager(w), id);
         } catch (Exception e) {
             e.printStackTrace();
         }
