@@ -30,6 +30,7 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
 import com.zones.model.ZoneBase;
 
@@ -86,26 +87,67 @@ public class ZonesPlayerListener extends PlayerListener {
      */
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
+        if(event.isCancelled()) return;
+        
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
-        //do nothing when we don't actually change from 1 block to another.
+        /*
+         * We only revalidate when we change actually change from 1 block to another.
+         * and since bukkits "check" is allot smaller we have to do this properly ourselves, sadly.
+         */
         if(from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ())
             return;
+        /*
+         * For the heck of it al:
+         * if you're wondering why we use the same world manager for both aZone and bZone it's because as far as i know you cant MOVE to another world
+         * and always get teleported.
+         */
+        WorldManager wm = plugin.getWorldManager(from);
+        ZoneBase aZone = wm.getActiveZone(from);
+        ZoneBase bZone = wm.getActiveZone(to);
         
-        ZoneBase aZone = plugin.getWorldManager(from).getActiveZone(from);
-        ZoneBase bZone = plugin.getWorldManager(to).getActiveZone(to);
-        if (bZone != null && !bZone.allowEnter(player, to)) {
-            event.setCancelled(true);
-            player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
-            if (aZone != null && !aZone.allowEnter(player, from)) {
-                event.setFrom(player.getWorld().getSpawnLocation());
-                player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
-                plugin.getWorldManager(player.getWorld()).revalidateZones(player, from, player.getWorld().getSpawnLocation());
-            } 
-            // we don't have to do overall revalidation if the player gets
-            // warped back to his previous location.
-            return;
+        if (bZone != null) {
+            if(!bZone.allowEnter(player, to)) {
+                event.setCancelled(true);
+                player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
+                /*
+                 * In principle this should only occur when someone's access to a zone gets revoked when still inside the zone.
+                 * This prevents players getting stuck ;).
+                 */
+                if (aZone != null && !aZone.allowEnter(player, from)) {
+                    event.setFrom(wm.getWorld().getSpawnLocation());
+                    player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
+                    wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
+                } 
+                return;
+            } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE && !plugin.getP().permission(player, "zones.override.border")) {
+                if(wm.getConfig().isOutsideBorder(to)) {
+                    if(wm.getConfig().isOutsideBorder(from)) {
+                        event.setCancelled(true);
+                        event.setFrom(wm.getWorld().getSpawnLocation());
+                        player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
+                        wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                        return;
+                    }
+                    player.sendMessage(ChatColor.RED + "You have reached the border.");
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        } else if(wm.getConfig().BORDER_ENABLED && !plugin.getP().permission(player, "zones.override.border")) {
+            if(wm.getConfig().isOutsideBorder(to)) {
+                if(wm.getConfig().isOutsideBorder(from)) {
+                    event.setCancelled(true);
+                    event.setFrom(wm.getWorld().getSpawnLocation());
+                    player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
+                    wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                    return;
+                }
+                player.sendMessage(ChatColor.RED + "You have reached the border.");
+                event.setCancelled(true);
+                return;
+            }
         }
 
         plugin.getWorldManager(from).revalidateZones(player, from, to);
@@ -119,12 +161,14 @@ public class ZonesPlayerListener extends PlayerListener {
      */
     @Override
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-
+        if(event.isCancelled()) return;
+        
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
+        WorldManager wmto = plugin.getWorldManager(to);
         ZoneBase aZone = plugin.getWorldManager(from).getActiveZone(from);
-        ZoneBase bZone = plugin.getWorldManager(to).getActiveZone(to);
+        ZoneBase bZone = wmto.getActiveZone(to);
         
         if(aZone != null) {
             if(!aZone.allowTeleport(player, from) && aZone.allowEnter(player, from)) {
@@ -135,7 +179,23 @@ public class ZonesPlayerListener extends PlayerListener {
         }
         if(bZone != null){
             if(!bZone.allowTeleport(player, to)) {
-                player.sendMessage(ChatColor.RED + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");
+                if(bZone.allowEnter(player, to)) {
+                    player.sendMessage(ChatColor.RED + "You cannot warp into " + bZone.getName() + " because it has teleporting disabled.");                    
+                } else {
+                    player.sendMessage(ChatColor.RED + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");                    
+                }
+                event.setCancelled(true);
+                return;
+            } else if (wmto.getConfig().BORDER_ENABLED && wmto.getConfig().BORDER_ENFORCE) {
+                if(wmto.getConfig().isOutsideBorder(to) && !plugin.getP().permission(player, "zones.override.border")) {
+                    player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        } else if(wmto.getConfig().BORDER_ENABLED) {
+            if(wmto.getConfig().isOutsideBorder(to) && !plugin.getP().permission(player, "zones.override.border")) {
+                player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
                 event.setCancelled(true);
                 return;
             }
@@ -167,8 +227,8 @@ public class ZonesPlayerListener extends PlayerListener {
     
     private static List<Integer> blocks = Arrays.asList(
             Material.NOTE_BLOCK.getId(),
-            93,
-            94
+            Material.DIODE_BLOCK_OFF.getId(),
+            Material.DIODE_BLOCK_ON.getId()
             );
     
     private static List<Integer> containers = Arrays.asList(
@@ -180,6 +240,8 @@ public class ZonesPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if(event.isCancelled()) return;
+        
         switch(event.getAction()) {
             case RIGHT_CLICK_BLOCK:
                 Block blockPlaced = event.getClickedBlock().getRelative(event.getBlockFace());
@@ -188,7 +250,7 @@ public class ZonesPlayerListener extends PlayerListener {
                 int type = event.getItem().getTypeId();
                 int blocktype = event.getClickedBlock().getTypeId();
                 Player player = event.getPlayer();
-                if (type == Zones.toolType) {
+                if (type == ZonesConfig.CREATION_TOOL_TYPE) {
                     ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
                     if (dummy != null) {
                         if (dummy.getType() == 1 && dummy.getCoords().size() == 2) {
@@ -200,11 +262,11 @@ public class ZonesPlayerListener extends PlayerListener {
                         p[0] = WorldManager.toInt(event.getClickedBlock().getX());
                         p[1] = WorldManager.toInt(event.getClickedBlock().getZ());
 
-                        if (event.getClickedBlock().getY() < WorldManager.MAX_Z - Zones.pilonHeight) {
-                            for (int i = 1; i <= Zones.pilonHeight; i++) {
+                        if (event.getClickedBlock().getY() < WorldManager.MAX_Z - ZonesConfig.CREATION_PILON_HEIGHT) {
+                            for (int i = 1; i <= ZonesConfig.CREATION_PILON_HEIGHT; i++) {
                                 Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
                                 dummy.addDeleteBlock(t);
-                                t.setTypeId(Zones.pilonType);
+                                t.setTypeId(ZonesConfig.CREATION_PILON_TYPE);
                             }
                         }
                         if (dummy.getCoords().contains(p)) {

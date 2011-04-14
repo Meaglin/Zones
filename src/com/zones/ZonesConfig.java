@@ -13,7 +13,7 @@ import com.zones.util.Properties;
 public class ZonesConfig {
     public static final String ZONES_CONFIG_FILE = "./plugins/zones/Zones.properties";
 
-    private static Logger      log               = Logger.getLogger(ZonesConfig.class.getName());
+    private static Logger      log                         = Logger.getLogger(ZonesConfig.class.getName());
 
     public static String       DATABASE_URL;
     public static String       DATABASE_LOGIN;
@@ -22,18 +22,13 @@ public class ZonesConfig {
 
     public static String       ZONES_TABLE;
     public static String       ZONES_VERTICES_TABLE;
-
-    public static final String ALLOW_TELEPORT_NAME = "PreventTeleport";
-    public static final String ALLOW_FIRE_NAME = "AllowFire";
     
-    public static final String LAVA_ENABLED_NAME = "LavaEnabled";
-    public static final String WATER_ENABLED_NAME = "WaterEnabled";
-    public static final String HEALTH_ENABLED_NAME = "HealthEnabled";
-    public static final String DYNAMITE_ENABLED_NAME = "DynamiteEnabled";
-    public static final String SPAWN_MOBS_NAME = "SpawnMobs";
-    public static final String SPAWN_ANIMALS_NAME = "SpawnAnimals";
-    public static final String LEAF_DECAY_ENABLED_NAME = "LeafDecay";
+    public static String       DEFAULT_ENTER_MESSAGE;
+    public static String       DEFAULT_LEAVE_MESSAGE;
     
+    public static int          CREATION_TOOL_TYPE;
+    public static int          CREATION_PILON_TYPE;
+    public static int          CREATION_PILON_HEIGHT;
     
     public static void load() {
         try {
@@ -45,6 +40,13 @@ public class ZonesConfig {
 
             ZONES_TABLE = zp.getProperty("ZonesTable", "zones");
             ZONES_VERTICES_TABLE = zp.getProperty("ZonesVerticesTable", "zones_vertices");
+            
+            DEFAULT_ENTER_MESSAGE = zp.getProperty("DefaultEnterMessage", "You have just entered {zname}[{acces}].");
+            DEFAULT_LEAVE_MESSAGE = zp.getProperty("DefaultLeaveMessage", "You have just exited {zname}.");
+            
+            CREATION_TOOL_TYPE      = zp.getInt("CreationToolType", 280);
+            CREATION_PILON_TYPE     = zp.getInt("CreationPilonType", 80);
+            CREATION_PILON_HEIGHT   = zp.getInt("CreationPilonHeight", 4);
         } catch (Exception e) {
             log.warning("[Zones]Error loading configurations.");
             e.printStackTrace();

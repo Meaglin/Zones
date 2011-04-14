@@ -3,9 +3,11 @@ main: com.zones.Zones
 version: 1.2
 author: Meaglin
 website: https://github.com/Meaglin/0xFFFF
+description: The Over optimized Area Protection tool with integrated Anti Grief options.
 commands:
     zhelp
     zcreate
+    zset
     zadd
     zremove
     zsetplot

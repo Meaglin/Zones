@@ -1,6 +1,5 @@
-package com.zones;
+package com.zones.model;
 
-import java.util.ArrayList;
 import org.bukkit.ChatColor;
 
 /**
@@ -42,21 +41,6 @@ public class ZonesAccess {
         public boolean canDo(int rights) {
             return (rights & flag) == flag;
         }
-
-        private final static ArrayList<Rights> rights;
-        static {
-            rights = new ArrayList<Rights>();
-            rights.add(Rights.BUILD);
-            rights.add(Rights.DESTROY);
-            rights.add(Rights.MODIFY);
-            rights.add(Rights.ENTER);
-            rights.add(Rights.HIT);
-            rights.add(Rights.ALL);
-        }
-
-        public static ArrayList<Rights> getRights() {
-            return rights;
-        }
     }
 
     private int rights = 0;
@@ -66,7 +50,7 @@ public class ZonesAccess {
     }
 
     public ZonesAccess(String rightsString) {
-        for (Rights right : Rights.getRights())
+        for (Rights right : Rights.values())
             if (rightsString.toLowerCase().contains(right.getCode()))
                 rights |= right.getFlag();
         
@@ -123,7 +107,7 @@ public class ZonesAccess {
             return "-";
         // Build list of access codes.
         String rights = "";
-        for (Rights right : Rights.getRights())
+        for (Rights right : Rights.values())
             if (canDo(right))
                 rights += right.getCode();
 
@@ -140,7 +124,7 @@ public class ZonesAccess {
 
         // Build list of access codes.
         String text = "";
-        for (Rights right : Rights.getRights())
+        for (Rights right : Rights.values())
             if (canDo(right))
                 text += right.getTextual() + ", ";
 

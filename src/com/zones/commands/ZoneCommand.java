@@ -14,7 +14,6 @@ import com.zones.Zones;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.create.ZConfirmCommand;
 import com.zones.model.ZoneBase;
-import com.zones.model.types.ZoneNormal;
 
 /**
  * 
@@ -28,7 +27,7 @@ public abstract class ZoneCommand extends Command {
     private boolean requiresDummy;
     private boolean requiresCreate;
     private boolean requiresAdmin;
-    private Class<?> requiredClass;
+    private Class<? extends ZoneBase> requiredClass = null;
     
     public ZoneCommand(String name, Zones plugin) {
         super(name);
@@ -105,10 +104,6 @@ public abstract class ZoneCommand extends Command {
         return getZoneManager().getSelectedZone(p.getEntityId());
     }
     
-    protected ZoneNormal getSelectedNormalZone(Player p) {
-        return (ZoneNormal) getSelectedZone(p);
-    }
-    
     @Override
     public boolean execute(CommandSender sender, String alias, String[] vars) {
         if(sender instanceof Player) {
@@ -148,18 +143,6 @@ public abstract class ZoneCommand extends Command {
             "[zone name] - starts zone creation in a new zone.",
 
             "Starts Zone creation mode in which you can set the \n zones perimiter and type and height en depth."
-        });
-
-        commands.put("/zadd", new String[] {
-            "zones.create",
-            "- adds the current location to the temp zone.",
-            "Adds the current player x and y as a point of the  \n zone you are making."
-        });
-
-        commands.put("/zremove", new String[] {
-            "zones.create",
-            "- removes the current location from the temp zone.",
-            "If the current player location is a point of \n the zone you are making it will be removed from the zone \n you are making. "
         });
 
         commands.put("/zsetplot", new String[] {
@@ -360,12 +343,48 @@ public abstract class ZoneCommand extends Command {
                 
         } );
         
+        commands.put("/zadd", new String[] {
+            "zones.settings.add",
+            "- [variable name] [value] add value to variable.",
+            "Adds the [value] to the list [variable name] \n." +
+            "List of variables :\n" +
+            "protectedplace - blocks which cannot be placed inside the zone.\n" +
+            "protectedbreak - blocks which cannot be destroyed inside the zone.\n" +
+            "allowedanimals - list of animals that can spawn inside the zone.\n" +
+            "allowedmobs - list of mobs that can spawn inside the zone."
+            
+        });
+
+        commands.put("/zremove", new String[] {
+            "zones.settings.remove",
+            "- [variable name] [value] remove value from variable.",
+            "removes the [value] from the list [variable name] \n." +
+            "List of variables :\n" +
+            "protectedplace - blocks which cannot be placed inside the zone.\n" +
+            "protectedbreak - blocks which cannot be destroyed inside the zone.\n" +
+            "allowedanimals - list of animals that can spawn inside the zone.\n" +
+            "allowedmobs - list of mobs that can spawn inside the zone."
+        });
+        
+        commands.put("/zset", new String[] {
+            "zones.settings.set",
+            "- [variable name] [value] changes variable to value.",
+            "defines [variables name]'s value as [value] \n." +
+            "List of variables :\n" +
+            "protectedplace - blocks which cannot be placed inside the zone.\n" +
+            "protectedbreak - blocks which cannot be destroyed inside the zone.\n" +
+            "allowedanimals - list of animals that can spawn inside the zone.\n" +
+            "allowedmobs - list of mobs that can spawn inside the zone.\n" +
+            "[value] must be a comma seperated list of all the items in the list\n" +
+            "for example: /zset [variable] <val1>,<val2>,<val3> ."
+        });
+            
     }
 
 
     protected static Map<String, String[]> getCommands() { return commands; }
 
-    public void setRequiredClass(Class<?> requiredClass) {
+    public void setRequiredClass(Class<?  extends ZoneBase> requiredClass) {
         this.requiredClass = requiredClass;
     }
 

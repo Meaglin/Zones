@@ -28,6 +28,7 @@ public class ZoneCommandMap {
         commands.clear();
         
 
+        // Admin
         registerCommand(new ZAddAdminCommand(plugin));
         registerCommand(new ZDeleteCommand(plugin));
         registerCommand(new ZGetAccessCommand(plugin));
@@ -36,6 +37,29 @@ public class ZoneCommandMap {
         registerCommand(new ZSetGroupCommand(plugin));
         registerCommand(new ZSetUserCommand(plugin));
         
+        //Create
+        registerCommand(new ZConfirmCommand(plugin));
+        registerCommand(new ZCreateCommand(plugin));
+        registerCommand(new ZEditCommand(plugin));
+        registerCommand(new ZMergeCommand(plugin));
+        registerCommand(new ZImportCommand(plugin));
+        registerCommand(new ZSaveCommand(plugin));
+        registerCommand(new ZSetDepthCommand(plugin));
+        registerCommand(new ZSetHeightCommand(plugin));
+        registerCommand(new ZSetPlotCommand(plugin));
+        registerCommand(new ZSetTypeCommand(plugin));
+        registerCommand(new ZSetzCommand(plugin));
+        registerCommand(new ZStopCommand(plugin));
+        
+        //General
+        registerCommand(new ZHelpCommand(plugin));
+        registerCommand(new ZRegionInfoCommand(plugin));
+        registerCommand(new ZSelectCommand(plugin));
+
+        // Settings
+        registerCommand(new ZAddCommand(plugin));
+        registerCommand(new ZRemoveCommand(plugin));
+        registerCommand(new ZSet(plugin));
         registerCommand(new ZSetNameCommand(plugin));
         registerCommand(new ZToggleAnimalsCommand(plugin));
         registerCommand(new ZToggleDynamiteCommand(plugin));
@@ -45,24 +69,6 @@ public class ZoneCommandMap {
         registerCommand(new ZToggleWaterCommand(plugin));
         registerCommand(new ZToggleCommand(plugin));
         
-        registerCommand(new ZAddCommand(plugin));
-        registerCommand(new ZConfirmCommand(plugin));
-        registerCommand(new ZCreateCommand(plugin));
-        registerCommand(new ZEditCommand(plugin));
-        registerCommand(new ZMergeCommand(plugin));
-        registerCommand(new ZImportCommand(plugin));
-        registerCommand(new ZRemoveCommand(plugin));
-        registerCommand(new ZSaveCommand(plugin));
-        registerCommand(new ZSetDepthCommand(plugin));
-        registerCommand(new ZSetHeightCommand(plugin));
-        registerCommand(new ZSetPlotCommand(plugin));
-        registerCommand(new ZSetTypeCommand(plugin));
-        registerCommand(new ZSetzCommand(plugin));
-        registerCommand(new ZStopCommand(plugin));
-        
-        registerCommand(new ZHelpCommand(plugin));
-        registerCommand(new ZRegionInfoCommand(plugin));
-        registerCommand(new ZSelectCommand(plugin));
     }
     
     public void registerCommand(ZoneCommand cmd) {

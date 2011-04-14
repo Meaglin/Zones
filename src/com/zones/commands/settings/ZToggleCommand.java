@@ -6,10 +6,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
 import com.zones.model.ZoneBase;
-import com.zones.util.Settings;
+import com.zones.model.ZoneSettings;
+import com.zones.model.settings.ZoneVar;
 
 /**
  * 
@@ -18,64 +18,60 @@ import com.zones.util.Settings;
  */
 public class ZToggleCommand extends ZoneCommand {
 
-    private final HashMap<String,String[]> variables = new HashMap<String, String[]>();
+    private final HashMap<String,Object[]> variables = new HashMap<String, Object[]>();
     
     
     public ZToggleCommand(Zones plugin) {
         super("ztoggle", plugin);
         this.setRequiresSelected(true);
-        variables.put("dynamite" , new String[] { 
+        variables.put("dynamite" , new Object[] { 
                 "zones.toggle.tnt",
                 "Dynamite",
-                ZonesConfig.DYNAMITE_ENABLED_NAME
+                ZoneVar.DYNAMITE
         } );
-        variables.put("tnt" , new String[] { 
+        variables.put("tnt" , new Object[] { 
                 "zones.toggle.tnt",
                 "Tnt",
-                ZonesConfig.DYNAMITE_ENABLED_NAME
+                ZoneVar.DYNAMITE
         } );
-        variables.put("health" , new String[] { 
+        variables.put("health" , new Object[] { 
                 "zones.toggle.health",
                 "Health",
-                ZonesConfig.HEALTH_ENABLED_NAME
+                ZoneVar.HEALTH
         } );
-        variables.put("lava" , new String[] { 
+        variables.put("lava" , new Object[] { 
                 "zones.toggle.lava",
                 "Lava Flow",
-                ZonesConfig.LAVA_ENABLED_NAME,
-                Boolean.TRUE.toString()
+                ZoneVar.LAVA
         } );
-        variables.put("water" , new String[] { 
+        variables.put("water" , new Object[] { 
                 "zones.toggle.water",
-                "Water Flow",
-                ZonesConfig.WATER_ENABLED_NAME,
-                Boolean.TRUE.toString()
+                ZoneVar.WATER
         } );
-        variables.put("mobs" , new String[] { 
+        variables.put("mobs" , new Object[] { 
                 "zones.toggle.mobs",
                 "Mobs Spawning",
-                ZonesConfig.SPAWN_MOBS_NAME
+                ZoneVar.SPAWN_MOBS
         } );
-        variables.put("animals" , new String[] { 
+        variables.put("animals" , new Object[] { 
                 "zones.toggle.animals",
                 "Animals Spawning",
-                ZonesConfig.SPAWN_ANIMALS_NAME
+                ZoneVar.SPAWN_ANIMALS
         } );
-        variables.put("leafdecay", new String[] {
+        variables.put("leafdecay", new Object[] {
                "zones.toggle.leafdecay",
                "Leaf Decay",
-               ZonesConfig.LEAF_DECAY_ENABLED_NAME
+               ZoneVar.LEAF_DECAY
         });
-        variables.put("teleport", new String[] {
+        variables.put("teleport", new Object[] {
                "zones.toggle.teleport",
                "Teleporting",
-               ZonesConfig.ALLOW_TELEPORT_NAME ,
-               Boolean.TRUE.toString()
+               ZoneVar.TELEPORT
         });
-        variables.put("fire", new String[] {
+        variables.put("fire", new Object[] {
                 "zones.toggle.fire",
                 "Fire",
-                ZonesConfig.ALLOW_FIRE_NAME
+                ZoneVar.FIRE
         });
     }
 
@@ -92,14 +88,14 @@ public class ZToggleCommand extends ZoneCommand {
             player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport] ");
             return true;
         }
-        String[] variable = variables.get(vars[0].toLowerCase());
-        if(!canUseCommand(player,variable[0])) {
+        Object[] variable = variables.get(vars[0].toLowerCase());
+        if(!canUseCommand(player,((String)variable[0]))) {
             player.sendMessage(ChatColor.RED + "You're not allowed to change this variable.");
         } else {
             ZoneBase zone = getSelectedZone(player);
-            Settings settings = zone.getSettings();
-            if(zone.setSetting(variable[2], !settings.getBool(variable[2],getDefault(vars[0],zone)))) {
-                player.sendMessage(ChatColor.GREEN + variable[1] + " is now " + (settings.getBool(variable[2],getDefault(vars[0],zone)) ?  "allowed" : "blocked")+ " in this zone!");
+            ZoneSettings settings = zone.getSettings();
+            if(zone.setSetting(((ZoneVar)variable[2]), !settings.getBool(((ZoneVar)variable[2]),getDefault(vars[0],zone)))) {
+                player.sendMessage(ChatColor.GREEN + ((String)variable[1]) + " is now " + (settings.getBool(((ZoneVar)variable[2]),getDefault(vars[0],zone)) ?  "allowed" : "blocked")+ " in this zone!");
             } else {
                 player.sendMessage(ChatColor.RED + "Error changing variable, contact an admin.");
             }

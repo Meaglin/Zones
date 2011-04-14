@@ -1,9 +1,11 @@
 package com.zones.commands.create;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
 
@@ -37,7 +39,8 @@ public class ZCreateCommand extends ZoneCommand {
             getZoneManager().addDummy(player.getEntityId(), new ZonesDummyZone(getPlugin(),player.getWorld(),name));
             player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
             player.sendMessage("You can start adding the zone points of this zone by");
-            player.sendMessage(ChatColor.RED + " hitting blocks with a stick(280)" + ChatColor.WHITE + " or using " + ChatColor.RED + " /zadd");
+            player.sendMessage(ChatColor.RED + " right clicking blocks with " + Material.getMaterial(ZonesConfig.CREATION_TOOL_TYPE).name().toLowerCase() + "[" + ZonesConfig.CREATION_TOOL_TYPE + "].");
+            if(ZonesConfig.WORLDEDIT_ENABLED) player.sendMessage("Or you can import a worldedit selection using /zimport");
         }
         return true;
     }

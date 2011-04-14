@@ -35,6 +35,8 @@ public class ZonesEntityListener extends EntityListener {
 
     @Override
     public void onEntityDamage(EntityDamageEvent event) {
+        if(event.isCancelled()) return;
+        
         Entity defender = event.getEntity();
         Entity attacker = null;
         if(event instanceof EntityDamageByEntityEvent) {
@@ -56,11 +58,8 @@ public class ZonesEntityListener extends EntityListener {
                 }
             }
         } else {
-            if (defender instanceof Player) {
-                if (event.getCause() == DamageCause.FALL)
-                    event.setCancelled(true);
-                
-                if (!zone.allowHealth(((Player)defender))) {
+            if (defender instanceof Player) {                
+                if (!zone.allowHealth(((Player)defender)) || (wm.getConfig().PLAYER_ENFORCE_SPECIFIC_DAMAGE && !wm.getConfig().canReceiveSpecificDamage((Player)defender, event.getCause()))) {
                     event.setCancelled(true);
                     return;
                 }
@@ -77,6 +76,8 @@ public class ZonesEntityListener extends EntityListener {
 
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
+        if(event.isCancelled()) return;
+        
         WorldManager wm = plugin.getWorldManager(event.getLocation());
         ZoneBase zone = wm.getActiveZone(event.getLocation());
         if (zone == null) {
@@ -98,6 +99,8 @@ public class ZonesEntityListener extends EntityListener {
 
     @Override
     public void onCreatureSpawn(CreatureSpawnEvent event) {
+        if(event.isCancelled()) return;
+        
         WorldManager wm = plugin.getWorldManager(event.getLocation());
         ZoneBase zone = wm.getActiveZone(event.getLocation());
         if (zone == null) {
@@ -115,6 +118,8 @@ public class ZonesEntityListener extends EntityListener {
     }
 
     public void onExplosionPrime(ExplosionPrimeEvent event) {
+        if(event.isCancelled()) return;
+        
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
         if(event.getEntity() instanceof Creeper) {
             event.setRadius(wm.getConfig().CREEPER_EXPLOSION_RANGE);

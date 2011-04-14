@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Animals;
@@ -35,11 +37,11 @@ public class WorldConfig {
     public boolean BORDER_ENABLED;
     public int BORDER_RANGE;
     public int BORDER_TYPE;
+    public boolean BORDER_ENFORCE;
     
     public boolean ALLOW_TNT_TRIGGER;
     public int TNT_RANGE;
     public boolean EXPLOSION_DAMAGE_ENTITIES;
-    public boolean TNT_DAMAGE_BLOCKS;
     
     public boolean ALLOW_CREEPER_TRIGGER;
     public int CREEPER_EXPLOSION_RANGE;
@@ -49,6 +51,7 @@ public class WorldConfig {
     public boolean LAVA_FIRE_ENABLED;
     
     public List<Integer> FIRE_PROTECTED_BLOCKS;
+    public boolean FIRE_ENFORCE_PROTECTED_BLOCKS;
     
     public boolean LAVA_FLOW_ENABLED;
     public List<Integer> LAVA_PROTECTED_BLOCKS;
@@ -76,6 +79,8 @@ public class WorldConfig {
     
     public boolean PLAYER_HEALTH_ENABLED;
     
+    public boolean PLAYER_ENFORCE_SPECIFIC_DAMAGE;
+    
     public boolean PLAYER_ENTITY_DAMAGE_ENABLED;
     public boolean PLAYER_FALL_DAMAGE_ENABLED;
     public boolean PLAYER_LAVA_DAMAGE_ENABLED;
@@ -87,6 +92,13 @@ public class WorldConfig {
     public boolean PLAYER_CREEPER_DAMAGE_ENABLED;
     public boolean PLAYER_VOID_DAMAGE_ENABLED;
     public boolean PLAYER_CONTACT_DAMAGE_ENABLED;
+    
+    public boolean SPONGE_EMULATION;
+    public int SPONGE_RADIUS;
+    
+    public boolean SPONGE_LAVA_EMULATION;
+    public int SPONGE_LAVA_RADIUS;
+    
     
     private PermissionHandler permission;
     
@@ -127,7 +139,8 @@ public class WorldConfig {
             
             BORDER_ENABLED = p.getBool("BorderEnabled", false);
             BORDER_RANGE = p.getInt("", 0);
-            BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CYLINDER") ? 2 : 1);
+            BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAIR") ? 2 : 1);
+            BORDER_ENFORCE = p.getBool("EnforceBorder", false);
             
             ALLOW_TNT_TRIGGER = p.getBool("AllowTntTrigger", true);
             TNT_RANGE = p.getInt("TntRange", 4);
@@ -141,6 +154,7 @@ public class WorldConfig {
             FIRE_ENABLED = p.getBool("FireEnabled", true);
             LAVA_FIRE_ENABLED = p.getBool("LavaFireEnabled", true);
             
+            FIRE_ENFORCE_PROTECTED_BLOCKS = p.getBool("EnforceFireProtectedBlocks", true);
             FIRE_PROTECTED_BLOCKS = new ArrayList<Integer>();
             for(String b : p.getProperty("FireProtectedBlocks", "").split(","))
                 FIRE_PROTECTED_BLOCKS.add(Integer.parseInt(b));
@@ -208,6 +222,8 @@ public class WorldConfig {
             
             PLAYER_HEALTH_ENABLED = p.getBool("PlayerHealthEnabled", true);
             
+            PLAYER_ENFORCE_SPECIFIC_DAMAGE = p.getBool("EnforcePlayerSpecificDamage", true);
+            
             PLAYER_ENTITY_DAMAGE_ENABLED = p.getBool("PlayerEntityDamageEnabled", true);
             PLAYER_FALL_DAMAGE_ENABLED = p.getBool("PlayerFallDamageEnabled", true);
             PLAYER_LAVA_DAMAGE_ENABLED = p.getBool("PlayerLavaDamageEnabled", true);
@@ -220,6 +236,11 @@ public class WorldConfig {
             PLAYER_VOID_DAMAGE_ENABLED = p.getBool("PlayerVoidDamageEnabled", true);
             PLAYER_CONTACT_DAMAGE_ENABLED = p.getBool("PlayerContactDamageEnabled", true);
             
+            SPONGE_EMULATION          = p.getBool("EmulateSponges", false);
+            SPONGE_RADIUS           = p.getInt("SpongeRadius", 2);
+
+            SPONGE_LAVA_EMULATION     = p.getBool("EmulateLavaSponges", false);
+            SPONGE_LAVA_RADIUS      = p.getInt("LavaSpongeRadius", 2);
         } catch (Exception e) {
             log.warning("[Zones]Error loading configurations for world '" + manager.getWorld().getName() + "' !");
             e.printStackTrace();
@@ -250,6 +271,9 @@ public class WorldConfig {
         return false;
     }
     
+    /*
+     * TODO: extend logging to allow logging to database.
+     */
     public void logBlockBreak(Player player, Block block) {
         if(LOGGED_BLOCKS_ENABLED) {
             if(this.LOGGED_BLOCKS_BREAK.contains(block.getTypeId())){
@@ -260,8 +284,42 @@ public class WorldConfig {
                 log.info("Player " + player.getName() + " has broken " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
             }
         }
+        // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
+        if(block.getTypeId() == Material.SPONGE.getId()) {
+            if(this.SPONGE_EMULATION) {
+                // We only update once every 2 Blocks since the basic notch physics check 1 block around the checked block.
+                // TODO: optimize.
+                for(int i = -SPONGE_RADIUS;i <= SPONGE_RADIUS;i = i+2) {
+                    for(int o = -SPONGE_RADIUS;o <= SPONGE_RADIUS;o = o+2) {
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()-SPONGE_RADIUS-1, block.getY()+i, block.getZ()+o)); // North
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+SPONGE_RADIUS, block.getY()+i, block.getZ()+o)); // South
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()-SPONGE_RADIUS-1)); // West
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()+SPONGE_RADIUS+1)); // East
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+SPONGE_RADIUS+1, block.getZ()+o)); // Up
+                    }
+                }
+            }
+            if(this.SPONGE_LAVA_EMULATION) {
+                // We only update once every 2 Blocks since the basic notch physics check 1 block around the checked block.
+                // TODO: optimize.
+                for(int i = -SPONGE_LAVA_RADIUS;i <= SPONGE_LAVA_RADIUS;i = i+2) {
+                    for(int o = -SPONGE_LAVA_RADIUS;o <= SPONGE_LAVA_RADIUS;o = o+2) {
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()-SPONGE_LAVA_RADIUS-1, block.getY()+i, block.getZ()+o)); // North
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+SPONGE_LAVA_RADIUS, block.getY()+i, block.getZ()+o)); // South
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()-SPONGE_LAVA_RADIUS-1)); // West
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()+SPONGE_LAVA_RADIUS+1)); // East
+                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+SPONGE_LAVA_RADIUS+1, block.getZ()+o)); // Up
+                    }
+                }
+            }
+        }
     }
-    
+    private static void triggerPhysics(Block b) {
+        b.setTypeId(b.getTypeId());
+    }
+    /*
+     * TODO: extend logging to allow logging to database.
+     */
     public void logBlockPlace(Player player, Block block) {
         if(LOGGED_BLOCKS_ENABLED) {
             if(this.LOGGED_BLOCKS_PLACE.contains(block.getTypeId())){
@@ -272,6 +330,38 @@ public class WorldConfig {
                 log.info("Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
             }
         }
+        // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
+        if(block.getTypeId() == Material.SPONGE.getId()) {
+            if(this.SPONGE_EMULATION) {
+                int type = 0;
+                for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
+                    for(int z = block.getZ() - SPONGE_RADIUS ; z <= block.getZ() + SPONGE_RADIUS;z++) {
+                        for(int y = block.getY() - SPONGE_RADIUS ; y <= block.getY() + SPONGE_RADIUS;y++) {
+                            type = block.getWorld().getBlockTypeIdAt(x, y, z);
+                            if(type == 8 || type == 9) {
+                                // Prevent any physics calls since it could get messy :<
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                            }
+                        }
+                    }
+                }
+            }
+            if(this.SPONGE_LAVA_EMULATION) {
+                int type = 0;
+                for(int x = block.getX() - SPONGE_LAVA_RADIUS ; x <= block.getX() + SPONGE_LAVA_RADIUS;x++) {
+                    for(int z = block.getZ() - SPONGE_LAVA_RADIUS ; z <= block.getZ() + SPONGE_LAVA_RADIUS;z++) {
+                        for(int y = block.getY() - SPONGE_LAVA_RADIUS ; y <= block.getY() + SPONGE_LAVA_RADIUS;y++) {
+                            type = block.getWorld().getBlockTypeIdAt(x, y, z);
+                            if(type == 10 || type == 11) {
+                                // Prevent any physics calls since it could get messy :<
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
     }
     
     public boolean canReceiveDamage(Player player, DamageCause cause) {
@@ -307,6 +397,35 @@ public class WorldConfig {
         return false;
     }
     
+    public boolean canReceiveSpecificDamage(Player player, DamageCause cause) {
+        switch(cause) {
+            case CONTACT:
+                return this.PLAYER_CONTACT_DAMAGE_ENABLED;
+            case ENTITY_ATTACK:
+                return this.PLAYER_ENTITY_DAMAGE_ENABLED;
+            case SUFFOCATION:
+                return this.PLAYER_SUFFOCATION_DAMAGE_ENABLED;
+            case FALL:
+                return this.PLAYER_FALL_DAMAGE_ENABLED;
+            case FIRE:
+                return this.PLAYER_FIRE_DAMAGE_ENABLED;
+            case FIRE_TICK:
+                return this.PLAYER_BURN_DAMAGE_ENABLED;
+            case LAVA:
+                return this.PLAYER_LAVA_DAMAGE_ENABLED;
+            case DROWNING:
+                return this.PLAYER_DROWNING_DAMAGE_ENABLED;
+            case BLOCK_EXPLOSION:
+                return this.PLAYER_TNT_DAMAGE_ENABLED;
+            case ENTITY_EXPLOSION:
+                return this.PLAYER_CREEPER_DAMAGE_ENABLED;
+            case VOID:
+                return this.PLAYER_VOID_DAMAGE_ENABLED;
+            default:
+                return true;
+        }
+    }
+    
     public boolean canSpawn(Entity entity, CreatureType type) {
         if(entity instanceof Animals) {
             return this.ANIMAL_SPAWNING_ENABLED && this.ALLOWED_ANIMALS.contains(type);
@@ -318,14 +437,15 @@ public class WorldConfig {
     }
     
     public boolean canFlow(Block from, Block to) {
-        if (from.getTypeId() == 8 || from.getTypeId() == 9) {
-            if(this.WATER_FLOW_ENABLED && !this.WATER_PROTECTED_BLOCKS.contains(to.getTypeId()))
+        int type = from.getTypeId();
+        if (type == 8 || type == 9) {
+            if(this.WATER_FLOW_ENABLED && !isFlowProtectedBlock(from,to))
                 return true;
             return false;
         }
 
-        if (from.getTypeId() == 10 || from.getTypeId() == 11) {
-            if(this.LAVA_FLOW_ENABLED && !this.LAVA_PROTECTED_BLOCKS.contains(to.getTypeId()) && !this.LAVA_PROTECTED_BLOCKS.contains(to.getRelative(BlockFace.DOWN)))
+        if (type == 10 || type == 11) {
+            if(this.LAVA_FLOW_ENABLED && !isFlowProtectedBlock(from,to))
                 return true;
             return false;
         }
@@ -333,17 +453,73 @@ public class WorldConfig {
         return true;
         
     }
+    public boolean isNearSponge(Block b, int radius) {
+        for(int x = b.getX() - radius ; x <= b.getX() + radius;x++) {
+            for(int z = b.getZ() - radius ; z <= b.getZ() + radius;z++) {
+                for(int y = b.getY() - radius ; y <= b.getY() + radius;y++) {
+                    if(b.getWorld().getBlockTypeIdAt(x, y, z) == Material.SPONGE.getId())
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean isFlowProtectedBlock(Block from,Block to) {
+        int type = from.getTypeId();
+        if (type == 8 || type == 9) {
+            if(!WATER_PROTECTED_BLOCKS.isEmpty() && this.WATER_PROTECTED_BLOCKS.contains(to.getTypeId()))
+                return true;
+            if(this.SPONGE_EMULATION && isNearSponge(to,this.SPONGE_RADIUS))
+                return true;
+            return false;
+        }
+
+        if (type == 10 || type == 11) {
+            if(!LAVA_PROTECTED_BLOCKS.isEmpty() && (this.LAVA_PROTECTED_BLOCKS.contains(to.getTypeId()) || this.LAVA_PROTECTED_BLOCKS.contains(to.getRelative(BlockFace.DOWN))))
+                return true;
+            if(this.SPONGE_LAVA_EMULATION && isNearSponge(to,this.SPONGE_LAVA_RADIUS))
+                return true;
+            return false;
+        }
+        return false;
+    }
     
     public boolean canBurn(Player player, Block block, IgniteCause cause) {
         switch(cause) {
             case FLINT_AND_STEEL:
                 return this.LIGHTER_ALLOWED || permission.permission(player, "zones.override.lighter");
             case LAVA:
-                return this.FIRE_ENABLED && this.LAVA_FIRE_ENABLED;
-            case SPREAD:
-                return this.FIRE_ENABLED;
+                return this.FIRE_ENABLED && this.LAVA_FIRE_ENABLED && canBurnBlock(block);
             default:
-                return true;
+                return this.FIRE_ENABLED && canBurnBlock(block);
+        }
+    }
+    
+    public boolean canBurnBlock(Block b) {
+        return !this.FIRE_PROTECTED_BLOCKS.contains(b.getTypeId());
+    }
+    
+    public boolean isOutsideBorder(Location loc) {
+        Location spawn = loc.getWorld().getSpawnLocation();
+        switch (this.BORDER_TYPE) {
+            case 1:
+                if(loc.getZ() > spawn.getZ()+this.BORDER_RANGE || loc.getZ() < spawn.getZ()+this.BORDER_RANGE)
+                    return true;
+                if(loc.getX() > spawn.getX()+this.BORDER_RANGE || loc.getX() < spawn.getX()+this.BORDER_RANGE)
+                    return true;
+                
+                return false;
+            case 2:
+                int xdistance = spawn.getBlockX() - loc.getBlockX();
+                int zdistance = spawn.getBlockZ() - loc.getBlockZ();
+                double range = StrictMath.sqrt(xdistance * xdistance  + zdistance * zdistance);
+                if(range > this.BORDER_RANGE)
+                    return true;
+                
+                return false;
+            default:
+                return false;
         }
     }
     

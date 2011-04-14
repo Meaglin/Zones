@@ -4,7 +4,6 @@ import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.forms.ZoneCuboid;
 import com.zones.model.forms.ZoneNPoly;
-import com.zones.util.Settings;
 
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
@@ -141,18 +140,6 @@ public class ZonesDummyZone {
         }
         _class = name;
     }
-
-    private Settings basicSettings() {
-        Settings st = new Settings();
-        st.set(ZonesConfig.WATER_ENABLED_NAME, true);
-        st.set(ZonesConfig.LAVA_ENABLED_NAME, true);
-        st.set(ZonesConfig.DYNAMITE_ENABLED_NAME, plugin.getWorldManager(w).getConfig().ALLOW_TNT_TRIGGER);
-        st.set(ZonesConfig.HEALTH_ENABLED_NAME, plugin.getWorldManager(w).getConfig().PLAYER_HEALTH_ENABLED);
-        st.set(ZonesConfig.SPAWN_ANIMALS_NAME, plugin.getWorldManager(w).getConfig().ANIMAL_SPAWNING_ENABLED);
-        st.set(ZonesConfig.SPAWN_MOBS_NAME, plugin.getWorldManager(w).getConfig().MOB_SPAWNING_ENABLED);
-        st.set(ZonesConfig.LEAF_DECAY_ENABLED_NAME, true);
-        return st;
-    }
     
     private boolean Save() {
         // you can only merge a zone which you are editting.
@@ -181,7 +168,8 @@ public class ZonesDummyZone {
             st.setInt(5, _minz);
             st.setInt(6, _maxz);
             st.setInt(7, _coords.size());
-            st.setString(8, basicSettings().serialize());
+            // Default settings are empty and just refers to default.
+            st.setString(8, "");
             st.executeUpdate();
 
             rs = st.getGeneratedKeys();
@@ -273,7 +261,6 @@ public class ZonesDummyZone {
         temp.setParameter("admins", "");
         temp.setParameter("users", "2,default,e");
         temp.setParameter("name", _name);
-        temp.loadSettings(basicSettings());
         plugin.getZoneManager().addZone(temp);
         revertBlocks();
 

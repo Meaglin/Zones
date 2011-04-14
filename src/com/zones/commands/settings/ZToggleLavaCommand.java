@@ -4,9 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.ZonesConfig;
 import com.zones.commands.ZoneCommand;
 import com.zones.model.ZoneBase;
+import com.zones.model.settings.ZoneVar;
 
 /**
  * 
@@ -27,8 +27,8 @@ public class ZToggleLavaCommand extends ZoneCommand {
             return true;
         }
         ZoneBase z = getSelectedZone(player);
-        if(z.setSetting(ZonesConfig.LAVA_ENABLED_NAME, !z.getSettings().getBool(ZonesConfig.LAVA_ENABLED_NAME, true)))
-            player.sendMessage(ChatColor.GREEN.toString() + "Lava is now "+(z.getSettings().getBool(ZonesConfig.LAVA_ENABLED_NAME, true) ? "allowed" : "blocked" )+".");
+        if(z.setSetting(ZoneVar.LAVA, !z.getSettings().getBool(ZoneVar.LAVA, true)))
+            player.sendMessage(ChatColor.GREEN.toString() + "Lava is now "+(z.getSettings().getBool(ZoneVar.LAVA, true) ? "allowed" : "blocked" )+".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Unable to change lava flag, please contact a admin.");
         

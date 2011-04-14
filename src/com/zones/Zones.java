@@ -48,10 +48,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private final ZonesEntityListener  entityListener  = new ZonesEntityListener(this);
     private final ZonesVehicleListener vehicleListener = new ZonesVehicleListener(this);
     
-    public static final int            pilonHeight     = 4;
-    public static final int            pilonType       = 80;
-    public static final int            toolType        = 280;
-    
     private final ZoneCommandMap      commandMap = new ZoneCommandMap(this);
     
     private WorldEditPlugin   worldedit;

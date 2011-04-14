@@ -3,16 +3,10 @@ package com.zones.model.types;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
-import com.zones.WorldManager;
-import com.zones.Zones;
-import com.zones.ZonesAccess;
-import com.zones.ZonesConfig;
-import com.zones.ZonesAccess.Rights;
-import com.zones.model.ZoneBase;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -22,6 +16,14 @@ import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+
+import com.zones.WorldManager;
+import com.zones.Zones;
+import com.zones.ZonesConfig;
+import com.zones.model.ZoneBase;
+import com.zones.model.ZonesAccess;
+import com.zones.model.ZonesAccess.Rights;
+import com.zones.model.settings.ZoneVar;
 
 /**
  * 
@@ -35,6 +37,9 @@ public class ZoneNormal extends ZoneBase{
 
     private HashMap<String, ZonesAccess> groups;
     private HashMap<String, ZonesAccess> users;
+    
+    // We don't want to make a new list every time we need a default empty array.
+    public static final List<Integer> emptyIntList = Arrays.asList();
     
     public ZoneNormal(Zones zones, WorldManager worldManager, int id) {
         super(zones, worldManager, id);
@@ -326,22 +331,39 @@ public class ZoneNormal extends ZoneBase{
         if (zone == null || zone.getZone().getSize() > getZone().getSize())
             zone = this;
 
-        player.sendMessage("You have just entered " + getName() + "[" + zone.getAccess(player).toColorCode() + "].");
+        /*
+         * Possible codes:
+         * {zname} - Zone name.
+         * {access} - BCDEH
+         * {pname} - Player name.
+         */
+        String message = getSettings().getString(ZoneVar.ENTER_MESSAGE, ZonesConfig.DEFAULT_ENTER_MESSAGE);
+        message = message.replace("{zname}", getName());
+        if(message.contains("{access}")) message = message.replace("{access}", zone.getAccess(player).toColorCode());
+        message = message.replace("{pname}", player.getName());
+        
+        player.sendMessage(message);
         if (zone.allowHealth(player)) {
-            player.sendMessage(ChatColor.RED.toString() + "WARNING: you can die in this zone!");
+            player.sendMessage(ChatColor.RED + "WARNING: you can die in this zone!");
         }
     }
 
     @Override
-    public void onExit(Player character) {
-        character.sendMessage("You have just exited " + getName() + ".");
+    public void onExit(Player player) {
+        
+        String message = getSettings().getString(ZoneVar.LEAVE_MESSAGE, ZonesConfig.DEFAULT_LEAVE_MESSAGE);
+        message = message.replace("{zname}", getName());
+        if(message.contains("{access}")) message = message.replace("{access}", getAccess(player).toColorCode());
+        message = message.replace("{pname}", player.getName());
+        
+        player.sendMessage(message);
 
     }
 
     @Override
     public boolean allowWater(Block from, Block to) {
         if(!isInsideZone(from.getLocation()))
-            return getSettings().getBool(ZonesConfig.WATER_ENABLED_NAME,true);
+            return getSettings().getBool(ZoneVar.WATER,true);
         else
             return true;
     }
@@ -349,49 +371,89 @@ public class ZoneNormal extends ZoneBase{
     @Override
     public boolean allowLava(Block from, Block to) {
         if(!isInsideZone(from.getLocation()))
-            return getSettings().getBool(ZonesConfig.LAVA_ENABLED_NAME,true);
+            return getSettings().getBool(ZoneVar.LAVA,true);
         else
             return true;
     }
 
     @Override
     public boolean allowDynamite(Block b) {
-        return getSettings().getBool(ZonesConfig.DYNAMITE_ENABLED_NAME,getWorldManager().getConfig().ALLOW_TNT_TRIGGER);
+        return getSettings().getBool(ZoneVar.DYNAMITE,getWorldManager().getConfig().ALLOW_TNT_TRIGGER);
     }
 
     @Override
     public boolean allowHealth(Player player) {
-        return getSettings().getBool(ZonesConfig.HEALTH_ENABLED_NAME,getWorldManager().getConfig().PLAYER_HEALTH_ENABLED);
+        return getSettings().getBool(ZoneVar.HEALTH,getWorldManager().getConfig().PLAYER_HEALTH_ENABLED);
     }
 
     @Override
     public boolean allowLeafDecay(Block block) {
-        return getSettings().getBool(ZonesConfig.LEAF_DECAY_ENABLED_NAME, true);
+        return getSettings().getBool(ZoneVar.LEAF_DECAY, true);
     }
     
     @Override
     public boolean allowFire(Player player,Block block) {
-        return getSettings().getBool(ZonesConfig.ALLOW_FIRE_NAME, getWorldManager().getConfig().FIRE_ENABLED);
+        return getSettings().getBool(ZoneVar.FIRE , getWorldManager().getConfig().FIRE_ENABLED);
     }
     
     @Override
     public boolean allowSpawn(Entity entity,CreatureType type) {
         if(entity instanceof Animals) {
-            return getSettings().getBool(ZonesConfig.SPAWN_ANIMALS_NAME, getWorldManager().getConfig().ANIMAL_SPAWNING_ENABLED);
+            if(getSettings().getBool(ZoneVar.SPAWN_ANIMALS, getWorldManager().getConfig().ANIMAL_SPAWNING_ENABLED)) {
+                List<CreatureType> list = getSettings().getCreatureList(ZoneVar.ANIMALS);
+                if(list != null && !list.contains(type))
+                    return false;
+                else
+                    return true;
+            } else {
+                return false;
+            }
         } else if(entity instanceof Monster) {
-            return getSettings().getBool(ZonesConfig.SPAWN_MOBS_NAME, getWorldManager().getConfig().MOB_SPAWNING_ENABLED);            
+            if(getSettings().getBool(ZoneVar.SPAWN_MOBS, getWorldManager().getConfig().MOB_SPAWNING_ENABLED)) {
+                List<CreatureType> list = getSettings().getCreatureList(ZoneVar.MOBS);
+                if(list != null && !list.contains(type))
+                    return false;
+                else
+                    return true;
+            } else {
+                return false;
+            }       
         } else
             return true;
     }
 
     @Override
     public boolean allowBlockCreate(Player player, Block block) {
-        return this.canModify(player, Rights.BUILD);
+        
+        if(!this.canModify(player, Rights.BUILD)) {
+            player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + getName() + "' !");
+            return false;
+        } else {
+            List<Integer> list = getSettings().getIntList(ZoneVar.PLACE_BLOCKS);
+            if(list != null && list.contains(block.getTypeId()) && !this.canAdministrate(player)) {
+                player.sendMessage(ChatColor.RED + "This block type is blacklisted in '" + getName() + "' !");
+                return false;
+            } else {
+                return true;
+            }
+        }
     }
 
     @Override
     public boolean allowBlockDestroy(Player player, Block block) {
-        return this.canModify(player, Rights.DESTROY);
+        if(!this.canModify(player, Rights.DESTROY)) {
+            player.sendMessage(ChatColor.RED + "You cannot destroy blocks in '" + getName() + "' !");
+            return false;
+        } else {
+            List<Integer> list = getSettings().getIntList(ZoneVar.BREAK_BLOCKS);
+            if(list != null && list.contains(block.getTypeId()) && !this.canAdministrate(player)) {
+                player.sendMessage(ChatColor.RED + "This block type is protected in '" + getName() + "' !");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
     }
 
     @Override
@@ -416,6 +478,6 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public boolean allowTeleport(Player player, Location to) {
-        return this.canModify(player, Rights.ENTER) && getSettings().getBool(ZonesConfig.ALLOW_TELEPORT_NAME, true);
+        return this.canModify(player, Rights.ENTER) && getSettings().getBool(ZoneVar.TELEPORT, true);
     }
 }

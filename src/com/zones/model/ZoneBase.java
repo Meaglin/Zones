@@ -14,9 +14,8 @@ import org.bukkit.entity.Player;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
-import com.zones.ZonesAccess;
 import com.zones.ZonesConfig;
-import com.zones.util.Settings;
+import com.zones.model.settings.ZoneVar;
 
 /**
  * Abstract base class for any zone type Handles basic operations
@@ -31,7 +30,7 @@ public abstract class ZoneBase {
     protected HashMap<String, Player> characterList;
 
     private String                    name;
-    private Settings                  settings;
+    private ZoneSettings                  settings = new ZoneSettings();
 
     protected Zones                   zones;
     protected WorldManager            worldManager;
@@ -45,14 +44,14 @@ public abstract class ZoneBase {
     
     public void loadSettings(String data) {
         try {
-            loadSettings(Settings.unserialize(data));
+            loadSettings(ZoneSettings.unserialize(data));
         } catch(Exception e) {
             log.warning("[Zones]Error loading settings of " + name + "[" + id + "]");
             e.printStackTrace();
         }
     }
     
-    public void loadSettings(Settings settings) {
+    public void loadSettings(ZoneSettings settings) {
         this.settings = settings;
     }
     /**
@@ -240,7 +239,7 @@ public abstract class ZoneBase {
         return true;
     }
     
-    private boolean saveSettings() {
+    public boolean saveSettings() {
         Connection conn = null;
         PreparedStatement st = null;
         int u = 0;
@@ -284,11 +283,11 @@ public abstract class ZoneBase {
         }
     }
     
-    public Settings getSettings() {
+    public ZoneSettings getSettings() {
         return settings;
     }
     
-    public boolean setSetting(String name, boolean b) {
+    public boolean setSetting(ZoneVar name, boolean b) {
         getSettings().set(name, b);
         return saveSettings();
     }

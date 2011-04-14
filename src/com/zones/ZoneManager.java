@@ -243,6 +243,14 @@ public class ZoneManager {
         return true;
     }
 
+    /*
+     * A little note on using playerId(entity id):
+     * I used this mainly because it is waay more efficient then using strings
+     * also it has a nice side effect that you lose your selection/dummy when
+     * switching worlds.
+     * 
+     * TODO: remove dummy's / selected when switching worlds.
+     */
     public void addDummy(int playerId, ZonesDummyZone zone) {
         dummyZones.put(playerId, zone);
     }
