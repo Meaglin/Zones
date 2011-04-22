@@ -104,6 +104,3 @@ commands:
     ztoggle:
         description: see /zhelp
         usage: /<command> 
-    worldedit:
-        description: compatibility for CUI
-        usage: Don't use it manually ;D

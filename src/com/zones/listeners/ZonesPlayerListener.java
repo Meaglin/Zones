@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -342,16 +343,13 @@ public class ZonesPlayerListener extends PlayerListener {
     /**
      * 
      * 
-     * FUCK U BUKKIT I WILL JUST USE THIS INSTEAD OF THE OVER COMPLICATED CRAP SYSTEM
-     * K THX BAI.
-     * 
      * 
      */
-    /* @Override
-    public void onPlayerCommandPreprocess(PlayerChatEvent event) {
-        if(ZonesCommandsHandler.onCommand(plugin, event.getPlayer(), event.getMessage().split(" ")))
-            event.setCancelled(true);
-    } */
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        if(event.getMessage().toLowerCase().startsWith("/worldedit")) {
+            plugin.onCommand(event.getPlayer(), null, "worldedit", Arrays.copyOfRange(event.getMessage().split(" "), 1, event.getMessage().split(" ").length));
+        }
+    }
 
     /**
      * Called when a player gets kicked from the server

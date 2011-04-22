@@ -81,7 +81,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.High);
-        //registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.High);
         registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.High);
