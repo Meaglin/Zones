@@ -41,20 +41,20 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int            Rev             = 42;
-    protected static final Logger      log             = Logger.getLogger("Minecraft");
-    private final ZonesPlayerListener  playerListener  = new ZonesPlayerListener(this);
-    private final ZonesBlockListener   blockListener   = new ZonesBlockListener(this);
-    private final ZonesEntityListener  entityListener  = new ZonesEntityListener(this);
-    private final ZonesVehicleListener vehicleListener = new ZonesVehicleListener(this);
-    
-    private final ZoneCommandMap      commandMap = new ZoneCommandMap(this);
-    
-    private WorldEditPlugin   worldedit;
-    private PermissionHandler accessmanager;
-    
-    private final Map<String,WorldManager> worlds = new HashMap<String, WorldManager>();
-    private final ZoneManager zoneManager = new ZoneManager();
+    public static final int                 Rev             = 50;
+    protected static final Logger           log             = Logger.getLogger("Minecraft");
+    private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
+    private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
+    private final ZonesEntityListener       entityListener  = new ZonesEntityListener(this);
+    private final ZonesVehicleListener      vehicleListener = new ZonesVehicleListener(this);
+
+    private final ZoneCommandMap            commandMap      = new ZoneCommandMap(this);
+
+    private WorldEditPlugin                 worldedit;
+    private PermissionHandler               accessmanager;
+
+    private final Map<String, WorldManager> worlds          = new HashMap<String, WorldManager>();
+    private final ZoneManager               zoneManager     = new ZoneManager(this);
     
     public Zones() {
         
@@ -123,23 +123,22 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public void onEnable() {
         log.info("[Zones]Rev " + Rev + "  Loading...");
         
-        if(!(new File(ZonesConfig.ZONES_CONFIG_FILE)).exists()) {
+        File configFile = new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE);
+        if(!configFile.exists()) {
             try {
-                (new File(ZonesConfig.ZONES_CONFIG_FILE)).mkdirs();
-            InputStream input = Zones.class.getResourceAsStream("/com/zones/config/Zones.properties");
-
-            //For Overwrite the file.
-            OutputStream output = new FileOutputStream(new File(ZonesConfig.ZONES_CONFIG_FILE));
-
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = input.read(buf)) > 0){
-              output.write(buf, 0, len);
-            }
-            input.close();
-            output.close();
-            
-            
+                getDataFolder().mkdirs();
+                InputStream input = Zones.class.getResourceAsStream("/com/zones/config/Zones.properties");
+    
+                //For Overwrite the file.
+                OutputStream output = new FileOutputStream(configFile);
+    
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = input.read(buf)) > 0){
+                  output.write(buf, 0, len);
+                }
+                input.close();
+                output.close();
             } catch (Exception e) {
                 log.info("[Zones]Error while restorting configuration file.");
                 e.printStackTrace();
@@ -162,9 +161,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
                 log.info("----------------------");                
             }
             
-            ZonesConfig.load();
+            ZonesConfig.load(configFile);
             loadWorlds();
-            getZoneManager().load(this);
             registerEvents();
             if(ZonesConfig.WORLDEDIT_ENABLED) {
                 log.info("[Zones] Loading worldedit support...");
@@ -233,7 +231,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             for(WorldManager w : worlds.values())
                 w.loadRegions();
             
-            getZoneManager().load(this);
             //commandMap.load();
         } catch(Throwable t) {
             t.printStackTrace();
@@ -244,7 +241,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     public boolean reloadConfig() {
         try {
-            ZonesConfig.load();
+            ZonesConfig.load(new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE));
             for(WorldManager w : worlds.values())
                 w.loadConfig();
         } catch(Throwable t) {

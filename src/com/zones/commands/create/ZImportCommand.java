@@ -25,7 +25,7 @@ public class ZImportCommand extends ZoneCommand {
             player.sendMessage(ChatColor.RED+"WorldEdit support is turned off!.");
         } else {
             ZonesDummyZone dummy = getDummy(player);
-            if(dummy.getType()!=1)
+            if(dummy.getFormId()!=1)
             {
                 player.sendMessage(ChatColor.RED+"Only cuboid selections are supported.");
             } else {
@@ -35,18 +35,14 @@ public class ZImportCommand extends ZoneCommand {
                     player.sendMessage(ChatColor.YELLOW+"Can't find your current worldedit selection!");
                 } else {
                     player.sendMessage(ChatColor.YELLOW+"Trying to import your current worldedit selection as zone coords.");
-                    dummy.setClass(player, "ZoneNormal");
-                    for(int[] c : dummy.getCoords()) // remove the current selection!
-                    {
-                        dummy.remove(c);
-                    }
+                    dummy.setClass("ZoneNormal");
+                    dummy.clearCoords();
+
                     Location min = selection.getMinimumPoint();
                     Location max = selection.getMaximumPoint();
                     dummy.setZ(min.getBlockY(), max.getBlockY());
-                    int[] coords = new int[] { min.getBlockX(), min.getBlockZ() };
-                    dummy.addCoords(coords);
-                          coords = new int[] { max.getBlockX(), max.getBlockZ() };
-                    dummy.addCoords(coords);
+                    dummy.addCoords(min.getBlockX(), min.getBlockZ());
+                    dummy.addCoords(max.getBlockX(), max.getBlockZ());
 
                     player.sendMessage(ChatColor.YELLOW+"Added your worldedit selection as zone points.");
                 }

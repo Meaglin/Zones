@@ -27,7 +27,9 @@ public class ZoneCommandMap {
     public void load() {
         commands.clear();
         
-
+        //CUI
+        registerCommand(new CuiValidateCommand(plugin));
+        
         // Admin
         registerCommand(new ZAddAdminCommand(plugin));
         registerCommand(new ZDeleteCommand(plugin));

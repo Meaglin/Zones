@@ -11,7 +11,7 @@ import com.zones.util.Properties;
  *
  */
 public class ZonesConfig {
-    public static final String ZONES_CONFIG_FILE = "./plugins/zones/Zones.properties";
+    public static final String ZONES_CONFIG_FILE = "Zones.properties";
 
     private static Logger      log                         = Logger.getLogger(ZonesConfig.class.getName());
 
@@ -30,9 +30,9 @@ public class ZonesConfig {
     public static int          CREATION_PILON_TYPE;
     public static int          CREATION_PILON_HEIGHT;
     
-    public static void load() {
+    public static void load(File f) {
         try {
-            Properties zp = new Properties(new File(ZONES_CONFIG_FILE));
+            Properties zp = new Properties(f);
             DATABASE_URL = zp.getProperty("URL", "jdbc:mysql://localhost/Minecraft");
             DATABASE_LOGIN = zp.getProperty("Login", "root");
             DATABASE_PASSWORD = zp.getProperty("Password", "");

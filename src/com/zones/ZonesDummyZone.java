@@ -1,9 +1,14 @@
 package com.zones;
 
+import com.zones.model.RevertBlock;
+import com.zones.model.WorldConfig;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
+import com.zones.model.ZoneVertice;
 import com.zones.model.forms.ZoneCuboid;
 import com.zones.model.forms.ZoneNPoly;
+import com.zones.model.types.ZoneNormal;
+import com.zones.model.types.ZonePlot;
 
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
@@ -12,9 +17,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -25,149 +32,317 @@ import org.bukkit.entity.Player;
  */
 public class ZonesDummyZone {
 
-    private String                 _name;
-    private String                 _class;
-    private int                    _type;
-    private final ArrayList<int[]> _coords;
-    private final ArrayList<int[]> _deleteBlocks;
-    private int                    _minz, _maxz;
-    private String                 _confirm;
-    protected static final Logger  log = Logger.getLogger("Minecraft");
-    private boolean                allowHealth = false, edit = false;
-
-    private org.bukkit.World       w;
-    private Zones                  plugin;
-
-    public ZonesDummyZone(Zones plugin, org.bukkit.World w, String name) {
-        _name = name;
-        this.plugin = plugin;
-        _type = 1;
-        _minz = 0;
-        _maxz = 130;
-        _class = "ZoneNormal";
-        _coords = new ArrayList<int[]>();
-        _deleteBlocks = new ArrayList<int[]>();
-        this.w = w;
+    public enum Confirm {
+        SAVE,
+        MERGE,
+        STOP,
+        NONE
     }
+    
+    public enum Mode {
+        NEW,
+        EDIT
+    }
+    
+    private final Zones               plugin;
+    private final Player              player;
 
-    public void setZ(int min, int max) {
-        if (min > 130)
-            min = 130;
-        if (min < 0)
-            min = 0;
+    private final String              name;
+    private Confirm                   confirm = Confirm.NONE;
+    private Mode                mode;
 
-        if (max > 130)
-            max = 130;
-        if (max < 0)
-            max = 0;
+    private ZoneVertice               height;
+    private ArrayList<ZoneVertice>    coords;
 
-        if (min > max) {
-            int t = max;
-            max = min;
-            min = t;
-        }
-        _minz = min;
-        _maxz = max;
+    private Class<? extends ZoneBase> type    = ZoneNormal.class;
+    private Class<? extends ZoneForm> form    = ZoneCuboid.class;
+    
+    
+    private boolean cuiEnabled = false;
+    private static final String CUI = "񘘦񘄹";
+    
+    private List<RevertBlock> revertBlocks;
+    
+    private static final Logger log = Logger.getLogger("Minecraft");
+    
+    public ZonesDummyZone(Zones plugin, Player player,String name) {
+        this.plugin = plugin;
+        this.player = player;
+        this.mode = Mode.NEW;
+        this.name = name;
+        height = new ZoneVertice(0,130);
+        coords = new ArrayList<ZoneVertice>();
+        revertBlocks = new ArrayList<RevertBlock>();
+        sendCUIHandShake();
+    }
+    private Logger getLog() { return log; }
+
+    public World getWorld() { return player.getWorld(); }
+    public Zones getPlugin() { return plugin; }
+    public Player getPlayer() { return player; }
+    public ZoneManager getZoneManager() { return plugin.getZoneManager(); }
+    public ZoneBase getSelectedZone() { return getZoneManager().getSelectedZone(player.getEntityId()); }
+    public WorldManager getWorldManager() { return getPlugin().getWorldManager(getWorld()); }
+    public WorldConfig getWorldConfig() { return getWorldManager().getConfig(); }
+    
+    public String getName() { return name; }
+    public Class<? extends ZoneBase> getType() { return type; }
+    public Class<? extends ZoneForm> getForm() { return form; }
+    
+    
+    public int getFormId() {
+        if(getForm().equals(ZoneCuboid.class))
+            return 1;
+        else if(getForm().equals(ZoneNPoly.class))
+            return 2;
+        else 
+            return 0;
+    }
+    
+    public void setZ(int min , int max) { setZ(new ZoneVertice(min,max)); }
+    public void setZ(ZoneVertice vertice) {
+        height = vertice;
+        updateCUISelection();
     }
 
     public int getMax() {
-        return _maxz;
+        return height.getMax();
     }
 
     public int getMin() {
-        return _minz;
+        return height.getMin();
     }
 
-    public boolean healthAllowed() {
-        return allowHealth;
+    public ArrayList<ZoneVertice> getCoords() {
+        return coords;
     }
 
-    public void toggleHealth() {
-        allowHealth = !allowHealth;
-    }
-
-    public ArrayList<int[]> getCoords() {
-        return _coords;
-    }
-
-    public void addCoords(int[] c) {
-        _coords.add(c);
-    }
-
-    public void removeCoords(int[] r) {
-
-        for (int i = 0; i < _coords.size(); i++)
-            if (Arrays.equals(_coords.get(i), r)) {
-                _coords.remove(i);
-
-            }
-    }
-
-    public void setConfirm(String c) {
-        _confirm = c;
-    }
-
-    public void confirm(Player p) {
-        if (_confirm == null) {
-            p.sendMessage("Nothing to confirm.");
-        } else if (_confirm.equals("save")) {
-            plugin.getZoneManager().removeDummy(p.getEntityId());
-            if (Save())
-                p.sendMessage(ChatColor.GREEN.toString() + "Zone Saved.");
-            else
-                p.sendMessage(ChatColor.RED.toString() + "Error saving zone.");
-        } else if (_confirm.equals("stop")) {
-            plugin.getZoneManager().removeDummy(p.getEntityId());
-            Delete();
-            p.sendMessage(ChatColor.RED.toString() + "Zone mode stopped, temp zone deleted.");
-        } else if (_confirm.equals("merge")) {
-            if (merge(plugin.getZoneManager().getSelected(p.getEntityId()))) {
-                p.sendMessage(ChatColor.GREEN.toString() + "Zone merged.");
-                plugin.getZoneManager().removeDummy(p.getEntityId());
-            } else
-                p.sendMessage(ChatColor.RED.toString() + "Error merging zone.");
+    public void addCoords(int x, int y) { addCoords(new ZoneVertice(x,y)); }
+    public void addCoords(ZoneVertice z) {
+        if(!containsCoords(z)) {
+            coords.add(z);
+            updateCUISelection();
         }
     }
 
-    public void setClass(Player p, String name) {
+    public void removeCoords(int x, int y) { removeCoords(new ZoneVertice(x,y)); }
+    public void removeCoords(ZoneVertice z) {
+        coords.remove(z);
+        updateCUISelection();
+    }
 
-        try {
-            @SuppressWarnings("unused")
-            Class<?> t = Class.forName(name);
-        } catch (ClassNotFoundException e) {
-            p.sendMessage("No such zone class: " + name);
-            return;
-        }
-        _class = name;
+    public boolean containsCoords(int x, int y) {
+        for(ZoneVertice v : coords)
+            if(v.getX() == x && v.getY() == y)
+                return true;
+        return false;
+    }
+    public boolean containsCoords(ZoneVertice z) {
+        return coords.contains(z);
     }
     
-    private boolean Save() {
-        // you can only merge a zone which you are editting.
-        if (edit)
-            return false;
+    public void clearCoords() {
+        coords.clear();
+        this.revertBlocks();
+    }
+    
+    public void setConfirm(Confirm confirm) {
+        this.confirm = confirm;
+    }
 
-        int[][] points = _coords.toArray(new int[_coords.size()][]);
-
-        Class<?> newZone = null;
-        try {
-            newZone = Class.forName("com.zones.model.types."+_class);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+    public void confirm() {
+        switch(confirm) {
+            case STOP:
+                getZoneManager().removeDummy(getPlayer().getEntityId());
+                revertBlocks();
+                getPlayer().sendMessage(ChatColor.RED + "Zone creation mode stopped, work deleted.");
+                break;
+            case SAVE:
+                if (save()) {
+                    getZoneManager().removeDummy(getPlayer().getEntityId());
+                    getPlayer().sendMessage(ChatColor.GREEN + "Zone Saved.");
+                } else {
+                    getPlayer().sendMessage(ChatColor.RED + "Error saving zone.");
+                }
+                break;
+            case MERGE:
+                if (merge()) {
+                    getZoneManager().removeDummy(getPlayer().getEntityId());
+                    getPlayer().sendMessage(ChatColor.GREEN + "Zone merged.");
+                } else {
+                    getPlayer().sendMessage(ChatColor.RED + "Error merging zone.");
+                }
+                break;
+            default:
+                getPlayer().sendMessage(ChatColor.YELLOW + "Nothing to confirm.");
+                break;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setClass(String name) {
+        
+        Class<? extends ZoneBase> newtype = null;
+        try {
+            newtype = (Class<? extends ZoneBase>) Class.forName("com.zones.model.types." + name);
+        } catch (Exception e) {
+            getPlayer().sendMessage("No such zone class: " + name);
+            return;
+        }
+        if(newtype != null) {
+            type = newtype;
+            getPlayer().sendMessage(ChatColor.GREEN + "Zone Type succesfully changed to " + type.getName() + ".");
+        } else {
+            getPlayer().sendMessage(ChatColor.RED + "Error changing zone type.");
+        }
+    }
+
+    /**
+     * 
+     * Pilon management.
+     * 
+     */
+    private void revertBlocks() {
+        for(RevertBlock b : revertBlocks)
+            b.revert();
+        
+        revertBlocks.clear();
+    }
+
+    public void addDeleteBlock(Block block) {
+        revertBlocks.add(new RevertBlock(block));
+    }
+
+    public boolean containsDeleteBlock(Block block) {
+        for(RevertBlock b : revertBlocks) {
+            if(b.getBlock().getX() == block.getX() && b.getBlock().getY() == block.getY() && b.getBlock().getZ() == block.getZ())
+                return true;
+        }
+        return false;
+    }
+
+    public void fix(int x, int y) {
+
+        Iterator<RevertBlock> it = revertBlocks.iterator();
+        RevertBlock b;
+        while(it.hasNext()) {
+            b = it.next();
+            if(b.getBlock().getX() == x && b.getBlock().getZ() == y) {
+                b.revert();
+                it.remove();
+            }
+        }
+
+    }
+
+    /**
+     * Little feature to allow easy creation of plots.
+     * also allows easy recognition in the db.
+     * @param player
+     */
+    public void makePlot(Player player) {
+        if (type.equals(ZonePlot.class)) {
+            setZ(0, 127);
+            type = ZoneNormal.class;
+            player.sendMessage("Reverted zone to default z and class.");
+        } else {
+            setZ(0, WorldManager.toInt(player.getLocation().getY()) + 19);
+            type = ZonePlot.class;
+            player.sendMessage("Zone is now a plot zone.");
+        }
+    }
+
+    public void setType(String string) {
+        if (string.equals("Cuboid")) {
+            form = ZoneCuboid.class;
+            coords.clear();
+            revertBlocks();
+        } else if (string.equals("NPoly"))
+            form = ZoneNPoly.class;
+        else {
+            log.info("Trying to set a invalid zone shape in dummyZone, type: " + string);
+        }
+    }
+
+    public void loadEdit(ZoneBase z) {
+        ZoneForm form = z.getZone();
+        setZ(new ZoneVertice(form.getLowZ(),form.getHighZ()));
+        this.form   = form.getClass();
+        if (form instanceof ZoneCuboid) {
+            addCoords(form.getLowX(), form.getLowY());
+            addCoords(form.getHighX(), form.getHighY());
+
+        } else if (form instanceof ZoneNPoly) {
+            int[] x = ((ZoneNPoly) form).getX();
+            int[] y = ((ZoneNPoly) form).getY();
+            for (int i = 0; i < x.length; i++) {
+                addCoords(x[i], y[i]);
+            }
+        } else {
+            // wut?
+        }
+    }
+    
+    public boolean hasCUIEnabled() { return cuiEnabled; }
+    public void enableCUI() {
+        cuiEnabled = true;
+        player.sendMessage(ChatColor.GREEN + "[Zones]WorldEdit CUI compatibility enabled.");
+    }
+    
+    public void updateCUISelection() {
+        if(!hasCUIEnabled()) return;
+        sendCUIType();
+        sendCUIPoints();
+    }
+    
+    private void sendCUIHandShake() {
+        player.sendRawMessage(CUI);
+    }
+    
+    private void sendCUIType() {
+        player.sendRawMessage(CUI + "s" + "|" + (getFormId() == 1 ? "cuboid" : "polygon2d"));
+    }
+
+    private void sendCUIPoints() { 
+        for(int i = 0;i < getCoords().size();i++) {
+            if(getCoords().get(i) != null) {
+                if(i == getCoords().size()-1)
+                    sendCUIPoint(i,getCoords().get(i),getMax(),0);
+                else
+                    sendCUIPoint(i,getCoords().get(i),getMin(),0);
+            }
+        }
+    }
+    
+    private void sendCUIPoint(int index, ZoneVertice point,int height, int size) {
+        player.sendRawMessage(CUI + join("|","p",index,point.getX(),height,point.getY(),size));
+    }
+    
+    private static String join(String del,Object... o) {
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < o.length; i++) {
+            buffer.append(del).append(o[i]);
+        }
+        return buffer.toString();
+    }
+    
+    private boolean save() {
+        if(mode == Mode.EDIT) return false;
+
         Connection conn = null;
         PreparedStatement st = null;
         ResultSet rs = null;
         int id = -1;
         try {
-            conn = plugin.getConnection();
+            conn = getPlugin().getConnection();
             st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,world,admins,users,minz,maxz,size,settings) VALUES (?,?,?,?,'','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
-            st.setString(1, _name);
-            st.setString(2, _class);
-            st.setInt(3, _type);
-            st.setString(4, this.w.getName());
-            st.setInt(5, _minz);
-            st.setInt(6, _maxz);
-            st.setInt(7, _coords.size());
+            st.setString(1, getName());
+            st.setString(2, getClassName(getType()));
+            st.setString(3, getClassName(getForm()));
+            st.setString(4, getWorld().getName());
+            st.setInt(5, getMin());
+            st.setInt(6, getMax());
+            st.setInt(7, getCoords().size());
             // Default settings are empty and just refers to default.
             st.setString(8, "");
             st.executeUpdate();
@@ -196,17 +371,18 @@ public class ZonesDummyZone {
         Constructor<?> zoneConstructor;
         ZoneBase temp = null;
         try {
-            zoneConstructor = newZone.getConstructor(Zones.class,WorldManager.class, int.class);
-            temp = (ZoneBase) zoneConstructor.newInstance(plugin,plugin.getWorldManager(w), id);
+            zoneConstructor = getType().getConstructor(Zones.class,WorldManager.class, int.class);
+            temp = (ZoneBase) zoneConstructor.newInstance(getPlugin(),getWorldManager(), id);
         } catch (Exception e) {
             e.printStackTrace();
         }
         if (temp == null)
             return false;
 
-        for (int i = 0; i < points.length; i++) {
-            if (points[i] == null)
+        for (int i = 0; i < getCoords().size(); i++) {
+            if (getCoords().get(i) == null)
                 continue;
+            
             PreparedStatement st2 = null;
             Connection conn2 = null;
             try {
@@ -214,8 +390,8 @@ public class ZonesDummyZone {
                 st2 = conn2.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_VERTICES_TABLE + " (`id`,`order`,`x`,`y`) VALUES (?,?,?,?) ");
                 st2.setInt(1, id);
                 st2.setInt(2, i);
-                st2.setInt(3, points[i][0]);
-                st2.setInt(4, points[i][1]);
+                st2.setInt(3, getCoords().get(i).getX());
+                st2.setInt(4, getCoords().get(i).getY());
 
                 st2.execute();
             } catch (Exception e) {
@@ -230,173 +406,92 @@ public class ZonesDummyZone {
                 }
             }
         }
-        int[][] coords = _coords.toArray(new int[_coords.size()][]);
-        switch (_type) {
+        switch (getFormId()) {
             case 1:
-                if (_coords.size() == 2) {
-                    temp.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], _minz, _maxz));
+                if (getCoords().size() == 2) {
+                    temp.setZone(new ZoneCuboid(getCoords().get(0).getX(), getCoords().get(1).getX(), getCoords().get(0).getY(), getCoords().get(1).getY(), getMin(), getMax()));
                 } else {
-                    log.info("Missing zone vertex for cuboid zone id: " + id);
+                    getLog().info("Missing zone vertex for cuboid zone id: " + id);
                     return false;
                 }
                 break;
             case 2:
-                if (coords.length > 2) {
-                    final int[] aX = new int[coords.length];
-                    final int[] aY = new int[coords.length];
-                    for (int i = 0; i < coords.length; i++) {
-                        aX[i] = coords[i][0];
-                        aY[i] = coords[i][1];
+                if (getCoords().size() > 2) {
+                    final int[] aX = new int[getCoords().size()];
+                    final int[] aY = new int[getCoords().size()];
+                    for (int i = 0; i < getCoords().size(); i++) {
+                        aX[i] = getCoords().get(i).getX();
+                        aY[i] = getCoords().get(i).getY();
                     }
-                    temp.setZone(new ZoneNPoly(aX, aY, _minz, _maxz));
+                    temp.setZone(new ZoneNPoly(aX, aY, getMin(), getMax()));
                 } else {
-                    log.warning("Bad data for zone: " + id);
+                    getLog().warning("Bad data for zone: " + id);
                     return false;
                 }
                 break;
             default:
-                log.severe("Unknown zone form " + _type + " for id " + id);
+                getLog().severe("Unknown zone form " + getForm().getName() + " for id " + id);
                 break;
         }
-        temp.setParameter("admins", "");
         temp.setParameter("users", "2,default,e");
-        temp.setParameter("name", _name);
-        plugin.getZoneManager().addZone(temp);
+        temp.setParameter("name", name);
+        getZoneManager().addZone(temp);
         revertBlocks();
 
         return true;
     }
+    
 
-    public void Delete() {
-        revertBlocks();
-    }
-
-    private void revertBlocks() {
-
-        for (int[] block : _deleteBlocks) {
-
-            w.getBlockAt(block[0], block[1], block[2]).setTypeId(block[3]);
-
-            if (block[4] != 0)
-                w.getBlockAt(block[0], block[1], block[2]).setData((byte) block[4]);
-
-        }
-
-        _deleteBlocks.clear();
-
-    }
-
-    public void addDeleteBlock(Block block) {
-
-        _deleteBlocks.add(new int[] { block.getX(), block.getY(), block.getZ(), block.getTypeId(), block.getData() });
-
-    }
-
-    public boolean containsDeleteBlock(Block block) {
-
-        for (int[] b : _deleteBlocks)
-            if (b[0] == block.getX() && b[1] == block.getY() && b[2] == block.getZ())
-                return true;
-
-        return false;
-    }
-
-    public void fix(int x, int y) {
-
-        ArrayList<int[]> list = new ArrayList<int[]>();
-        list.addAll(_deleteBlocks);
-        for (int[] block : list)
-            if (block[0] == x && block[2] == y) {
-                w.getBlockAt(block[0], block[1], block[2]).setTypeId(block[3]);
-                _deleteBlocks.remove(block);
-            }
-
-    }
-
-    public void makePlot(Player player) {
-        if (_class.equals("ZonePlot")) {
-            setZ(0, 127);
-            _class = "ZoneNormal";
-            player.sendMessage("Reverted zone to default z and class.");
-        } else {
-            setZ(WorldManager.toInt(player.getLocation().getY()) - 10, WorldManager.toInt(player.getLocation().getY()) + 10);
-            _class = "ZonePlot";
-            player.sendMessage("Zone is now a plot zone.");
-        }
-    }
-
-    public void setType(String string) {
-        if (string.equals("Cuboid")) {
-            _type = 1;
-            _coords.clear();
-            revertBlocks();
-        } else if (string.equals("NPoly"))
-            _type = 2;
-        else {
-            log.info("Trying to set a invalid zone shape in dummyZone, type: " + string);
-        }
-    }
-
-    public void loadEdit(ZoneBase z) {
-        edit = true;
-        ZoneForm form = z.getZone();
-        _minz = form.getLowZ();
-        _maxz = form.getLowZ();
-        if (form instanceof ZoneCuboid) {
-            addCoords(new int[] { form.getLowX(), form.getLowY() });
-            addCoords(new int[] { form.getHighX(), form.getHighY() });
-            _type = 1;
-        } else if (form instanceof ZoneNPoly) {
-            int[] x = ((ZoneNPoly) form).getX();
-            int[] y = ((ZoneNPoly) form).getY();
-            for (int i = 0; i < x.length; i++) {
-                addCoords(new int[] { x[i], y[i] });
-            }
-            _type = 2;
-        } else {
-            // wut?
-        }
-    }
-
-    public boolean merge(int id) {
-        ZoneBase z = plugin.getZoneManager().getZone(id);
+    public boolean merge() {
+        ZoneBase z = getSelectedZone();
         if (z == null)
             return false;
-
-        int[][] points = _coords.toArray(new int[_coords.size()][]);
-
         Connection conn = null;
         PreparedStatement st = null;
+        
+        try {
+            conn = getPlugin().getConnection();
+            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " type = ?, size = ? WHERE id = ?");
+            st.setString(1, getClassName(getForm()));
+            st.setInt(2, coords.size());
+            st.setInt(3, z.getId());
+            st.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (st != null)     st.close();
+                if (conn != null)   conn.close();
+            } catch (SQLException ex) {}
+        }
+        
         try {
             conn = plugin.getConnection();
             st = conn.prepareStatement("DELETE FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ?");
-            st.setInt(1, id);
+            st.setInt(1, z.getId());
 
             st.execute();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
-                if (st != null)
-                    st.close();
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException ex) {
-            }
+                if (st != null)     st.close();
+                if (conn != null)   conn.close();
+            } catch (SQLException ex) {}
         }
 
-        for (int i = 0; i < points.length; i++) {
-            if (points[i] == null)
+        for (int i = 0; i < getCoords().size(); i++) {
+            if (getCoords().get(i) == null)
                 continue;
             PreparedStatement st2 = null;
             Connection conn2 = null;
             try {
                 conn2 = plugin.getConnection();
                 st2 = conn2.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_VERTICES_TABLE + " (`id`,`order`,`x`,`y`) VALUES (?,?,?,?) ");
-                st2.setInt(1, id);
+                st2.setInt(1, z.getId());
                 st2.setInt(2, i);
-                st2.setInt(3, points[i][0]);
-                st2.setInt(4, points[i][1]);
+                st2.setInt(3, getCoords().get(i).getX());
+                st2.setInt(4, getCoords().get(i).getY());
 
                 st2.execute();
             } catch (Exception e) {
@@ -411,45 +506,48 @@ public class ZonesDummyZone {
                 }
             }
         }
-        int[][] coords = _coords.toArray(new int[_coords.size()][]);
-        switch (_type) {
+
+        switch (getFormId()) {
             case 1:
-                if (_coords.size() == 2) {
-                    z.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], _minz, _maxz));
+                if (getCoords().size() == 2) {
+                    z.setZone(new ZoneCuboid(getCoords().get(0).getX(), getCoords().get(0).getY(), getCoords().get(1).getX(), getCoords().get(1).getY(), getMin(), getMax()));
                 } else {
-                    log.info("Missing zone vertex for cuboid zone id: " + id);
+                    getLog().info("Missing zone vertex for cuboid zone id: " + z.getId());
                     return false;
                 }
                 break;
             case 2:
-                if (coords.length > 2) {
-                    final int[] aX = new int[coords.length];
-                    final int[] aY = new int[coords.length];
-                    for (int i = 0; i < coords.length; i++) {
-                        aX[i] = coords[i][0];
-                        aY[i] = coords[i][1];
+                if (getCoords().size() > 2) {
+                    final int[] aX = new int[getCoords().size()];
+                    final int[] aY = new int[getCoords().size()];
+                    for (int i = 0; i < getCoords().size(); i++) {
+                        aX[i] = getCoords().get(i).getX();
+                        aY[i] = getCoords().get(i).getY();
                     }
-                    z.setZone(new ZoneNPoly(aX, aY, _minz, _maxz));
+                    z.setZone(new ZoneNPoly(aX, aY, getMin(), getMax()));
                 } else {
-                    log.warning("Bad data for zone: " + id);
+                    getLog().warning("Bad data for zone: " + z.getId());
                     return false;
                 }
                 break;
             default:
-                log.severe("Unknown zone form " + _type + " for id " + id);
+                getLog().severe("Unknown zone form " + getForm().getName() + " for id " + z.getId());
                 break;
         }
-
+        getWorldManager().removeZone(z);
+        getZoneManager().addZone(z);
         revertBlocks();
 
         return true;
     }
-
-    public int getType() {
-        return _type;
-    }
-
-    public void remove(int[] point) {
-        _coords.remove(point);
-    }
+    
+    public static String getClassName(Class<?> c) {
+        String className = c.getName();
+        int firstChar;
+        firstChar = className.lastIndexOf ('.') + 1;
+        if ( firstChar > 0 ) {
+          className = className.substring ( firstChar );
+          }
+        return className;
+        }
 }

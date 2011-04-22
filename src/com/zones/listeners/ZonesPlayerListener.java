@@ -32,6 +32,7 @@ import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
+import com.zones.ZonesDummyZone.Confirm;
 import com.zones.model.ZoneBase;
 
 
@@ -74,8 +75,8 @@ public class ZonesPlayerListener extends PlayerListener {
         
         ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
         if (dummy != null) {
-            dummy.setConfirm("stop");
-            dummy.confirm(player);
+            dummy.setConfirm(Confirm.STOP);
+            dummy.confirm();
         }
     }
 
@@ -253,28 +254,24 @@ public class ZonesPlayerListener extends PlayerListener {
                 if (type == ZonesConfig.CREATION_TOOL_TYPE) {
                     ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
                     if (dummy != null) {
-                        if (dummy.getType() == 1 && dummy.getCoords().size() == 2) {
+                        if (dummy.getFormId() == 1 && dummy.getCoords().size() == 2) {
                             player.sendMessage(ChatColor.RED.toString() + "You can only use 2 points to define a cuboid zone.");
                             return;
                         }
-                        int[] p = new int[2];
 
-                        p[0] = WorldManager.toInt(event.getClickedBlock().getX());
-                        p[1] = WorldManager.toInt(event.getClickedBlock().getZ());
-
-                        if (event.getClickedBlock().getY() < WorldManager.MAX_Z - ZonesConfig.CREATION_PILON_HEIGHT) {
-                            for (int i = 1; i <= ZonesConfig.CREATION_PILON_HEIGHT; i++) {
-                                Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
-                                dummy.addDeleteBlock(t);
-                                t.setTypeId(ZonesConfig.CREATION_PILON_TYPE);
-                            }
-                        }
-                        if (dummy.getCoords().contains(p)) {
+                        if (dummy.containsCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ())) {
                             player.sendMessage(ChatColor.RED.toString() + "Already added this point.");
+                        } else {
+                            if (event.getClickedBlock().getY() < WorldManager.MAX_Z - ZonesConfig.CREATION_PILON_HEIGHT) {
+                                for (int i = 1; i <= ZonesConfig.CREATION_PILON_HEIGHT; i++) {
+                                    Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
+                                    dummy.addDeleteBlock(t);
+                                    t.setTypeId(ZonesConfig.CREATION_PILON_TYPE);
+                                }
+                            }
+                            player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + event.getClickedBlock().getX() + "," + event.getClickedBlock().getZ() + "] to the temp zone.");
+                            dummy.addCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ());
                         }
-
-                        player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
-                        dummy.addCoords(p);
                     }
                 }
                 

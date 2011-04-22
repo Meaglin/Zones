@@ -106,10 +106,10 @@ public class WorldConfig {
         this.filename = filename;
         this.manager = manager;
         permission = manager.getPlugin().getP();
-        if(!(new File(filename)).exists()) {
+        File worldConfigFile = new File(filename);
+        if(!worldConfigFile.exists()) {
             try {
-                (new File(filename)).mkdirs();
-                byte[] buffer = new byte[(int) new File(Zones.class.getResource("/com/zones/config/world.properties").toURI()).length()];
+                byte[] buffer = new byte[Zones.class.getResourceAsStream("/com/zones/config/world.properties").available()];
                 InputStream input = Zones.class.getResourceAsStream("/com/zones/config/world.properties");
                 BufferedInputStream f = new BufferedInputStream(input);
                 f.read(buffer);
@@ -118,7 +118,7 @@ public class WorldConfig {
                 String str = new String(buffer);
                 str.replace("{$worldname}", manager.getWorld().getName());
                 //For Overwrite the file.
-                FileWriter output = new FileWriter(new File(filename));
+                FileWriter output = new FileWriter(worldConfigFile);
                 BufferedWriter b = new BufferedWriter(output);
                 b.write(str);
                 b.close();
@@ -138,7 +138,7 @@ public class WorldConfig {
             Properties p = new Properties(new File(filename));
             
             BORDER_ENABLED = p.getBool("BorderEnabled", false);
-            BORDER_RANGE = p.getInt("", 0);
+            BORDER_RANGE = p.getInt("BorderRange", 0);
             BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAIR") ? 2 : 1);
             BORDER_ENFORCE = p.getBool("EnforceBorder", false);
             
@@ -157,18 +157,21 @@ public class WorldConfig {
             FIRE_ENFORCE_PROTECTED_BLOCKS = p.getBool("EnforceFireProtectedBlocks", true);
             FIRE_PROTECTED_BLOCKS = new ArrayList<Integer>();
             for(String b : p.getProperty("FireProtectedBlocks", "").split(","))
-                FIRE_PROTECTED_BLOCKS.add(Integer.parseInt(b));
+                if(b != null && !b.equals(""))
+                    FIRE_PROTECTED_BLOCKS.add(Integer.parseInt(b));
             
             LAVA_FLOW_ENABLED = p.getBool("LavaFlowEnabled", true);
             LAVA_PROTECTED_BLOCKS = new ArrayList<Integer>();
             for(String b : p.getProperty("LavaProtectedBlock", "").split(","))
-                LAVA_PROTECTED_BLOCKS.add(Integer.parseInt(b));
+                if(b != null && !b.equals(""))
+                    LAVA_PROTECTED_BLOCKS.add(Integer.parseInt(b));
             
             
             WATER_FLOW_ENABLED = p.getBool("WaterFlowEnabled", true);
             WATER_PROTECTED_BLOCKS = new ArrayList<Integer>();
             for(String b : p.getProperty("WaterProtectedBlock", "").split(","))
-                WATER_PROTECTED_BLOCKS.add(Integer.parseInt(b));
+                if(b != null && !b.equals(""))
+                    WATER_PROTECTED_BLOCKS.add(Integer.parseInt(b));
             
             LEAF_DECAY_ENABLED = p.getBool("LeafDecayEnabled", true);
             
@@ -176,21 +179,25 @@ public class WorldConfig {
             if(PROTECTED_BLOCKS_ENABLED) {
                 PROTECTED_BLOCKS_PLACE = new ArrayList<Integer>();
                 for(String b : p.getProperty("ProtectedBlocksPlace", "").split(","))
-                    PROTECTED_BLOCKS_PLACE.add(Integer.parseInt(b));
+                    if(b != null && !b.equals(""))
+                        PROTECTED_BLOCKS_PLACE.add(Integer.parseInt(b));
                 PROTECTED_BLOCKS_BREAK = new ArrayList<Integer>();
                 for(String b : p.getProperty("ProtectedBlocksBreak", "").split(","))
-                    PROTECTED_BLOCKS_BREAK.add(Integer.parseInt(b));
+                    if(b != null && !b.equals(""))
+                        PROTECTED_BLOCKS_BREAK.add(Integer.parseInt(b));
             }
             
             LOGGED_BLOCKS_ENABLED = p.getBool("LoggedBlocksEnabled", true);
             if(LOGGED_BLOCKS_ENABLED){
                 LOGGED_BLOCKS_PLACE = new ArrayList<Integer>();
                 for(String b : p.getProperty("LoggedBlocksPlace", "").split(","))
-                    LOGGED_BLOCKS_PLACE.add(Integer.parseInt(b));
+                    if(b != null && !b.equals(""))
+                        LOGGED_BLOCKS_PLACE.add(Integer.parseInt(b));
                 
                 LOGGED_BLOCKS_BREAK = new ArrayList<Integer>();
                 for(String b : p.getProperty("LoggedBlocksBreak", "").split(","))
-                    LOGGED_BLOCKS_BREAK.add(Integer.parseInt(b));
+                    if(b != null && !b.equals(""))
+                        LOGGED_BLOCKS_BREAK.add(Integer.parseInt(b));
             }
             
             MOB_SPAWNING_ENABLED = p.getBool("MobSpawningEnabled", true);

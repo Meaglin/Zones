@@ -253,7 +253,7 @@ public abstract class ZoneCommand extends Command {
             "changes the zone type to a square(cuboid) or polygon(NPoly)."
         });
 
-        commands.put("/zregion",new String[] {
+        commands.put("/zregioninfo",new String[] {
             "zones.info",
             " returns region info.",
             "Return the region x and y index and the amount of zones in \n"
@@ -348,10 +348,10 @@ public abstract class ZoneCommand extends Command {
             "- [variable name] [value] add value to variable.",
             "Adds the [value] to the list [variable name] \n." +
             "List of variables :\n" +
-            "protectedplace - blocks which cannot be placed inside the zone.\n" +
-            "protectedbreak - blocks which cannot be destroyed inside the zone.\n" +
-            "allowedanimals - list of animals that can spawn inside the zone.\n" +
-            "allowedmobs - list of mobs that can spawn inside the zone."
+            "protectedplace - blocks which cannot be placed.\n" +
+            "protectedbreak - blocks which cannot be destroyed.\n" +
+            "allowedanimals - list of animals that can spawn.\n" +
+            "allowedmobs - list of mobs that can spawn."
             
         });
 
@@ -360,23 +360,26 @@ public abstract class ZoneCommand extends Command {
             "- [variable name] [value] remove value from variable.",
             "removes the [value] from the list [variable name] \n." +
             "List of variables :\n" +
-            "protectedplace - blocks which cannot be placed inside the zone.\n" +
-            "protectedbreak - blocks which cannot be destroyed inside the zone.\n" +
-            "allowedanimals - list of animals that can spawn inside the zone.\n" +
-            "allowedmobs - list of mobs that can spawn inside the zone."
+            "protectedplace - blocks which cannot be placed.\n" +
+            "protectedbreak - blocks which cannot be destroyed.\n" +
+            "allowedanimals - list of animals that can spawn.\n" +
+            "allowedmobs - list of mobs that can spawn."
         });
         
         commands.put("/zset", new String[] {
             "zones.settings.set",
             "- [variable name] [value] changes variable to value.",
-            "defines [variables name]'s value as [value] \n." +
+            "Defines [variables name]'s value as [value].\n" +
             "List of variables :\n" +
-            "protectedplace - blocks which cannot be placed inside the zone.\n" +
-            "protectedbreak - blocks which cannot be destroyed inside the zone.\n" +
-            "allowedanimals - list of animals that can spawn inside the zone.\n" +
-            "allowedmobs - list of mobs that can spawn inside the zone.\n" +
-            "[value] must be a comma seperated list of all the items in the list\n" +
-            "for example: /zset [variable] <val1>,<val2>,<val3> ."
+            "protectedplace - [L] blocks which cannot be placed.\n" +
+            "protectedbreak - [L] blocks which cannot be destroyed.\n" +
+            "allowedanimals - [L] list of animals that can spawn.\n" +
+            "allowedmobs - [L] list of mobs that can spawn.\n" +
+            "entermessage - The message you see when you enter a zone.\n" +
+            "leavemessage - The message you see when you leave a zone.\n" +
+            "{zname} - zone name,{pname} - player name,{access} - access\n" +
+            "Can be used to make enter/leave messages dynamic.\n" +
+            "List variables[L] requires comma seperated input: <val1>,<val2>\n"
         });
             
     }

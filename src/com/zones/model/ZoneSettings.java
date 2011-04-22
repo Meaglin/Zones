@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.bukkit.entity.CreatureType;
-
 import com.zones.model.settings.*;
 
 /**
@@ -14,11 +12,6 @@ import com.zones.model.settings.*;
  *
  */
 public class ZoneSettings {
-    
-    public static final BooleanSerializer bool = new BooleanSerializer();
-    public static final StringSerializer string = new StringSerializer();
-    public static final IntListSerializer intlist = new IntListSerializer();
-    public static final CreatureListSerializer creaturelist= new CreatureListSerializer();
     
     private HashMap<ZoneVar, Object> settings;
     
@@ -79,29 +72,14 @@ public class ZoneSettings {
             return def;
         }
     }
-    public List<Integer> getIntList(ZoneVar name) {
-        return getIntList(name,null);
+    public List<?> getList(ZoneVar name) {
+        return getList(name,null);
     }
     
-    @SuppressWarnings("unchecked")
-    public List<Integer> getIntList(ZoneVar name,List<Integer> def) {
+    public List<?> getList(ZoneVar name,List<?> def) {
         Object o = get(name);
-        if(o != null && o instanceof List<?> && !((List<?>)o).isEmpty() && ((List<?>)o).get(0) instanceof Integer) {
-            return (List<Integer>)o;
-        } else {
-            return def;
-        }
-    }
-    
-    public List<CreatureType> getCreatureList(ZoneVar name) {
-        return getCreatureList(name,null);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public List<CreatureType> getCreatureList(ZoneVar name,List<CreatureType> def) {
-        Object o = get(name);
-        if(o != null && o instanceof List<?> && !((List<?>)o).isEmpty() && ((List<?>)o).get(0) instanceof CreatureType) {
-            return (List<CreatureType>)o;
+        if(o != null && o instanceof List && !((List<?>)o).isEmpty()) {
+            return (List<?>)o;
         } else {
             return def;
         }

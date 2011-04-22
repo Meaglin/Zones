@@ -25,13 +25,14 @@ public class ZAddCommand extends ZoneCommand{
         this.setRequiresSelected(true);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean run(Player player, String[] vars) {
         if(vars.length < 2){
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
             return true;
         }
-        ZoneVar v = ZSet.vars.get(vars[0].toLowerCase());
+        ZoneVar v = ZSet.lists.get(vars[0].toLowerCase());
         if(v == null) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + vars[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
@@ -40,9 +41,9 @@ public class ZAddCommand extends ZoneCommand{
         
         ZoneBase zone = getSelectedZone(player);
         Object o = zone.getSettings().get(v);
-        List<?> list = null;
+        List list = null;
         if(o != null) {
-            list = (List<?>) o;
+            list = (List) o;
         } else {
             list = new ArrayList();
         }

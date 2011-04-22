@@ -38,12 +38,17 @@
 		<jar destfile="${build}/Zones.jar">
 			<fileset dir="${build.classes}" />
 			<zipfileset dir="${src}/com/zones/config/" prefix="com/zones/config/" >
-				<include name="Zones.properties" />
+				<include name="*.properties" />
 			</zipfileset >
 			<zipfileset dir="" prefix="" >
 				<include name="plugin.yml" />
 			</zipfileset >
-			
+			<zipfileset dir="${src}" prefix="src" >
+				<include name="**" />
+			</zipfileset>
+			<zipfileset dir="" prefix="src" >
+				<include name="db.sql" />
+			</zipfileset>
 			<zipfileset src="libs/trove-2.1.0.jar" prefix="" >
 				<include name="**" />
 				<exclude name="META-INF/*" />

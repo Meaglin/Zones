@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import com.zones.Zones;
 import com.zones.ZonesDummyZone;
+import com.zones.ZonesDummyZone.Confirm;
 import com.zones.commands.ZoneCommand;
 
 /**
@@ -23,10 +24,10 @@ public class ZMergeCommand extends ZoneCommand {
     @Override
     public boolean run(Player player, String[] vars) {
         ZonesDummyZone dummy = getDummy(player);
-        if (dummy.getType() == 1 && dummy.getCoords().size() != 2) {
+        if (dummy.getFormId() == 1 && dummy.getCoords().size() != 2) {
             player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need 2.");
             return true;
-        }else if(dummy.getType() == 2 && dummy.getCoords().size() < 3){
+        }else if(dummy.getFormId() == 2 && dummy.getCoords().size() < 3){
             player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need atleast 3.");
             return true;
         }
@@ -35,7 +36,7 @@ public class ZMergeCommand extends ZoneCommand {
 
         player.sendMessage(ChatColor.YELLOW.toString() + "If you are sure you want to save this zone do /zconfirm");
 
-        dummy.setConfirm("merge");
+        dummy.setConfirm(Confirm.MERGE);
         
         return true;
     }

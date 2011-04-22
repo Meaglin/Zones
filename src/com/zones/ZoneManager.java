@@ -27,34 +27,34 @@ public class ZoneManager {
     protected static final Logger             log = Logger.getLogger("Minecraft");
     private Zones                             plugin;
 
-    protected ZoneManager() {
+    protected ZoneManager(Zones plugin) {
         zones = new TIntObjectHashMap<ZoneBase>();
         dummyZones = new TIntObjectHashMap<ZonesDummyZone>();
         selectedZones = new TIntIntHashMap();
+        this.plugin = plugin;
     }
 
-    public void load(Zones plugin) {
+    public void load(WorldManager world) {
         zones.clear();
         dummyZones.clear();
         selectedZones.clear();
-        this.plugin = plugin;
         Connection conn = null;
         try {
             conn = plugin.getConnection();
-            PreparedStatement st = conn.prepareStatement("SELECT * FROM " + ZonesConfig.ZONES_TABLE);
+            PreparedStatement st = conn.prepareStatement("SELECT * FROM " + ZonesConfig.ZONES_TABLE + " WHERE world = ?");
             PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
+            st.setString(1, world.getWorldName());
             ResultSet rset = st.executeQuery();
 
-            int id, type, size, minz, maxz;
-            String zoneClass, admins, users, name, world, settings;
+            int id, size, minz, maxz;
+            String zoneClass,type, admins, users, name, settings;
             ArrayList<int[]> points = new ArrayList<int[]>();
 
             while (rset.next()) {
                 id = rset.getInt("id");
                 name = rset.getString("name");
                 zoneClass = rset.getString("class");
-                world = rset.getString("world");
-                type = rset.getInt("type");
+                type = rset.getString("type");
                 size = rset.getInt("size");
                 admins = rset.getString("admins");
                 users = rset.getString("users");
@@ -68,8 +68,8 @@ public class ZoneManager {
                     log.warning("[Zones]No such zone class: " + zoneClass + " id: " + id);
                     continue;
                 }
-                Constructor<?> zoneConstructor = newZone.getConstructor(Zones.class, WorldManager.class, int.class);
-                ZoneBase temp = (ZoneBase) zoneConstructor.newInstance(zones,plugin.getWorldManager(world),id);
+                Constructor<?> zoneConstructor = newZone.getConstructor(Zones.class,WorldManager.class, int.class);
+                ZoneBase temp = (ZoneBase) zoneConstructor.newInstance(plugin,world,id);
 
                 points.clear();
 
@@ -90,39 +90,35 @@ public class ZoneManager {
                     st2.clearParameters();
                 }
                 int[][] coords = points.toArray(new int[points.size()][]);
-                switch (type) {
-                    case 1:
-                        if (points.size() == 2) {
-                            temp.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], minz, maxz));
-                        } else {
-                            log.info("[Zones]Missing zone vertex for cuboid zone id: " + id);
-                            continue;
+                if(type.equalsIgnoreCase("ZoneCuboid")) {
+                    if (points.size() == 2) {
+                        temp.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], minz, maxz));
+                    } else {
+                        log.info("[Zones]Missing zone vertex for cuboid zone id: " + id);
+                        continue;
+                    }
+                } else if(type.equalsIgnoreCase("ZoneNPoly")) {
+                    if (coords.length > 2) {
+                        final int[] aX = new int[coords.length];
+                        final int[] aY = new int[coords.length];
+                        for (int i = 0; i < coords.length; i++) {
+                            aX[i] = coords[i][0];
+                            aY[i] = coords[i][1];
                         }
-                        break;
-                    case 2:
-                        if (coords.length > 2) {
-                            final int[] aX = new int[coords.length];
-                            final int[] aY = new int[coords.length];
-                            for (int i = 0; i < coords.length; i++) {
-                                aX[i] = coords[i][0];
-                                aY[i] = coords[i][1];
-                            }
-                            temp.setZone(new ZoneNPoly(aX, aY, minz, maxz));
-                        } else {
-                            log.warning("[Zones]Bad data for zone: " + id);
-                            continue;
-                        }
-                        break;
-                    default:
-                        log.severe("[Zones]Unknown zone form " + type + " for id " + id);
-                        break;
+                        temp.setZone(new ZoneNPoly(aX, aY, minz, maxz));
+                    } else {
+                        log.warning("[Zones]Bad data for zone: " + id);
+                        continue;
+                    }
                 }
 
                 temp.setParameter("admins", admins);
                 temp.setParameter("users", users);
                 temp.setParameter("name", name);
                 temp.loadSettings(settings);
-                addZone(temp);
+                
+                world.addZone(temp);
+                zones.put(temp.getId(), temp);
             }
             rset.close();
         } catch (Exception e) {
@@ -135,29 +131,13 @@ public class ZoneManager {
             }
         }
         if (zones.size() == 1)
-            log.info("[Zones]Loaded " + zones.size() + " Zone.");
+            log.info("[Zones]Loaded " + zones.size() + " Zone for world " + world.getWorldName() + ".");
         else
-            log.info("[Zones]Loaded " + zones.size() + " Zones.");
+            log.info("[Zones]Loaded " + zones.size() + " Zones for world " + world.getWorldName() + ".");
     }
 
     public void addZone(ZoneBase zone) {
-        int ax, ay, bx, by;
-        for (int x = 0; x < WorldManager.X_REGIONS; x++) {
-            for (int y = 0; y < WorldManager.Y_REGIONS; y++) {
-
-                ax = (x + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
-                bx = ((x + 1) + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
-                ay = (y + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
-                by = ((y + 1) + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
-
-                if (zone.getZone().intersectsRectangle(ax, bx, ay, by)) {
-                    plugin.getWorldManager(zone.getWorld()).addZone(x, y, zone);
-                    // log.info("adding zone["+zone.getId()+"] to region " + x +
-                    // " " + y);
-                }
-            }
-        }
-
+        zone.getWorldManager().addZone(zone);
         zones.put(zone.getId(), zone);
     }
 

@@ -36,7 +36,7 @@ public class ZCreateCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
                 return true;
             }
-            getZoneManager().addDummy(player.getEntityId(), new ZonesDummyZone(getPlugin(),player.getWorld(),name));
+            getZoneManager().addDummy(player.getEntityId(), new ZonesDummyZone(getPlugin(),player,name));
             player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
             player.sendMessage("You can start adding the zone points of this zone by");
             player.sendMessage(ChatColor.RED + " right clicking blocks with " + Material.getMaterial(ZonesConfig.CREATION_TOOL_TYPE).name().toLowerCase() + "[" + ZonesConfig.CREATION_TOOL_TYPE + "].");

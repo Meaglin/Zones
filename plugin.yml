@@ -1,40 +1,109 @@
 name: Zones
 main: com.zones.Zones
-version: 1.2
+version: 2.0
 author: Meaglin
 website: https://github.com/Meaglin/0xFFFF
 description: The Over optimized Area Protection tool with integrated Anti Grief options.
 commands:
-    zhelp
-    zcreate
-    zset
-    zadd
-    zremove
-    zsetplot
-    zsetheight
-    zimport
-    zsetdepth
-    zsave
-    zconfirm
-    zsetz
-    zstop
-    zsetuser
-    zsetgroup
-    zaddadmin
-    zremoveadmin
-    zselect
-    zsettype
-    zregion
-    zgetaccess
-    zdelete
-    zsetname
-    ztogglehealth
-    ztoggledynamite
-    ztogglelava
-    ztogglewater
-    ztogglemobs
-    ztoggleanimals
-    zedit
-    zmerge
-    zreload
-    ztoggle
+    zhelp:
+        description: info command for all Zones commands.
+        usage: /<command> <command name>
+    zcreate:
+        description: see /zhelp
+        usage: /<command> 
+    zset:
+        description: see /zhelp
+        usage: /<command> 
+    zadd:
+        description: see /zhelp
+        usage: /<command> 
+    zremove:
+        description: see /zhelp
+        usage: /<command> 
+    zsetplot:
+        description: see /zhelp
+        usage: /<command> 
+    zsetheight:
+        description: see /zhelp
+        usage: /<command> 
+    zimport:
+        description: see /zhelp
+        usage: /<command> 
+    zsetdepth:
+        description: see /zhelp
+        usage: /<command> 
+    zsave:
+        description: see /zhelp
+        usage: /<command> 
+    zconfirm:
+        description: see /zhelp
+        usage: /<command> 
+    zsetz:
+        description: see /zhelp
+        usage: /<command> 
+    zstop:
+        description: see /zhelp
+        usage: /<command> 
+    zsetuser:
+        description: see /zhelp
+        usage: /<command> 
+    zsetgroup:
+        description: see /zhelp
+        usage: /<command> 
+    zaddadmin:
+        description: see /zhelp
+        usage: /<command> 
+    zremoveadmin:
+        description: see /zhelp
+        usage: /<command> 
+    zselect:
+        description: see /zhelp
+        usage: /<command> 
+    zsettype:
+        description: see /zhelp
+        usage: /<command> 
+    zregioninfo:
+        description: see /zhelp
+        usage: /<command> 
+    zgetaccess:
+        description: see /zhelp
+        usage: /<command> 
+    zdelete:
+        description: see /zhelp
+        usage: /<command> 
+    zsetname:
+        description: see /zhelp
+        usage: /<command> 
+    ztogglehealth:
+        description: see /zhelp
+        usage: /<command> 
+    ztoggledynamite:
+        description: see /zhelp
+        usage: /<command> 
+    ztogglelava:
+        description: see /zhelp
+        usage: /<command> 
+    ztogglewater:
+        description: see /zhelp
+        usage: /<command> 
+    ztogglemobs:
+        description: see /zhelp
+        usage: /<command> 
+    ztoggleanimals:
+        description: see /zhelp
+        usage: /<command> 
+    zedit:
+        description: see /zhelp
+        usage: /<command> 
+    zmerge:
+        description: see /zhelp
+        usage: /<command> 
+    zreload:
+        description: see /zhelp
+        usage: /<command> 
+    ztoggle:
+        description: see /zhelp
+        usage: /<command> 
+    worldedit:
+        description: compatibility for CUI
+        usage: Don't use it manually ;D

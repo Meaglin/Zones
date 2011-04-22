@@ -48,13 +48,10 @@ public class ZonesBlockListener extends BlockListener {
         if (player.getItemInHand().getTypeId() == ZonesConfig.CREATION_TOOL_TYPE) {
             ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
             if (dummy != null) {
-                if (dummy.containsDeleteBlock(block)) {
-                    int[] p = new int[2];
-                    p[0] = block.getX();
-                    p[1] = block.getZ();
-                    dummy.removeCoords(p);
+                if (dummy.containsCoords(block.getX(), block.getZ())) {
+                    dummy.removeCoords(block.getX(), block.getZ());
                     dummy.fix(block.getX(), block.getZ());
-                    player.sendMessage(ChatColor.GREEN.toString() + "Removed point [" + p[0] + "," + p[1] + "] from temp zone.");
+                    player.sendMessage(ChatColor.GREEN.toString() + "Removed point [" + block.getX() + "," + block.getZ() + "] from temp zone.");
 
                 } else {
                     player.sendMessage(ChatColor.RED.toString() + "Couldn't find point in zone so nothing could be removed");

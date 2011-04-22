@@ -52,6 +52,8 @@ public class ZoneNormal extends ZoneBase{
     }
 
     public void setParameter(String name,String value){
+        if(value == null || value.equals("")) return;
+        
         if (name.equals("admins")) {
             String[] list = value.split(";");
             for (int i = 0; i < list.length; i++) {
@@ -400,7 +402,7 @@ public class ZoneNormal extends ZoneBase{
     public boolean allowSpawn(Entity entity,CreatureType type) {
         if(entity instanceof Animals) {
             if(getSettings().getBool(ZoneVar.SPAWN_ANIMALS, getWorldManager().getConfig().ANIMAL_SPAWNING_ENABLED)) {
-                List<CreatureType> list = getSettings().getCreatureList(ZoneVar.ANIMALS);
+                List<?> list = getSettings().getList(ZoneVar.ANIMALS);
                 if(list != null && !list.contains(type))
                     return false;
                 else
@@ -410,7 +412,7 @@ public class ZoneNormal extends ZoneBase{
             }
         } else if(entity instanceof Monster) {
             if(getSettings().getBool(ZoneVar.SPAWN_MOBS, getWorldManager().getConfig().MOB_SPAWNING_ENABLED)) {
-                List<CreatureType> list = getSettings().getCreatureList(ZoneVar.MOBS);
+                List<?> list = getSettings().getList(ZoneVar.MOBS);
                 if(list != null && !list.contains(type))
                     return false;
                 else
@@ -429,7 +431,7 @@ public class ZoneNormal extends ZoneBase{
             player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + getName() + "' !");
             return false;
         } else {
-            List<Integer> list = getSettings().getIntList(ZoneVar.PLACE_BLOCKS);
+            List<?> list = getSettings().getList(ZoneVar.PLACE_BLOCKS);
             if(list != null && list.contains(block.getTypeId()) && !this.canAdministrate(player)) {
                 player.sendMessage(ChatColor.RED + "This block type is blacklisted in '" + getName() + "' !");
                 return false;
@@ -445,7 +447,7 @@ public class ZoneNormal extends ZoneBase{
             player.sendMessage(ChatColor.RED + "You cannot destroy blocks in '" + getName() + "' !");
             return false;
         } else {
-            List<Integer> list = getSettings().getIntList(ZoneVar.BREAK_BLOCKS);
+            List<?> list = getSettings().getList(ZoneVar.BREAK_BLOCKS);
             if(list != null && list.contains(block.getTypeId()) && !this.canAdministrate(player)) {
                 player.sendMessage(ChatColor.RED + "This block type is protected in '" + getName() + "' !");
                 return false;
