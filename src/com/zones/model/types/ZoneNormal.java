@@ -21,6 +21,7 @@ import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
+import com.zones.model.ZoneVertice;
 import com.zones.model.ZonesAccess;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.settings.ZoneVar;
@@ -481,5 +482,16 @@ public class ZoneNormal extends ZoneBase{
     @Override
     public boolean allowTeleport(Player player, Location to) {
         return this.canModify(player, Rights.ENTER) && getSettings().getBool(ZoneVar.TELEPORT, true);
+    }
+
+    @Override
+    public Location getSpawnLocation(Player player) {
+        Object o = getSettings().get(ZoneVar.SPAWN_LOCATION);
+        if(o == null) { 
+            return getWorld().getSpawnLocation();
+        } else {
+            ZoneVertice z = (ZoneVertice)o;
+            return new Location(getWorld(),z.getX(),getWorld().getHighestBlockYAt(z.getX(), z.getY()),z.getY());
+        }
     }
 }

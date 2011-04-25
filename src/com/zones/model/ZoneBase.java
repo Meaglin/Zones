@@ -194,6 +194,7 @@ public abstract class ZoneBase {
     public abstract boolean allowEnter(Player player,Location to);
     public abstract boolean allowTeleport(Player player,Location to);
     
+    public abstract Location getSpawnLocation(Player player);
     
     public abstract ZonesAccess getAccess(Player player);
     public abstract ZonesAccess getAccess(String group);

@@ -18,14 +18,11 @@ public class ZToggleHealthCommand extends ZoneCommand {
     public ZToggleHealthCommand(Zones plugin) {
         super("ztogglehealth", plugin);
         this.setRequiresSelected(true);
+        this.setRequiredAccess("zones.toggle.health");
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if(!canUseCommand(player,"zones.toggle.health")) {
-            player.sendMessage(ChatColor.RED + "You're not allowed to use this command.");
-            return true;
-        }
         
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.HEALTH, !z.getSettings().getBool(ZoneVar.HEALTH, z.getWorldManager().getConfig().PLAYER_HEALTH_ENABLED)))

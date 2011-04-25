@@ -18,14 +18,11 @@ public class ZToggleDynamiteCommand extends ZoneCommand {
     public ZToggleDynamiteCommand(Zones plugin) {
         super("ztoggledynamite", plugin);
         this.setRequiresSelected(true);
+        this.setRequiredAccess("zones.toggle.tnt");
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if(!canUseCommand(player,"zones.toggle.tnt")) {
-            player.sendMessage(ChatColor.RED + "You're not allowed to use this command.");
-            return true;
-        }
         
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.DYNAMITE, !z.getSettings().getBool(ZoneVar.DYNAMITE, z.getWorldManager().getConfig().ALLOW_TNT_TRIGGER)))

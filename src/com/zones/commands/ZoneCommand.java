@@ -28,6 +28,7 @@ public abstract class ZoneCommand extends Command {
     private boolean requiresCreate;
     private boolean requiresAdmin;
     private Class<? extends ZoneBase> requiredClass = null;
+    private String requiredAccess = null;
     
     public ZoneCommand(String name, Zones plugin) {
         super(name);
@@ -68,11 +69,19 @@ public abstract class ZoneCommand extends Command {
         this.requiresAdmin = requiresAdmin;
     }
 
-    public void setRequiresDummy(boolean requiresDummy) {
+    protected void setRequiresDummy(boolean requiresDummy) {
         this.requiresDummy = requiresDummy;
     }
+    
+    protected void setRequiredAccess(String access) {
+        requiredAccess = access;
+    }
+    
+    protected boolean requiresAccess() {
+        return requiredAccess != null;
+    }
 
-    public boolean requiresDummy() {
+    protected boolean requiresDummy() {
         return requiresDummy;
     }
 
@@ -123,6 +132,8 @@ public abstract class ZoneCommand extends Command {
                 }
             } else if(hasRequiredClass() && (!hasSelected(p) || !(requiredClass.isAssignableFrom(getSelectedZone(p).getClass())))){
                 p.sendMessage(ChatColor.RED + "This zone doesn't allow this type of command.");
+            } else if(requiresAccess() && !canUseCommand(p,requiredAccess)) {
+                p.sendMessage(ChatColor.RED + "You don't have the required permissions to use this command.");
             } else {
                 if(requiresDummy() && !(this instanceof ZConfirmCommand)){
                     getDummy(p).setConfirm(null);
@@ -201,7 +212,7 @@ public abstract class ZoneCommand extends Command {
             + "c = Modify(accessing chest/furnaces),\n "
             + "d = Destroy(destroying blocks),\n"
             + "e = Enter(entering your zone),\n"
-            + "h = Hit Entity's(killing mobs/destroying minecarts or boats),\n"
+            + "h = Hit(killing mobs/destroying minecarts or boats),\n"
             + "* = full access(all of the above) and - = remove all access. \n"
             + "Example: /zsetuser Meaglin bde this will give meaglin access \n"
             + " to build,destroy and walk around in your zone but not to \n"
@@ -217,7 +228,7 @@ public abstract class ZoneCommand extends Command {
             + "c = Modify(accessing chest/furnaces),\n "
             + "d = Destroy(destroying blocks),\n"
             + "e = Enter(entering your zone), \n"
-            + "h = Hit Entity's(killing mobs/destroying minecarts or boats),\n"
+            + "h = Hit(killing mobs/destroying minecarts or boats),\n"
             + "* = full access(all of the above) and - = remove all access. \n"
             + "Example: /zsetuser default bde this will give all users access \n"
             + " to build,destroy and walk around in your zone but not to \n"
@@ -312,15 +323,15 @@ public abstract class ZoneCommand extends Command {
         commands.put("/zedit", new String[] {
             "zones.create",
             "see extended help.",
-            "loads the current selected zone into a dummy \n"
-            + "zone so it can be editted and merged with a zone.\n"
-            + "Edited zones CAN'T be saved as new zones but have to be MERGED!"
+            "loads the current selected zone into your \n"
+            + "edit selection so that it can be editten.\n"
+            + "and merged back into an active zone.\n" +
+            		"This is used to adjust the area of a zone."
         });
         commands.put("/zmerge", new String[] {
             "zones.create",
-            "merges the dummy zone points/form with the selected zone.",
-            "Changes the 'area'/'form' of the zone you selected \n" +
-            " with your current dummy zone 'area'/'form'."
+            "Merges your current edit selection with your selected\n",
+            "zone replacing the area of the zone with your selection."
         });
         commands.put("/zreload", new String[] {
                 "zones.admin",
@@ -330,7 +341,7 @@ public abstract class ZoneCommand extends Command {
                 "All - reloads the whole plugin."
         });
         commands.put("/ztoggle", new String[] {
-                "",
+                "zones.toggle",
                 "[variable name] - toggles variable name.",
                 "[variable name] - toggles variable name, options: \n"
                 + "lava|water - Toggles lava/water flow into the zone. \n"
@@ -379,8 +390,22 @@ public abstract class ZoneCommand extends Command {
             "leavemessage - The message you see when you leave a zone.\n" +
             "{zname} - zone name,{pname} - player name,{access} - access\n" +
             "Can be used to make enter/leave messages dynamic.\n" +
-            "List variables[L] requires comma seperated input: <val1>,<val2>\n"
+            "spawnlocation - change the respawn location within the zone.\n" +
+            "List variables[L] requires comma seperated input: <val1>,<val2>"
         });
+        
+        commands.put("/zaccess" , new String[] {
+             null,
+             "Gives basic explenation about access tags.",
+             "Use the command damnit :<."
+        } );
+        
+        commands.put("/zinfo", new String[] {
+            null,
+            "Gives basic info about the selected zone.",
+            "Displays zone size,min-max coordinates \n" +
+            "and all set settings."
+        } );
             
     }
 

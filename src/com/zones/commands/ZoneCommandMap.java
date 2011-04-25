@@ -54,22 +54,24 @@ public class ZoneCommandMap {
         registerCommand(new ZStopCommand(plugin));
         
         //General
+        registerCommand(new ZAccessCommand(plugin));
         registerCommand(new ZHelpCommand(plugin));
+        registerCommand(new ZInfoCommand(plugin));
         registerCommand(new ZRegionInfoCommand(plugin));
         registerCommand(new ZSelectCommand(plugin));
 
         // Settings
         registerCommand(new ZAddCommand(plugin));
         registerCommand(new ZRemoveCommand(plugin));
-        registerCommand(new ZSet(plugin));
+        registerCommand(new ZSetCommand(plugin));
         registerCommand(new ZSetNameCommand(plugin));
         registerCommand(new ZToggleAnimalsCommand(plugin));
+        registerCommand(new ZToggleCommand(plugin));
         registerCommand(new ZToggleDynamiteCommand(plugin));
         registerCommand(new ZToggleHealthCommand(plugin));
         registerCommand(new ZToggleLavaCommand(plugin));
         registerCommand(new ZToggleMobsCommand(plugin));
         registerCommand(new ZToggleWaterCommand(plugin));
-        registerCommand(new ZToggleCommand(plugin));
         
     }
     

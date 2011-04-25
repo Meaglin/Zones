@@ -373,6 +373,10 @@ public class ZonesPlayerListener extends PlayerListener {
      * @param event Relevant event details
      */
     public void onPlayerRespawn(PlayerRespawnEvent event) {
+        ZoneBase z = plugin.getWorldManager(event.getPlayer()).getActiveZone(event.getPlayer());
+        if(z != null) {
+            event.setRespawnLocation(z.getSpawnLocation(event.getPlayer()));
+        }
     }
 
     /**

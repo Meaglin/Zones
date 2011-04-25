@@ -104,3 +104,9 @@ commands:
     ztoggle:
         description: see /zhelp
         usage: /<command> 
+    zinfo:
+        description: see /zhelp
+        usage: /<command>   
+    zaccess:
+        description: see /zhelp
+        usage: /<command>   

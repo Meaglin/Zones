@@ -95,9 +95,11 @@ public class WorldConfig {
     
     public boolean SPONGE_EMULATION;
     public int SPONGE_RADIUS;
+    public boolean SPONGE_OVERRIDE_NEEDED;
     
     public boolean SPONGE_LAVA_EMULATION;
     public int SPONGE_LAVA_RADIUS;
+    public boolean SPONGE_LAVA_OVERRIDE_NEEDED;
     
     
     private PermissionHandler permission;
@@ -245,9 +247,10 @@ public class WorldConfig {
             
             SPONGE_EMULATION          = p.getBool("EmulateSponges", false);
             SPONGE_RADIUS           = p.getInt("SpongeRadius", 2);
-
+            SPONGE_OVERRIDE_NEEDED = p.getBool("SpongeOverrideNeeded", false);
             SPONGE_LAVA_EMULATION     = p.getBool("EmulateLavaSponges", false);
             SPONGE_LAVA_RADIUS      = p.getInt("LavaSpongeRadius", 2);
+            SPONGE_LAVA_OVERRIDE_NEEDED = p.getBool("LavaSpongeOverrideNeeded", false);
         } catch (Exception e) {
             log.warning("[Zones]Error loading configurations for world '" + manager.getWorld().getName() + "' !");
             e.printStackTrace();
@@ -339,7 +342,7 @@ public class WorldConfig {
         }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
         if(block.getTypeId() == Material.SPONGE.getId()) {
-            if(this.SPONGE_EMULATION) {
+            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && permission.permission(player, "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_RADIUS ; z <= block.getZ() + SPONGE_RADIUS;z++) {
@@ -353,7 +356,7 @@ public class WorldConfig {
                     }
                 }
             }
-            if(this.SPONGE_LAVA_EMULATION) {
+            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && permission.permission(player, "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_LAVA_RADIUS ; x <= block.getX() + SPONGE_LAVA_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_LAVA_RADIUS ; z <= block.getZ() + SPONGE_LAVA_RADIUS;z++) {

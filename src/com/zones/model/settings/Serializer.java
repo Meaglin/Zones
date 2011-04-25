@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.bukkit.entity.CreatureType;
 
+import com.zones.model.ZoneVertice;
+
 public enum Serializer {
     INTEGER {
         @Override
@@ -121,6 +123,29 @@ public enum Serializer {
             if(list.isEmpty()) return null;
             return list;
         }
+    },
+    
+    ZONEVERTICE {
+
+        @Override
+        public String serialize(Object data) {
+            if(data != null && data instanceof ZoneVertice) {
+                return "(" + ((ZoneVertice)data).getX() + ":" + ((ZoneVertice)data).getY() + ")";
+            } return null;
+        }
+
+        @Override
+        public Object unSerialize(String serializedData) {
+            ZoneVertice z = null;
+            String[] split = serializedData.replace("(","").replace(")", "").split(":");
+            try {
+                z = new ZoneVertice(Integer.parseInt(split[0]),Integer.parseInt(split[1]));
+            } catch (NumberFormatException e) { return null; }
+            catch(ArrayIndexOutOfBoundsException e) { return null; }
+            
+            return z;
+        }
+        
     };
     
     public abstract String serialize(Object data);

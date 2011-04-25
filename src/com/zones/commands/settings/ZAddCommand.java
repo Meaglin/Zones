@@ -23,6 +23,7 @@ public class ZAddCommand extends ZoneCommand{
     public ZAddCommand(Zones plugin) {
         super("zadd", plugin);
         this.setRequiresSelected(true);
+        this.setRequiredAccess("zones.settings.add");
     }
 
     @SuppressWarnings("unchecked")
@@ -32,7 +33,7 @@ public class ZAddCommand extends ZoneCommand{
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
             return true;
         }
-        ZoneVar v = ZSet.lists.get(vars[0].toLowerCase());
+        ZoneVar v = ZSetCommand.lists.get(vars[0].toLowerCase());
         if(v == null) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + vars[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");

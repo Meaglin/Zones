@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.bukkit.entity.CreatureType;
 
+import com.zones.model.ZoneVertice;
+
 
 public enum ZoneVar {
     
@@ -24,8 +26,8 @@ public enum ZoneVar {
         MOBS("AllowedMobs", List.class,CreatureType.class, Serializer.CREATURELIST),
         ANIMALS("AllowedAnimals", List.class,CreatureType.class, Serializer.CREATURELIST),
         ENTER_MESSAGE("EnterMessage", String.class, Serializer.STRING),
-        LEAVE_MESSAGE("LeaveMessage", String.class, Serializer.STRING);
-
+        LEAVE_MESSAGE("LeaveMessage", String.class, Serializer.STRING),
+        SPAWN_LOCATION("SpawnLocation",ZoneVertice.class, Serializer.ZONEVERTICE); 
 
         
         private final String name;

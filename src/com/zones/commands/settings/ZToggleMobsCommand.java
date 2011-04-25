@@ -18,14 +18,11 @@ public class ZToggleMobsCommand extends ZoneCommand {
     public ZToggleMobsCommand(Zones plugin) {
         super("ztoggleanimals", plugin);
         this.setRequiresSelected(true);
+        this.setRequiredAccess("zones.toggle.mobs");
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if(!canUseCommand(player,"zones.toggle.mobs")) {
-            player.sendMessage(ChatColor.RED + "You're not allowed to use this command.");
-            return true;
-        }
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.SPAWN_MOBS, !z.getSettings().getBool(ZoneVar.SPAWN_MOBS, z.getWorldManager().getConfig().MOB_SPAWNING_ENABLED)))
             player.sendMessage(ChatColor.GREEN.toString() + "Mobs spawning is now "+(z.getSettings().getBool(ZoneVar.SPAWN_MOBS, z.getWorldManager().getConfig().MOB_SPAWNING_ENABLED) ? "enabled" : "disabled" )+".");

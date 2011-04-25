@@ -18,14 +18,11 @@ public class ZToggleLavaCommand extends ZoneCommand {
     public ZToggleLavaCommand(Zones plugin) {
         super("ztogglelava", plugin);
         this.setRequiresSelected(true);
+        this.setRequiredAccess("zones.toggle.lava");
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if(!canUseCommand(player,"zones.toggle.lava")) {
-            player.sendMessage(ChatColor.RED + "You're not allowed to use this command.");
-            return true;
-        }
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.LAVA, !z.getSettings().getBool(ZoneVar.LAVA, true)))
             player.sendMessage(ChatColor.GREEN.toString() + "Lava is now "+(z.getSettings().getBool(ZoneVar.LAVA, true) ? "allowed" : "blocked" )+".");
