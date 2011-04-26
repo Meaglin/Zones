@@ -16,6 +16,7 @@ import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -427,13 +428,21 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public boolean allowBlockCreate(Player player, Block block) {
-        
+        return allowBlockCreate(player,block.getTypeId());
+    }
+
+    @Override
+    public boolean allowBlockCreate(Player player, Block block, ItemStack item) {
+        return allowBlockCreate(player,item.getTypeId());
+    }
+    
+    private boolean allowBlockCreate(Player player, int type) {
         if(!this.canModify(player, Rights.BUILD)) {
             player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + getName() + "' !");
             return false;
         } else {
             List<?> list = getSettings().getList(ZoneVar.PLACE_BLOCKS);
-            if(list != null && list.contains(block.getTypeId()) && !this.canAdministrate(player)) {
+            if(list != null && list.contains(type) && !this.canAdministrate(player)) {
                 player.sendMessage(ChatColor.RED + "This block type is blacklisted in '" + getName() + "' !");
                 return false;
             } else {
@@ -441,7 +450,7 @@ public class ZoneNormal extends ZoneBase{
             }
         }
     }
-
+    
     @Override
     public boolean allowBlockDestroy(Player player, Block block) {
         if(!this.canModify(player, Rights.DESTROY)) {
@@ -494,4 +503,6 @@ public class ZoneNormal extends ZoneBase{
             return new Location(getWorld(),z.getX(),getWorld().getHighestBlockYAt(z.getX(), z.getY()),z.getY());
         }
     }
+
+
 }

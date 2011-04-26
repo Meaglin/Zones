@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -186,6 +187,7 @@ public abstract class ZoneBase {
     public abstract boolean allowSpawn(Entity entity,CreatureType type);
     
     public abstract boolean allowBlockCreate(Player player, Block block);
+    public abstract boolean allowBlockCreate(Player player, Block block, ItemStack item);
     public abstract boolean allowBlockModify(Player player, Block block);
     public abstract boolean allowBlockDestroy(Player player, Block block);
     public abstract boolean allowBlockHit(Player attacker, Block defender);

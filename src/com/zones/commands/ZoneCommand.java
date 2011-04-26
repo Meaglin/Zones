@@ -388,7 +388,7 @@ public abstract class ZoneCommand extends Command {
             "allowedmobs - [L] list of mobs that can spawn.\n" +
             "entermessage - The message you see when you enter a zone.\n" +
             "leavemessage - The message you see when you leave a zone.\n" +
-            "{zname} - zone name,{pname} - player name,{access} - access\n" +
+            "{zname} - zone name,{pname} - playername,{access} - access\n" +
             "Can be used to make enter/leave messages dynamic.\n" +
             "spawnlocation - change the respawn location within the zone.\n" +
             "List variables[L] requires comma seperated input: <val1>,<val2>"

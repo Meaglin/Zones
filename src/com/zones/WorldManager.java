@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import com.zones.model.WorldConfig;
@@ -93,7 +94,9 @@ public class WorldManager {
     public ZoneBase getActiveZone(Player player)                                {return getRegion(player).getActiveZone(player);}
     public ZoneBase getActiveZone(double x, double y, double z)                 {return getRegion(x, y).getActiveZone(x, y, z);}
     public ZoneBase getActiveZone(Location loc)                                 {return getRegion(loc).getActiveZone(loc);}
-
+    public ZoneBase getActiveZone(int x, int y, int z)                          {return getRegion(x,y).getActiveZone(x, y, z);}
+    public ZoneBase getActiveZone(Block block)                                  {return getActiveZone(block.getX(),block.getZ(),block.getY());}
+    
     public boolean regionChange(Location from,Location to)                      {return getRegion(from).equals(getRegion(to)); }
     
     public void revalidateZones(Player player) {getRegion(player).revalidateZones(player);}

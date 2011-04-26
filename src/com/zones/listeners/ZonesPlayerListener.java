@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -215,25 +216,40 @@ public class ZonesPlayerListener extends PlayerListener {
      * @param event
      *            Relevant event details
      */
-    private static List<Integer> items = Arrays.asList(
+    /*
+     * Some might say that referencing to the items like this might not be efficient
+     * however the actual materials are only requested when the array gets initialized
+     * (this happens when it gets called for the first time) and after that its
+     * just a list of Integers in the memory.
+     */
+    private static final List<Integer> placeItems = Arrays.asList(
             Material.FLINT_AND_STEEL.getId(),
-            Material.BUCKET.getId(),
             Material.LAVA_BUCKET.getId(),
             Material.WATER_BUCKET.getId(),
             Material.MINECART.getId(),
             Material.BOAT.getId(),
             Material.SEEDS.getId(),
             Material.SIGN.getId(),
-            Material.REDSTONE.getId()
+            Material.REDSTONE.getId(),
+            Material.INK_SACK.getId()
             );
     
-    private static List<Integer> blocks = Arrays.asList(
+    private static final List<Integer> destroyItems = Arrays.asList(
+            Material.BUCKET.getId()
+            );
+    
+    private static final List<Integer> hitBlocks = Arrays.asList(
             Material.NOTE_BLOCK.getId(),
+            Material.CAKE_BLOCK.getId(),
             Material.DIODE_BLOCK_OFF.getId(),
-            Material.DIODE_BLOCK_ON.getId()
+            Material.DIODE_BLOCK_ON.getId(),
+            Material.LEVER.getId(),
+            Material.STONE_PLATE.getId(),
+            Material.WOOD_PLATE.getId(),
+            Material.STONE_BUTTON.getId()
             );
     
-    private static List<Integer> containers = Arrays.asList(
+    private static final List<Integer> modifyBlocks = Arrays.asList(
             Material.FURNACE.getId(),
             Material.BURNING_FURNACE.getId(),
             Material.CHEST.getId(),
@@ -242,104 +258,155 @@ public class ZonesPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
+        
+        /*
+        System.out.println( event.getAction().name() + 
+                "\t i:" + event.getItem().getTypeId() + 
+                "\t b:" + event.getClickedBlock().getTypeId() + 
+                "\t p:" + event.getClickedBlock().getRelative(event.getBlockFace()).getTypeId());
+        */
+        
+        
         if(event.isCancelled()) return;
+
+        Player player = event.getPlayer();
+        int blockType = (event.getClickedBlock() != null ? event.getClickedBlock().getTypeId() : 0);
+        int toolType = (event.getItem() != null ? event.getItem().getTypeId() : 0);
+        
+        /*
+         * Using a huge ass if(...) would have been possible too however this seems more elegant and prolly is a little bit faster
+         * (however this speed difference would be very hard to determine :P )
+         */
+        switch(event.getAction()) {
+            case RIGHT_CLICK_BLOCK:
+            case LEFT_CLICK_BLOCK:
+            case PHYSICAL:
+                if(hitBlocks.contains(blockType)) {
+                    // Allow people to play a note block, shouldn't be protected imho.
+                    if(event.getAction() == Action.LEFT_CLICK_BLOCK && blockType == 25) break;
+                    
+                    WorldManager wm = plugin.getWorldManager(player.getWorld());
+                    ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
+                    if(zone == null) {
+                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player, "zones.build")) {
+                            player.sendMessage(ChatColor.RED + "You cannot change blocks in this world !");
+                            event.setCancelled(true);
+                            return;
+                        }
+                    } else {
+                        if(!zone.allowBlockHit(player, event.getClickedBlock())) {
+                            player.sendMessage(ChatColor.RED + "You cannot change blocks in '" + zone.getName() + "' !");
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+                }
+                break;
+        }
         
         switch(event.getAction()) {
             case RIGHT_CLICK_BLOCK:
-                Block blockPlaced = event.getClickedBlock().getRelative(event.getBlockFace());
-                WorldManager wm = plugin.getWorldManager(blockPlaced.getWorld());
-                ZoneBase zone = wm.getActiveZone(blockPlaced.getLocation());
-                int type = event.getItem().getTypeId();
-                int blocktype = event.getClickedBlock().getTypeId();
-                Player player = event.getPlayer();
-                if (type == ZonesConfig.CREATION_TOOL_TYPE) {
+                
+                if (toolType == ZonesConfig.CREATION_TOOL_TYPE) {
                     ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
                     if (dummy != null) {
                         if (dummy.getFormId() == 1 && dummy.getCoords().size() == 2) {
                             player.sendMessage(ChatColor.RED.toString() + "You can only use 2 points to define a cuboid zone.");
+                        } else {
+                            if (dummy.containsCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ())) {
+                                player.sendMessage(ChatColor.RED.toString() + "Already added this point.");
+                            } else {
+                                if (event.getClickedBlock().getY() < WorldManager.MAX_Z - ZonesConfig.CREATION_PILON_HEIGHT) {
+                                    for (int i = 1; i <= ZonesConfig.CREATION_PILON_HEIGHT; i++) {
+                                        Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
+                                        dummy.addDeleteBlock(t);
+                                        t.setTypeId(ZonesConfig.CREATION_PILON_TYPE);
+                                    }
+                                }
+                                player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + event.getClickedBlock().getX() + "," + event.getClickedBlock().getZ() + "] to the temp zone.");
+                                dummy.addCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ());
+                            }
+                        }
+                    }
+                }
+                
+                
+                if(modifyBlocks.contains(blockType)) {
+                    WorldManager wm = plugin.getWorldManager(player.getWorld());
+                    ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
+                    if(zone == null) {
+                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player, "zones.build")) {
+                            if (blockType == Material.CHEST.getId())
+                                player.sendMessage(ChatColor.RED + "You cannot change chests in this world !");
+                            else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
+                                player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world !");
+                            else if (blockType == Material.DISPENSER.getId())
+                                player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world !");
+                            event.setCancelled(true);
                             return;
                         }
-
-                        if (dummy.containsCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ())) {
-                            player.sendMessage(ChatColor.RED.toString() + "Already added this point.");
-                        } else {
-                            if (event.getClickedBlock().getY() < WorldManager.MAX_Z - ZonesConfig.CREATION_PILON_HEIGHT) {
-                                for (int i = 1; i <= ZonesConfig.CREATION_PILON_HEIGHT; i++) {
-                                    Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
-                                    dummy.addDeleteBlock(t);
-                                    t.setTypeId(ZonesConfig.CREATION_PILON_TYPE);
-                                }
-                            }
-                            player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + event.getClickedBlock().getX() + "," + event.getClickedBlock().getZ() + "] to the temp zone.");
-                            dummy.addCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ());
-                        }
-                    }
-                }
-                
-                
-                if (zone == null) {
-                    if(containers.contains(blocktype) || blocks.contains(blocktype)) {
-                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player, "zones.build")) {
-                            if (blocktype == Material.CHEST.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change chests in this world !");
-                            else if (blocktype == Material.FURNACE.getId() || type == Material.BURNING_FURNACE.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world !");
-                            else if (blocktype == Material.DISPENSER.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world !");
-                            else if (blocktype == Material.NOTE_BLOCK.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change blocks in this world !");
-                            event.setCancelled(true);
-                        }
-                    } else if(items.contains(type)) {
-                        if(!wm.getConfig().isProtectedPlaceBlock(player, type)) {
-                            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player, "zones.build")) {
-                                player.sendMessage(ChatColor.RED + "You cannot place blocks in this world !");
-                                event.setCancelled(true);
-                            } else {
-                                wm.getConfig().logBlockPlace(player, blockPlaced);
-                            }
-                        } else {
-                            event.setCancelled(true);
-                        }
-                    }
-                } else {
-                    if(containers.contains(blocktype)) {
+                    } else {
                         if(!zone.allowBlockModify(player, event.getClickedBlock())) {
-                            if (blocktype == Material.CHEST.getId())
+                            if (blockType == Material.CHEST.getId())
                                 player.sendMessage(ChatColor.RED + "You cannot change chests in '" + zone.getName() + "' !");
-                            else if (blocktype == Material.FURNACE.getId() || type == Material.BURNING_FURNACE.getId())
+                            else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
                                 player.sendMessage(ChatColor.RED + "You cannot change furnaces in '" + zone.getName() + "' !");
-                            else if (blocktype == Material.DISPENSER.getId())
+                            else if (blockType == Material.DISPENSER.getId())
                                 player.sendMessage(ChatColor.RED + "You cannot change dispensers in '" + zone.getName() + "' !");
-                                
                             event.setCancelled(true);
-                        }
-                    } else if(blocks.contains(blocktype)) {
-                        if(!zone.allowBlockHit(player, event.getClickedBlock())) {
-                            player.sendMessage(ChatColor.RED + "You cannot change blocks in '" + zone.getName() + "' !");
-                            event.setCancelled(true);
-                        }
-                    } else if (items.contains(type)){
-                        if(!wm.getConfig().isProtectedPlaceBlock(player, type)) {
-                            if(!zone.allowBlockCreate(player,blockPlaced)) {
-                                player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' !");
-                                event.setCancelled(true);
-                            } else {
-                                wm.getConfig().logBlockPlace(player, blockPlaced);
-                            }
-                        } else {
-                            event.setCancelled(true);
+                            return;
                         }
                     }
                 }
-                break;
-            case LEFT_CLICK_BLOCK:
                 
+                if(placeItems.contains(toolType)) {
+                    WorldManager wm = plugin.getWorldManager(player.getWorld());
+                    if(!wm.getConfig().isProtectedPlaceBlock(player, toolType)) {
+                        Block block = event.getClickedBlock().getRelative(event.getBlockFace());
+                        ZoneBase zone = wm.getActiveZone(block);
+                        if(zone == null) {                            
+                            wm.getConfig().logBlockPlace(player, block,event.getItem());
+                        } else {
+                            if(!zone.allowBlockCreate(player,block,event.getItem())) {
+                                event.setCancelled(true);
+                                return;
+                            } else {
+                                wm.getConfig().logBlockPlace(player, block,event.getItem());                                
+                            }
+                        }
+                    } else {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+                
+                else if(destroyItems.contains(toolType)) {
+                    WorldManager wm = plugin.getWorldManager(player.getWorld());
+                    Block block = event.getClickedBlock().getRelative(event.getBlockFace());
+                    if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
+                        ZoneBase zone = wm.getActiveZone(block);
+                        if(zone == null) {                            
+                            wm.getConfig().logBlockBreak(player, block);
+                        } else {
+                            if(!zone.allowBlockDestroy(player, block)) {
+                                event.setCancelled(true);
+                                return;
+                            } else {
+                                wm.getConfig().logBlockBreak(player, block);                             
+                            }
+                        }
+                    } else {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
                 break;
         }
         
     }
-
+    
+    
+    
     /**
      * 
      * 

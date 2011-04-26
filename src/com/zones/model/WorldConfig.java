@@ -21,6 +21,7 @@ import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.ItemStack;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.zones.WorldManager;
@@ -336,6 +337,53 @@ public class WorldConfig {
                 for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
                     if(permission.permission(p, "zones.log.place")) {
                         p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
+                    }
+                log.info("Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
+            }
+        }
+        // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
+        if(block.getTypeId() == Material.SPONGE.getId()) {
+            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && permission.permission(player, "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
+                int type = 0;
+                for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
+                    for(int z = block.getZ() - SPONGE_RADIUS ; z <= block.getZ() + SPONGE_RADIUS;z++) {
+                        for(int y = block.getY() - SPONGE_RADIUS ; y <= block.getY() + SPONGE_RADIUS;y++) {
+                            type = block.getWorld().getBlockTypeIdAt(x, y, z);
+                            if(type == 8 || type == 9) {
+                                // Prevent any physics calls since it could get messy :<
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                            }
+                        }
+                    }
+                }
+            }
+            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && permission.permission(player, "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
+                int type = 0;
+                for(int x = block.getX() - SPONGE_LAVA_RADIUS ; x <= block.getX() + SPONGE_LAVA_RADIUS;x++) {
+                    for(int z = block.getZ() - SPONGE_LAVA_RADIUS ; z <= block.getZ() + SPONGE_LAVA_RADIUS;z++) {
+                        for(int y = block.getY() - SPONGE_LAVA_RADIUS ; y <= block.getY() + SPONGE_LAVA_RADIUS;y++) {
+                            type = block.getWorld().getBlockTypeIdAt(x, y, z);
+                            if(type == 10 || type == 11) {
+                                // Prevent any physics calls since it could get messy :<
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    /*
+     * TODO: extend logging to allow logging to database.
+     */
+    public void logBlockPlace(Player player, Block block, ItemStack item) {
+        if(LOGGED_BLOCKS_ENABLED) {
+            if(this.LOGGED_BLOCKS_PLACE.contains(block.getTypeId())){
+                for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
+                    if(permission.permission(p, "zones.log.place")) {
+                        p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has placed " + item.getType().name() + "[" + item.getTypeId() + "] at " + block.getLocation().toString() + "!");
                     }
                 log.info("Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
             }

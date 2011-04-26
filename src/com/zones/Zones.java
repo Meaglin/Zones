@@ -41,7 +41,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 50;
+    public static final int                 Rev             = 55;
     protected static final Logger           log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -76,12 +76,13 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.High);
         registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.High);
 
-        registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.High);
+        registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Low);
         registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal);
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.High);
         registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.High);

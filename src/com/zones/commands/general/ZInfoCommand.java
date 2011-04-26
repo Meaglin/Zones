@@ -27,7 +27,7 @@ public class ZInfoCommand extends ZoneCommand {
         
         String bools = "";
         for(ZoneVar v : ZoneVar.values()) {
-            if(v.getClass().equals(Boolean.class)) {
+            if(v.getType().equals(Boolean.class)) {
                 if(b.getSettings().get(v) != null) {
                     bools += " " + (b.getSettings().getBool(v) ? ChatColor.GREEN : ChatColor.RED) + v.getName();
                 }
@@ -38,9 +38,9 @@ public class ZInfoCommand extends ZoneCommand {
         
         String settings = "";
         for(ZoneVar v : ZoneVar.values()) {
-            if(!v.getClass().equals(Boolean.class)) {
+            if(!v.getType().equals(Boolean.class)) {
                 if(b.getSettings().get(v) != null) {
-                    settings += " " + ChatColor.BLUE + v.getName() + ChatColor.WHITE + Serializer.unEscape(v.serialize(b.getSettings().get(v)));
+                    settings += " " + ChatColor.BLUE + v.getName() + ":" + ChatColor.WHITE + Serializer.unEscape(v.serialize(b.getSettings().get(v)));
                 }
             }
         }
