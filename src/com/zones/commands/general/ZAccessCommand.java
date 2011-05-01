@@ -17,10 +17,10 @@ public class ZAccessCommand extends ZoneCommand {
 
         player.sendMessage(ChatColor.GREEN + "Zone Access tags explained:");
         player.sendMessage(ChatColor.GREEN + "b = Build(placing blocks),");
-        player.sendMessage(ChatColor.GREEN + "c = Chest Access(accessing chest/furnaces),");
+        player.sendMessage(ChatColor.GREEN + "c = Chest Access(accessing chest/furnaces/note blocks),");
         player.sendMessage(ChatColor.GREEN + "d = Destroy(destroying blocks),");
         player.sendMessage(ChatColor.GREEN + "e = Enter(entering zone), ");
-        player.sendMessage(ChatColor.GREEN + "h = Hit(killing mobs/destroying minecarts or boats).");
+        player.sendMessage(ChatColor.GREEN + "h = Hit(killing mobs,minecarts or boats/modify redstone).");
         return true;
     }
 

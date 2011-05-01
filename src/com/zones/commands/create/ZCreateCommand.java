@@ -8,6 +8,8 @@ import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
+import com.zones.model.ZoneBase;
+import com.zones.model.types.ZoneInherit;
 
 /**
  * 
@@ -23,6 +25,21 @@ public class ZCreateCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
+        
+        ZoneBase inheritedZone = null;
+        if(!canUseCommand(player,"zones.create")) {
+            if(hasSelected(player)) {
+                inheritedZone = getSelectedZone(player);
+                if(!(inheritedZone instanceof ZoneInherit)) {
+                    player.sendMessage(ChatColor.RED + "This zone doesn't allow subzoning.");
+                    return true;
+                }
+            } else {
+                player.sendMessage(ChatColor.RED + "You don't have permission to make global zones.");
+                return true;
+            }
+        }
+        
         if (vars.length < 1) {
             player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zcreate [zone name]");
         } else {
@@ -36,10 +53,12 @@ public class ZCreateCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
                 return true;
             }
-            getZoneManager().addDummy(player.getEntityId(), new ZonesDummyZone(getPlugin(),player,name));
+            ZonesDummyZone dummy = new ZonesDummyZone(getPlugin(),player,name);
+            dummy.setInherited(inheritedZone);
+            getZoneManager().addDummy(player.getEntityId(), dummy);
             player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
             player.sendMessage("You can start adding the zone points of this zone by");
-            player.sendMessage(ChatColor.RED + " right clicking blocks with " + Material.getMaterial(ZonesConfig.CREATION_TOOL_TYPE).name().toLowerCase() + "[" + ZonesConfig.CREATION_TOOL_TYPE + "].");
+            player.sendMessage(ChatColor.RED + "Right clicking blocks with " + Material.getMaterial(ZonesConfig.CREATION_TOOL_TYPE).name().toLowerCase() + "[" + ZonesConfig.CREATION_TOOL_TYPE + "].");
             if(ZonesConfig.WORLDEDIT_ENABLED) player.sendMessage("Or you can import a worldedit selection using /zimport");
         }
         return true;

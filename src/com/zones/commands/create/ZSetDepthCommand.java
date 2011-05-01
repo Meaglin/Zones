@@ -28,7 +28,7 @@ public class ZSetDepthCommand extends ZoneCommand {
         } else {
             dummy.setZ(WorldManager.toInt(player.getLocation().getY()) - Integer.parseInt(vars[0]),dummy.getMax());
 
-            player.sendMessage(ChatColor.GREEN.toString() + "Min z is now : " + dummy.getMin());
+            //player.sendMessage(ChatColor.GREEN.toString() + "Min z is now : " + dummy.getMin());
         }
         return true;
     }

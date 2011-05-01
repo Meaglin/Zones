@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import com.zones.model.ZoneBase;
+import com.zones.model.types.ZoneInherit;
 
 /**
  * 
@@ -26,13 +27,24 @@ public class Region {
         if (_zones.contains(zone))
             return;
 
+        
+        for(ZoneBase b : _zones) {
+            if(b instanceof ZoneInherit && !((ZoneInherit)b).containsInherited(zone) && zone.getZone().contains(b.getZone())) {
+                ((ZoneInherit)b).addInherited(zone);
+            } 
+            if(zone instanceof ZoneInherit && !((ZoneInherit)zone).containsInherited(b) && zone.getZone().contains(b.getZone())) {
+                ((ZoneInherit)zone).addInherited(b);
+            }
+        }
         _zones.add(zone);
     }
 
     public void removeZone(ZoneBase zone) {
-        for (int i = 0; i < _zones.size(); i++) {
-            if (_zones.get(i).getId() == zone.getId())
-                _zones.remove(i);
+        _zones.remove(zone);
+        for(ZoneBase b : _zones) {
+            if(b instanceof ZoneInherit) {
+                ((ZoneInherit)b).removeInherited(zone);
+            }
         }
     }
 

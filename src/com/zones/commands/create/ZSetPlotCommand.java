@@ -19,7 +19,7 @@ public class ZSetPlotCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        getDummy(player).makePlot(player);
+        getDummy(player).makePlot();
         return true;
     }
 }

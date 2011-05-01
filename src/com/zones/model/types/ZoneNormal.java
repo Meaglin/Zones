@@ -34,11 +34,11 @@ import com.zones.model.settings.ZoneVar;
  */
 public class ZoneNormal extends ZoneBase{
 
-    private List<String>                 admingroups;
-    private List<String>                 adminusers;
+    protected List<String>                 admingroups;
+    protected List<String>                 adminusers;
 
-    private HashMap<String, ZonesAccess> groups;
-    private HashMap<String, ZonesAccess> users;
+    protected HashMap<String, ZonesAccess> groups;
+    protected HashMap<String, ZonesAccess> users;
     
     // We don't want to make a new list every time we need a default empty array.
     public static final List<Integer> emptyIntList = Arrays.asList();
@@ -163,6 +163,10 @@ public class ZoneNormal extends ZoneBase{
     }
 
     public boolean canAdministrate(Player player) {
+        return isAdmin(player);
+    }
+
+    protected boolean isAdmin(Player player) {
         if (zones.getP().permission(player, "zones.admin"))
             return true;
 
@@ -175,7 +179,7 @@ public class ZoneNormal extends ZoneBase{
 
         return false;
     }
-
+    
     private String mapToString(HashMap<String, ZonesAccess> map) {
         String rt = "";
 

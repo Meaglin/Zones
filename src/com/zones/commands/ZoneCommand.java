@@ -150,10 +150,9 @@ public abstract class ZoneCommand extends Command {
     static {
         commands = new LinkedHashMap<String,String[]>();
         commands.put("/zcreate", new String[] {
-            "zones.create",
-            "[zone name] - starts zone creation in a new zone.",
-
-            "Starts Zone creation mode in which you can set the \n zones perimiter and type and height en depth."
+            null,
+            "[zone name] - starts zone creation.",
+            "Starts Zone creation mode in which you define \n the area/height and type of the zone."
         });
 
         commands.put("/zsetplot", new String[] {
@@ -169,37 +168,37 @@ public abstract class ZoneCommand extends Command {
         });
 
         commands.put("/zsetheight",new String[] {
-            "zones.create",
+                null,
              "[height] - sets maxz to current z + [height].",
-            "Sets the zone you are creating height to your \n current z position + [height]"
+            "Sets the height of your selection to your \n current z position + [height]"
         });
 
         commands.put("/zsetdepth",new String[] {
-            "zones.create",
+                null,
              "[depth] - sets minz to current z - [depth].",
-            "Sets the depth of the zone you are creating \n to your current z position - [depth]"
+            "Sets the depth of your current selection \n to your current z position - [depth]"
         });
 
         commands.put("/zsave",new String[] {
-            "zones.create",
-            "- saves the temp zone after confirmation.",
+            null,
+            "- saves the selection after confirmation.",
             "Initiates saving of the zone you were creating \n you will need to confirm this with \n /zconfirm to make it actually save the zone. \n THIS CANNOT BE USED WHEN EDITTING A ZONE USE /zmerge!!!! "
         });
 
         commands.put("/zconfirm",new String[] {
-            "zones.create",
+            null,
             "- confirms confirmations.",
-            "Confirms the last action that needs confirmation \n needed when /zsave or /zstop is used."
+            "Confirms the last action that needs confirmation \n needed when /zsave,/zmerge or /zstop is used."
         });
 
         commands.put("/zsetz",new String[] {
-            "zones.create",
+            null,
             "[minz] [maxz] - sets minz, maxz, range [0-127].",
             "Sets the depth and height of the zone according to \n [minz] and [maxz] limited by the max \n and min height of the map [0-127]."
         });
 
         commands.put("/zstop",new String[] {
-            "zones.create",
+            null,
             "- stop creation and delete zone (asks confirmation).",
             "Stops the creation of the current zone and deletes \n all relative data this needs to be confirmed \n with /zconfirm though."
         });
@@ -209,10 +208,10 @@ public abstract class ZoneCommand extends Command {
             "[user name] b|m|d|e|h|*|- (combination of these)",
             "Sets the access of [user name] to what is specified\n "
             + "b = Build(placing blocks),\n"
-            + "c = Modify(accessing chest/furnaces),\n "
+            + "c = Modify(accessing chest/furnaces/note blocks),\n "
             + "d = Destroy(destroying blocks),\n"
             + "e = Enter(entering your zone),\n"
-            + "h = Hit(killing mobs/destroying minecarts or boats),\n"
+            + "h = Hit(killing mobs,minecarts or boats/modify redstone),\n"
             + "* = full access(all of the above) and - = remove all access. \n"
             + "Example: /zsetuser Meaglin bde this will give meaglin access \n"
             + " to build,destroy and walk around in your zone but not to \n"
@@ -225,10 +224,10 @@ public abstract class ZoneCommand extends Command {
             "Sets the access of [group name] to what is specified \n "
             + "Possible group names: beunhaas, default, builder and vip \n"
             + "b = Build(placing blocks),\n"
-            + "c = Modify(accessing chest/furnaces),\n "
+            + "c = Modify(accessing chest/furnaces/note blocks),\n "
             + "d = Destroy(destroying blocks),\n"
             + "e = Enter(entering your zone), \n"
-            + "h = Hit(killing mobs/destroying minecarts or boats),\n"
+            + "h = Hit(killing mobs,minecarts or boats/modify redstone),\n"
             + "* = full access(all of the above) and - = remove all access. \n"
             + "Example: /zsetuser default bde this will give all users access \n"
             + " to build,destroy and walk around in your zone but not to \n"
@@ -246,7 +245,7 @@ public abstract class ZoneCommand extends Command {
         });
 
         commands.put("/zremoveadmin",new String[] {
-            "zones.admin",
+            null,
             "[user name]",
             "Removes [user name] as an admin from the zone."
         });
@@ -259,9 +258,9 @@ public abstract class ZoneCommand extends Command {
         });
 
         commands.put("/zsettype",new String[] {
-            "zones.create",
-            "Cuboid|NPoly - changes zone type.",
-            "changes the zone type to a square(cuboid) or polygon(NPoly)."
+            null,
+            "Cuboid|NPoly - changes selection form.",
+            "changes the form of your selection to \na square(cuboid) or polygon(NPoly)."
         });
 
         commands.put("/zregioninfo",new String[] {
@@ -279,7 +278,7 @@ public abstract class ZoneCommand extends Command {
         });
 
         commands.put("/zdelete",new String[] {
-            "zones.create",
+            "zones.admin",
             "- deletes selected zone.",
             "Deletes the currently selected zone, No confirmation!"
         });

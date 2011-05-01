@@ -35,7 +35,7 @@ public class ZAddAdminCommand extends ZoneCommand {
             player.sendMessage(ChatColor.GREEN.toString() + "Succesfully added player " + vars[0] + " as an admin of zone "  + zone.getName() +  " .");
         
         } else {
-            player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zaddadmim [user name]");
+            player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zaddadmin [user name]");
         }
         return true;
     }

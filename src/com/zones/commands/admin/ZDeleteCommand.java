@@ -17,7 +17,7 @@ public class ZDeleteCommand extends ZoneCommand {
     public ZDeleteCommand(Zones plugin) {
         super("zdelete", plugin);
         this.setRequiresSelected(true);
-        this.setRequiresCreate(true);
+        this.setRequiresAdmin(true);
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -231,7 +230,10 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.SEEDS.getId(),
             Material.SIGN.getId(),
             Material.REDSTONE.getId(),
-            Material.INK_SACK.getId()
+            Material.INK_SACK.getId(),
+            Material.PAINTING.getId(),
+            Material.WOOD_DOOR.getId(),
+            Material.IRON_DOOR.getId()
             );
     
     private static final List<Integer> destroyItems = Arrays.asList(
@@ -239,7 +241,6 @@ public class ZonesPlayerListener extends PlayerListener {
             );
     
     private static final List<Integer> hitBlocks = Arrays.asList(
-            Material.NOTE_BLOCK.getId(),
             Material.CAKE_BLOCK.getId(),
             Material.DIODE_BLOCK_OFF.getId(),
             Material.DIODE_BLOCK_ON.getId(),
@@ -250,6 +251,7 @@ public class ZonesPlayerListener extends PlayerListener {
             );
     
     private static final List<Integer> modifyBlocks = Arrays.asList(
+            Material.NOTE_BLOCK.getId(),
             Material.FURNACE.getId(),
             Material.BURNING_FURNACE.getId(),
             Material.CHEST.getId(),
@@ -283,7 +285,7 @@ public class ZonesPlayerListener extends PlayerListener {
             case PHYSICAL:
                 if(hitBlocks.contains(blockType)) {
                     // Allow people to play a note block, shouldn't be protected imho.
-                    if(event.getAction() == Action.LEFT_CLICK_BLOCK && blockType == 25) break;
+                   // if(event.getAction() == Action.LEFT_CLICK_BLOCK && blockType == 25) break;
                     
                     WorldManager wm = plugin.getWorldManager(player.getWorld());
                     ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
@@ -337,11 +339,14 @@ public class ZonesPlayerListener extends PlayerListener {
                     if(zone == null) {
                         if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player, "zones.build")) {
                             if (blockType == Material.CHEST.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change chests in this world !");
+                                player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
                             else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world !");
+                                player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
                             else if (blockType == Material.DISPENSER.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world !");
+                                player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
+                            else if (blockType == Material.NOTE_BLOCK.getId())
+                                player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
+                            
                             event.setCancelled(true);
                             return;
                         }
@@ -353,6 +358,8 @@ public class ZonesPlayerListener extends PlayerListener {
                                 player.sendMessage(ChatColor.RED + "You cannot change furnaces in '" + zone.getName() + "' !");
                             else if (blockType == Material.DISPENSER.getId())
                                 player.sendMessage(ChatColor.RED + "You cannot change dispensers in '" + zone.getName() + "' !");
+                            else if (blockType == Material.NOTE_BLOCK.getId())
+                                player.sendMessage(ChatColor.RED + "You cannot change note blocks in '" + zone.getName() + "' !");
                             event.setCancelled(true);
                             return;
                         }

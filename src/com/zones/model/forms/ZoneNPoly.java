@@ -20,14 +20,16 @@ public class ZoneNPoly extends ZoneForm {
         _y = y;
         _z1 = z1;
         _z2 = z2;
+        if (_z1 > _z2) // switch them if alignment is wrong
+        {
+            _z1 = z2;
+            _z2 = z1;
+        }
         calculateSize();
     }
 
     @Override
-    public boolean isInsideZone(int x, int y, int z) {
-        if (z < _z1 || z > _z2)
-            return false;
-
+    public boolean isInsideZone(int x, int y) {
         boolean inside = false;
         for (int i = 0, j = _x.length - 1; i < _x.length; j = i++) {
             if ((((_y[i] <= y) && (y < _y[j])) || ((_y[j] <= y) && (y < _y[i]))) && (x < (_x[j] - _x[i]) * (y - _y[i]) / (_y[j] - _y[i]) + _x[i])) {
@@ -36,7 +38,7 @@ public class ZoneNPoly extends ZoneForm {
         }
         return inside;
     }
-
+    
     @Override
     public boolean intersectsRectangle(int ax1, int ax2, int ay1, int ay2) {
         int tX, tY, uX, uY;
@@ -170,4 +172,22 @@ public class ZoneNPoly extends ZoneForm {
     public int[] getY() {
         return _y;
     }
+
+    @Override
+    public boolean contains(ZoneForm f) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public int[][] getPoints() {
+        return new int[][] { _x , _y };
+    }
+
+    @Override
+    public int getPointsSize() {
+        return _x.length;
+    }
+
+
 }

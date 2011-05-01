@@ -36,10 +36,10 @@ public class ZoneCuboid extends ZoneForm {
             _z2 = z1;
         }
     }
-
+    
     @Override
-    public boolean isInsideZone(int x, int y, int z) {
-        if (x < _x1 || x > _x2 || y < _y1 || y > _y2 || z < _z1 || z > _z2)
+    public boolean isInsideZone(int x, int y) {
+        if (x < _x1 || x > _x2 || y < _y1 || y > _y2)
             return false;
         return true;
     }
@@ -148,5 +148,15 @@ public class ZoneCuboid extends ZoneForm {
     @Override
     public int getHighY() {
         return _y2;
+    }
+
+    @Override
+    public int[][] getPoints() {
+        return new int[][] { new int[] { _x1 , _x2 } , new int[] { _y1 , _y2 }  };
+    }
+
+    @Override
+    public int getPointsSize() {
+        return 2;
     }
 }

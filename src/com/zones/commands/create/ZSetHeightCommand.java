@@ -28,7 +28,7 @@ public class ZSetHeightCommand extends ZoneCommand {
         } else {
             dummy.setZ(dummy.getMin(),WorldManager.toInt(player.getLocation().getY()) + Integer.parseInt(vars[0]) - 1);
 
-            player.sendMessage(ChatColor.GREEN.toString() + "Max z is now : " + dummy.getMax());
+            //player.sendMessage(ChatColor.GREEN.toString() + "Max z is now : " + dummy.getMax());
         }
         return true;
     }

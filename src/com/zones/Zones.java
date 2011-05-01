@@ -10,6 +10,8 @@ import com.zones.listeners.ZonesEntityListener;
 import com.zones.listeners.ZonesPlayerListener;
 import com.zones.listeners.ZonesVehicleListener;
 
+import gnu.trove.TLongObjectHashMap;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -17,8 +19,6 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +53,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private WorldEditPlugin                 worldedit;
     private PermissionHandler               accessmanager;
 
-    private final Map<String, WorldManager> worlds          = new HashMap<String, WorldManager>();
+    private final TLongObjectHashMap<WorldManager> worlds   = new TLongObjectHashMap<WorldManager>(1);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
     
     public Zones() {
@@ -176,7 +176,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private void loadWorlds() {
         worlds.clear();
         for(World world : getServer().getWorlds())
-            worlds.put(world.getName(),new WorldManager(this,world));
+            worlds.put(world.getId(),new WorldManager(this,world));
         
     }
     
@@ -192,15 +192,20 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public WorldManager getWorldManager(Player p) { return getWorldManager(p.getWorld()); }
     public WorldManager getWorldManager(Location l) { return getWorldManager(l.getWorld()); }
     
+    /*
+     * It's more efficient to do the null call instead of using containskey since it has more underlying calls.
+     */
     public WorldManager getWorldManager(World world) {
-        if(!worlds.containsKey(world.getName())) {
-            worlds.put(world.getName(), new WorldManager(this,world));
+        WorldManager wm = worlds.get(world.getId());
+        if(wm == null) {
+            wm = new WorldManager(this,world);
+            worlds.put(world.getId(), wm);
         }
-        return worlds.get(world.getName());
+        return wm;
     }
     
 
-    public WorldManager getWorldManager(String world) {
+    /*public WorldManager getWorldManager(String world) {
         if(!worlds.containsKey(world)) {
             World w = getServer().getWorld(world);
             if(w != null) {
@@ -210,7 +215,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             }
         }
         return worlds.get(world);
-    }
+    }*/
     
     public ZoneManager getZoneManager() {
         return zoneManager;
@@ -229,7 +234,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     public boolean reloadZones() {
         try {
-            for(WorldManager w : worlds.values())
+            for(WorldManager w : worlds.getValues(new WorldManager[worlds.size()]))
                 w.loadRegions();
             
             //commandMap.load();
@@ -243,7 +248,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public boolean reloadConfig() {
         try {
             ZonesConfig.load(new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE));
-            for(WorldManager w : worlds.values())
+            for(WorldManager w : worlds.getValues(new WorldManager[worlds.size()]))
                 w.loadConfig();
         } catch(Throwable t) {
             t.printStackTrace();

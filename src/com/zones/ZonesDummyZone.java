@@ -7,6 +7,7 @@ import com.zones.model.ZoneForm;
 import com.zones.model.ZoneVertice;
 import com.zones.model.forms.ZoneCuboid;
 import com.zones.model.forms.ZoneNPoly;
+import com.zones.model.types.ZoneInherit;
 import com.zones.model.types.ZoneNormal;
 import com.zones.model.types.ZonePlot;
 
@@ -61,6 +62,9 @@ public class ZonesDummyZone {
     private boolean cuiEnabled = false;
     private static final String CUI = "񘘦񘄹";
     
+    
+    private ZoneBase inheritedZone = null;
+    
     private List<RevertBlock> revertBlocks;
     
     private static final Logger log = Logger.getLogger("Minecraft");
@@ -101,7 +105,14 @@ public class ZonesDummyZone {
     
     public void setZ(int min , int max) { setZ(new ZoneVertice(min,max)); }
     public void setZ(ZoneVertice vertice) {
+        if(hasInherited()) {
+            if(inheritedZone.getZone().getHighZ() < vertice.getMax() || inheritedZone.getZone().getLowZ() > vertice.getMin()) {
+                player.sendMessage(ChatColor.RED + "Cannot create a selection outside your zone.");
+                return;
+            }
+        }
         height = vertice;
+        getPlayer().sendMessage(ChatColor.GREEN + "Selection height now changed to: " + getMin() + " - " + getMax() + ".");
         updateCUISelection();
     }
 
@@ -117,12 +128,26 @@ public class ZonesDummyZone {
         return coords;
     }
 
+    public void setInherited(ZoneBase inheritedZone) {
+        if(inheritedZone == null)return;
+        type = ZoneInherit.class;
+        this.inheritedZone = inheritedZone;
+    }
+    public boolean hasInherited() { return inheritedZone != null; }
+    public boolean insideInherited(ZoneVertice z) { 
+        if(!hasInherited()) return true;
+        return inheritedZone.getZone().isInsideZone(z.getX(), z.getY());
+    }
+    
     public void addCoords(int x, int y) { addCoords(new ZoneVertice(x,y)); }
     public void addCoords(ZoneVertice z) {
-        if(!containsCoords(z)) {
-            coords.add(z);
-            updateCUISelection();
+        if(!insideInherited(z)) {
+            player.sendMessage(ChatColor.RED + "Cannot create a selection outside your zone.");
+            return;
         }
+        coords.add(z);
+        updateCUISelection();
+        player.sendMessage(ChatColor.GREEN + "Succefully added point (" + z.getX() + "," + z.getY() + ") to the selection.");
     }
 
     public void removeCoords(int x, int y) { removeCoords(new ZoneVertice(x,y)); }
@@ -182,15 +207,24 @@ public class ZonesDummyZone {
     @SuppressWarnings("unchecked")
     public void setClass(String name) {
         
-        Class<? extends ZoneBase> newtype = null;
+        Class<?> newtype = null;
         try {
-            newtype = (Class<? extends ZoneBase>) Class.forName("com.zones.model.types." + name);
+            newtype = Class.forName("com.zones.model.types." + name);
         } catch (Exception e) {
             getPlayer().sendMessage("No such zone class: " + name);
             return;
         }
         if(newtype != null) {
-            type = newtype;
+            if(hasInherited())  {
+                if(!newtype.isAssignableFrom(ZoneInherit.class) && !newtype.equals(ZoneInherit.class)) {
+                    getPlayer().sendMessage(ChatColor.RED + "You cannot change the zone type when making an subzone.");
+                    return;
+                }
+            } else if(!newtype.isAssignableFrom(ZoneBase.class)) {
+                player.sendMessage(ChatColor.RED + "Invalid zone type '" + name + "'!");
+                return;
+            }
+            type = (Class<? extends ZoneBase>) newtype;
             getPlayer().sendMessage(ChatColor.GREEN + "Zone Type succesfully changed to " + type.getName() + ".");
         } else {
             getPlayer().sendMessage(ChatColor.RED + "Error changing zone type.");
@@ -238,17 +272,20 @@ public class ZonesDummyZone {
     /**
      * Little feature to allow easy creation of plots.
      * also allows easy recognition in the db.
-     * @param player
      */
-    public void makePlot(Player player) {
+    public void makePlot() {
+        if(hasInherited()) {
+            getPlayer().sendMessage(ChatColor.RED + "You cannot change the type when making an subzone.");
+            return;
+        }
         if (type.equals(ZonePlot.class)) {
             setZ(0, 127);
             type = ZoneNormal.class;
-            player.sendMessage("Reverted zone to default z and class.");
+            getPlayer().sendMessage("Reverted zone to default z and class.");
         } else {
             setZ(0, WorldManager.toInt(player.getLocation().getY()) + 19);
             type = ZonePlot.class;
-            player.sendMessage("Zone is now a plot zone.");
+            getPlayer().sendMessage("Zone is now a plot zone.");
         }
     }
 
@@ -433,7 +470,7 @@ public class ZonesDummyZone {
                 getLog().severe("Unknown zone form " + getForm().getName() + " for id " + id);
                 break;
         }
-        temp.setParameter("users", "2,default,e");
+        temp.setParameter("users", "2,default,he");
         temp.setParameter("name", name);
         getZoneManager().addZone(temp);
         revertBlocks();
