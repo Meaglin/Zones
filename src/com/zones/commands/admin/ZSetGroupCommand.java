@@ -23,16 +23,29 @@ public class ZSetGroupCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if (vars.length == 2) {
+        if (vars.length >= 2) {
                 ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
-                zone.addGroup(vars[0], vars[1]);
-                ZonesAccess newAccess = new ZonesAccess(vars[1]);
-                player.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed access of group '" + vars[0] + "' of zone '" + zone.getName() + "' to access " + newAccess.textual() + ".");
-
+                for(int i = 0;i < floor(vars.length/2);i++) {
+                    try {
+                        setGroup(player, zone, vars[i*2], vars[i*2 + 1]);
+                    } catch(IndexOutOfBoundsException e) {
+                        break;
+                    }
+                }
         } else {
-            player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetgroup [group name] b|c|d|e|h|*|- (combination of these)");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /zsetgroup [groupname 1] [access 1] <groupname 2> <access 2>...");
         }
         return true;
     }
 
+    private int floor(double d) { int rt = (int) d; return rt > d ? rt-1 : rt; }
+    
+    private void setGroup(Player owner, ZoneNormal zone, String groupname, String access) {
+        if(groupname == null || groupname.trim().equals("") || access == null || access.trim().equals(""))
+            return;
+        
+        ZonesAccess z = new ZonesAccess(access);
+        zone.addGroup(groupname,z);
+        owner.sendMessage(ChatColor.GREEN + "Succesfully changed access of group '" + groupname + "' of zone '" + zone.getName() + "' to access " + z.textual() + ".");
+    }
 }

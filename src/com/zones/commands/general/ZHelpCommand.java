@@ -21,7 +21,7 @@ public class ZHelpCommand extends ZoneCommand {
         super("zhelp", plugin);
     }
 
-    private static final int ITEMS_PER_PAGE = 7;
+    private static final int ITEMS_PER_PAGE = 8;
     @Override
     public boolean run(Player player, String[] vars) {
         List<String> availableCommands = new ArrayList<String>();

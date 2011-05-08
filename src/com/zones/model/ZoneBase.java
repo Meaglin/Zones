@@ -182,6 +182,7 @@ public abstract class ZoneBase {
     public abstract boolean allowDynamite(Block block);
     public abstract boolean allowHealth(Player player);
     public abstract boolean allowLeafDecay(Block block);
+    public abstract boolean allowSnowFall(Block block);
     public abstract boolean allowFire(Player player, Block block);
     
     public abstract boolean allowSpawn(Entity entity,CreatureType type);

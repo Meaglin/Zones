@@ -22,22 +22,29 @@ public class ZAddAdminCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if (vars.length == 1) {
+        if (vars.length >= 1) {
             ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
-
-            Player p = getPlugin().getServer().getPlayer(vars[0]);
-
-            if(p != null)
-                vars[0] = p.getName();
-
-            zone.addAdmin(vars[0]);
-
-            player.sendMessage(ChatColor.GREEN.toString() + "Succesfully added player " + vars[0] + " as an admin of zone "  + zone.getName() +  " .");
-        
+            for(int i = 0;i < vars.length;i++) {
+                addAdmin(player, zone, vars[i]);
+            }
         } else {
-            player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zaddadmin [user name]");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /zaddadmin [user 1] <user 2> <user 3>...");
         }
         return true;
+    }
+    
+    private void addAdmin(Player owner, ZoneNormal zone, String username) {
+        if(username == null || username.trim().equals(""))
+            return;
+        
+        // This is fine since it finds the closest match.
+        Player p = getPlugin().getServer().getPlayer(username);
+
+        if(p != null)
+            username = p.getName();
+        
+        zone.addAdmin(username);
+        owner.sendMessage(ChatColor.GREEN + "Succesfully added player " + username + " as an admin of zone "  + zone.getName() +  " .");
     }
 
 }

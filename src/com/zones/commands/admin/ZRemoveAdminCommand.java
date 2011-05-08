@@ -23,7 +23,7 @@ public class ZRemoveAdminCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if (vars.length == 1) {
+        if (vars.length >= 1) {
             ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
             if(zone instanceof ZoneInherit && !((ZoneInherit)zone).isInheritAdmin(player) ) {
                 if(!canUseCommand(player,"zones.admin")) {
@@ -34,12 +34,28 @@ public class ZRemoveAdminCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.RED + "You're not allowed to remove admin's from zones.");
                 return true;
             }
-            zone.removeAdmin(vars[0]);
-            player.sendMessage(ChatColor.GREEN.toString() + "Succesfully removed player " + vars[0] + " as an admin of zone "  + zone.getName() +  " .");
+            for(int i = 0;i < vars.length;i++) {
+                removeAdmin(player, zone, vars[i]);
+            }
         } else {
-            player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zremoveadmin [user name]");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /zremoveadmin [user 1] <user 2> <user 3>...");
         }
         return true;
     }
+    
+    private void removeAdmin(Player owner, ZoneNormal zone, String username) {
+        if(username == null || username.trim().equals(""))
+            return;
+        
+        // This is fine since it finds the closest match.
+        Player p = getPlugin().getServer().getPlayer(username);
+
+        if(p != null)
+            username = p.getName();
+        
+        zone.removeAdmin(username);
+        owner.sendMessage(ChatColor.GREEN + "Succesfully removed player " + username + " as an admin of zone "  + zone.getName() +  " .");
+    }
+
 
 }

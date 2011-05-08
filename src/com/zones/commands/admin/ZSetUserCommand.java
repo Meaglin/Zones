@@ -23,25 +23,36 @@ public class ZSetUserCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        if (vars.length == 2) {
+        if (vars.length >= 2) {
                 ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
-                ZonesAccess z = new ZonesAccess(vars[1]);
-
-                // TODO : update.
-                Player p = getPlugin().getServer().getPlayer(vars[0]);
-
-                if(p != null)
-                    vars[0] = p.getName();
-
-                zone.addUser(vars[0], vars[1]);
-
-                
-
-                player.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed access of user " + vars[0] + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
+                for(int i = 0;i < floor(vars.length/2);i++) {
+                    try {
+                        setUser(player, zone, vars[i*2], vars[i*2 + 1]);
+                    } catch(IndexOutOfBoundsException e) {
+                        break;
+                    }
+                }
         } else {
-            player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetuser [user name] b|c|d|e|h|*|- (combination of these) ");
+            player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetuser [username 1] [access1] <username 2> <accces 2>...");
         }
         return true;
+    }
+    
+    private int floor(double d) { int rt = (int) d; return rt > d ? rt-1 : rt; }
+    
+    private void setUser(Player owner, ZoneNormal zone, String username, String access) {
+        if(username == null || username.trim().equals("") || access == null || access.trim().equals(""))
+            return;
+        
+        ZonesAccess z = new ZonesAccess(access);
+        // This is fine since it finds the closest match.
+        Player p = getPlugin().getServer().getPlayer(username);
+
+        if(p != null)
+            username = p.getName();
+        zone.addUser(username,z);
+
+        owner.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed access of user " + username + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
     }
 
 }

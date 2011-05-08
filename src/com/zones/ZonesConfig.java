@@ -45,7 +45,7 @@ public class ZonesConfig {
             DEFAULT_LEAVE_MESSAGE = zp.getProperty("DefaultLeaveMessage", "You have just exited {zname}.");
             
             CREATION_TOOL_TYPE      = zp.getInt("CreationToolType", 280);
-            CREATION_PILON_TYPE     = zp.getInt("CreationPilonType", 80);
+            CREATION_PILON_TYPE     = zp.getInt("CreationPilonType", 3);
             CREATION_PILON_HEIGHT   = zp.getInt("CreationPilonHeight", 4);
         } catch (Exception e) {
             log.warning("[Zones]Error loading configurations.");

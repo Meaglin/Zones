@@ -34,10 +34,16 @@ public class ZoneManager {
         this.plugin = plugin;
     }
 
-    public void load(WorldManager world) {
-        zones.clear();
-        dummyZones.clear();
+    public void cleanUp(WorldManager world) {
         selectedZones.clear();
+        for(ZoneBase z : zones.getValues(new ZoneBase[zones.size()])) {
+            if(z.getWorldManager().equals(world)) {
+                zones.remove(z.getId());
+            }
+        }
+    }
+    public void load(WorldManager world) {
+        cleanUp(world);
         Connection conn = null;
         try {
             conn = plugin.getConnection();
@@ -268,7 +274,7 @@ public class ZoneManager {
     }
 
     public ZoneBase[] getAllZones() {
-        return (ZoneBase[]) zones.getValues();
+        return zones.getValues(new ZoneBase[zones.size()]);
     }
 
 }

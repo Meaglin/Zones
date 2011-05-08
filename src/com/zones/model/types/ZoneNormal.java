@@ -119,7 +119,8 @@ public class ZoneNormal extends ZoneBase{
     
     public boolean canModify(Player player, ZonesAccess.Rights right) {
 
-        if (users.containsKey(player.getName().toLowerCase()) && users.get(player.getName().toLowerCase()).canDo(right))
+        ZonesAccess z = users.get(player.getName().toLowerCase());
+        if (z != null && z.canDo(right))
             return true;
 
         for (Entry<String, ZonesAccess> e : groups.entrySet())
@@ -506,6 +507,11 @@ public class ZoneNormal extends ZoneBase{
             ZoneVertice z = (ZoneVertice)o;
             return new Location(getWorld(),z.getX(),getWorld().getHighestBlockYAt(z.getX(), z.getY()),z.getY());
         }
+    }
+
+    @Override
+    public boolean allowSnowFall(Block block) {
+        return getSettings().getBool(ZoneVar.SNOW_FALL, getWorldManager().getConfig().SNOW_FALL_ENABLED);
     }
 
 

@@ -97,7 +97,7 @@ public class WorldManager {
     public ZoneBase getActiveZone(int x, int y, int z)                          {return getRegion(x,y).getActiveZone(x, y, z);}
     public ZoneBase getActiveZone(Block block)                                  {return getActiveZone(block.getX(),block.getZ(),block.getY());}
     
-    public boolean regionChange(Location from,Location to)                      {return getRegion(from).equals(getRegion(to)); }
+    public boolean regionChange(Location from,Location to)                      {return !getRegion(from).equals(getRegion(to)); }
     
     public void revalidateZones(Player player) {getRegion(player).revalidateZones(player);}
     
@@ -192,5 +192,15 @@ public class WorldManager {
     
     public static long toLong(int x, int y) {
         return ((((long)x) << 32) | ((long)y & 0xFFFFFFFFL));
+    }
+    
+    public boolean equals(Object o) {
+        if(!(o instanceof WorldManager)) 
+            return false;
+        return ((WorldManager)o).getWorld().getName().equals(getWorld().getName());
+    }
+
+    public void revalidatOutZones(Player player, Location from) {
+        getRegion(from).revalidateOutZones(player, from);
     }
 }

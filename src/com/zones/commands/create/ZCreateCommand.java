@@ -20,7 +20,6 @@ public class ZCreateCommand extends ZoneCommand {
 
     public ZCreateCommand(Zones plugin) {
         super("zcreate", plugin);
-        this.setRequiresCreate(true);
     }
 
     @Override

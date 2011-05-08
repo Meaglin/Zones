@@ -25,7 +25,6 @@ public abstract class ZoneCommand extends Command {
     private Zones plugin;
     private boolean requiresSelected;
     private boolean requiresDummy;
-    private boolean requiresCreate;
     private boolean requiresAdmin;
     private Class<? extends ZoneBase> requiredClass = null;
     private String requiredAccess = null;
@@ -61,10 +60,6 @@ public abstract class ZoneCommand extends Command {
         requiresSelected = b;
     }
     
-    protected void setRequiresCreate(boolean requiresCreate) {
-        this.requiresCreate = requiresCreate;
-    }
-    
     protected void setRequiresAdmin(boolean requiresAdmin) {
         this.requiresAdmin = requiresAdmin;
     }
@@ -87,10 +82,6 @@ public abstract class ZoneCommand extends Command {
 
     protected boolean requiresAdmin() {
         return requiresAdmin;
-    }
-
-    protected boolean requiresCreate() {
-        return requiresCreate;
     }
 
     protected boolean hasDummy(Player p) {
@@ -118,9 +109,7 @@ public abstract class ZoneCommand extends Command {
         if(sender instanceof Player) {
             Player p = (Player)sender;
             if(requiresSelected() && !hasSelected(p)) {
-                p.sendMessage(ChatColor.RED.toString() + "Please select a zone first with /zselect.");
-            } else if(requiresCreate() && !canUseCommand(p,"zones.create")) {
-                p.sendMessage(ChatColor.RED + "You're not allowed to create zones.");
+                p.sendMessage(ChatColor.RED + "Please select a zone first with /zselect.");
             } else if(requiresAdmin() && !canUseCommand(p,"zones.admin")) {
                 p.sendMessage(ChatColor.RED + "You need to be a ServerZoneAdmin to be allowed to do this.");
             } else if(requiresDummy() && !hasDummy(p)){
@@ -199,14 +188,14 @@ public abstract class ZoneCommand extends Command {
 
         commands.put("/zstop",new String[] {
             null,
-            "- stop creation and delete zone (asks confirmation).",
+            "- stops creation and deletes selection (asks confirmation).",
             "Stops the creation of the current zone and deletes \n all relative data this needs to be confirmed \n with /zconfirm though."
         });
             //ttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttTttttT
         commands.put("/zsetuser",new String[] {
             null,
-            "[user name] b|m|d|e|h|*|- (combination of these)",
-            "Sets the access of [user name] to what is specified\n "
+            "[username 1] [access1] <username 2> <accces 2> ....",
+            "Sets the access of usernames to what is specified\n "
             + "b = Build(placing blocks),\n"
             + "c = Modify(accessing chest/furnaces/note blocks),\n "
             + "d = Destroy(destroying blocks),\n"
@@ -220,8 +209,8 @@ public abstract class ZoneCommand extends Command {
 
         commands.put("/zsetgroup",new String[] {
             null,
-            "[group name] b|m|d|e|h|*|- (combination of these)",
-            "Sets the access of [group name] to what is specified \n "
+            "[groupname 1] [access 1] <groupname 2> <access 2> ...",
+            "Sets the access of groupnames to what is specified \n "
             + "Possible group names: beunhaas, default, builder and vip \n"
             + "b = Build(placing blocks),\n"
             + "c = Modify(accessing chest/furnaces/note blocks),\n "
@@ -237,17 +226,18 @@ public abstract class ZoneCommand extends Command {
 
         commands.put("/zaddadmin",new String[] {
             null,
-            "[user name]",
-            "Adds [user name] as admin to your zone which gives \n"
-            + "[user name] rights to build,modify,destroy,enter your zone \n"
-            + "and to give other people rights to do so . (access to \n"
-            + "/zsetuser and /zsetgroup in your zone)"
+            "[user 1] <user 2> <user 3>...",
+            "Adds usernames as admin to your zone which gives \n"
+            + "specified users rights to everything in your zone. \n"
+            + "(Giving permissions, changing flags, etc..)"
         });
 
         commands.put("/zremoveadmin",new String[] {
             null,
-            "[user name]",
-            "Removes [user name] as an admin from the zone."
+            "[user 1] <user 2> <user 3>...",
+            "Removes usernames as admin from the zone." +
+            "Note: This can only be used if your an ZonesAdmin or\n" +
+            "if you're an admin in a super zone."
         });
 
         commands.put("/zselect",new String[] {
@@ -349,7 +339,8 @@ public abstract class ZoneCommand extends Command {
                 + "tnt - Enables/Disables tnt explosions in the zone.\n"
                 + "leafdecay - Enables/Disables leave decay in the zone.\n"
                 + "teleport - Enables/Disables teleporting in/out of the zone.\n"
-                + "fire - Enables/Disables fire in the zone."
+                + "fire - Enables/Disables fire in the zone.\n"
+                + "snowfall - Enables/Disables snowfall in the zone."
                 
         } );
         
@@ -404,6 +395,33 @@ public abstract class ZoneCommand extends Command {
             "Gives basic info about the selected zone.",
             "Displays zone size,min-max coordinates \n" +
             "and all set settings."
+        } );
+        
+        commands.put("/zsetclass", new String[] {
+               null,
+               "[class] - changes selection class to [class].",
+               "Beh"
+        });
+        
+        commands.put("/zdefine", new String[] {
+                null,
+                "[zone naam] - defines a zone.",
+                "based on your word edit selection a zone \n" +
+                "is defind with name [zone name]."
+        } );
+        
+        commands.put("/zredefine", new String[] {
+                "zones.create",
+                "- changes the form of your selected zone.",
+                "Changes the form of your current selected\n" +
+                "zone to your world edit selection."
+        } );
+        
+        commands.put("/zexport", new String[] {
+                null,
+                "- see description./zhelp /zexport",
+                "Exports the selected zone to your\n" +
+                "world edit selection."
         } );
             
     }

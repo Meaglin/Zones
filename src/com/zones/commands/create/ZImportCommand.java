@@ -36,6 +36,7 @@ public class ZImportCommand extends ZoneCommand {
                 } else {
                     player.sendMessage(ChatColor.YELLOW+"Trying to import your current worldedit selection as zone coords.");
                     dummy.setClass("ZoneNormal");
+                    dummy.setType("Cuboid");
                     dummy.clearCoords();
 
                     Location min = selection.getMinimumPoint();

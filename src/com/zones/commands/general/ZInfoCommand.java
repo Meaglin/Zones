@@ -20,10 +20,10 @@ public class ZInfoCommand extends ZoneCommand {
     @Override
     public boolean run(Player player, String[] vars) {
         ZoneBase b = getSelectedZone(player);
-        player.sendMessage(ChatColor.GREEN + "Zone: " + b.getName() + "[" + b.getAccess(player).toColorCode() + "]" );
+        player.sendMessage(ChatColor.DARK_GREEN + "Zone: " + b.getName() + ChatColor.WHITE + "[" + b.getAccess(player).toColorCode() + "]" );
         ZoneForm f = b.getZone();
         player.sendMessage(ChatColor.AQUA + "Size: " + f.getSize() + " " +
-        		"Location: (" + f.getLowX() + "-" + f.getHighX() + "," + f.getLowY() + "-" + f.getHighY() + "," + f.getLowZ() + "-" + f.getHighZ() + ")");
+        		"Location: (" + f.getLowX() + "<->" + f.getHighX() + "," + f.getLowY() + "<->" + f.getHighY() + "," + f.getLowZ() + "<->" + f.getHighZ() + ")");
         
         String bools = "";
         for(ZoneVar v : ZoneVar.values()) {

@@ -17,12 +17,21 @@ public class RevertBlock {
     }
     
     public void revert() {
+        boolean unloadChunk = false;
+        if(!block.getWorld().isChunkLoaded(block.getChunk())) {
+            block.getWorld().loadChunk(block.getChunk());
+            unloadChunk = true;
+        }
+        
         block.setTypeId(oldType);
         if(oldData != 0) block.setData((byte)oldData);
         
         
         if(oldState != null) {
             oldState.update(true);
+        }
+        if(unloadChunk) {
+            block.getWorld().unloadChunk(block.getChunk().getX(),block.getChunk().getZ());
         }
     }
     

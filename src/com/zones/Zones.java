@@ -41,7 +41,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 55;
+    public static final int                 Rev             = 64;
     protected static final Logger           log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -70,6 +70,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Low);
         registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Low);
         registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Low);
+        registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.High);
 
         registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.High);
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.High);
@@ -89,10 +90,11 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
 
     public void registerWorldEdit() {
-        Plugin plugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
-        if(worldedit == null)
+        if(worldedit == null) {
+            Plugin plugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
             if(plugin != null)
                 worldedit = (WorldEditPlugin) plugin;
+        }
     }
 
     /**
@@ -225,7 +227,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return reloadConfig() && reloadZones();
     }
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        ZoneCommand cmd = commandMap.getCommand(label);
+        ZoneCommand cmd = commandMap.getCommand(command.getName());
         if(cmd != null) {
             return cmd.execute(sender, label, args);
         }

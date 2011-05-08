@@ -32,7 +32,7 @@ public class Region {
             if(b instanceof ZoneInherit && !((ZoneInherit)b).containsInherited(zone) && zone.getZone().contains(b.getZone())) {
                 ((ZoneInherit)b).addInherited(zone);
             } 
-            if(zone instanceof ZoneInherit && !((ZoneInherit)zone).containsInherited(b) && zone.getZone().contains(b.getZone())) {
+            if(zone instanceof ZoneInherit && !((ZoneInherit)zone).containsInherited(b) && b.getZone().contains(zone.getZone())) {
                 ((ZoneInherit)zone).addInherited(b);
             }
         }
@@ -129,5 +129,12 @@ public class Region {
         Region r = (Region)object;
         
         return (r.getX() == getX() && r.getY() == getY());
+    }
+
+    public void revalidateOutZones(Player player, Location from) {
+        for (ZoneBase z : getZones()) {
+            if (z != null)
+                z.removeCharacter(player);
+        }
     }
 }

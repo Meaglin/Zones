@@ -23,6 +23,7 @@ public class ZReloadCommand extends ZoneCommand {
 
         if(vars.length < 1) {
             player.sendMessage(ChatColor.RED + "Usage: /zreload config|zones|all");
+            return true;
         }
         String type = vars[0];
         if(type.equalsIgnoreCase("config")) {

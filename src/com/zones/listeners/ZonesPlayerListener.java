@@ -152,7 +152,7 @@ public class ZonesPlayerListener extends PlayerListener {
             }
         }
 
-        plugin.getWorldManager(from).revalidateZones(player, from, to);
+        wm.revalidateZones(player, from, to);
     }
 
     /**
@@ -168,8 +168,9 @@ public class ZonesPlayerListener extends PlayerListener {
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
+        WorldManager wmfrom = plugin.getWorldManager(from);
         WorldManager wmto = plugin.getWorldManager(to);
-        ZoneBase aZone = plugin.getWorldManager(from).getActiveZone(from);
+        ZoneBase aZone = wmfrom.getActiveZone(from);
         ZoneBase bZone = wmto.getActiveZone(to);
         
         if(aZone != null) {
@@ -203,9 +204,9 @@ public class ZonesPlayerListener extends PlayerListener {
             }
         }
 
-        plugin.getWorldManager(from).revalidateZones(player, from, to);
-        if(!from.getWorld().equals(to.getWorld()))
-            plugin.getWorldManager(to).revalidateZones(player, from, to);
+        wmto.revalidateZones(player, from, to);
+        if(from.getWorld() != to.getWorld())
+            wmfrom.revalidatOutZones(player, from);
             
     }
 
@@ -247,7 +248,8 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.LEVER.getId(),
             Material.STONE_PLATE.getId(),
             Material.WOOD_PLATE.getId(),
-            Material.STONE_BUTTON.getId()
+            Material.STONE_BUTTON.getId(),
+            Material.WOODEN_DOOR.getId()
             );
     
     private static final List<Integer> modifyBlocks = Arrays.asList(
@@ -318,15 +320,32 @@ public class ZonesPlayerListener extends PlayerListener {
                             if (dummy.containsCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ())) {
                                 player.sendMessage(ChatColor.RED.toString() + "Already added this point.");
                             } else {
-                                if (event.getClickedBlock().getY() < WorldManager.MAX_Z - ZonesConfig.CREATION_PILON_HEIGHT) {
+                                //player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + event.getClickedBlock().getX() + "," + event.getClickedBlock().getZ() + "] to the temp zone.");
+                                if(dummy.addCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ())) {
                                     for (int i = 1; i <= ZonesConfig.CREATION_PILON_HEIGHT; i++) {
-                                        Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
-                                        dummy.addDeleteBlock(t);
-                                        t.setTypeId(ZonesConfig.CREATION_PILON_TYPE);
+                                        if(event.getClickedBlock().getY() + i < 128) {
+                                            Block t = player.getWorld().getBlockAt(event.getClickedBlock().getX(), event.getClickedBlock().getY() + i, event.getClickedBlock().getZ());
+                                            dummy.addDeleteBlock(t);
+                                            t.setTypeId(ZonesConfig.CREATION_PILON_TYPE); 
+                                        }
                                     }
                                 }
-                                player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + event.getClickedBlock().getX() + "," + event.getClickedBlock().getZ() + "] to the temp zone.");
-                                dummy.addCoords(event.getClickedBlock().getX(), event.getClickedBlock().getZ());
+                            }
+                        }
+                    } else {
+                        if(event.getClickedBlock() != null) {
+                            Block block = event.getClickedBlock();
+                            WorldManager wm = plugin.getWorldManager(player.getWorld());
+                            List<ZoneBase> zones = wm.getActiveZones(block.getX(), block.getZ(), block.getY());
+                            if(zones.size() > 0) {
+                                player.sendMessage(ChatColor.GREEN + "Permission:" + wm.getActiveZone(block).getAccess(player).toColorCode() + ", zones found:");
+                                String str = "";
+                                for(ZoneBase zone : zones) {
+                                    str += "," + zone.getName() + "[" + zone.getId() + "]";
+                                }
+                                player.sendMessage(ChatColor.AQUA + str);
+                            } else {
+                                player.sendMessage(ChatColor.GREEN + "No zones found.");
                             }
                         }
                     }

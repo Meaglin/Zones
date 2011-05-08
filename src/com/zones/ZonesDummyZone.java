@@ -77,7 +77,7 @@ public class ZonesDummyZone {
         height = new ZoneVertice(0,130);
         coords = new ArrayList<ZoneVertice>();
         revertBlocks = new ArrayList<RevertBlock>();
-        sendCUIHandShake();
+        //sendCUIHandShake();
     }
     private Logger getLog() { return log; }
 
@@ -139,15 +139,16 @@ public class ZonesDummyZone {
         return inheritedZone.getZone().isInsideZone(z.getX(), z.getY());
     }
     
-    public void addCoords(int x, int y) { addCoords(new ZoneVertice(x,y)); }
-    public void addCoords(ZoneVertice z) {
+    public boolean addCoords(int x, int y) { return addCoords(new ZoneVertice(x,y)); }
+    public boolean addCoords(ZoneVertice z) {
         if(!insideInherited(z)) {
             player.sendMessage(ChatColor.RED + "Cannot create a selection outside your zone.");
-            return;
+            return false;
         }
         coords.add(z);
         updateCUISelection();
         player.sendMessage(ChatColor.GREEN + "Succefully added point (" + z.getX() + "," + z.getY() + ") to the selection.");
+        return true;
     }
 
     public void removeCoords(int x, int y) { removeCoords(new ZoneVertice(x,y)); }
@@ -183,7 +184,7 @@ public class ZonesDummyZone {
                 getPlayer().sendMessage(ChatColor.RED + "Zone creation mode stopped, work deleted.");
                 break;
             case SAVE:
-                if (save()) {
+                if (save() != null) {
                     getZoneManager().removeDummy(getPlayer().getEntityId());
                     getPlayer().sendMessage(ChatColor.GREEN + "Zone Saved.");
                 } else {
@@ -216,11 +217,11 @@ public class ZonesDummyZone {
         }
         if(newtype != null) {
             if(hasInherited())  {
-                if(!newtype.isAssignableFrom(ZoneInherit.class) && !newtype.equals(ZoneInherit.class)) {
+                if(!ZoneInherit.class.isAssignableFrom(newtype)) {
                     getPlayer().sendMessage(ChatColor.RED + "You cannot change the zone type when making an subzone.");
                     return;
                 }
-            } else if(!newtype.isAssignableFrom(ZoneBase.class)) {
+            } else if(!ZoneBase.class.isAssignableFrom(newtype)) {
                 player.sendMessage(ChatColor.RED + "Invalid zone type '" + name + "'!");
                 return;
             }
@@ -318,12 +319,13 @@ public class ZonesDummyZone {
         } else {
             // wut?
         }
+        mode = Mode.EDIT;
     }
     
     public boolean hasCUIEnabled() { return cuiEnabled; }
     public void enableCUI() {
-        cuiEnabled = true;
-        player.sendMessage(ChatColor.GREEN + "[Zones]WorldEdit CUI compatibility enabled.");
+        //cuiEnabled = true;
+        //player.sendMessage(ChatColor.GREEN + "[Zones]WorldEdit CUI compatibility enabled.");
     }
     
     public void updateCUISelection() {
@@ -343,12 +345,23 @@ public class ZonesDummyZone {
     private void sendCUIPoints() { 
         for(int i = 0;i < getCoords().size();i++) {
             if(getCoords().get(i) != null) {
-                if(i == getCoords().size()-1)
-                    sendCUIPoint(i,getCoords().get(i),getMax(),0);
+                if(i == (getCoords().size()-1))
+                    sendCUIPoint(i,getCoords().get(i),getMax(),getSize());
                 else
-                    sendCUIPoint(i,getCoords().get(i),getMin(),0);
+                    sendCUIPoint(i,getCoords().get(i),getMin(),getSize());
             }
         }
+    }
+    
+    private int getSize() {
+        if(getCoords().size() == 0)
+            return -1;
+        else if(getCoords().size() == 1)
+            return -1;
+        else if(getCoords().size() == 2)
+            return Math.abs(getCoords().get(0).getX() - getCoords().get(1).getX()) * Math.abs(getCoords().get(0).getY() - getCoords().get(1).getY()) * Math.abs(getMax() - getMin());
+        else
+            return -1;
     }
     
     private void sendCUIPoint(int index, ZoneVertice point,int height, int size) {
@@ -363,8 +376,8 @@ public class ZonesDummyZone {
         return buffer.toString();
     }
     
-    private boolean save() {
-        if(mode == Mode.EDIT) return false;
+    public ZoneBase save() {
+        if(mode == Mode.EDIT) return null;
 
         Connection conn = null;
         PreparedStatement st = null;
@@ -372,7 +385,7 @@ public class ZonesDummyZone {
         int id = -1;
         try {
             conn = getPlugin().getConnection();
-            st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,world,admins,users,minz,maxz,size,settings) VALUES (?,?,?,?,'','2,default,e',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
+            st = conn.prepareStatement("INSERT INTO " + ZonesConfig.ZONES_TABLE + " (name,class,type,world,admins,users,minz,maxz,size,settings) VALUES (?,?,?,?,'','2,default,he',?,?,?,?) ", Statement.RETURN_GENERATED_KEYS);
             st.setString(1, getName());
             st.setString(2, getClassName(getType()));
             st.setString(3, getClassName(getForm()));
@@ -403,7 +416,7 @@ public class ZonesDummyZone {
         }
         // SQL error, so were gonna stop here.
         if (id == -1)
-            return false;
+            return null;
 
         Constructor<?> zoneConstructor;
         ZoneBase temp = null;
@@ -414,7 +427,7 @@ public class ZonesDummyZone {
             e.printStackTrace();
         }
         if (temp == null)
-            return false;
+            return null;
 
         for (int i = 0; i < getCoords().size(); i++) {
             if (getCoords().get(i) == null)
@@ -449,7 +462,7 @@ public class ZonesDummyZone {
                     temp.setZone(new ZoneCuboid(getCoords().get(0).getX(), getCoords().get(1).getX(), getCoords().get(0).getY(), getCoords().get(1).getY(), getMin(), getMax()));
                 } else {
                     getLog().info("Missing zone vertex for cuboid zone id: " + id);
-                    return false;
+                    return null;
                 }
                 break;
             case 2:
@@ -463,7 +476,7 @@ public class ZonesDummyZone {
                     temp.setZone(new ZoneNPoly(aX, aY, getMin(), getMax()));
                 } else {
                     getLog().warning("Bad data for zone: " + id);
-                    return false;
+                    return null;
                 }
                 break;
             default:
@@ -475,7 +488,7 @@ public class ZonesDummyZone {
         getZoneManager().addZone(temp);
         revertBlocks();
 
-        return true;
+        return temp;
     }
     
 
@@ -547,7 +560,7 @@ public class ZonesDummyZone {
         switch (getFormId()) {
             case 1:
                 if (getCoords().size() == 2) {
-                    z.setZone(new ZoneCuboid(getCoords().get(0).getX(), getCoords().get(0).getY(), getCoords().get(1).getX(), getCoords().get(1).getY(), getMin(), getMax()));
+                    z.setZone(new ZoneCuboid(getCoords().get(0).getX(), getCoords().get(1).getX(), getCoords().get(0).getY(), getCoords().get(1).getY(), getMin(), getMax()));
                 } else {
                     getLog().info("Missing zone vertex for cuboid zone id: " + z.getId());
                     return false;

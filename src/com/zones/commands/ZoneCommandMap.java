@@ -33,6 +33,7 @@ public class ZoneCommandMap {
         // Admin
         registerCommand(new ZAddAdminCommand(plugin));
         registerCommand(new ZDeleteCommand(plugin));
+        registerCommand(new ZExportCommand(plugin));
         registerCommand(new ZGetAccessCommand(plugin));
         registerCommand(new ZReloadCommand(plugin));
         registerCommand(new ZRemoveAdminCommand(plugin));
@@ -42,10 +43,13 @@ public class ZoneCommandMap {
         //Create
         registerCommand(new ZConfirmCommand(plugin));
         registerCommand(new ZCreateCommand(plugin));
+        registerCommand(new ZDefineCommand(plugin));
         registerCommand(new ZEditCommand(plugin));
         registerCommand(new ZMergeCommand(plugin));
+        registerCommand(new ZRedefineCommand(plugin));
         registerCommand(new ZImportCommand(plugin));
         registerCommand(new ZSaveCommand(plugin));
+        registerCommand(new ZSetClassCommand(plugin));
         registerCommand(new ZSetDepthCommand(plugin));
         registerCommand(new ZSetHeightCommand(plugin));
         registerCommand(new ZSetPlotCommand(plugin));

@@ -21,6 +21,7 @@ public enum ZoneVar {
         SPAWN_MOBS("SpawnMobs", Boolean.class , Serializer.BOOLEAN),
         SPAWN_ANIMALS("SpawnAnimals", Boolean.class , Serializer.BOOLEAN),
         LEAF_DECAY("LeafDecay", Boolean.class , Serializer.BOOLEAN),
+        SNOW_FALL("SnowFall", Boolean.class, Serializer.BOOLEAN),
         PLACE_BLOCKS("ProtectedPlaceBlocks", List.class,Integer.class, Serializer.INTEGERLIST),
         BREAK_BLOCKS("ProtectedBreakBlocks", List.class,Integer.class, Serializer.INTEGERLIST),
         MOBS("AllowedMobs", List.class,CreatureType.class, Serializer.CREATURELIST),

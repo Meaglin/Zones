@@ -61,6 +61,7 @@ public class WorldConfig {
     public List<Integer> WATER_PROTECTED_BLOCKS;
     
     public boolean LEAF_DECAY_ENABLED;
+    public boolean SNOW_FALL_ENABLED;
     
     public boolean PROTECTED_BLOCKS_ENABLED;
     public List<Integer> PROTECTED_BLOCKS_PLACE;
@@ -71,9 +72,11 @@ public class WorldConfig {
     public List<Integer> LOGGED_BLOCKS_BREAK;
     
     public boolean MOB_SPAWNING_ENABLED;
+    public boolean ALLOWED_MOBS_ENABLED;
     public List<CreatureType> ALLOWED_MOBS;
     
     public boolean ANIMAL_SPAWNING_ENABLED;
+    public boolean ALLOWED_ANIMALS_ENABLED;
     public List<CreatureType> ALLOWED_ANIMALS;
     
     public boolean LIMIT_BUILD_BY_FLAG;
@@ -177,6 +180,7 @@ public class WorldConfig {
                     WATER_PROTECTED_BLOCKS.add(Integer.parseInt(b));
             
             LEAF_DECAY_ENABLED = p.getBool("LeafDecayEnabled", true);
+            SNOW_FALL_ENABLED = p.getBool("SnowFallEnabled", true);
             
             PROTECTED_BLOCKS_ENABLED = p.getBool("ProtectedBlocksEnabled", true);
             if(PROTECTED_BLOCKS_ENABLED) {
@@ -204,7 +208,8 @@ public class WorldConfig {
             }
             
             MOB_SPAWNING_ENABLED = p.getBool("MobSpawningEnabled", true);
-            if(MOB_SPAWNING_ENABLED) {
+            ALLOWED_MOBS_ENABLED = p.getBool("EnableAllowedMobs", false);
+            if(MOB_SPAWNING_ENABLED && ALLOWED_MOBS_ENABLED) {
                 ALLOWED_MOBS = new ArrayList<CreatureType>();
                 CreatureType t = null;
                 for(String m : p.getProperty("AllowedMobs", "Creeper,Ghast,PigZombie,Skeleton,Spider,Zombie").split(",")) {
@@ -217,7 +222,8 @@ public class WorldConfig {
             }
             
             ANIMAL_SPAWNING_ENABLED = p.getBool("AnimalSpawningEnabled", true);
-            if(ANIMAL_SPAWNING_ENABLED) {
+            ALLOWED_ANIMALS_ENABLED = p.getBool("EnableAllowedAnimals", false);
+            if(ANIMAL_SPAWNING_ENABLED && ALLOWED_ANIMALS_ENABLED) {
                 ALLOWED_ANIMALS = new ArrayList<CreatureType>();
                 CreatureType t = null;
                 for(String a : p.getProperty("AllowedAnimals", "Chicken,Cow,Pig,Sheep,Squid").split(",")) {
@@ -424,33 +430,7 @@ public class WorldConfig {
     
     public boolean canReceiveDamage(Player player, DamageCause cause) {
         if(this.PLAYER_HEALTH_ENABLED) {
-            switch(cause) {
-                case CONTACT:
-                    return this.PLAYER_CONTACT_DAMAGE_ENABLED;
-                case ENTITY_ATTACK:
-                    return this.PLAYER_ENTITY_DAMAGE_ENABLED;
-                case SUFFOCATION:
-                    return this.PLAYER_SUFFOCATION_DAMAGE_ENABLED;
-                case FALL:
-                    return this.PLAYER_FALL_DAMAGE_ENABLED;
-                case FIRE:
-                    return this.PLAYER_FIRE_DAMAGE_ENABLED;
-                case FIRE_TICK:
-                    return this.PLAYER_BURN_DAMAGE_ENABLED;
-                case LAVA:
-                    return this.PLAYER_LAVA_DAMAGE_ENABLED;
-                case DROWNING:
-                    return this.PLAYER_DROWNING_DAMAGE_ENABLED;
-                case BLOCK_EXPLOSION:
-                    return this.PLAYER_TNT_DAMAGE_ENABLED;
-                case ENTITY_EXPLOSION:
-                    return this.PLAYER_CREEPER_DAMAGE_ENABLED;
-                case VOID:
-                    return this.PLAYER_VOID_DAMAGE_ENABLED;
-                default:
-                    return true;
-                    
-            }
+            return canReceiveSpecificDamage(player,cause);
         }
         return false;
     }
@@ -486,9 +466,9 @@ public class WorldConfig {
     
     public boolean canSpawn(Entity entity, CreatureType type) {
         if(entity instanceof Animals) {
-            return this.ANIMAL_SPAWNING_ENABLED && this.ALLOWED_ANIMALS.contains(type);
+            return this.ANIMAL_SPAWNING_ENABLED && (!this.ALLOWED_ANIMALS_ENABLED || this.ALLOWED_ANIMALS.contains(type));
         } else if(entity instanceof Monster) {
-            return this.MOB_SPAWNING_ENABLED && this.ALLOWED_MOBS.contains(type);
+            return this.MOB_SPAWNING_ENABLED && (!this.ALLOWED_MOBS_ENABLED || this.ALLOWED_MOBS.contains(type));
         } else {
             return true;
         }

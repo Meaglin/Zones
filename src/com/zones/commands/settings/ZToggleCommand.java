@@ -73,19 +73,24 @@ public class ZToggleCommand extends ZoneCommand {
                 "Fire",
                 ZoneVar.FIRE
         });
+        variables.put("snowfall", new Object[] {
+           "zones.toggle.snowfall",
+           "SnowFall",
+           ZoneVar.SNOW_FALL
+        });
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
 
         if(vars.length < 1) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall] ");
             return true;
         }
         
         if(!variables.containsKey(vars[0].toLowerCase())) {
             player.sendMessage(ChatColor.RED + "Invalid variable name.");
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall] ");
             return true;
         }
         Object[] variable = variables.get(vars[0].toLowerCase());
@@ -118,6 +123,8 @@ public class ZToggleCommand extends ZoneCommand {
             return zone.getWorldManager().getConfig().FIRE_ENABLED;
         else if(name.equalsIgnoreCase("leafdecay"))
             return zone.getWorldManager().getConfig().LEAF_DECAY_ENABLED;
+        else if(name.equalsIgnoreCase("snowfall"))
+            return zone.getWorldManager().getConfig().SNOW_FALL_ENABLED;
         else 
             return false;
     }

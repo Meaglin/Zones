@@ -13,6 +13,7 @@ import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.block.SnowFormEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -285,6 +286,23 @@ public class ZonesBlockListener extends BlockListener {
                     wm.getConfig().logBlockBreak(player, block);
                 }
             }
+        }
+    }
+    
+    @Override
+    public void onSnowForm(SnowFormEvent event) {
+        if(event.isCancelled()) return;
+        
+        Block block = event.getBlock();
+
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
+        ZoneBase zone = wm.getActiveZone(block);
+        if(zone == null) {
+            if(!wm.getConfig().SNOW_FALL_ENABLED)
+                event.setCancelled(true);
+        } else {
+            if(!zone.allowSnowFall(block))
+                event.setCancelled(true);
         }
     }
 }

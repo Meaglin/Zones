@@ -67,7 +67,7 @@ public class ZonesEntityListener extends EntityListener {
             if(attacker != null && attacker instanceof Player) {
                 Player att = (Player)attacker;
                 if(!zone.allowEntityHit(att, defender)) {
-                    att.sendMessage(ChatColor.RED + "You cannot kill entity's in " + zone.getName() + "!");
+                    att.sendMessage(ChatColor.RED + "You cannot kill entities in " + zone.getName() + "!");
                     event.setCancelled(true);
                 }
             }            
