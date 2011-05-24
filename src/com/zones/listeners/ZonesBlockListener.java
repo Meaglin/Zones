@@ -18,8 +18,8 @@ import org.bukkit.event.block.SnowFormEvent;
 import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.ZonesDummyZone;
 import com.zones.model.ZoneBase;
+import com.zones.selection.ZoneSelection;
 
 /**
  * 
@@ -47,16 +47,10 @@ public class ZonesBlockListener extends BlockListener {
         Block block = event.getBlock();
 
         if (player.getItemInHand().getTypeId() == ZonesConfig.CREATION_TOOL_TYPE) {
-            ZonesDummyZone dummy = plugin.getZoneManager().getDummy(player.getEntityId());
-            if (dummy != null) {
-                if (dummy.containsCoords(block.getX(), block.getZ())) {
-                    dummy.removeCoords(block.getX(), block.getZ());
-                    dummy.fix(block.getX(), block.getZ());
-                    player.sendMessage(ChatColor.GREEN.toString() + "Removed point [" + block.getX() + "," + block.getZ() + "] from temp zone.");
-
-                } else {
-                    player.sendMessage(ChatColor.RED.toString() + "Couldn't find point in zone so nothing could be removed");
-                }
+            ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
+            if (selection != null) {
+                selection.onLeftClick(block);
+                event.setCancelled(true);
             }
         }
 
@@ -77,7 +71,7 @@ public class ZonesBlockListener extends BlockListener {
 
 
         WorldManager wm = plugin.getWorldManager(blockFrom.getWorld());
-        ZoneBase toZone = wm.getActiveZone(blockTo.getLocation());
+        ZoneBase toZone = wm.getActiveZone(blockTo);
         if(toZone == null) {
             if(!wm.getConfig().canFlow(blockFrom, blockTo))
                 event.setCancelled(true);
@@ -109,9 +103,9 @@ public class ZonesBlockListener extends BlockListener {
 
         WorldManager wm = plugin.getWorldManager(player);
         if(!wm.getConfig().isProtectedBreakBlock(player, blockPlaced)) {
-            ZoneBase zone = wm.getActiveZone(blockPlaced.getLocation());
+            ZoneBase zone = wm.getActiveZone(blockPlaced);
             if(zone == null){
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player,"zones.build")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,"zones.build")){
                     player.sendMessage(ChatColor.RED + "You cannot build in this world!");
                     event.setBuild(false);
                 } else {
@@ -184,7 +178,7 @@ public class ZonesBlockListener extends BlockListener {
         if(event.isCancelled()) return;
         
         WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
-        ZoneBase zone = wm.getActiveZone(event.getBlock().getLocation());
+        ZoneBase zone = wm.getActiveZone(event.getBlock());
         if(zone == null) {
             if(!wm.getConfig().canBurn(event.getPlayer(), event.getBlock(), event.getCause()))
                 event.setCancelled(true);
@@ -209,6 +203,22 @@ public class ZonesBlockListener extends BlockListener {
      *            Relevant event details
      */
     public void onBlockPhysics(BlockPhysicsEvent event) {
+        if(event.isCancelled()) return;
+        switch(event.getBlock().getTypeId()) {
+            case 12:
+            case 13:
+            case 90:
+                WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
+                ZoneBase zone = wm.getActiveZone(event.getBlock());
+                if(zone == null) {
+                    if(!wm.getConfig().PHYSICS_ENABLED)
+                        event.setCancelled(true);
+                } else {
+                    if(!zone.allowPhysics(event.getBlock()))
+                        event.setCancelled(true);
+                }
+                break;
+        }
     }
     
     /**
@@ -231,7 +241,7 @@ public class ZonesBlockListener extends BlockListener {
         if(event.isCancelled()) return;
         
         WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
-        ZoneBase zone = wm.getActiveZone(event.getBlock().getLocation());
+        ZoneBase zone = wm.getActiveZone(event.getBlock());
         if(zone == null) {
             if(!wm.getConfig().LEAF_DECAY_ENABLED)
                 event.setCancelled(true);
@@ -266,9 +276,9 @@ public class ZonesBlockListener extends BlockListener {
 
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
-            ZoneBase zone = wm.getActiveZone(block.getLocation());
+            ZoneBase zone = wm.getActiveZone(block);
             if(zone == null) {
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getP().permission(player, "zones.build")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")){
                     player.sendMessage(ChatColor.RED + "You're not allowed to destroy blocks in this world!");
                     event.setCancelled(true);
                 } else {

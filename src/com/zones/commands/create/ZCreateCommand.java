@@ -6,10 +6,11 @@ import org.bukkit.entity.Player;
 
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
 import com.zones.model.ZoneBase;
 import com.zones.model.types.ZoneInherit;
+import com.zones.selection.ZoneCreateSelection;
+import com.zones.selection.ZoneSelection;
 
 /**
  * 
@@ -52,11 +53,11 @@ public class ZCreateCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
                 return true;
             }
-            ZonesDummyZone dummy = new ZonesDummyZone(getPlugin(),player,name);
-            dummy.setInherited(inheritedZone);
-            getZoneManager().addDummy(player.getEntityId(), dummy);
-            player.sendMessage("Entering zone creation mode. Zone name: '" + name + "'");
-            player.sendMessage("You can start adding the zone points of this zone by");
+            ZoneSelection selection = new ZoneCreateSelection(getPlugin(),player,name);
+            selection.setInherited(inheritedZone);
+            getZoneManager().addSelection(player.getEntityId(), selection);
+            player.sendMessage(ChatColor.YELLOW + "Entering zone creation mode. Zone name: '" + name + "'");
+            player.sendMessage(ChatColor.YELLOW + "You can start adding the zone points of this zone by");
             player.sendMessage(ChatColor.RED + "Right clicking blocks with " + Material.getMaterial(ZonesConfig.CREATION_TOOL_TYPE).name().toLowerCase() + "[" + ZonesConfig.CREATION_TOOL_TYPE + "].");
             if(ZonesConfig.WORLDEDIT_ENABLED) player.sendMessage("Or you can import a worldedit selection using /zimport");
         }

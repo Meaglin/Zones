@@ -44,6 +44,15 @@ public class ZSetGroupCommand extends ZoneCommand {
         if(groupname == null || groupname.trim().equals("") || access == null || access.trim().equals(""))
             return;
         
+
+        if (!getPlugin().getPermissions().isValid(zone.getWorld().getName(), groupname)) {
+            owner.sendMessage(ChatColor.RED + "Invalid group " + groupname + "!");
+            return;
+        }
+        
+        if(!canUseCommand(owner,"zones.admin"))
+            access += "e";
+        
         ZonesAccess z = new ZonesAccess(access);
         zone.addGroup(groupname,z);
         owner.sendMessage(ChatColor.GREEN + "Succesfully changed access of group '" + groupname + "' of zone '" + zone.getName() + "' to access " + z.textual() + ".");

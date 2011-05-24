@@ -22,10 +22,15 @@ public enum ZoneVar {
         SPAWN_ANIMALS("SpawnAnimals", Boolean.class , Serializer.BOOLEAN),
         LEAF_DECAY("LeafDecay", Boolean.class , Serializer.BOOLEAN),
         SNOW_FALL("SnowFall", Boolean.class, Serializer.BOOLEAN),
+        PHYSICS("PhysicsEnabled", Boolean.class, Serializer.BOOLEAN),
+        NOTIFY("Notify", Boolean.class, Serializer.BOOLEAN),
+        
         PLACE_BLOCKS("ProtectedPlaceBlocks", List.class,Integer.class, Serializer.INTEGERLIST),
         BREAK_BLOCKS("ProtectedBreakBlocks", List.class,Integer.class, Serializer.INTEGERLIST),
+        
         MOBS("AllowedMobs", List.class,CreatureType.class, Serializer.CREATURELIST),
         ANIMALS("AllowedAnimals", List.class,CreatureType.class, Serializer.CREATURELIST),
+        
         ENTER_MESSAGE("EnterMessage", String.class, Serializer.STRING),
         LEAVE_MESSAGE("LeaveMessage", String.class, Serializer.STRING),
         SPAWN_LOCATION("SpawnLocation",ZoneVertice.class, Serializer.ZONEVERTICE); 

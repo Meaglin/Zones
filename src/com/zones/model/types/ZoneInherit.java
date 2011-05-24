@@ -5,16 +5,14 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import com.zones.WorldManager;
-import com.zones.Zones;
 import com.zones.model.ZoneBase;
 
 public class ZoneInherit extends ZoneNormal {
 
     private List<ZoneBase> inheritedZones;
     
-    public ZoneInherit(Zones zones, WorldManager worldManager, int id) {
-        super(zones, worldManager, id);
+    public ZoneInherit() {
+        super();
         inheritedZones = new ArrayList<ZoneBase>();
     }
     
@@ -28,6 +26,10 @@ public class ZoneInherit extends ZoneNormal {
 
     public boolean containsInherited(ZoneBase b) {
         return inheritedZones.contains(b);
+    }
+    
+    public List<ZoneBase> getInheritedZones() {
+        return inheritedZones;
     }
     
     @Override

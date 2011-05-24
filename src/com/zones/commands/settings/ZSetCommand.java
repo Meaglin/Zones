@@ -57,7 +57,12 @@ public class ZSetCommand extends ZoneCommand {
         }
         
         ZoneBase zone = getSelectedZone(player);
-
+        if(vars[0].trim().equalsIgnoreCase("reset")) {
+            zone.getSettings().set(v, null);
+            zone.saveSettings();
+            player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " has now been reset to default.");
+            return true;
+        }
         /**
          * Some variables require special treatment.
          */

@@ -4,9 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
 import com.zones.model.ZoneBase;
+import com.zones.selection.ZoneEditSelection;
 
 /**
  * 
@@ -22,10 +22,9 @@ public class ZEditCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        ZoneBase z = this.getSelectedZone(player);
-        ZonesDummyZone dummy = new ZonesDummyZone(getPlugin(),player,z.getName());
-        dummy.loadEdit(z);
-        getZoneManager().addDummy(player.getEntityId(), dummy);
+        ZoneBase z = getSelectedZone(player);
+        ZoneEditSelection selection = new ZoneEditSelection(getPlugin(),player,z.getName());
+        getZoneManager().addSelection(player.getEntityId(), selection);
         player.sendMessage(ChatColor.GREEN + " Loaded zone " + z.getName() + " into your edit selection.");
         
         return true;

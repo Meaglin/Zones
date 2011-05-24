@@ -6,14 +6,15 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import com.zones.WorldManager;
 import com.zones.ZoneManager;
 import com.zones.Zones;
-import com.zones.ZonesDummyZone;
 import com.zones.commands.create.ZConfirmCommand;
 import com.zones.model.ZoneBase;
+import com.zones.selection.ZoneSelection;
 
 /**
  * 
@@ -33,15 +34,13 @@ public abstract class ZoneCommand extends Command {
         super(name);
         this.plugin = plugin;
     }
-
-    public abstract boolean run(Player player,String[] vars) ;
     
     protected Zones getPlugin() {
         return plugin;
     }
     
     protected boolean canUseCommand(Player p, String command) {
-        return getPlugin().getP().has(p, command);
+        return getPlugin().getPermissions().canUse(p, command);
     }
     
     protected WorldManager getWorldManager(Player p) {
@@ -88,8 +87,8 @@ public abstract class ZoneCommand extends Command {
         return getDummy(p) != null;
     }
     
-    protected ZonesDummyZone getDummy(Player p) {
-        return getZoneManager().getDummy(p.getEntityId());
+    protected ZoneSelection getDummy(Player p) {
+        return getZoneManager().getSelection(p.getEntityId());
     }
     
     protected boolean hasSelected(Player p) {
@@ -131,8 +130,17 @@ public abstract class ZoneCommand extends Command {
             }
             
             return true;
-        } else
+        } else if(sender instanceof ConsoleCommandSender){
+            return runConsole(sender, vars);
+        } else {
             return false;
+        }
+    }
+    
+    public abstract boolean run(Player player, String[] vars) ;
+    public boolean runConsole(CommandSender sender, String[] vars) {
+        sender.sendMessage(ChatColor.RED + "This command doesn't support console usage.");
+        return true;
     }
     
     public static final Map<String, String[]> commands;
@@ -144,11 +152,13 @@ public abstract class ZoneCommand extends Command {
             "Starts Zone creation mode in which you define \n the area/height and type of the zone."
         });
 
+        /*
         commands.put("/zsetplot", new String[] {
             "zones.create",
             "- set height and depth to according to plot specs.",
             "Changes the zone you are making to a plot type \n with the related height and depth of the zone relative to \n your z position."
         });
+        */
 
         commands.put("/zhelp",new String[] {
             null,
@@ -171,7 +181,7 @@ public abstract class ZoneCommand extends Command {
         commands.put("/zsave",new String[] {
             null,
             "- saves the selection after confirmation.",
-            "Initiates saving of the zone you were creating \n you will need to confirm this with \n /zconfirm to make it actually save the zone. \n THIS CANNOT BE USED WHEN EDITTING A ZONE USE /zmerge!!!! "
+            "Initiates saving of the zone you were creating \n you will need to confirm this with \n /zconfirm to make it actually save the zone."
         });
 
         commands.put("/zconfirm",new String[] {
@@ -317,11 +327,13 @@ public abstract class ZoneCommand extends Command {
             + "and merged back into an active zone.\n" +
             		"This is used to adjust the area of a zone."
         });
+        /*
         commands.put("/zmerge", new String[] {
             "zones.create",
             "Merges your current edit selection with your selected\n",
             "zone replacing the area of the zone with your selection."
         });
+        */
         commands.put("/zreload", new String[] {
                 "zones.admin",
                 "config|zones|all - reloads specified part of zones.",
@@ -340,7 +352,9 @@ public abstract class ZoneCommand extends Command {
                 + "leafdecay - Enables/Disables leave decay in the zone.\n"
                 + "teleport - Enables/Disables teleporting in/out of the zone.\n"
                 + "fire - Enables/Disables fire in the zone.\n"
-                + "snowfall - Enables/Disables snowfall in the zone."
+                + "snowfall - Enables/Disables snowfall in the zone.\n"
+                + "physics - Enables/Disables physics in the zone.\n" 
+                + "notify - Toggles enter/leave notifications in the zone."
                 
         } );
         
@@ -370,8 +384,7 @@ public abstract class ZoneCommand extends Command {
         commands.put("/zset", new String[] {
             "zones.settings.set",
             "- [variable name] [value] changes variable to value.",
-            "Defines [variables name]'s value as [value].\n" +
-            "List of variables :\n" +
+            "Defines [variables name]'s value as [value]. Variables:\n" +
             "protectedplace - [L] blocks which cannot be placed.\n" +
             "protectedbreak - [L] blocks which cannot be destroyed.\n" +
             "allowedanimals - [L] list of animals that can spawn.\n" +
@@ -379,9 +392,10 @@ public abstract class ZoneCommand extends Command {
             "entermessage - The message you see when you enter a zone.\n" +
             "leavemessage - The message you see when you leave a zone.\n" +
             "{zname} - zone name,{pname} - playername,{access} - access\n" +
-            "Can be used to make enter/leave messages dynamic.\n" +
+            "and ^ - colors, Can be used to make the message dynamic.\n" +
+            "Disable enter/leave messages by settings them to \"NONE\".\n" +
             "spawnlocation - change the respawn location within the zone.\n" +
-            "List variables[L] requires comma seperated input: <val1>,<val2>"
+            "[L]List variables requires comma seperated input: <val1>,<val2>"
         });
         
         commands.put("/zaccess" , new String[] {
@@ -423,6 +437,15 @@ public abstract class ZoneCommand extends Command {
                 "Exports the selected zone to your\n" +
                 "world edit selection."
         } );
+        
+        commands.put("/zwho", new String[] { 
+           null,
+           "- displays list of players in zone.",
+           "Displays a list of players in the zones\n" +
+           "at your current location or when you have\n" +
+           "a zone selected it will display a list of\n" +
+           "players in that zone."
+        });
             
     }
 

@@ -1,6 +1,9 @@
 package com.zones.model.forms;
 
+import java.util.List;
+
 import com.zones.model.ZoneForm;
+import com.zones.persistence.Vertice;
 
 /**
  * A not so primitive npoly zone
@@ -24,6 +27,23 @@ public class ZoneNPoly extends ZoneForm {
         {
             _z1 = z2;
             _z2 = z1;
+        }
+        calculateSize();
+    }
+
+    public ZoneNPoly(List<Vertice> vertices, int minz, int maxz) {
+        _x = new int[vertices.size()];
+        _y = new int[vertices.size()];
+        for (Vertice v : vertices) {
+            _x[v.getVertexorder()] = v.getX();
+            _y[v.getVertexorder()] = v.getY();
+        }
+        _z1 = minz;
+        _z2 = maxz;
+        if (_z1 > _z2) // switch them if alignment is wrong
+        {
+            _z1 = maxz;
+            _z2 = minz;
         }
         calculateSize();
     }
@@ -126,7 +146,7 @@ public class ZoneNPoly extends ZoneForm {
             int y1 = _y[i];
             size += x0 * y1 - x1 * y0;
         }
-        _size = (int) Math.round(Math.abs(size) * 0.5) * (_z2 - _z1);
+        _size = (int) Math.round(Math.abs(size) * 0.5) * (_z2 - _z1 + 1);
     }
 
     @Override
@@ -171,12 +191,6 @@ public class ZoneNPoly extends ZoneForm {
 
     public int[] getY() {
         return _y;
-    }
-
-    @Override
-    public boolean contains(ZoneForm f) {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     @Override

@@ -54,7 +54,7 @@ public abstract class ZoneForm {
         if(f.getSize() > getSize())
             return false;
         
-        if(f.getLowZ() > getLowZ())
+        if(f.getLowZ() < getLowZ())
             return false;
         if(f.getHighZ() > getHighZ())
             return false;

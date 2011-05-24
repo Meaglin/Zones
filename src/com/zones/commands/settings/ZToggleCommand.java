@@ -46,6 +46,7 @@ public class ZToggleCommand extends ZoneCommand {
         } );
         variables.put("water" , new Object[] { 
                 "zones.toggle.water",
+                "Water Flow",
                 ZoneVar.WATER
         } );
         variables.put("mobs" , new Object[] { 
@@ -78,19 +79,29 @@ public class ZToggleCommand extends ZoneCommand {
            "SnowFall",
            ZoneVar.SNOW_FALL
         });
+        variables.put("physics", new Object[] {
+           "zones.toggle.physics",
+           "Physics",
+           ZoneVar.PHYSICS
+        });
+        variables.put("notify", new Object[] {
+            "zones.toggle.notify",
+            "Enters/Leaves Notify's",
+            ZoneVar.NOTIFY
+        });
     }
 
     @Override
     public boolean run(Player player, String[] vars) {
 
         if(vars.length < 1) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|notify] ");
             return true;
         }
         
         if(!variables.containsKey(vars[0].toLowerCase())) {
             player.sendMessage(ChatColor.RED + "Invalid variable name.");
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|notify] ");
             return true;
         }
         Object[] variable = variables.get(vars[0].toLowerCase());
@@ -125,6 +136,10 @@ public class ZToggleCommand extends ZoneCommand {
             return zone.getWorldManager().getConfig().LEAF_DECAY_ENABLED;
         else if(name.equalsIgnoreCase("snowfall"))
             return zone.getWorldManager().getConfig().SNOW_FALL_ENABLED;
+        else if(name.equalsIgnoreCase("physics"))
+            return zone.getWorldManager().getConfig().PHYSICS_ENABLED;
+        else if(name.equalsIgnoreCase("notify")) 
+            return false;
         else 
             return false;
     }

@@ -27,7 +27,7 @@ public class ZExportCommand extends ZoneCommand {
         }
         
         ZoneBase zone = getSelectedZone(player);
-        ZoneForm form = zone.getZone();
+        ZoneForm form = zone.getForm();
         if(form instanceof ZoneCuboid) {
             Vector pt1 = new Vector(form.getLowX(),form.getLowZ(),form.getLowY());
             Vector pt2 = new Vector(form.getHighX(),form.getHighZ(),form.getHighY());

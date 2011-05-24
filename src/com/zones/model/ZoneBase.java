@@ -1,7 +1,5 @@
 package com.zones.model;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -15,8 +13,8 @@ import org.bukkit.inventory.ItemStack;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
-import com.zones.ZonesConfig;
 import com.zones.model.settings.ZoneVar;
+import com.zones.persistence.Zone;
 
 /**
  * Abstract base class for any zone type Handles basic operations
@@ -26,34 +24,45 @@ import com.zones.model.settings.ZoneVar;
 public abstract class ZoneBase {
     protected static final Logger     log = Logger.getLogger(ZoneBase.class.getName());
 
-    private final int                 id;
+    private int                 id;
     protected ZoneForm                form;
     protected HashMap<String, Player> characterList;
 
     private String                    name;
-    private ZoneSettings                  settings = new ZoneSettings();
+    private ZoneSettings              settings = new ZoneSettings();
 
     protected Zones                   zones;
     protected WorldManager            worldManager;
     
-    protected ZoneBase(Zones zones,WorldManager worldManager, int id) {
-        this.id = id;
-        this.zones = zones;
-        this.worldManager = worldManager;
+    private Zone                      persistence;
+    
+    private boolean                   initialized;
+    
+    protected ZoneBase() {
         characterList = new HashMap<String, Player>();
     }
     
-    public void loadSettings(String data) {
-        try {
-            loadSettings(ZoneSettings.unserialize(data));
-        } catch(Exception e) {
-            log.warning("[Zones]Error loading settings of " + name + "[" + id + "]");
-            e.printStackTrace();
+    public final void initialize(Zones plugin, WorldManager worldManager, Zone persistence) {
+        if(!initialized) {
+            initialized = true;
+            this.zones = plugin;
+            this.worldManager = worldManager;
+            this.persistence = persistence;
+            id = persistence.getId();
+            onLoad(persistence);
         }
     }
     
-    public void loadSettings(ZoneSettings settings) {
-        this.settings = settings;
+    protected void onLoad(Zone persistence) {
+        name = persistence.getName();
+        if(persistence.getSettings() != null && !persistence.getSettings().trim().equals("")) {
+            try {
+                settings = ZoneSettings.unserialize(persistence.getSettings());
+            } catch(Exception e) {
+                log.warning("[Zones]Error loading settings of " + name + "[" + id + "]");
+                e.printStackTrace();
+            }
+        }
     }
     /**
      * @return Returns the id.
@@ -65,6 +74,10 @@ public abstract class ZoneBase {
     public String getName() {
         return name;
     }
+    
+    public Zone getPersistence() {
+        return persistence;
+    }
 
     public WorldManager getWorldManager() {
         return worldManager;
@@ -73,20 +86,9 @@ public abstract class ZoneBase {
     public World getWorld() {
         return getWorldManager().getWorld();
     }
-    /**
-     * Setup new parameters for this zone
-     * 
-     * @param type
-     * @param value
-     */
-    public void setParameter(String name, String value) {
-        if (value == null || value.equals(""))
-            return;
-        
-        if (name.equals("name")) {
-            this.name = value;
-        } else
-            log.info(getClass().getSimpleName() + ": Unknown parameter - " + name + " in zone: " + getId());
+    
+    public Zones getPlugin() {
+        return zones;
     }
 
     /**
@@ -94,18 +96,28 @@ public abstract class ZoneBase {
      * 
      * @param zone
      */
-    public void setZone(ZoneForm zone) {
+    public void setForm(ZoneForm zone) {
         form = zone;
     }
+    
+    @Deprecated
+    public void setZone(ZoneForm zone) {
+        setForm(zone);
+    }
+    
 
     /**
      * Returns this zones zone form
      * 
-     * @param zone
-     * @return
+     * @return form
      */
-    public ZoneForm getZone() {
+    public ZoneForm getForm() {
         return form;
+    }
+    
+    @Deprecated
+    public ZoneForm getZone() {
+        return getForm();
     }
 
     /**
@@ -143,11 +155,11 @@ public abstract class ZoneBase {
     public boolean isInsideZone(Player player)      {return isInsideZone(player.getLocation());}
     public boolean isInsideZone(Location loc)       {return isInsideZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()), WorldManager.toInt(loc.getY()));}
     
-    public double getDistanceToZone(int x, int y)   {return getZone().getDistanceToZone(x, y);}
+    public double getDistanceToZone(int x, int y)   {return getForm().getDistanceToZone(x, y);}
 
     public double getDistanceToZone(Player player) {
         Location loc = player.getLocation();
-        return getZone().getDistanceToZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()));
+        return getForm().getDistanceToZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()));
     }
 
     /**
@@ -183,6 +195,7 @@ public abstract class ZoneBase {
     public abstract boolean allowHealth(Player player);
     public abstract boolean allowLeafDecay(Block block);
     public abstract boolean allowSnowFall(Block block);
+    public abstract boolean allowPhysics(Block block);
     public abstract boolean allowFire(Player player, Block block);
     
     public abstract boolean allowSpawn(Entity entity,CreatureType type);
@@ -216,56 +229,15 @@ public abstract class ZoneBase {
 
     public boolean setName(String name) {
 
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET name = ? WHERE id = ?");
-            st.setString(1, name);
-            st.setInt(2, getId());
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if(conn != null)    conn.close();
-                if(st != null)      st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u < 1)
-            return false;
-
+        getPersistence().setName(name);
+        zones.getDatabase().update(getPersistence());
         this.name = name;
-
         return true;
     }
     
     public boolean saveSettings() {
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET settings = ? WHERE id = ?");
-            st.setString(1, settings.serialize());
-            st.setInt(2, getId());
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if(conn != null)    conn.close();
-                if(st != null)      st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u < 1)
-            return false;
-        
+        getPersistence().setSettings(getSettings().serialize());
+        zones.getDatabase().update(getPersistence());      
         return true;
     }
 

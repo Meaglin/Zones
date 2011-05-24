@@ -45,24 +45,24 @@ public class ZoneCommandMap {
         registerCommand(new ZCreateCommand(plugin));
         registerCommand(new ZDefineCommand(plugin));
         registerCommand(new ZEditCommand(plugin));
-        registerCommand(new ZMergeCommand(plugin));
         registerCommand(new ZRedefineCommand(plugin));
         registerCommand(new ZImportCommand(plugin));
         registerCommand(new ZSaveCommand(plugin));
         registerCommand(new ZSetClassCommand(plugin));
         registerCommand(new ZSetDepthCommand(plugin));
         registerCommand(new ZSetHeightCommand(plugin));
-        registerCommand(new ZSetPlotCommand(plugin));
         registerCommand(new ZSetTypeCommand(plugin));
         registerCommand(new ZSetzCommand(plugin));
         registerCommand(new ZStopCommand(plugin));
-        
+
         //General
+        registerCommand(new ZAboutCommand(plugin));
         registerCommand(new ZAccessCommand(plugin));
         registerCommand(new ZHelpCommand(plugin));
         registerCommand(new ZInfoCommand(plugin));
         registerCommand(new ZRegionInfoCommand(plugin));
         registerCommand(new ZSelectCommand(plugin));
+        registerCommand(new ZWhoCommand(plugin));
 
         // Settings
         registerCommand(new ZAddCommand(plugin));

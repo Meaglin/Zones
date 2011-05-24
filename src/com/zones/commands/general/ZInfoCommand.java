@@ -1,14 +1,18 @@
 package com.zones.commands.general;
 
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.zones.Region;
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.settings.Serializer;
 import com.zones.model.settings.ZoneVar;
+import com.zones.model.types.ZoneInherit;
 
 public class ZInfoCommand extends ZoneCommand {
 
@@ -20,10 +24,11 @@ public class ZInfoCommand extends ZoneCommand {
     @Override
     public boolean run(Player player, String[] vars) {
         ZoneBase b = getSelectedZone(player);
-        player.sendMessage(ChatColor.DARK_GREEN + "Zone: " + b.getName() + ChatColor.WHITE + "[" + b.getAccess(player).toColorCode() + "]" );
-        ZoneForm f = b.getZone();
+        player.sendMessage(ChatColor.DARK_GREEN + "Zone: " + b.getName() + ChatColor.BLUE + "(" + b.getId() + ")" + ChatColor.WHITE + "[" + b.getAccess(player).toColorCode() + "]" );
+        ZoneForm f = b.getForm();
+        player.sendMessage(ChatColor.AQUA + "Type: " + getClassName(b.getClass()) + " Form: " + getClassName(f.getClass()));
         player.sendMessage(ChatColor.AQUA + "Size: " + f.getSize() + " " +
-        		"Location: (" + f.getLowX() + "<->" + f.getHighX() + "," + f.getLowY() + "<->" + f.getHighY() + "," + f.getLowZ() + "<->" + f.getHighZ() + ")");
+        		"Location: (" + f.getLowX() + "," + f.getHighX() + ";" + f.getLowY() + "," + f.getHighY() + ";" + f.getLowZ() + "," + f.getHighZ() + ")");
         
         String bools = "";
         for(ZoneVar v : ZoneVar.values()) {
@@ -46,8 +51,31 @@ public class ZInfoCommand extends ZoneCommand {
         }
         if(!settings.equals("")) 
             player.sendMessage(ChatColor.AQUA + "Settings:" + settings);
-        
+        Region min = b.getWorldManager().getRegion(b.getForm().getLowX(),b.getForm().getLowZ());
+        Region max = b.getWorldManager().getRegion(b.getForm().getHighX(),b.getForm().getHighZ());
+        player.sendMessage(ChatColor.AQUA + "Region: " +  "(" + min.getX() + "," + max.getX() + ";" + min.getY() + "," + max.getY() + ")" );
+        if(b instanceof ZoneInherit) {
+            List<ZoneBase> inherits = ((ZoneInherit)b).getInheritedZones();
+            if(inherits.size() > 0) {
+                String message = "";
+                for(ZoneBase zone : inherits) {
+                    message += ", " + zone.getName() + "[" + zone.getId() + "]";
+                }
+                player.sendMessage(ChatColor.AQUA + "InheritedZones: " + message.substring(2));
+            } else {
+                player.sendMessage(ChatColor.AQUA + "InheritedZones: None.");
+            }
+        }
         return true;
     }
 
+    public static String getClassName(Class<?> c) {
+        String className = c.getName();
+        int firstChar;
+        firstChar = className.lastIndexOf ('.') + 1;
+        if ( firstChar > 0 ) {
+            className = className.substring ( firstChar );
+        }
+        return className;
+    }
 }

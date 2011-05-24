@@ -5,8 +5,9 @@ import org.bukkit.entity.Player;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
-import com.zones.ZonesDummyZone;
 import com.zones.commands.ZoneCommand;
+import com.zones.model.ZoneVertice;
+import com.zones.selection.ZoneSelection;
 
 /**
  * 
@@ -22,13 +23,12 @@ public class ZSetDepthCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        ZonesDummyZone dummy = getDummy(player);
+        ZoneSelection selection = getDummy(player);
         if (vars.length < 1 || Integer.parseInt(vars[0]) < 0) {
             player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetdepth [depth]");
         } else {
-            dummy.setZ(WorldManager.toInt(player.getLocation().getY()) - Integer.parseInt(vars[0]),dummy.getMax());
-
-            //player.sendMessage(ChatColor.GREEN.toString() + "Min z is now : " + dummy.getMin());
+            ZoneVertice height = selection.getSelection().getHeight();
+            selection.getSelection().setHeight(new ZoneVertice(WorldManager.toInt(player.getLocation().getY()) - Integer.parseInt(vars[0]), height.getMax()));
         }
         return true;
     }

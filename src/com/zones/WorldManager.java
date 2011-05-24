@@ -34,8 +34,8 @@ public class WorldManager {
     public static final int            X_REGIONS   = ((MAX_X - MIN_X) >> SHIFT_SIZE) + 1;
     public static final int            Y_REGIONS   = ((MAX_Y - MIN_Y) >> SHIFT_SIZE) + 1;
 
-    public static final int            XMOD        = (MIN_X < 0 ? -1 : 1);
-    public static final int            YMOD        = (MIN_Y < 0 ? -1 : 1);
+    public static final int            XMOD        = -1;
+    public static final int            YMOD        = -1;
 
     public static final int            OFFSET_X    = ((MIN_X * XMOD) >> SHIFT_SIZE) * XMOD;
     public static final int            OFFSET_Y    = ((MIN_Y * YMOD) >> SHIFT_SIZE) * YMOD;
@@ -64,8 +64,8 @@ public class WorldManager {
     
     public void load() {
         regions.clear();
-        plugin.getZoneManager().load(this);
         worldConfig.load();
+        plugin.getZoneManager().load(this);
         //ZoneManager.log.info("[Zones]Loaded " + X_REGIONS * Y_REGIONS + " regions.");
     }
     
@@ -111,9 +111,10 @@ public class WorldManager {
             return emptyRegion;
         }*/
 
-        long index = toLong((x - MIN_X) >> SHIFT_SIZE, (y - MIN_Y) >> SHIFT_SIZE);
-        if(regions.containsKey(index))
-            return regions.get(index);
+        long index = toLong((x) >> SHIFT_SIZE, (y) >> SHIFT_SIZE);
+        Region rg = regions.get(index);
+        if(rg != null)
+            return rg;
         else
             return emptyRegion;
     }
@@ -137,21 +138,23 @@ public class WorldManager {
                 }
             }
         } */
-        ZoneForm f = zone.getZone();
+        ZoneForm f = zone.getForm();
         int ax, ay, bx, by;
-        for (int x = (f.getLowX() - MIN_X) >> SHIFT_SIZE; x <= (f.getHighX() - MIN_X) >> SHIFT_SIZE; x++) {
-            for (int y = (f.getLowY() - MIN_Y) >> SHIFT_SIZE; y <= (f.getHighY() - MIN_Y) >> SHIFT_SIZE; y++) {
-                ax = (x + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
-                bx = ((x + 1) + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
-                ay = (y + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
-                by = ((y + 1) + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
-                if (zone.getZone().intersectsRectangle(ax, bx, ay, by)) {
+        for (int x = (f.getLowX() >> SHIFT_SIZE); x <= (f.getHighX() >> SHIFT_SIZE); x++) {
+            for (int y = (f.getLowY() >> SHIFT_SIZE); y <= (f.getHighY() >> SHIFT_SIZE); y++) {
+                ax = x << WorldManager.SHIFT_SIZE;
+                bx = (x + 1) << WorldManager.SHIFT_SIZE;
+                ay = y << WorldManager.SHIFT_SIZE;
+                by = (y + 1) << WorldManager.SHIFT_SIZE;
+                if (zone.getForm().intersectsRectangle(ax, bx, ay, by)) {
                     long index = toLong(x,y);
-                    if(regions.containsKey(index)) {
-                        regions.get(index).addZone(zone);
+                    Region rg = regions.get(index);
+                    if(rg != null) {
+                        rg.addZone(zone);
                     } else {
-                        regions.put(index, new Region(x,y));
-                        regions.get(index).addZone(zone);
+                        rg = new Region(x,y);
+                        rg.addZone(zone);
+                        regions.put(index, rg);
                     }
                 }
             }

@@ -29,10 +29,10 @@ public class Region {
 
         
         for(ZoneBase b : _zones) {
-            if(b instanceof ZoneInherit && !((ZoneInherit)b).containsInherited(zone) && zone.getZone().contains(b.getZone())) {
+            if(b instanceof ZoneInherit && !((ZoneInherit)b).containsInherited(zone) && zone.getForm().contains(b.getForm())) {
                 ((ZoneInherit)b).addInherited(zone);
             } 
-            if(zone instanceof ZoneInherit && !((ZoneInherit)zone).containsInherited(b) && b.getZone().contains(zone.getZone())) {
+            if(zone instanceof ZoneInherit && !((ZoneInherit)zone).containsInherited(b) && b.getForm().contains(zone.getForm())) {
                 ((ZoneInherit)zone).addInherited(b);
             }
         }
@@ -64,7 +64,7 @@ public class Region {
         ZoneBase primary = null;
 
         for (ZoneBase zone : getZones())
-            if (zone.isInsideZone(x, y, z) && (primary == null || primary.getZone().getSize() > zone.getZone().getSize()))
+            if (zone.isInsideZone(x, y, z) && (primary == null || primary.getForm().getSize() > zone.getForm().getSize()))
                 primary = zone;
 
         return primary;

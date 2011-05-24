@@ -3,16 +3,15 @@ package com.zones;
 import com.zones.model.ZoneBase;
 import com.zones.model.forms.ZoneCuboid;
 import com.zones.model.forms.ZoneNPoly;
+import com.zones.persistence.Vertice;
+import com.zones.persistence.Zone;
+import com.zones.selection.ZoneSelection;
 
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 
 import java.lang.reflect.Constructor;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -22,14 +21,14 @@ import java.util.logging.Logger;
  */
 public class ZoneManager {
     private TIntObjectHashMap<ZoneBase>       zones;
-    private TIntObjectHashMap<ZonesDummyZone> dummyZones;
+    private TIntObjectHashMap<ZoneSelection>  selections;
     private TIntIntHashMap                    selectedZones;
     protected static final Logger             log = Logger.getLogger("Minecraft");
     private Zones                             plugin;
-
+    
     protected ZoneManager(Zones plugin) {
         zones = new TIntObjectHashMap<ZoneBase>();
-        dummyZones = new TIntObjectHashMap<ZonesDummyZone>();
+        selections = new TIntObjectHashMap<ZoneSelection>();
         selectedZones = new TIntIntHashMap();
         this.plugin = plugin;
     }
@@ -44,104 +43,71 @@ public class ZoneManager {
     }
     public void load(WorldManager world) {
         cleanUp(world);
-        Connection conn = null;
+        
+        int count = 0;
         try {
-            conn = plugin.getConnection();
-            PreparedStatement st = conn.prepareStatement("SELECT * FROM " + ZonesConfig.ZONES_TABLE + " WHERE world = ?");
-            PreparedStatement st2 = conn.prepareStatement("SELECT `x`,`y` FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ? ORDER BY `order` ASC LIMIT ? ");
-            st.setString(1, world.getWorldName());
-            ResultSet rset = st.executeQuery();
-
-            int id, size, minz, maxz;
-            String zoneClass,type, admins, users, name, settings;
-            ArrayList<int[]> points = new ArrayList<int[]>();
-
-            while (rset.next()) {
-                id = rset.getInt("id");
-                name = rset.getString("name");
-                zoneClass = rset.getString("class");
-                type = rset.getString("type");
-                size = rset.getInt("size");
-                admins = rset.getString("admins");
-                users = rset.getString("users");
-                minz = rset.getInt("minz");
-                maxz = rset.getInt("maxz");
-                settings = rset.getString("settings");
-                Class<?> newZone;
-                try {
-                    newZone = Class.forName("com.zones.model.types."+zoneClass);
-                } catch (ClassNotFoundException e) {
-                    log.warning("[Zones]No such zone class: " + zoneClass + " id: " + id);
-                    continue;
-                }
-                Constructor<?> zoneConstructor = newZone.getConstructor(Zones.class,WorldManager.class, int.class);
-                ZoneBase temp = (ZoneBase) zoneConstructor.newInstance(plugin,world,id);
-
-                points.clear();
-
-                try {
-
-                    st2.setInt(1, id);
-                    st2.setInt(2, size);
-
-                    ResultSet rset2 = st2.executeQuery();
-                    while (rset2.next()) {
-                        int[] point = new int[2];
-                        point[0] = rset2.getInt("x");
-                        point[1] = rset2.getInt("y");
-                        points.add(point);
-                    }
-                    rset2.close();
-                } finally {
-                    st2.clearParameters();
-                }
-                int[][] coords = points.toArray(new int[points.size()][]);
-                if(type.equalsIgnoreCase("ZoneCuboid")) {
-                    if (points.size() == 2) {
-                        temp.setZone(new ZoneCuboid(coords[0][0], coords[1][0], coords[0][1], coords[1][1], minz, maxz));
-                    } else {
-                        log.info("[Zones]Missing zone vertex for cuboid zone id: " + id);
-                        continue;
-                    }
-                } else if(type.equalsIgnoreCase("ZoneNPoly")) {
-                    if (coords.length > 2) {
-                        final int[] aX = new int[coords.length];
-                        final int[] aY = new int[coords.length];
-                        for (int i = 0; i < coords.length; i++) {
-                            aX[i] = coords[i][0];
-                            aY[i] = coords[i][1];
-                        }
-                        temp.setZone(new ZoneNPoly(aX, aY, minz, maxz));
-                    } else {
-                        log.warning("[Zones]Bad data for zone: " + id);
-                        continue;
-                    }
-                }
-
-                temp.setParameter("admins", admins);
-                temp.setParameter("users", users);
-                temp.setParameter("name", name);
-                temp.loadSettings(settings);
-                
-                world.addZone(temp);
-                zones.put(temp.getId(), temp);
+            List<Zone> zones = plugin.getDatabase().find(Zone.class).where().ieq("world", world.getWorldName()).findList();
+            for(Zone zone : zones) {
+                if(loadFromPersistentData(world, zone) != null)
+                    count++;
             }
-            rset.close();
-        } catch (Exception e) {
+        } catch(Exception e) {
+            log.warning("[Zones]Error loading world " + world.getWorldName() + ".");
             e.printStackTrace();
+            return;
         } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (count == 1)
+                log.info("[Zones]Loaded " + count + " Zone for world " + world.getWorldName() + ".");
+            else
+                log.info("[Zones]Loaded " + count + " Zones for world " + world.getWorldName() + ".");
         }
-        if (zones.size() == 1)
-            log.info("[Zones]Loaded " + zones.size() + " Zone for world " + world.getWorldName() + ".");
-        else
-            log.info("[Zones]Loaded " + zones.size() + " Zones for world " + world.getWorldName() + ".");
     }
 
+    public ZoneBase loadFromPersistentData(WorldManager world, Zone zone) {
+        Class<?> newZone = null;
+        ZoneBase temp = null;
+        try {
+            try {
+                newZone = Class.forName("com.zones.model.types."+zone.getZonetype());
+            } catch (ClassNotFoundException e) {
+                log.warning("[Zones]No such zone class: " + zone.getZonetype() + " id: " + zone.getId());
+                return null;
+            }
+            try {
+                Constructor<?> zoneConstructor = newZone.getConstructor();
+                temp = (ZoneBase) zoneConstructor.newInstance();
+            } catch(Exception e) {
+                log.warning("[Zones]Error in constructing zone: " + zone.getId() + ".");
+                e.printStackTrace();
+                return null;
+            }
+            temp.initialize(plugin, world, zone);
+            List<Vertice> vertices = zone.getVertices();
+            
+            if(zone.getFormtype().equalsIgnoreCase("ZoneCuboid")) {
+                if (vertices.size() == 2) {
+                    temp.setForm(new ZoneCuboid(vertices, zone.getMinz(), zone.getMaxz()));
+                } else {
+                    log.info("[Zones]Missing zone vertex for cuboid zone id: " + zone.getId());
+                    return null;
+                }
+            } else if(zone.getFormtype().equalsIgnoreCase("ZoneNPoly")) {
+                if (vertices.size() > 2) {
+                    temp.setForm(new ZoneNPoly(vertices, zone.getMinz() , zone.getMaxz()));
+                } else {
+                    log.warning("[Zones]Bad data for zone: " + zone.getId());
+                    return null;
+                }
+            }
+        } catch(Exception e) {
+            log.warning("[Zones]Error loading zone " + zone.getId() + ".");
+            e.printStackTrace();
+            return null;
+        }
+        addZone(temp);
+        return temp;
+    }
+    
     public void addZone(ZoneBase zone) {
         zone.getWorldManager().addZone(zone);
         zones.put(zone.getId(), zone);
@@ -155,102 +121,35 @@ public class ZoneManager {
         if (!zones.containsKey(toDelete.getId()))
             return false;
 
-        // first delete sql data.
-        Connection conn = null;
-        PreparedStatement st = null;
-        int u = 0;
-        try {
-            conn = plugin.getConnection();
-            st = conn.prepareStatement("DELETE FROM " + ZonesConfig.ZONES_VERTICES_TABLE + " WHERE id = ?");
-            st.setInt(1, toDelete.getId());
+        //plugin.getDatabase().find(Vertice.class).where().gt("id", toDelete.getId());
+        //plugin.getDatabase().delete(toDelete.getPersistence().getVertices());
+        plugin.getDatabase().execute(plugin.getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id  = " + toDelete.getId() + ""));
+        plugin.getDatabase().delete(toDelete.getPersistence());
+        //plugin.getDatabase().createUpdate(Vertice.class, "delete from zones_vertices where id = " + toDelete.getId()).execute();
 
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null)
-                    conn.close();
-                if (st != null)
-                    st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u == 0)
-            return false;
-
-        u = 0;
-        try {
-            conn = plugin.getConnection();
-            st = conn.prepareStatement("DELETE FROM " + ZonesConfig.ZONES_TABLE + " WHERE id = ?");
-            st.setInt(1, toDelete.getId());
-
-            u = st.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null)
-                    conn.close();
-                if (st != null)
-                    st.close();
-            } catch (Exception e) {
-            }
-        }
-
-        if (u == 0)
-            return false;
-
-        // then delete the zone from all regions
-/*        int ax, ay, bx, by;
-        for (int x = 0; x < WorldManager.X_REGIONS; x++) {
-            for (int y = 0; y < WorldManager.Y_REGIONS; y++) {
-
-                ax = (x + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
-                bx = ((x + 1) + WorldManager.OFFSET_X) << WorldManager.SHIFT_SIZE;
-                ay = (y + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
-                by = ((y + 1) + WorldManager.OFFSET_Y) << WorldManager.SHIFT_SIZE;
-
-                // System.out.println(ax + " " + bx + " " + ay + " " + by);
-
-                if (toDelete.getZone().intersectsRectangle(ax, bx, ay, by)) {
-                    plugin.getWorldManager(toDelete.getWorld()).getRegion(ax, ay).removeZone(toDelete);
-                    // log.info("adding zone["+zone.getId()+"] to region " + x +
-                    // " " + y);
-                }
-            }
-        }*/
-        plugin.getWorldManager(toDelete.getWorld()).removeZone(toDelete);
-
-        // finally remove the zone from the main zones list.
-        zones.remove(toDelete.getId());
-
+        removeZone(toDelete);
         return true;
     }
 
     /*
      * A little note on using playerId(entity id):
-     * I used this mainly because it is waay more efficient then using strings
-     * also it has a nice side effect that you lose your selection/dummy when
-     * switching worlds.
+     * I used this mainly because it is waay more efficient then using strings.
      * 
-     * TODO: remove dummy's / selected when switching worlds.
      */
-    public void addDummy(int playerId, ZonesDummyZone zone) {
-        dummyZones.put(playerId, zone);
+    public void addSelection(int playerId, ZoneSelection zone) {
+        selections.put(playerId, zone);
     }
 
-    public ZonesDummyZone getDummy(int playerId) {
-        return dummyZones.get(playerId);
+    public ZoneSelection getSelection(int playerId) {
+        return selections.get(playerId);
     }
 
     public boolean zoneExists(int id) {
         return zones.containsKey(id);
     }
 
-    public void removeDummy(int playerId) {
-        dummyZones.remove(playerId);
+    public void removeSelection(int playerId) {
+        selections.remove(playerId);
     }
 
     public void setSelected(int playerId, int id) {
@@ -275,6 +174,25 @@ public class ZoneManager {
 
     public ZoneBase[] getAllZones() {
         return zones.getValues(new ZoneBase[zones.size()]);
+    }
+
+    public void reloadZone(int id) {
+        ZoneBase zone = getZone(id);
+        removeZone(zone);
+        Zone persistentZone = plugin.getDatabase().find(Zone.class, id);
+        if(persistentZone != null) {
+            WorldManager wm = plugin.getWorldManager(persistentZone.getWorld());
+            if(wm == null) {
+                log.warning("[Zones] Trying to load zone: " + id + " with invalid world " + persistentZone.getWorld() + "!");
+            } else {                
+                loadFromPersistentData(wm, persistentZone);
+            }
+        }
+    }
+
+    public void removeZone(ZoneBase zone) {
+        zone.getWorldManager().removeZone(zone);
+        zones.remove(zone.getId());
     }
 
 }

@@ -4,9 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.ZonesDummyZone;
-import com.zones.ZonesDummyZone.Confirm;
 import com.zones.commands.ZoneCommand;
+import com.zones.selection.ZoneSelection;
+import com.zones.selection.ZoneSelection.Confirm;
 
 /**
  * 
@@ -22,20 +22,16 @@ public class ZSaveCommand extends ZoneCommand {
 
     @Override
     public boolean run(Player player, String[] vars) {
-        ZonesDummyZone dummy = getDummy(player);
-        if (dummy.getFormId() == 1 && dummy.getCoords().size() != 2) {
-            player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need 2.");
-            return true;
-        }else if(dummy.getFormId() == 2 && dummy.getCoords().size() < 3){
-            player.sendMessage(ChatColor.RED.toString() + "Not enough coordinates set for this zone type, you need atleast 3.");
-            return true;
+        ZoneSelection selection = getDummy(player);
+        if(!selection.getSelection().isValid()) {
+            player.sendMessage(ChatColor.RED + "You don't have a valid selection.");
         }
-        if (dummy.getMax() == 130 && dummy.getMin() == 0)
+        if (selection.getSelection().getHeight().getMax() == 130 && selection.getSelection().getHeight().getMin() == 0)
             player.sendMessage(ChatColor.RED.toString() + "WARNING: default z values not changed!");
 
         player.sendMessage(ChatColor.YELLOW.toString() + "If you are sure you want to save this zone do /zconfirm");
 
-        dummy.setConfirm(Confirm.SAVE);
+        selection.setConfirm(Confirm.SAVE);
         return true;
     }
 }

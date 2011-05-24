@@ -130,7 +130,7 @@ public class ZonesVehicleListener extends VehicleListener {
                     wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                 } 
                 return;
-            } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE && !plugin.getP().permission(player, "zones.override.border")) {
+            } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE && !plugin.getPermissions().canUse(player, "zones.override.border")) {
                 if(wm.getConfig().isOutsideBorder(to)) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
@@ -143,7 +143,7 @@ public class ZonesVehicleListener extends VehicleListener {
                     return;
                 }
             }
-        } else if(wm.getConfig().BORDER_ENABLED && !plugin.getP().permission(player, "zones.override.border")) {
+        } else if(wm.getConfig().BORDER_ENABLED && !plugin.getPermissions().canUse(player, "zones.override.border")) {
             if(wm.getConfig().isOutsideBorder(to)) {
                 if(wm.getConfig().isOutsideBorder(from)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());

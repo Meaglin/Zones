@@ -1,7 +1,5 @@
 package com.zones;
 
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.zones.commands.ZoneCommand;
 import com.zones.commands.ZoneCommandMap;
@@ -9,18 +7,21 @@ import com.zones.listeners.ZonesBlockListener;
 import com.zones.listeners.ZonesEntityListener;
 import com.zones.listeners.ZonesPlayerListener;
 import com.zones.listeners.ZonesVehicleListener;
+import com.zones.permissions.BukkitPermissions;
+import com.zones.permissions.NijiPermissions;
+import com.zones.permissions.Permissions;
+import com.zones.persistence.Vertice;
+import com.zones.persistence.Zone;
+import com.zones.util.FileUtil;
 
 import gnu.trove.TLongObjectHashMap;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
+
+import javax.persistence.PersistenceException;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -41,7 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 64;
+    public static final int                 Rev             = 87;
     protected static final Logger           log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -51,7 +52,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private final ZoneCommandMap            commandMap      = new ZoneCommandMap(this);
 
     private WorldEditPlugin                 worldedit;
-    private PermissionHandler               accessmanager;
+    private Permissions                     permissionsManager;
 
     private final TLongObjectHashMap<WorldManager> worlds   = new TLongObjectHashMap<WorldManager>(1);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
@@ -71,6 +72,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Low);
         registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Low);
         registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.High);
 
         registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.High);
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.High);
@@ -82,7 +84,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.High);
-        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
+        //registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal);
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.High);
@@ -107,14 +109,22 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private void registerEvent(Event.Type type, Listener listener, Priority priority) {
         getServer().getPluginManager().registerEvent(type, listener, priority, this);
     }
-
-    public Connection getConnection() {
+    
+    private void setupDatabase() {
         try {
-            return DriverManager.getConnection(ZonesConfig.DATABASE_URL + "?autoReconnect=true&user=" + ZonesConfig.DATABASE_LOGIN + "&password=" + ZonesConfig.DATABASE_PASSWORD);
-        } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Unable to retreive connection", ex);
+            getDatabase().find(Zone.class).findRowCount();
+        } catch (PersistenceException ex) {
+            System.out.println("Installing database for " + getDescription().getName() + " due to first time usage");
+            installDDL();
         }
-        return null;
+    }
+    
+    @Override
+    public List<Class<?>> getDatabaseClasses() {
+        List<Class<?>> list = new ArrayList<Class<?>>();
+        list.add(Zone.class);
+        list.add(Vertice.class);
+        return list;
     }
 
     @Override
@@ -128,50 +138,37 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         
         File configFile = new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE);
         if(!configFile.exists()) {
-            try {
-                getDataFolder().mkdirs();
-                InputStream input = Zones.class.getResourceAsStream("/com/zones/config/Zones.properties");
-    
-                //For Overwrite the file.
-                OutputStream output = new FileOutputStream(configFile);
-    
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = input.read(buf)) > 0){
-                  output.write(buf, 0, len);
-                }
-                input.close();
-                output.close();
-            } catch (Exception e) {
-                log.info("[Zones]Error while restorting configuration file.");
-                e.printStackTrace();
-            }
-            log.info("[Zones]Missing configuration file restored.");
-            log.info("----------------------");
-            log.info("Zones will NOT finish loading since it has to be configured first to be able to load properly!");
-            log.info("----------------------");            
-        } else {    
-            Plugin p = this.getServer().getPluginManager().getPlugin("Permissions");
-            
-            if(p != null && p instanceof Permissions) {
-                if(!p.isEnabled()) {
-                    getPluginLoader().enablePlugin(p);
-                }
-                accessmanager = ((Permissions)p).getHandler();
+            getDataFolder().mkdirs();
+            if(FileUtil.copyFile(Zones.class.getResourceAsStream("/com/zones/config/Zones.properties"), configFile)) {
+                log.info("[Zones]Missing configuration file restored.");                
             } else {
-                log.info("----------------------");
-                log.info("Permissions manager NOT found, this will probably break the plugin!");
-                log.info("----------------------");                
+                log.info("[Zones]Error while restorting configuration file.");
+            }       
+        }  
+        resolvePermissions();
+        setupDatabase();
+        ZonesConfig.load(configFile);
+        loadWorlds();
+        registerEvents();
+        if(ZonesConfig.WORLDEDIT_ENABLED) {
+            log.info("[Zones] Loading worldedit support...");
+            registerWorldEdit();
+        }
+        log.info("[Zones]finished Loading.");
+        
+    }
+    
+    private void resolvePermissions() {
+        Plugin plugin = getServer().getPluginManager().getPlugin("Permissions");
+        if(plugin != null && plugin instanceof com.nijikokun.bukkit.Permissions.Permissions) {
+            if(!plugin.isEnabled()) {
+                getPluginLoader().enablePlugin(plugin);
             }
-            
-            ZonesConfig.load(configFile);
-            loadWorlds();
-            registerEvents();
-            if(ZonesConfig.WORLDEDIT_ENABLED) {
-                log.info("[Zones] Loading worldedit support...");
-                registerWorldEdit();
-            }
-            log.info("[Zones]finished Loading.");
+            permissionsManager = new NijiPermissions((com.nijikokun.bukkit.Permissions.Permissions)plugin);
+            log.info("[Zones]Using Nijikokun Permissions for permissions managing.");
+        } else {
+            permissionsManager = new BukkitPermissions();
+            log.info("[Zones]Using built in isOp() for permissions managing.");
         }
     }
     
@@ -182,12 +179,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         
     }
     
-    public PermissionHandler getP() {
-        return accessmanager;
+    
+    public Permissions getPermissions() {
+        return permissionsManager;
     }
 
-    public WorldEditPlugin getWorldEdit()
-    {
+    public WorldEditPlugin getWorldEdit() {
         return worldedit;
     }
     
@@ -205,19 +202,21 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         }
         return wm;
     }
-    
 
-    /*public WorldManager getWorldManager(String world) {
-        if(!worlds.containsKey(world)) {
-            World w = getServer().getWorld(world);
-            if(w != null) {
-                worlds.put(w.getName(), new WorldManager(this,w));
-            } else {
-                log.warning("[Zones] Trying to find world '" + world + "' which doesn't exist !");
-            }
+    protected WorldManager getWorldManager(String world) {
+        World w = getServer().getWorld(world);
+        if(w == null) {
+            log.warning("[Zones] Trying to find world '" + world + "' which doesn't exist !");
+            return null;
         }
-        return worlds.get(world);
-    }*/
+        WorldManager wm = worlds.get(w.getId());
+        if(wm == null) {
+            wm = new WorldManager(this,w);
+            worlds.put(w.getId(), wm);
+        }
+        
+        return wm;
+    }
     
     public ZoneManager getZoneManager() {
         return zoneManager;
@@ -226,6 +225,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public boolean reload() {
         return reloadConfig() && reloadZones();
     }
+    
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         ZoneCommand cmd = commandMap.getCommand(command.getName());
         if(cmd != null) {
@@ -239,7 +239,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             for(WorldManager w : worlds.getValues(new WorldManager[worlds.size()]))
                 w.loadRegions();
             
-            //commandMap.load();
         } catch(Throwable t) {
             t.printStackTrace();
             return false;

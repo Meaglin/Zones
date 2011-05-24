@@ -1,7 +1,5 @@
 package com.zones.model.types;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,14 +16,14 @@ import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.zones.WorldManager;
-import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneVertice;
 import com.zones.model.ZonesAccess;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.settings.ZoneVar;
+import com.zones.permissions.Permissions;
+import com.zones.persistence.Zone;
 
 /**
  * 
@@ -43,8 +41,8 @@ public class ZoneNormal extends ZoneBase{
     // We don't want to make a new list every time we need a default empty array.
     public static final List<Integer> emptyIntList = Arrays.asList();
     
-    public ZoneNormal(Zones zones, WorldManager worldManager, int id) {
-        super(zones, worldManager, id);
+    public ZoneNormal() {
+        super();
         
         admingroups = new ArrayList<String>();
         adminusers = new ArrayList<String>();
@@ -53,11 +51,14 @@ public class ZoneNormal extends ZoneBase{
         users = new HashMap<String, ZonesAccess>();
     }
 
-    public void setParameter(String name,String value){
-        if(value == null || value.equals("")) return;
-        
-        if (name.equals("admins")) {
-            String[] list = value.split(";");
+    public Permissions getPermissions() {
+        return getPlugin().getPermissions();
+    }
+    @Override
+    protected void onLoad(Zone persistence) {
+        super.onLoad(persistence);
+        if(persistence.getAdmins() != null && !persistence.getAdmins().trim().equals("")) {
+            String[] list = persistence.getAdmins().split(";");
             for (int i = 0; i < list.length; i++) {
                 String[] item = list[i].split(",");
 
@@ -68,7 +69,7 @@ public class ZoneNormal extends ZoneBase{
                         break;
                     // group
                     case 2:
-                        if (zones.getP().getGroup(getWorld().getName(),item[1]) != null)
+                        if (getPermissions().isValid(getWorld().getName(),item[1]))
                             admingroups.add(item[1]);
                         else
                             log.info("Invalid admin grouptype in zone id: " + getId());
@@ -78,8 +79,9 @@ public class ZoneNormal extends ZoneBase{
                         break;
                 }
             }
-        } else if (name.equals("users")) {
-            String[] list = value.split(";");
+        }
+        if(persistence.getUsers() != null && !persistence.getUsers().trim().equals("")) {
+            String[] list = persistence.getUsers().split(";");
             for (int i = 0; i < list.length; i++) {
                 String[] item = list[i].split(",");
                 int type = Integer.parseInt(item[0]);
@@ -100,7 +102,7 @@ public class ZoneNormal extends ZoneBase{
                         break;
                     // group
                     case 2:
-                        if (zones.getP().getGroup(getWorld().getName(),item[1]) != null)
+                        if (getPermissions().isValid(getWorld().getName(),itemname))
                             // addGroup(itemname,itemrights);
                             groups.put(itemname, new ZonesAccess(itemrights));
                         else
@@ -111,10 +113,7 @@ public class ZoneNormal extends ZoneBase{
                         break;
                 }
             }
-        } else {
-            super.setParameter(name, value);
         }
-        
     }
     
     public boolean canModify(Player player, ZonesAccess.Rights right) {
@@ -124,12 +123,15 @@ public class ZoneNormal extends ZoneBase{
             return true;
 
         for (Entry<String, ZonesAccess> e : groups.entrySet())
-            if (e.getValue().canDo(right))
-                if (zones.getP().inGroup(getWorld().getName(), player.getName(), e.getKey())) 
+            if (e.getValue().canDo(right)) {
+                if(e.getKey().equalsIgnoreCase("default"))
                     return true;
+                if (getPermissions().inGroup(getWorld(), player, e.getKey())) { 
+                    return true;
+                }
+            }
             
 
-        // Admins always have full access to the zone.
         return canAdministrate(player);
     }
 
@@ -156,7 +158,7 @@ public class ZoneNormal extends ZoneBase{
             base = base.merge(users.get(name));
 
         for (Entry<String, ZonesAccess> e : groups.entrySet())
-            if (zones.getP().inGroup(getWorld().getName(), player.getName(), e.getKey())) {
+            if (getPermissions().inGroup(getWorld(), player, e.getKey())) {
                 base = base.merge(e.getValue());
             }
 
@@ -168,13 +170,13 @@ public class ZoneNormal extends ZoneBase{
     }
 
     protected boolean isAdmin(Player player) {
-        if (zones.getP().permission(player, "zones.admin"))
+        if (getPermissions().canUse(player, "zones.admin"))
             return true;
 
         if (adminusers.contains(player.getName().toLowerCase()))
             return true;
 
-        for (String group : zones.getP().getGroups(getWorld().getName(), player.getName()))
+        for (String group : getPermissions().getGroups(player))
             if (admingroups.contains(group.toLowerCase()))
                 return true;
 
@@ -236,11 +238,6 @@ public class ZoneNormal extends ZoneBase{
             groups.remove(group);
         }
 
-        if (zones.getP().getGroup(getWorld().getName(), group) == null) {
-            log.info("Trying to add an invalid group '" + group + "' in zone '" + getName() + "'[" + getId() + "].");
-            return;
-        }
-
         if (!a.canNothing())
             groups.put(group, a);
 
@@ -259,7 +256,7 @@ public class ZoneNormal extends ZoneBase{
         if (admingroups.contains(group.toLowerCase()))
             return;
 
-        if (zones.getP().getGroup(getWorld().getName(), group) == null) {
+        if (!getPermissions().isValid(getWorld().getName(), group)) {
             log.info("Trying to add an invalid adminGroup '" + group + "' in zone '" + getName() + "'[" + getId() + "].");
             return;
         }
@@ -299,23 +296,9 @@ public class ZoneNormal extends ZoneBase{
         if (admins.length() > 0)
             admins = admins.substring(0, admins.length() - 1);
 
-        Connection conn = null;
-        PreparedStatement st = null;
-        try {
-            conn = zones.getConnection();
-            st = conn.prepareStatement("UPDATE " + ZonesConfig.ZONES_TABLE + " SET users = ?,admins = ? WHERE id = ?");
-            st.setString(1, users);
-            st.setString(2, admins);
-            st.setInt(3, getId());
-            st.execute();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null)conn.close();
-                if (st != null)st.close();
-            } catch (Exception e) {}
-        }
+        getPersistence().setUsers(users);
+        getPersistence().setAdmins(admins);
+        zones.getDatabase().update(getPersistence());
     }
 
     public void addUser(String username) {
@@ -337,7 +320,7 @@ public class ZoneNormal extends ZoneBase{
     @Override
     public void onEnter(Player player) {
         ZoneBase zone = zones.getWorldManager(player).getActiveZone(player);
-        if (zone == null || zone.getZone().getSize() > getZone().getSize())
+        if (zone == null || zone.getForm().getSize() > getForm().getSize())
             zone = this;
 
         /*
@@ -347,28 +330,44 @@ public class ZoneNormal extends ZoneBase{
          * {pname} - Player name.
          */
         String message = getSettings().getString(ZoneVar.ENTER_MESSAGE, ZonesConfig.DEFAULT_ENTER_MESSAGE);
-        message = message.replace("{zname}", getName());
-        if(message.contains("{access}")) message = message.replace("{access}", zone.getAccess(player).toColorCode());
-        message = message.replace("{pname}", player.getName());
-        
-        player.sendMessage(message);
+        sendMarkupMessage(message, player);
         if (zone.allowHealth(player)) {
             player.sendMessage(ChatColor.RED + "WARNING: you can die in this zone!");
+        }
+        
+        if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
+            for(Player insidePlayer : getCharactersInside().values()) {
+                if(!insidePlayer.equals(player) && canAdministrate(player)) {
+                    insidePlayer.sendMessage(ChatColor.YELLOW + "Player " + player.getDisplayName() + ChatColor.YELLOW + " has entered " + getName() + ".");
+                }
+            }
         }
     }
 
     @Override
     public void onExit(Player player) {
-        
         String message = getSettings().getString(ZoneVar.LEAVE_MESSAGE, ZonesConfig.DEFAULT_LEAVE_MESSAGE);
-        message = message.replace("{zname}", getName());
-        if(message.contains("{access}")) message = message.replace("{access}", getAccess(player).toColorCode());
-        message = message.replace("{pname}", player.getName());
+        sendMarkupMessage(message, player);
         
-        player.sendMessage(message);
-
+        if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
+            for(Player insidePlayer : getCharactersInside().values()) {
+                if(!insidePlayer.equals(player) && canAdministrate(player)) {
+                    insidePlayer.sendMessage(ChatColor.YELLOW + "Player " + player.getDisplayName() + ChatColor.YELLOW + " has left " + getName() + ".");
+                }
+            }
+        }
     }
 
+    private void sendMarkupMessage(String message, Player player) {
+        if(message.trim().equalsIgnoreCase("none")) return;
+        
+        message = message.replace("{zname}", getName());
+        if(message.contains("{access}")) message = message.replace("{access}", getAccess(player).toColorCode());
+        message = message.replace("{pname}", player.getDisplayName());
+        message = message.replace("^", "\u00A7");
+        player.sendMessage(message);
+    }
+    
     @Override
     public boolean allowWater(Block from, Block to) {
         if(!isInsideZone(from.getLocation()))
@@ -495,7 +494,7 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public boolean allowTeleport(Player player, Location to) {
-        return this.canModify(player, Rights.ENTER) && getSettings().getBool(ZoneVar.TELEPORT, true);
+        return this.canModify(player, Rights.ENTER) && (getSettings().getBool(ZoneVar.TELEPORT, true) || canAdministrate(player));
     }
 
     @Override
@@ -512,6 +511,11 @@ public class ZoneNormal extends ZoneBase{
     @Override
     public boolean allowSnowFall(Block block) {
         return getSettings().getBool(ZoneVar.SNOW_FALL, getWorldManager().getConfig().SNOW_FALL_ENABLED);
+    }
+
+    @Override
+    public boolean allowPhysics(Block block) {
+        return getSettings().getBool(ZoneVar.PHYSICS, getWorldManager().getConfig().PHYSICS_ENABLED);
     }
 
 

@@ -22,16 +22,14 @@ public class ZSetTypeCommand extends ZoneCommand {
     public boolean run(Player player, String[] vars) {
         
         if(vars.length == 1){
-            if(vars[0].equals("Cuboid"))
-                getDummy(player).setType(vars[0]);
-            else if(vars[0].equals("NPoly"))
-                getDummy(player).setType(vars[0]);
+            if(vars[0].equalsIgnoreCase("Cuboid"))
+                getDummy(player).setForm(vars[0]);
+            else if(vars[0].equalsIgnoreCase("NPoly"))
+                getDummy(player).setForm(vars[0]);
             else{
                 player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
                 return true;
             }
-            player.sendMessage(ChatColor.GREEN.toString() + "Succesfully changed zone type to '" + vars[0] + "' .");
-
         }else
             player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
         

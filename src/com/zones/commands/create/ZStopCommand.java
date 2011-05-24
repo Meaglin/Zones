@@ -4,8 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.ZonesDummyZone.Confirm;
 import com.zones.commands.ZoneCommand;
+import com.zones.selection.ZoneSelection.Confirm;
 
 /**
  * 

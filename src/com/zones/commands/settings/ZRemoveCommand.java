@@ -26,7 +26,7 @@ public class ZRemoveCommand extends ZoneCommand {
         this.setRequiredAccess("zones.settings.remove");
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public boolean run(Player player, String[] vars) {
         if(vars.length < 2){
@@ -42,9 +42,9 @@ public class ZRemoveCommand extends ZoneCommand {
         
         ZoneBase zone = getSelectedZone(player);
         Object o = zone.getSettings().get(v);
-        List list = null;
+        List<?> list = null;
         if(o != null) {
-            list = (List) o;
+            list = (List<?>) o;
         } else {
             list = new ArrayList();
         }

@@ -1,6 +1,9 @@
 package com.zones.model.forms;
 
+import java.util.List;
+
 import com.zones.model.ZoneForm;
+import com.zones.persistence.Vertice;
 
 /**
  * A primitive rectangular zone
@@ -37,6 +40,9 @@ public class ZoneCuboid extends ZoneForm {
         }
     }
     
+    public ZoneCuboid(List<Vertice> vertices, int minz, int maxz) {
+        this(vertices.get(0).getX(),vertices.get(1).getX(),vertices.get(0).getY(),vertices.get(1).getY(),minz,maxz);
+    }
     @Override
     public boolean isInsideZone(int x, int y) {
         if (x < _x1 || x > _x2 || y < _y1 || y > _y2)
@@ -127,7 +133,7 @@ public class ZoneCuboid extends ZoneForm {
     @Override
     public int getSize() {
 
-        return ((_x2 - _x1) * (_y2 - _y1) * (_z2 - _z1));
+        return ((_x2 - _x1 + 1) * (_y2 - _y1 + 1) * (_z2 - _z1 + 1));
     }
 
     @Override

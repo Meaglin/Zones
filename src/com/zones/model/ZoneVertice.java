@@ -1,8 +1,13 @@
 package com.zones.model;
 
+import org.bukkit.block.Block;
+
 public final class ZoneVertice {
 
     private long index;
+    public ZoneVertice(Block block) {
+        this(block.getX(), block.getZ());
+    }
     public ZoneVertice(int x, int y) {
         index = toLong(x,y);
     }

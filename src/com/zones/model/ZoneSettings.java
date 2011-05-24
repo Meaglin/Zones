@@ -32,6 +32,10 @@ public class ZoneSettings {
     }
     
     public void set(ZoneVar name, Object value) {
+        if(value == null) {
+            settings.remove(name);
+            return;
+        }
         settings.put(name, value);
     }
     
