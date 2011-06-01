@@ -60,6 +60,7 @@ public class WorldConfig {
     
     public boolean LEAF_DECAY_ENABLED;
     public boolean SNOW_FALL_ENABLED;
+    public boolean ICE_FORM_ENABLED;
     public boolean PHYSICS_ENABLED;
     
     public boolean PROTECTED_BLOCKS_ENABLED;
@@ -166,6 +167,7 @@ public class WorldConfig {
             
             LEAF_DECAY_ENABLED = p.getBool("LeafDecayEnabled", true);
             SNOW_FALL_ENABLED = p.getBool("SnowFallEnabled", true);
+            ICE_FORM_ENABLED = p.getBool("IceFormEnabled", true);
             PHYSICS_ENABLED             = p.getBool("PhysicsEnabled", true);
             
             PROTECTED_BLOCKS_ENABLED = p.getBool("ProtectedBlocksEnabled", true);

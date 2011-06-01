@@ -352,7 +352,7 @@ public abstract class ZoneCommand extends Command {
                 + "leafdecay - Enables/Disables leave decay in the zone.\n"
                 + "teleport - Enables/Disables teleporting in/out of the zone.\n"
                 + "fire - Enables/Disables fire in the zone.\n"
-                + "snowfall - Enables/Disables snowfall in the zone.\n"
+                + "snowfall|iceform - Enables/Disables snowfall|iceform.\n"
                 + "physics - Enables/Disables physics in the zone.\n" 
                 + "notify - Toggles enter/leave notifications in the zone."
                 

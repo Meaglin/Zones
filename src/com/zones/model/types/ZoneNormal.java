@@ -16,7 +16,6 @@ import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneVertice;
 import com.zones.model.ZonesAccess;
@@ -329,7 +328,7 @@ public class ZoneNormal extends ZoneBase{
          * {access} - BCDEH
          * {pname} - Player name.
          */
-        String message = getSettings().getString(ZoneVar.ENTER_MESSAGE, ZonesConfig.DEFAULT_ENTER_MESSAGE);
+        String message = getSettings().getString(ZoneVar.ENTER_MESSAGE, (String)ZoneVar.ENTER_MESSAGE.getDefault(this));
         sendMarkupMessage(message, player);
         if (zone.allowHealth(player)) {
             player.sendMessage(ChatColor.RED + "WARNING: you can die in this zone!");
@@ -346,7 +345,7 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public void onExit(Player player) {
-        String message = getSettings().getString(ZoneVar.LEAVE_MESSAGE, ZonesConfig.DEFAULT_LEAVE_MESSAGE);
+        String message = getSettings().getString(ZoneVar.LEAVE_MESSAGE, (String)ZoneVar.LEAVE_MESSAGE.getDefault(this));
         sendMarkupMessage(message, player);
         
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
@@ -371,7 +370,7 @@ public class ZoneNormal extends ZoneBase{
     @Override
     public boolean allowWater(Block from, Block to) {
         if(!isInsideZone(from.getLocation()))
-            return getSettings().getBool(ZoneVar.WATER,true);
+            return getFlag(ZoneVar.WATER);
         else
             return true;
     }
@@ -379,29 +378,29 @@ public class ZoneNormal extends ZoneBase{
     @Override
     public boolean allowLava(Block from, Block to) {
         if(!isInsideZone(from.getLocation()))
-            return getSettings().getBool(ZoneVar.LAVA,true);
+            return getFlag(ZoneVar.LAVA);
         else
             return true;
     }
 
     @Override
     public boolean allowDynamite(Block b) {
-        return getSettings().getBool(ZoneVar.DYNAMITE,getWorldManager().getConfig().ALLOW_TNT_TRIGGER);
+        return getFlag(ZoneVar.DYNAMITE);
     }
 
     @Override
     public boolean allowHealth(Player player) {
-        return getSettings().getBool(ZoneVar.HEALTH,getWorldManager().getConfig().PLAYER_HEALTH_ENABLED);
+        return getFlag(ZoneVar.HEALTH);
     }
 
     @Override
     public boolean allowLeafDecay(Block block) {
-        return getSettings().getBool(ZoneVar.LEAF_DECAY, true);
+        return getFlag(ZoneVar.LEAF_DECAY);
     }
     
     @Override
     public boolean allowFire(Player player,Block block) {
-        return getSettings().getBool(ZoneVar.FIRE , getWorldManager().getConfig().FIRE_ENABLED);
+        return getFlag(ZoneVar.FIRE);
     }
     
     @Override
@@ -494,7 +493,7 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public boolean allowTeleport(Player player, Location to) {
-        return this.canModify(player, Rights.ENTER) && (getSettings().getBool(ZoneVar.TELEPORT, true) || canAdministrate(player));
+        return this.canModify(player, Rights.ENTER) && (getFlag(ZoneVar.TELEPORT) || canAdministrate(player));
     }
 
     @Override
@@ -510,12 +509,17 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public boolean allowSnowFall(Block block) {
-        return getSettings().getBool(ZoneVar.SNOW_FALL, getWorldManager().getConfig().SNOW_FALL_ENABLED);
+        return getFlag(ZoneVar.SNOW_FALL);
     }
 
     @Override
     public boolean allowPhysics(Block block) {
-        return getSettings().getBool(ZoneVar.PHYSICS, getWorldManager().getConfig().PHYSICS_ENABLED);
+        return getFlag(ZoneVar.PHYSICS);
+    }
+
+    @Override
+    public boolean allowIceForm(Block block) {
+        return getFlag(ZoneVar.ICE_FORM);
     }
 
 

@@ -51,9 +51,9 @@ public class ZSelectCommand extends ZoneCommand {
                 int delta = Integer.MAX_VALUE;
                 ZoneBase closest = null;
                 for (ZoneBase zone : zoneslist) {
-                    if(closest == null || closest.getName().length()-vars[0].length() < delta) {
+                    if(closest == null || Math.abs(closest.getName().length()-vars[0].length()) < delta) {
                         closest = zone;
-                        delta = closest.getName().length()-vars[0].length();
+                        delta = Math.abs(closest.getName().length()-vars[0].length());
                     }
                     temp += zone.getName() + "[" + zone.getId() + "]";
                 }

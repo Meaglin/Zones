@@ -70,8 +70,8 @@ public class ZDefineCommand extends ZoneCommand {
         ZoneVertice height = new ZoneVertice(worldeditSelection.getMinimumPoint().getBlockY(), (worldeditSelection.getMaximumPoint().getBlockY() >= 127 ? 130 : worldeditSelection.getMaximumPoint().getBlockY()));
         if(inheritedZone != null){
             ZoneForm form = inheritedZone.getForm();
-            if (    form.getLowY() > height.getMin() || 
-                    form.getHighY() < height.getMax() ||
+            if (    form.getLowZ() > height.getMin() || 
+                    form.getHighZ() < height.getMax() ||
                     !form.isInsideZone(point1.getX(), point1.getY()) ||
                     !form.isInsideZone(point2.getX(), point2.getY()) ) {
                 player.sendMessage(ChatColor.RED + "Your selection is not inside your selected zone, zone cannot be created.");

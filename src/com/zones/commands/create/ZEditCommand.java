@@ -25,7 +25,7 @@ public class ZEditCommand extends ZoneCommand {
         ZoneBase z = getSelectedZone(player);
         ZoneEditSelection selection = new ZoneEditSelection(getPlugin(),player,z.getName());
         getZoneManager().addSelection(player.getEntityId(), selection);
-        player.sendMessage(ChatColor.GREEN + " Loaded zone " + z.getName() + " into your edit selection.");
+        player.sendMessage(ChatColor.GREEN + "Loaded zone " + z.getName() + " into your edit selection.");
         
         return true;
     }

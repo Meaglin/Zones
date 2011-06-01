@@ -40,7 +40,6 @@ public class ZWhoCommand extends ZoneCommand {
             sorted.addAll(getWorldManager(player).getActiveZones(player));
             if(sorted.size() > 0) {
                 Set<String> usedNames = new HashSet<String>();
-                usedNames.add(player.getName());
                 for(ZoneBase zone : sorted){
                     sendZone(player, zone, usedNames);
                 }
@@ -56,7 +55,7 @@ public class ZWhoCommand extends ZoneCommand {
     private void sendZone(Player player, ZoneBase zone, Set<String> usedNames) {
         String msg = "";
         for(Player insidePlayer : zone.getCharactersInside().values()) {
-            if(usedNames == null || !usedNames.contains(insidePlayer.getName())) {
+            if(player.getEntityId() != insidePlayer.getEntityId() && (usedNames == null || !usedNames.contains(insidePlayer.getName()))) {
                 msg += ", " + insidePlayer.getDisplayName();
                 if(usedNames != null) usedNames.add(insidePlayer.getName());
             }

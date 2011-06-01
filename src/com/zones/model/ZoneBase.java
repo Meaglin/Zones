@@ -83,6 +83,10 @@ public abstract class ZoneBase {
         return worldManager;
     }
     
+    public WorldConfig getWorldConfig() {
+        return getWorldManager().getConfig();
+    }
+    
     public World getWorld() {
         return getWorldManager().getWorld();
     }
@@ -195,6 +199,7 @@ public abstract class ZoneBase {
     public abstract boolean allowHealth(Player player);
     public abstract boolean allowLeafDecay(Block block);
     public abstract boolean allowSnowFall(Block block);
+    public abstract boolean allowIceForm(Block block);
     public abstract boolean allowPhysics(Block block);
     public abstract boolean allowFire(Player player, Block block);
     
@@ -261,6 +266,18 @@ public abstract class ZoneBase {
     
     public ZoneSettings getSettings() {
         return settings;
+    }
+    
+    /**
+     * Easy function to get boolean flags.
+     * 
+     * @param zoneconfigvar
+     * @return the value or default if null.
+     */
+    public boolean getFlag(ZoneVar name) {
+        if(!name.getType().equals(Boolean.class))
+            return false;
+        return getSettings().getBool(name, (Boolean)name.getDefault(this));
     }
     
     public boolean setSetting(ZoneVar name, boolean b) {

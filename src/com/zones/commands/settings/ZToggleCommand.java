@@ -25,60 +25,65 @@ public class ZToggleCommand extends ZoneCommand {
         super("ztoggle", plugin);
         this.setRequiresSelected(true);
         variables.put("dynamite" , new Object[] { 
-                "zones.toggle.tnt",
-                "Dynamite",
-                ZoneVar.DYNAMITE
+            "zones.toggle.tnt",
+            "Dynamite",
+            ZoneVar.DYNAMITE
         } );
         variables.put("tnt" , new Object[] { 
-                "zones.toggle.tnt",
-                "Tnt",
-                ZoneVar.DYNAMITE
+            "zones.toggle.tnt",
+            "Tnt",
+            ZoneVar.DYNAMITE
         } );
         variables.put("health" , new Object[] { 
-                "zones.toggle.health",
-                "Health",
-                ZoneVar.HEALTH
+            "zones.toggle.health",
+            "Health",
+            ZoneVar.HEALTH
         } );
         variables.put("lava" , new Object[] { 
-                "zones.toggle.lava",
-                "Lava Flow",
-                ZoneVar.LAVA
+            "zones.toggle.lava",
+            "Lava Flow",
+            ZoneVar.LAVA
         } );
         variables.put("water" , new Object[] { 
-                "zones.toggle.water",
-                "Water Flow",
-                ZoneVar.WATER
+            "zones.toggle.water",
+            "Water Flow",
+            ZoneVar.WATER
         } );
         variables.put("mobs" , new Object[] { 
-                "zones.toggle.mobs",
-                "Mobs Spawning",
-                ZoneVar.SPAWN_MOBS
+            "zones.toggle.mobs",
+            "Mobs Spawning",
+            ZoneVar.SPAWN_MOBS
         } );
         variables.put("animals" , new Object[] { 
-                "zones.toggle.animals",
-                "Animals Spawning",
-                ZoneVar.SPAWN_ANIMALS
+            "zones.toggle.animals",
+            "Animals Spawning",
+            ZoneVar.SPAWN_ANIMALS
         } );
         variables.put("leafdecay", new Object[] {
-               "zones.toggle.leafdecay",
-               "Leaf Decay",
-               ZoneVar.LEAF_DECAY
+           "zones.toggle.leafdecay",
+           "Leaf Decay",
+           ZoneVar.LEAF_DECAY
         });
         variables.put("teleport", new Object[] {
-               "zones.toggle.teleport",
-               "Teleporting",
-               ZoneVar.TELEPORT
+           "zones.toggle.teleport",
+           "Teleporting",
+           ZoneVar.TELEPORT
         });
         variables.put("fire", new Object[] {
-                "zones.toggle.fire",
-                "Fire",
-                ZoneVar.FIRE
+            "zones.toggle.fire",
+            "Fire",
+            ZoneVar.FIRE
         });
         variables.put("snowfall", new Object[] {
            "zones.toggle.snowfall",
            "SnowFall",
            ZoneVar.SNOW_FALL
         });
+        variables.put("iceform", new Object[] {
+            "zones.toggle.iceform",
+            "IceForm",
+            ZoneVar.ICE_FORM
+         });
         variables.put("physics", new Object[] {
            "zones.toggle.physics",
            "Physics",
@@ -95,13 +100,13 @@ public class ZToggleCommand extends ZoneCommand {
     public boolean run(Player player, String[] vars) {
 
         if(vars.length < 1) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|notify] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|iceform|notify] ");
             return true;
         }
         
         if(!variables.containsKey(vars[0].toLowerCase())) {
             player.sendMessage(ChatColor.RED + "Invalid variable name.");
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|notify] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|iceform|notify] ");
             return true;
         }
         Object[] variable = variables.get(vars[0].toLowerCase());
@@ -110,38 +115,15 @@ public class ZToggleCommand extends ZoneCommand {
         } else {
             ZoneBase zone = getSelectedZone(player);
             ZoneSettings settings = zone.getSettings();
-            if(zone.setSetting(((ZoneVar)variable[2]), !settings.getBool(((ZoneVar)variable[2]),getDefault(vars[0],zone)))) {
-                player.sendMessage(ChatColor.GREEN + ((String)variable[1]) + " is now " + (settings.getBool(((ZoneVar)variable[2]),getDefault(vars[0],zone)) ?  "allowed" : "blocked")+ " in this zone!");
+            ZoneVar var = ((ZoneVar)variable[2]);
+            if(zone.setSetting(var, !settings.getBool(var,(Boolean)var.getDefault(zone)))) {
+                player.sendMessage(ChatColor.GREEN + ((String)variable[1]) + " is now " + (settings.getBool(var,(Boolean)var.getDefault(zone)) ?  "allowed" : "blocked")+ " in this zone!");
             } else {
                 player.sendMessage(ChatColor.RED + "Error changing variable, contact an admin.");
             }
         }
         
         return false;
-    }
-    private static boolean getDefault(String name,ZoneBase zone) {
-        if(name.equalsIgnoreCase("tnt") || name.equalsIgnoreCase("dynamite"))
-            return zone.getWorldManager().getConfig().ALLOW_TNT_TRIGGER;
-        else if(name.equalsIgnoreCase("health"))
-            return zone.getWorldManager().getConfig().PLAYER_HEALTH_ENABLED;
-        else if(name.equalsIgnoreCase("lava"))
-            return true;
-        else if(name.equalsIgnoreCase("water"))
-            return true;
-        else if(name.equalsIgnoreCase("teleport"))
-            return true;
-        else if(name.equalsIgnoreCase("fire"))
-            return zone.getWorldManager().getConfig().FIRE_ENABLED;
-        else if(name.equalsIgnoreCase("leafdecay"))
-            return zone.getWorldManager().getConfig().LEAF_DECAY_ENABLED;
-        else if(name.equalsIgnoreCase("snowfall"))
-            return zone.getWorldManager().getConfig().SNOW_FALL_ENABLED;
-        else if(name.equalsIgnoreCase("physics"))
-            return zone.getWorldManager().getConfig().PHYSICS_ENABLED;
-        else if(name.equalsIgnoreCase("notify")) 
-            return false;
-        else 
-            return false;
     }
 
 }

@@ -315,4 +315,20 @@ public class ZonesBlockListener extends BlockListener {
                 event.setCancelled(true);
         }
     }
+    
+    public void onIceForm(org.bukkit.event.block.IceFormEvent event) {
+        if(event.isCancelled()) return;
+        
+        Block block = event.getBlock();
+
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
+        ZoneBase zone = wm.getActiveZone(block);
+        if(zone == null) {
+            if(!wm.getConfig().ICE_FORM_ENABLED)
+                event.setCancelled(true);
+        } else {
+            if(!zone.allowIceForm(block))
+                event.setCancelled(true);
+        }
+    }
 }

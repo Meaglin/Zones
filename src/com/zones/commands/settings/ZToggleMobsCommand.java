@@ -16,7 +16,7 @@ import com.zones.model.settings.ZoneVar;
 public class ZToggleMobsCommand extends ZoneCommand {
 
     public ZToggleMobsCommand(Zones plugin) {
-        super("ztoggleanimals", plugin);
+        super("ztogglemobs", plugin);
         this.setRequiresSelected(true);
         this.setRequiredAccess("zones.toggle.mobs");
     }

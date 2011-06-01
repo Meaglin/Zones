@@ -178,7 +178,9 @@ public class ZoneManager {
 
     public void reloadZone(int id) {
         ZoneBase zone = getZone(id);
-        removeZone(zone);
+        if(zone != null)
+            removeZone(zone);
+        
         Zone persistentZone = plugin.getDatabase().find(Zone.class, id);
         if(persistentZone != null) {
             WorldManager wm = plugin.getWorldManager(persistentZone.getWorld());
@@ -194,5 +196,6 @@ public class ZoneManager {
         zone.getWorldManager().removeZone(zone);
         zones.remove(zone.getId());
     }
+    
 
 }
