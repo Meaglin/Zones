@@ -522,5 +522,9 @@ public class ZoneNormal extends ZoneBase{
         return getFlag(ZoneVar.ICE_FORM);
     }
 
+    @Override
+    public boolean allowMushroomSpread(Block block) {
+        return getFlag(ZoneVar.MUSHROOM_SPREAD);
+    }
 
 }

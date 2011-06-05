@@ -128,47 +128,6 @@ public class ZonesBlockListener extends BlockListener {
     }
 
     /**
-     * Called when a player right clicks a block
-     * 
-     * @param event
-     *            Relevant event details
-     *
-    @Override
-    public void onBlockRightClick(BlockRightClickEvent event) {
-        int itemInHand = event.getItemInHand().getTypeId();
-        Block blockClicked = event.getBlock();
-        Player player = event.getPlayer();
-        if (itemInHand == Zones.toolType) {
-            ZonesDummyZone dummy = ZoneManager.getInstance().getDummy(player.getName());
-            if (dummy != null) {
-                if (dummy.getType() == 1 && dummy.getCoords().size() == 2) {
-                    player.sendMessage(ChatColor.RED.toString() + "You can only use 2 points to define a cuboid zone.");
-                    return;
-                }
-                int[] p = new int[2];
-
-                p[0] = World.toInt(blockClicked.getX());
-                p[1] = World.toInt(blockClicked.getZ());
-
-                if (blockClicked.getY() < World.MAX_Z - Zones.pilonHeight) {
-                    for (int i = 1; i <= Zones.pilonHeight; i++) {
-                        Block t = player.getWorld().getBlockAt(blockClicked.getX(), blockClicked.getY() + i, blockClicked.getZ());
-                        dummy.addDeleteBlock(t);
-                        t.setTypeId(Zones.pilonType);
-                    }
-                }
-                if (dummy.getCoords().contains(p)) {
-                    player.sendMessage(ChatColor.RED.toString() + "Already added this point.");
-                    return;
-                }
-
-                player.sendMessage(ChatColor.GREEN.toString() + "Added point [" + p[0] + "," + p[1] + "] to the temp zone.");
-                dummy.addCoords(p);
-            }
-        }
-    }
-
-    /**
      * Called when a block gets ignited
      * 
      * @param event
@@ -331,4 +290,21 @@ public class ZonesBlockListener extends BlockListener {
                 event.setCancelled(true);
         }
     }
+    
+    public void onMushroomSpread(org.bukkit.event.block.MushroomSpreadEvent event) {
+if(event.isCancelled()) return;
+        
+        Block block = event.getBlock();
+
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
+        ZoneBase zone = wm.getActiveZone(block);
+        if(zone == null) {
+            if(!wm.getConfig().MUSHROOM_SPREAD_ENABLED)
+                event.setCancelled(true);
+        } else {
+            if(!zone.allowMushroomSpread(block))
+                event.setCancelled(true);
+        }
+    }
+    
 }

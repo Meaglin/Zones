@@ -25,6 +25,11 @@ public enum Serializer {
                 return null;
             }
         }
+        
+        @Override
+        public Class<? extends Object> getType() {
+            return Integer.class;
+        }
     },
     BOOLEAN {
         @Override
@@ -40,6 +45,11 @@ public enum Serializer {
         public Object unSerialize(String serializedData) {
             return Boolean.parseBoolean(serializedData);
         }
+        
+        @Override
+        public Class<? extends Object> getType() {
+            return Boolean.class;
+        }
     },
     STRING {
         @Override
@@ -54,6 +64,11 @@ public enum Serializer {
         @Override
         public Object unSerialize(String serializedData) {
             return unEscape(serializedData);
+        }
+        
+        @Override
+        public Class<? extends Object> getType() {
+            return String.class;
         }
     },
     INTEGERLIST {
@@ -90,6 +105,16 @@ public enum Serializer {
             if(list.isEmpty()) return null;
             return list;
         }
+        
+        @Override
+        public Class<? extends Object> getType() {
+            return List.class;
+        }
+        
+        @Override
+        public Class<? extends Object> getListType() {
+            return Integer.class;
+        }
     },
     CREATURELIST {
         @Override
@@ -123,6 +148,16 @@ public enum Serializer {
             if(list.isEmpty()) return null;
             return list;
         }
+        
+        @Override
+        public Class<? extends Object> getType() {
+            return List.class;
+        }
+        
+        @Override
+        public Class<? extends Object> getListType() {
+            return CreatureType.class;
+        }
     },
     
     ZONEVERTICE {
@@ -146,10 +181,19 @@ public enum Serializer {
             return z;
         }
         
+        @Override
+        public Class<? extends Object> getType() {
+            return ZoneVertice.class;
+        }
     };
     
     public abstract String serialize(Object data);
     public abstract Object unSerialize(String serializedData);
+    public abstract Class<? extends Object> getType();
+    public Class<? extends Object> getListType() {
+        return null;
+    }
+    
     
     public static final String unEscape(String str) {
         return str.replace("$1", ",").replace("$2", ";");

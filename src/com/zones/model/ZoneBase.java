@@ -200,6 +200,7 @@ public abstract class ZoneBase {
     public abstract boolean allowLeafDecay(Block block);
     public abstract boolean allowSnowFall(Block block);
     public abstract boolean allowIceForm(Block block);
+    public abstract boolean allowMushroomSpread(Block block);
     public abstract boolean allowPhysics(Block block);
     public abstract boolean allowFire(Player player, Block block);
     
