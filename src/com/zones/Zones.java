@@ -42,7 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 91;
+    public static final int                 Rev             = 92;
     protected static final Logger           log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -58,14 +58,13 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private final ZoneManager               zoneManager     = new ZoneManager(this);
     
     public Zones() {
-        
     }
 
     /**
      * Register used events.
      */
     private void registerEvents() {
-
+        
         registerEvent(Event.Type.BLOCK_DAMAGE, blockListener, Priority.High);
         registerEvent(Event.Type.BLOCK_FROMTO, blockListener, Priority.High);
         registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Low);
@@ -73,6 +72,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Low);
         registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.High);
         registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_BURN, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.High);
 
         registerEvent(Event.Type.ICE_FORM, blockListener, Priority.High);
         registerEvent(Event.Type.MUSHROOM_SPREAD, blockListener, Priority.High);
@@ -81,6 +82,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.High);
         registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.High);
         registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.High);
+        registerEvent(Event.Type.PAINTING_PLACE, entityListener, Priority.Normal);
+        registerEvent(Event.Type.PAINTING_BREAK, entityListener, Priority.Normal);
 
         registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Low);
         registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.High);
@@ -89,6 +92,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.High);
         //registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_BUCKET_FILL, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_BUCKET_EMPTY, playerListener, Priority.Normal);
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.High);
         registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.High);
@@ -204,6 +209,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             worlds.put(world.getId(), wm);
         }
         return wm;
+    }
+    
+    public WorldManager[] getWorlds() {
+        return worlds.getValues(new WorldManager[worlds.size()]);
     }
 
     protected WorldManager getWorldManager(String world) {

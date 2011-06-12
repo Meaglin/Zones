@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -18,7 +21,7 @@ public final class Properties extends java.util.Properties {
     private static final long serialVersionUID = 1L;
 
     private static Logger     log              = Logger.getLogger(Properties.class.getName());
-
+    private boolean missingProperties          = false;
     public Properties() {
     }
 
@@ -74,7 +77,7 @@ public final class Properties extends java.util.Properties {
 
         if (property == null) {
             log.info("Properties: Missing property for key - " + key);
-
+            missingProperties = true;
             return null;
         }
 
@@ -94,6 +97,10 @@ public final class Properties extends java.util.Properties {
         return property.trim();
     }
 
+    public boolean isMissingProperties() {
+        return missingProperties;
+    }
+    
     public boolean getBool(String key, String defaultvalue) {
         return Boolean.parseBoolean(getProperty(key, defaultvalue));
     }
@@ -167,5 +174,42 @@ public final class Properties extends java.util.Properties {
 
     public float getFloat(String key, float defaultvalue, float min, float max) {
         return limit(getFloat(key, defaultvalue), min, max);
+    }
+    
+    public List<Integer> getIntList(String key, String defaultvalue) {
+        List<Integer> rt = new ArrayList<Integer>();
+        String property = getProperty(key, defaultvalue);
+        if(property == null || property.trim().equals("")) return rt;
+        
+        for(String item : property.split(","))
+            if(item != null && !item.trim().equals("")) {
+                try { rt.add(Integer.parseInt(item)); } catch(NumberFormatException e) {}
+            }
+        
+        return rt;
+    }
+    
+    public List<Integer> getIntList(String key, Integer... defaultvalue) {
+        return getIntList(key, Arrays.asList(defaultvalue));
+    }
+    
+    public List<Integer> getIntList(String key, List<Integer> defaultvalue) {
+        String property = getProperty(key);
+        if(property == null || property.trim().equals("")) return defaultvalue;
+        
+        List<Integer> rt = null;
+        if(defaultvalue == null) rt = new ArrayList<Integer>();
+        else {
+            // Object recycling.
+            rt = defaultvalue;
+            rt.clear();
+        }
+        
+        for(String item : property.split(","))
+            if(item != null && !item.trim().equals("")) {
+                try { rt.add(Integer.parseInt(item)); } catch(NumberFormatException e) {}
+            }
+        
+        return rt;
     }
 }

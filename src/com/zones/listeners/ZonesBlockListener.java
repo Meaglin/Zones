@@ -9,6 +9,7 @@ import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -128,24 +129,44 @@ public class ZonesBlockListener extends BlockListener {
     }
 
     /**
+     * Called when a block is destroyed from burning
+     * 
+     * @param event
+     *            Relevant event details
+     */
+    public void onBlockBurn(BlockBurnEvent event) {
+        if(event.isCancelled())return;
+        
+        if(onFire(null, event.getBlock(), IgniteCause.SPREAD))
+            event.setCancelled(true);
+    }
+    
+    /**
      * Called when a block gets ignited
      * 
      * @param event
      *            Relevant event details
      */
     public void onBlockIgnite(BlockIgniteEvent event) { 
-        if(event.isCancelled()) return;
+        if(event.isCancelled())return;
         
-        WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
-        ZoneBase zone = wm.getActiveZone(event.getBlock());
+        if(onFire(event.getPlayer(),event.getBlock(),event.getCause()))
+            event.setCancelled(true);
+    }
+    
+    public boolean onFire(Player player, Block block, IgniteCause cause) {
+        
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
+        ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(!wm.getConfig().canBurn(event.getPlayer(), event.getBlock(), event.getCause()))
-                event.setCancelled(true);
+            if(!wm.getConfig().canBurn(player, block, cause))
+                return true;
         } else {
-            if(!zone.allowFire(event.getPlayer(), event.getBlock()) || (wm.getConfig().FIRE_ENFORCE_PROTECTED_BLOCKS && !wm.getConfig().canBurnBlock(event.getBlock()))) {
-                event.setCancelled(true);
+            if(!zone.allowFire(player, block) || (wm.getConfig().FIRE_ENFORCE_PROTECTED_BLOCKS && !wm.getConfig().canBurnBlock(block))) {
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -210,14 +231,7 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
 
-    /**
-     * Called when a block is destroyed from burning
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    public void onBlockBurn(BlockBurnEvent event) {
-    }
+
 
     /**
      * Called when a block is destroyed by a player.
@@ -238,7 +252,7 @@ public class ZonesBlockListener extends BlockListener {
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null) {
                 if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")){
-                    player.sendMessage(ChatColor.RED + "You're not allowed to destroy blocks in this world!");
+                    player.sendMessage(ChatColor.RED + "You cannot destroy blocks in this world!");
                     event.setCancelled(true);
                 } else {
                     wm.getConfig().logBlockPlace(player, block);
@@ -292,7 +306,7 @@ public class ZonesBlockListener extends BlockListener {
     }
     
     public void onMushroomSpread(org.bukkit.event.block.MushroomSpreadEvent event) {
-if(event.isCancelled()) return;
+        if(event.isCancelled()) return;
         
         Block block = event.getBlock();
 

@@ -38,7 +38,7 @@ public class ZImportCommand extends ZoneCommand {
                     player.sendMessage(ChatColor.YELLOW+"Can't find your current worldedit selection!");
                 } else {
                     player.sendMessage(ChatColor.YELLOW+"Trying to import your current worldedit selection as zone coords.");
-                    selection.setClass("ZoneNormal");
+                    //selection.setClass("ZoneNormal");
                     CuboidSelection sel = new CuboidSelection(selection);
 
                     Location min = worldeditSelection.getMinimumPoint();

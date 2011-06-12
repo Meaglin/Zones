@@ -1,6 +1,7 @@
 package com.zones.listeners;
 
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -14,6 +15,9 @@ import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.painting.PaintingBreakByEntityEvent;
+import org.bukkit.event.painting.PaintingBreakEvent;
+import org.bukkit.event.painting.PaintingPlaceEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -44,12 +48,16 @@ public class ZonesEntityListener extends EntityListener {
         }
         WorldManager wm = plugin.getWorldManager(defender.getWorld());
         ZoneBase zone = wm.getActiveZone(defender.getLocation());
-        
+        Player player = (defender instanceof Player ? (Player)defender : null);
         if (zone == null) {
-            if(defender instanceof Player) {
-                Player p  = (Player)defender;
-                if(!wm.getConfig().canReceiveDamage(p, event.getCause())) {
+            if(player != null) {
+                if(!wm.getConfig().canReceiveDamage(player, event.getCause())) {
                     event.setCancelled(true);
+                    return;
+                }
+                if(wm.getConfig().hasGodMode(player)) {
+                    event.setCancelled(true);
+                    return;
                 }
             } else if(event.getCause() == DamageCause.BLOCK_EXPLOSION) {
                 if(!wm.getConfig().EXPLOSION_DAMAGE_ENTITIES) {
@@ -58,8 +66,8 @@ public class ZonesEntityListener extends EntityListener {
                 }
             }
         } else {
-            if (defender instanceof Player) {                
-                if (!zone.allowHealth(((Player)defender)) || (wm.getConfig().PLAYER_ENFORCE_SPECIFIC_DAMAGE && !wm.getConfig().canReceiveSpecificDamage((Player)defender, event.getCause()))) {
+            if (player != null) {                
+                if (!zone.allowHealth(player) || (wm.getConfig().PLAYER_ENFORCE_SPECIFIC_DAMAGE && !wm.getConfig().canReceiveSpecificDamage(player, event.getCause()))) {
                     event.setCancelled(true);
                     return;
                 }
@@ -69,6 +77,7 @@ public class ZonesEntityListener extends EntityListener {
                 if(!zone.allowEntityHit(att, defender)) {
                     att.sendMessage(ChatColor.RED + "You cannot kill entities in " + zone.getName() + "!");
                     event.setCancelled(true);
+                    return;
                 }
             }            
         }
@@ -132,6 +141,68 @@ public class ZonesEntityListener extends EntityListener {
     }
 
     public void onEntityTarget(EntityTargetEvent event) {
+    }
+    
+    public void onPaintingPlace(PaintingPlaceEvent event) {
+        if(event.isCancelled()) return;
+        
+        Player player = event.getPlayer();
+        Block blockPlaced = event.getBlock().getRelative(event.getBlockFace());
+
+        WorldManager wm = plugin.getWorldManager(player);
+        if(!wm.getConfig().isProtectedBreakBlock(player, blockPlaced)) {
+            ZoneBase zone = wm.getActiveZone(blockPlaced);
+            if(zone == null){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,"zones.build")){
+                    player.sendMessage(ChatColor.RED + "You cannot build in this world!");
+                    event.setCancelled(true);
+                } else {
+                    wm.getConfig().logBlockPlace(player, blockPlaced);
+                }
+            } else  {
+                if (!zone.allowBlockCreate(player, blockPlaced)) {
+                    // These messages are now handled in the ZoneClass.
+                    //player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' .");
+                    event.setCancelled(true);
+                } else {
+                    wm.getConfig().logBlockPlace(player, blockPlaced);
+                }
+            }
+        }
+        
+    }
+
+    public void onPaintingBreak(PaintingBreakEvent event) {
+        if(event.isCancelled()) return;
+        if(!(event instanceof PaintingBreakByEntityEvent)) return;
+        Entity entity = ((PaintingBreakByEntityEvent)event).getRemover();
+        if(entity == null) return;
+        if(!(entity instanceof Player)) return;
+        
+        Block block = event.getPainting().getLocation().getBlock();
+        Player player = ((Player)entity);
+
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
+        if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
+            ZoneBase zone = wm.getActiveZone(block);
+            if(zone == null) {
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")){
+                    player.sendMessage(ChatColor.RED + "You cannot destroy blocks in this world!");
+                    event.setCancelled(true);
+                } else {
+                    wm.getConfig().logBlockPlace(player, block);
+                }
+            } else {
+                if (!zone.allowBlockDestroy(player, block)) {
+                    // These messages are now handled in the ZoneClass.
+                    //player.sendMessage(ChatColor.RED + "You cannot destroy blocks in '" + zone.getName() + "' !");
+                    event.setCancelled(true);
+                } else {
+                    wm.getConfig().logBlockBreak(player, block);
+                }
+            }
+        }
+        
     }
 
 }

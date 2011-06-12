@@ -1,5 +1,7 @@
 package com.zones.model;
 
+import gnu.trove.TIntHashSet;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +84,9 @@ public class WorldConfig {
     
     public boolean LIMIT_BUILD_BY_FLAG;
     
+    public boolean GOD_MODE_ENABLED;
+    public boolean GOD_MODE_AUTOMATIC;
+    
     public boolean PLAYER_HEALTH_ENABLED;
     
     public boolean PLAYER_ENFORCE_SPECIFIC_DAMAGE;
@@ -120,6 +125,8 @@ public class WorldConfig {
             }
         }
         load();
+        for(Player player : manager.getPlugin().getServer().getOnlinePlayers())
+            this.setGodMode(player, GOD_MODE_AUTOMATIC);
     }
     
     public Permissions getPermissions() {
@@ -131,7 +138,7 @@ public class WorldConfig {
             Properties p = new Properties(new File(filename));
             
             BORDER_ENABLED = p.getBool("BorderEnabled", false);
-            BORDER_RANGE = p.getInt("BorderRange", 0);
+            BORDER_RANGE = p.getInt("BorderRange", 1000);
             BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAIR") ? 2 : 1);
             BORDER_ENFORCE = p.getBool("EnforceBorder", false);
             
@@ -148,23 +155,13 @@ public class WorldConfig {
             LAVA_FIRE_ENABLED = p.getBool("LavaFireEnabled", true);
             
             FIRE_ENFORCE_PROTECTED_BLOCKS = p.getBool("EnforceFireProtectedBlocks", true);
-            FIRE_PROTECTED_BLOCKS = new ArrayList<Integer>();
-            for(String b : p.getProperty("FireProtectedBlocks", "").split(","))
-                if(b != null && !b.equals(""))
-                    FIRE_PROTECTED_BLOCKS.add(Integer.parseInt(b));
+            FIRE_PROTECTED_BLOCKS = p.getIntList("FireProtectedBlocks", "");
             
             LAVA_FLOW_ENABLED = p.getBool("LavaFlowEnabled", true);
-            LAVA_PROTECTED_BLOCKS = new ArrayList<Integer>();
-            for(String b : p.getProperty("LavaProtectedBlock", "").split(","))
-                if(b != null && !b.equals(""))
-                    LAVA_PROTECTED_BLOCKS.add(Integer.parseInt(b));
-            
+            LAVA_PROTECTED_BLOCKS = p.getIntList("LavaProtectedBlock", "");
             
             WATER_FLOW_ENABLED = p.getBool("WaterFlowEnabled", true);
-            WATER_PROTECTED_BLOCKS = new ArrayList<Integer>();
-            for(String b : p.getProperty("WaterProtectedBlock", "").split(","))
-                if(b != null && !b.equals(""))
-                    WATER_PROTECTED_BLOCKS.add(Integer.parseInt(b));
+            WATER_PROTECTED_BLOCKS = p.getIntList("WaterProtectedBlock", "");
             
             LEAF_DECAY_ENABLED = p.getBool("LeafDecayEnabled", true);
             SNOW_FALL_ENABLED = p.getBool("SnowFallEnabled", true);
@@ -174,27 +171,14 @@ public class WorldConfig {
             
             PROTECTED_BLOCKS_ENABLED = p.getBool("ProtectedBlocksEnabled", true);
             if(PROTECTED_BLOCKS_ENABLED) {
-                PROTECTED_BLOCKS_PLACE = new ArrayList<Integer>();
-                for(String b : p.getProperty("ProtectedBlocksPlace", "").split(","))
-                    if(b != null && !b.equals(""))
-                        PROTECTED_BLOCKS_PLACE.add(Integer.parseInt(b));
-                PROTECTED_BLOCKS_BREAK = new ArrayList<Integer>();
-                for(String b : p.getProperty("ProtectedBlocksBreak", "").split(","))
-                    if(b != null && !b.equals(""))
-                        PROTECTED_BLOCKS_BREAK.add(Integer.parseInt(b));
+                PROTECTED_BLOCKS_PLACE = p.getIntList("ProtectedBlocksPlace", "");
+                PROTECTED_BLOCKS_BREAK = p.getIntList("ProtectedBlocksBreak", "");
             }
             
             LOGGED_BLOCKS_ENABLED = p.getBool("LoggedBlocksEnabled", true);
             if(LOGGED_BLOCKS_ENABLED){
-                LOGGED_BLOCKS_PLACE = new ArrayList<Integer>();
-                for(String b : p.getProperty("LoggedBlocksPlace", "").split(","))
-                    if(b != null && !b.equals(""))
-                        LOGGED_BLOCKS_PLACE.add(Integer.parseInt(b));
-                
-                LOGGED_BLOCKS_BREAK = new ArrayList<Integer>();
-                for(String b : p.getProperty("LoggedBlocksBreak", "").split(","))
-                    if(b != null && !b.equals(""))
-                        LOGGED_BLOCKS_BREAK.add(Integer.parseInt(b));
+                LOGGED_BLOCKS_PLACE = p.getIntList("LoggedBlocksPlace", "");
+                LOGGED_BLOCKS_BREAK = p.getIntList("LoggedBlocksBreak", "");
             }
             
             MOB_SPAWNING_ENABLED = p.getBool("MobSpawningEnabled", true);
@@ -225,6 +209,12 @@ public class WorldConfig {
                 }
             }
             LIMIT_BUILD_BY_FLAG = p.getBool("LimitBuildByFlag", false);
+            
+            GOD_MODE_ENABLED = p.getBool("AllowGodMode", false);
+            if(GOD_MODE_ENABLED) {
+                godMode = new TIntHashSet();
+                GOD_MODE_AUTOMATIC = p.getBool("AutoOnGodMode", true);
+            }
             
             PLAYER_HEALTH_ENABLED = p.getBool("PlayerHealthEnabled", true);
             
@@ -532,9 +522,9 @@ public class WorldConfig {
         Location spawn = loc.getWorld().getSpawnLocation();
         switch (this.BORDER_TYPE) {
             case 1:
-                if(loc.getZ() > spawn.getZ()+this.BORDER_RANGE || loc.getZ() < spawn.getZ()+this.BORDER_RANGE)
+                if(loc.getZ() > (spawn.getZ()+this.BORDER_RANGE) || loc.getZ() < (spawn.getZ()-this.BORDER_RANGE))
                     return true;
-                if(loc.getX() > spawn.getX()+this.BORDER_RANGE || loc.getX() < spawn.getX()+this.BORDER_RANGE)
+                if(loc.getX() > (spawn.getX()+this.BORDER_RANGE) || loc.getX() < (spawn.getX()-this.BORDER_RANGE))
                     return true;
                 
                 return false;
@@ -549,6 +539,30 @@ public class WorldConfig {
             default:
                 return false;
         }
+    }
+    
+    /*
+     *  TODO: move to separate handler ? 
+     */
+    private TIntHashSet godMode;
+    public boolean hasGodMode(Player player) {
+        if(!this.GOD_MODE_ENABLED)
+            return false;
+        
+        if(godMode.contains(player.getEntityId()))
+            return false;
+        
+        return true;
+    }
+    
+    public void setGodMode(Player player, boolean mode) {
+        if(!this.GOD_MODE_ENABLED)
+            return;
+        
+        if(mode)
+            godMode.remove(player.getEntityId());
+        else
+            godMode.add(player.getEntityId());
     }
     
 }
