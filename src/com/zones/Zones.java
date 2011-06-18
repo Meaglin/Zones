@@ -70,13 +70,18 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Low);
         registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Low);
         registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Low);
-        registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.High);
         registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.High);
         registerEvent(Event.Type.BLOCK_BURN, blockListener, Priority.High);
         registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.High);
 
-        registerEvent(Event.Type.ICE_FORM, blockListener, Priority.High);
-        registerEvent(Event.Type.MUSHROOM_SPREAD, blockListener, Priority.High);
+        /**
+         * Will be replaced by/fall under BLOCK_FORM after the next RB
+         */
+        registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.High);
+        
+        registerEvent(Event.Type.BLOCK_FORM, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_SPREAD, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_FADE, blockListener, Priority.High);
 
         registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.High);
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.High);

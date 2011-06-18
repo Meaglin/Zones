@@ -82,6 +82,18 @@ public enum ZoneVar {
                 return zone.getWorldConfig().PHYSICS_ENABLED;
             }
         },
+        ICE_MELT("IceMelt", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().ICE_MELT_ENABLED;
+            }
+        },
+        SNOW_MELT("SnowMelt", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().SNOW_MELT_ENABLED;
+            }
+        },
         NOTIFY("Notify", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {return false;}
