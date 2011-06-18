@@ -37,7 +37,7 @@ public class NijiPermissions implements Permissions {
 
     @Override
     public String getGroup(Player player) {
-        return getHandler().getGroup(player.getWorld().getName(), player.getName());
+        return getHandler().getPrimaryGroup(player.getWorld().getName(), player.getName());
     }
 
     @Override
@@ -47,7 +47,7 @@ public class NijiPermissions implements Permissions {
 
     @Override
     public boolean isValid(String world, String group) {
-        return getHandler().getGroup(world, group) != null;
+        return getHandler().getGroupObject(world, group) != null;
     }
 
 }
