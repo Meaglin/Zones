@@ -57,7 +57,7 @@ public class ZonesDummyZone {
     
     
     private boolean cuiEnabled = false;
-    private static final String CUI = "񘘦񘄹";
+    private static final String CUI = "搂5搂6搂4搂5";
     
     
     private ZoneBase inheritedZone = null;
