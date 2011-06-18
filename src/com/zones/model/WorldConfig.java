@@ -65,6 +65,9 @@ public class WorldConfig {
     public boolean ICE_FORM_ENABLED;
     public boolean MUSHROOM_SPREAD_ENABLED;
     public boolean PHYSICS_ENABLED;
+
+    public boolean ICE_MELT_ENABLED;
+    public boolean SNOW_MELT_ENABLED;
     
     public boolean PROTECTED_BLOCKS_ENABLED;
     public List<Integer> PROTECTED_BLOCKS_PLACE;
@@ -168,6 +171,9 @@ public class WorldConfig {
             ICE_FORM_ENABLED = p.getBool("IceFormEnabled", true);
             MUSHROOM_SPREAD_ENABLED = p.getBool("MushroomSpreadEnabled", true);
             PHYSICS_ENABLED             = p.getBool("PhysicsEnabled", true);
+
+            ICE_MELT_ENABLED = p.getBool("IceMeltEnabled", true);
+            SNOW_MELT_ENABLED = p.getBool("SnowMeltEnabled", true);
             
             PROTECTED_BLOCKS_ENABLED = p.getBool("ProtectedBlocksEnabled", true);
             if(PROTECTED_BLOCKS_ENABLED) {

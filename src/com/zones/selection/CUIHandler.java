@@ -8,7 +8,7 @@ import com.zones.model.ZoneVertice;
 
 public class CUIHandler {
     private final ZoneSelection selection;
-    private static final String CUI = "񘘦񘄹";
+    private static final String CUI = "搂5搂6搂4搂5";
     
     public CUIHandler(ZoneSelection selection) {
         this.selection = selection;

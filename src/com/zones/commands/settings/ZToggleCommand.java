@@ -84,6 +84,16 @@ public class ZToggleCommand extends ZoneCommand {
             "IceForm",
             ZoneVar.ICE_FORM
          });
+        variables.put("icemelt", new Object[] {
+           "zones.toggle.icemelt",
+           "IceMelt",
+           ZoneVar.ICE_MELT
+        });
+        variables.put("snowmelt", new Object[] {
+           "zones.toggle.snowmelt",
+           "SnowMelt",
+           ZoneVar.SNOW_MELT
+        });
         variables.put("mushroomspread", new Object[] {
             "zones.toggle.mushroomspread",
             "MushroomSpread",
@@ -105,13 +115,13 @@ public class ZToggleCommand extends ZoneCommand {
     public boolean run(Player player, String[] vars) {
 
         if(vars.length < 1) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|iceform|mushroomspread|notify] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|iceform|mushroomspread|icemelt|snowmelt|notify] ");
             return true;
         }
         
         if(!variables.containsKey(vars[0].toLowerCase())) {
             player.sendMessage(ChatColor.RED + "Invalid variable name.");
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|iceform|mushroomspread|notify] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|teleport|snowfall|iceform|mushroomspread|icemelt|snowmelt|notify] ");
             return true;
         }
         Object[] variable = variables.get(vars[0].toLowerCase());

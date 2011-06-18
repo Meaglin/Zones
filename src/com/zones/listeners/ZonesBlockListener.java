@@ -1,20 +1,12 @@
 package com.zones.listeners;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockCanBuildEvent;
-import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
-import org.bukkit.event.block.BlockListener;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.LeavesDecayEvent;
-import org.bukkit.event.block.SnowFormEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -271,7 +263,12 @@ public class ZonesBlockListener extends BlockListener {
             }
         }
     }
-    
+
+
+    /**
+     * Will be replaced by onBlockForm in the next RB
+     * @param event
+     */
     @Override
     public void onSnowForm(SnowFormEvent event) {
         if(event.isCancelled()) return;
@@ -289,23 +286,49 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
     
-    public void onIceForm(org.bukkit.event.block.IceFormEvent event) {
+    public void onBlockForm(org.bukkit.event.block.BlockFormEvent event) {
         if(event.isCancelled()) return;
         
+        BlockState blockstate = event.getNewState();
+        Block block = blockstate.getBlock();
+
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
+        ZoneBase zone = wm.getActiveZone(block);
+        if(zone == null) {
+            if(blockstate.getTypeId() == 78 && !wm.getConfig().SNOW_FALL_ENABLED)
+                event.setCancelled(true);
+            if(blockstate.getTypeId() == 79 && !wm.getConfig().ICE_FORM_ENABLED)
+                event.setCancelled(true);
+        } else {
+            if(blockstate.getTypeId() == 78 && !zone.allowIceForm(block))
+                event.setCancelled(true);
+            if(blockstate.getTypeId() == 79 && !zone.allowSnowFall(block))
+                event.setCancelled(true);
+        }
+    }
+
+    public void onBlockFade(BlockFadeEvent event) {
+        if(event.isCancelled()) return;
+
         Block block = event.getBlock();
 
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(!wm.getConfig().ICE_FORM_ENABLED)
+            if(block.getTypeId() == 78 && !wm.getConfig().SNOW_FALL_ENABLED)
+                event.setCancelled(true);
+            if(block.getTypeId() == 79 && !wm.getConfig().ICE_FORM_ENABLED)
                 event.setCancelled(true);
         } else {
-            if(!zone.allowIceForm(block))
+            if(block.getTypeId() == 78 && !zone.allowSnowFall(block))
                 event.setCancelled(true);
+            if(block.getTypeId() == 79 && !zone.allowIceForm(block))
+                event.setCancelled(true);
+
         }
     }
     
-    public void onMushroomSpread(org.bukkit.event.block.MushroomSpreadEvent event) {
+    public void onBlockSpread(org.bukkit.event.block.BlockSpreadEvent event) {
         if(event.isCancelled()) return;
         
         Block block = event.getBlock();
