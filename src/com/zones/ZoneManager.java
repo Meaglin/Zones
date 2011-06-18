@@ -43,7 +43,6 @@ public class ZoneManager {
     }
     public void load(WorldManager world) {
         cleanUp(world);
-        
         int count = 0;
         try {
             List<Zone> zones = plugin.getDatabase().find(Zone.class).where().ieq("world", world.getWorldName()).findList();

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.commands.admin.*;
 import com.zones.commands.create.*;
 import com.zones.commands.general.*;
@@ -21,7 +22,6 @@ public class ZoneCommandMap {
     
     public ZoneCommandMap(Zones plugin) {
         this.plugin = plugin;
-        load();
     }
     
     public void load() {
@@ -33,7 +33,6 @@ public class ZoneCommandMap {
         // Admin
         registerCommand(new ZAddAdminCommand(plugin));
         registerCommand(new ZDeleteCommand(plugin));
-        registerCommand(new ZExportCommand(plugin));
         registerCommand(new ZGetAccessCommand(plugin));
         registerCommand(new ZReloadCommand(plugin));
         registerCommand(new ZRemoveAdminCommand(plugin));
@@ -43,10 +42,7 @@ public class ZoneCommandMap {
         //Create
         registerCommand(new ZConfirmCommand(plugin));
         registerCommand(new ZCreateCommand(plugin));
-        registerCommand(new ZDefineCommand(plugin));
         registerCommand(new ZEditCommand(plugin));
-        registerCommand(new ZRedefineCommand(plugin));
-        registerCommand(new ZImportCommand(plugin));
         registerCommand(new ZSaveCommand(plugin));
         registerCommand(new ZSetClassCommand(plugin));
         registerCommand(new ZSetDepthCommand(plugin));
@@ -77,6 +73,12 @@ public class ZoneCommandMap {
         registerCommand(new ZToggleMobsCommand(plugin));
         registerCommand(new ZToggleWaterCommand(plugin));
         
+        if(ZonesConfig.WORLDEDIT_ENABLED) {
+            registerCommand(new ZDefineCommand(plugin));
+            registerCommand(new ZExportCommand(plugin));
+            registerCommand(new ZRedefineCommand(plugin));
+            registerCommand(new ZImportCommand(plugin));
+        }
     }
     
     public void registerCommand(ZoneCommand cmd) {

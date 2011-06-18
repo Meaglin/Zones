@@ -1,6 +1,7 @@
 package com.zones.model;
 
-import java.util.HashMap;
+import gnu.trove.TIntObjectHashMap;
+
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
@@ -26,7 +27,7 @@ public abstract class ZoneBase {
 
     private int                 id;
     protected ZoneForm                form;
-    protected HashMap<String, Player> characterList;
+    protected TIntObjectHashMap<Player> playerList;
 
     private String                    name;
     private ZoneSettings              settings = new ZoneSettings();
@@ -39,7 +40,7 @@ public abstract class ZoneBase {
     private boolean                   initialized;
     
     protected ZoneBase() {
-        characterList = new HashMap<String, Player>();
+        playerList = new TIntObjectHashMap<Player>();
     }
     
     public final void initialize(Zones plugin, WorldManager worldManager, Zone persistence) {
@@ -172,10 +173,10 @@ public abstract class ZoneBase {
      * 
      * @param player
      */
-    public void removeCharacter(Player player) { removeCharacter(player,false); }
-    public void removeCharacter(Player player, boolean silent) {
-        if (characterList.containsKey(player.getName())) {
-            characterList.remove(player.getName());
+    public void removePlayer(Player player) { removePlayer(player,false); }
+    public void removePlayer(Player player, boolean silent) {
+        if (playerList.containsKey(player.getEntityId())) {
+            playerList.remove(player.getEntityId());
             if(!silent)onExit(player);
         }
     }
@@ -186,8 +187,8 @@ public abstract class ZoneBase {
      * @param player
      * @return
      */
-    public boolean isCharacterInZone(Player player) {
-        return characterList.containsKey(player.getName());
+    public boolean isPlayerInZone(Player player) {
+        return playerList.containsKey(player.getEntityId());
     }
 
     protected abstract void onEnter(Player player);
@@ -224,8 +225,12 @@ public abstract class ZoneBase {
     public abstract boolean canAdministrate(Player player);
    
     
-    public HashMap<String, Player> getCharactersInside() {
-        return characterList;
+    public TIntObjectHashMap<Player> getPlayersInsideMap() {
+        return playerList;
+    }
+    
+    public Player[]  getPlayersInside() {
+        return playerList.getValues(new Player[playerList.size()]);
     }
 
     @Override
@@ -253,13 +258,13 @@ public abstract class ZoneBase {
     }
     public void revalidateInZone(Player player, Location loc) {
         if (isInsideZone(loc)) {
-            if (!characterList.containsKey(player.getName())) {
-                characterList.put(player.getName(), player);
+            if (!playerList.containsKey(player.getEntityId())) {
+                playerList.put(player.getEntityId(), player);
                 onEnter(player);
             }
         } else {
-            if (characterList.containsKey(player.getName())) {
-                characterList.remove(player.getName());
+            if (playerList.containsKey(player.getEntityId())) {
+                playerList.remove(player.getEntityId());
                 onExit(player);
             }
         }

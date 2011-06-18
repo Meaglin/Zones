@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -75,7 +76,7 @@ public class ZonesPlayerListener extends PlayerListener {
         Player player = event.getPlayer();
         List<ZoneBase> zones = plugin.getWorldManager(player).getActiveZones(player);
         for(ZoneBase z : zones)
-            z.removeCharacter(player,true);
+            z.removePlayer(player,true);
         
         ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
         if (selection != null) {
@@ -130,11 +131,11 @@ public class ZonesPlayerListener extends PlayerListener {
                 player.teleport(event.getFrom());
                 event.setCancelled(true);
                 return;
-            } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE && !plugin.getPermissions().canUse(player, "zones.override.border")) {
-                if(wm.getConfig().isOutsideBorder(to)) {
+            } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
+                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         event.setFrom(wm.getWorld().getSpawnLocation());
-                        player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
+                        player.sendMessage(ChatColor.RED + "You were moved to spawn because you were in an illigal position.");
                         wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         return;
                     }
@@ -144,8 +145,8 @@ public class ZonesPlayerListener extends PlayerListener {
                     return;
                 }
             }
-        } else if(wm.getConfig().BORDER_ENABLED && !plugin.getPermissions().canUse(player, "zones.override.border")) {
-            if(wm.getConfig().isOutsideBorder(to)) {
+        } else if(wm.getConfig().BORDER_ENABLED) {
+            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from)) {
 
                     event.setFrom(wm.getWorld().getSpawnLocation());
@@ -165,13 +166,9 @@ public class ZonesPlayerListener extends PlayerListener {
         wm.revalidateZones(player, from, to);
     }
 
-    /**
-     * Called when a player attempts to teleport to a new location in a world
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    @Override
+    public void onPlayerPortal(PlayerPortalEvent event) {
+        onPlayerTeleport(event);
+    }
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         if(event.isCancelled()) return;
         
@@ -200,23 +197,23 @@ public class ZonesPlayerListener extends PlayerListener {
                 event.setCancelled(true);
                 return;
             } else if (wmto.getConfig().BORDER_ENABLED && wmto.getConfig().BORDER_ENFORCE) {
-                if(wmto.getConfig().isOutsideBorder(to) && !plugin.getPermissions().canUse(player, "zones.override.border")) {
+                if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                     player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
                     event.setCancelled(true);
                     return;
                 }
             }
         } else if(wmto.getConfig().BORDER_ENABLED) {
-            if(wmto.getConfig().isOutsideBorder(to) && !plugin.getPermissions().canUse(player, "zones.override.border")) {
+            if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                 player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
                 event.setCancelled(true);
                 return;
             }
         }
 
-        wmto.revalidateZones(player, from, to);
         if(from.getWorld() != to.getWorld())
             wmfrom.revalidatOutZones(player, from);
+        wmto.revalidateZones(player, from, to);
             
     }
 
@@ -251,10 +248,13 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.BUCKET.getId()
             );
     
+    private static final List<Integer> placeBlocks = Arrays.asList(
+            Material.DIODE_BLOCK_OFF.getId(),
+            Material.DIODE_BLOCK_ON.getId()
+            );
+    
     private static final List<Integer> hitBlocks = Arrays.asList(
             Material.CAKE_BLOCK.getId(),
-            Material.DIODE_BLOCK_OFF.getId(),
-            Material.DIODE_BLOCK_ON.getId(),
             Material.LEVER.getId(),
             Material.STONE_PLATE.getId(),
             Material.WOOD_PLATE.getId(),
@@ -385,7 +385,7 @@ public class ZonesPlayerListener extends PlayerListener {
                     }
                 }
                 
-                if(placeItems.contains(toolType)) {
+                if(placeItems.contains(toolType) || placeBlocks.contains(blockType)) {
                     WorldManager wm = plugin.getWorldManager(player.getWorld());
                     if(!wm.getConfig().isProtectedPlaceBlock(player, toolType)) {
                         Block block = event.getClickedBlock().getRelative(event.getBlockFace());

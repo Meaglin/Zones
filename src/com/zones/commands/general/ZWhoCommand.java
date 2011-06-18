@@ -54,7 +54,7 @@ public class ZWhoCommand extends ZoneCommand {
     
     private void sendZone(Player player, ZoneBase zone, Set<String> usedNames) {
         String msg = "";
-        for(Player insidePlayer : zone.getCharactersInside().values()) {
+        for(Player insidePlayer : zone.getPlayersInside()) {
             if(player.getEntityId() != insidePlayer.getEntityId() && (usedNames == null || !usedNames.contains(insidePlayer.getName()))) {
                 msg += ", " + insidePlayer.getDisplayName();
                 if(usedNames != null) usedNames.add(insidePlayer.getName());

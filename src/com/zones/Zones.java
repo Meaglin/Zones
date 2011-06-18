@@ -42,7 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 92;
+    public static final int                 Rev             = 94;
     protected static final Logger           log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -92,6 +92,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
         registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Low);
         registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.High);
+        registerEvent(Event.Type.PLAYER_PORTAL, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.High);
@@ -125,7 +126,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     private void setupDatabase() {
         try {
-            getDatabase().find(Zone.class).findRowCount();
+            getDatabase().find(Zone.class);
         } catch (PersistenceException ex) {
             System.out.println("Installing database for " + getDescription().getName() + " due to first time usage");
             installDDL();
@@ -161,6 +162,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         resolvePermissions();
         setupDatabase();
         ZonesConfig.load(configFile);
+        commandMap.load();
         loadWorlds();
         registerEvents();
         if(ZonesConfig.WORLDEDIT_ENABLED) {

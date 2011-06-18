@@ -64,7 +64,7 @@ public class ZoneNormal extends ZoneBase{
                 switch (Integer.parseInt(item[0])) {
                     // user
                     case 1:
-                        adminusers.add(item[1]);
+                        adminusers.add(item[1].toLowerCase());
                         break;
                     // group
                     case 2:
@@ -97,7 +97,7 @@ public class ZoneNormal extends ZoneBase{
                     // user
                     case 1:
                         // addUser(itemname,itemrights );
-                        users.put(itemname, new ZonesAccess(itemrights));
+                        users.put(itemname.toLowerCase(), new ZonesAccess(itemrights));
                         break;
                     // group
                     case 2:
@@ -335,7 +335,7 @@ public class ZoneNormal extends ZoneBase{
         }
         
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
-            for(Player insidePlayer : getCharactersInside().values()) {
+            for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(player)) {
                     insidePlayer.sendMessage(ChatColor.YELLOW + "Player " + player.getDisplayName() + ChatColor.YELLOW + " has entered " + getName() + ".");
                 }
@@ -349,7 +349,7 @@ public class ZoneNormal extends ZoneBase{
         sendMarkupMessage(message, player);
         
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
-            for(Player insidePlayer : getCharactersInside().values()) {
+            for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(player)) {
                     insidePlayer.sendMessage(ChatColor.YELLOW + "Player " + player.getDisplayName() + ChatColor.YELLOW + " has left " + getName() + ".");
                 }

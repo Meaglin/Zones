@@ -134,7 +134,7 @@ public class Region {
     public void revalidateOutZones(Player player, Location from) {
         for (ZoneBase z : getZones()) {
             if (z != null)
-                z.removeCharacter(player);
+                z.removePlayer(player);
         }
     }
 }

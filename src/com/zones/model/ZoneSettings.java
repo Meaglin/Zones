@@ -139,10 +139,12 @@ public class ZoneSettings {
     
     
     public static final String unEscape(String str) {
+        if(str ==  null) return "";
         return str.replace("$1", ",").replace("$2", ";");
     }
     
     public static final String escape(String str) {
+        if(str == null) return "";
         return str.replace(",", "$1").replace(";" , "$2");
     }
 }

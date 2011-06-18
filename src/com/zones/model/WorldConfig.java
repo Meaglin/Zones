@@ -38,7 +38,11 @@ public class WorldConfig {
     public boolean BORDER_ENABLED;
     public int BORDER_RANGE;
     public int BORDER_TYPE;
+    public boolean BORDER_USE_SPAWN;
+    public ZoneVertice BORDER_ALTERNATE_CENTER;
+    
     public boolean BORDER_ENFORCE;
+    public boolean BORDER_OVERRIDE_ENABLED;
     
     public boolean ALLOW_TNT_TRIGGER;
     public int TNT_RANGE;
@@ -143,7 +147,19 @@ public class WorldConfig {
             BORDER_ENABLED = p.getBool("BorderEnabled", false);
             BORDER_RANGE = p.getInt("BorderRange", 1000);
             BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAIR") ? 2 : 1);
+            BORDER_USE_SPAWN = p.getBool("BorderUseSpawn", true);
+            if(!BORDER_USE_SPAWN) {
+                try {
+                    String[] split = p.getProperty("BorderAlternateCenter","0,0").split(",");
+                    if(split.length < 2) throw new Exception("Not enough parameters.");
+                    BORDER_ALTERNATE_CENTER = new ZoneVertice(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+                } catch(Exception e) {
+                    log.warning("[Zones] Invalid BorderAlternateCenter!");
+                    e.printStackTrace();
+                }
+            }
             BORDER_ENFORCE = p.getBool("EnforceBorder", false);
+            BORDER_OVERRIDE_ENABLED = p.getBool("BorderOverrideEnabled", true);
             
             ALLOW_TNT_TRIGGER = p.getBool("AllowTntTrigger", true);
             TNT_RANGE = p.getInt("TntRange", 4);
@@ -525,19 +541,28 @@ public class WorldConfig {
     }
     
     public boolean isOutsideBorder(Location loc) {
-        Location spawn = loc.getWorld().getSpawnLocation();
+        double x = 0;
+        double z = 0;
+        if(!BORDER_USE_SPAWN && BORDER_ALTERNATE_CENTER != null) {
+            x = BORDER_ALTERNATE_CENTER.getX();
+            z = BORDER_ALTERNATE_CENTER.getY();
+        } else {
+            Location spawn = loc.getWorld().getSpawnLocation();
+            x = spawn.getX();
+            z = spawn.getZ();
+        }
         switch (this.BORDER_TYPE) {
             case 1:
-                if(loc.getZ() > (spawn.getZ()+this.BORDER_RANGE) || loc.getZ() < (spawn.getZ()-this.BORDER_RANGE))
+                if(loc.getZ() > (z+this.BORDER_RANGE) || loc.getZ() < (z-this.BORDER_RANGE))
                     return true;
-                if(loc.getX() > (spawn.getX()+this.BORDER_RANGE) || loc.getX() < (spawn.getX()-this.BORDER_RANGE))
+                if(loc.getX() > (x+this.BORDER_RANGE) || loc.getX() < (x-this.BORDER_RANGE))
                     return true;
                 
                 return false;
             case 2:
-                int xdistance = spawn.getBlockX() - loc.getBlockX();
-                int zdistance = spawn.getBlockZ() - loc.getBlockZ();
-                double range = StrictMath.sqrt(xdistance * xdistance  + zdistance * zdistance);
+                double xdistance = x - loc.getX();
+                double zdistance = z - loc.getZ();
+                double range = StrictMath.sqrt(xdistance * xdistance + zdistance * zdistance);
                 if(range > this.BORDER_RANGE)
                     return true;
                 
