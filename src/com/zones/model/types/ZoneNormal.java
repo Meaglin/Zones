@@ -523,6 +523,16 @@ public class ZoneNormal extends ZoneBase{
     }
 
     @Override
+    public boolean allowIceMelt(Block block) {
+        return getFlag(ZoneVar.ICE_MELT);
+    }
+
+    @Override
+    public boolean allowSnowMelt(Block block) {
+        return getFlag(ZoneVar.SNOW_MELT);
+    }
+
+    @Override
     public boolean allowMushroomSpread(Block block) {
         return getFlag(ZoneVar.MUSHROOM_SPREAD);
     }

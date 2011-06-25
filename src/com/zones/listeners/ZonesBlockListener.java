@@ -315,15 +315,19 @@ public class ZonesBlockListener extends BlockListener {
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(block.getTypeId() == 78 && !wm.getConfig().SNOW_FALL_ENABLED)
+            if(block.getTypeId() == 78 && !wm.getConfig().SNOW_MELT_ENABLED) {
                 event.setCancelled(true);
-            if(block.getTypeId() == 79 && !wm.getConfig().ICE_FORM_ENABLED)
+            }
+            if(block.getTypeId() == 79 && !wm.getConfig().ICE_MELT_ENABLED) {
                 event.setCancelled(true);
+            }
         } else {
-            if(block.getTypeId() == 78 && !zone.allowSnowFall(block))
+            if(block.getTypeId() == 78 && !zone.allowSnowMelt(block)) {
                 event.setCancelled(true);
-            if(block.getTypeId() == 79 && !zone.allowIceForm(block))
+            }
+            if(block.getTypeId() == 79 && !zone.allowIceMelt(block)) {
                 event.setCancelled(true);
+            }
 
         }
     }
