@@ -369,7 +369,7 @@ public class ZoneNormal extends ZoneBase{
     
     @Override
     public boolean allowWater(Block from, Block to) {
-        if(!isInsideZone(from.getLocation()))
+        if(isInsideZone(from.getLocation()))
             return getFlag(ZoneVar.WATER);
         else
             return true;
@@ -377,7 +377,7 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public boolean allowLava(Block from, Block to) {
-        if(!isInsideZone(from.getLocation()))
+        if(isInsideZone(from.getLocation()))
             return getFlag(ZoneVar.LAVA);
         else
             return true;
