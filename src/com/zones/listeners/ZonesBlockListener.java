@@ -1,7 +1,6 @@
 package com.zones.listeners;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
@@ -288,8 +287,10 @@ public class ZonesBlockListener extends BlockListener {
     
     public void onBlockForm(org.bukkit.event.block.BlockFormEvent event) {
         if(event.isCancelled()) return;
-        
         BlockState blockstate = event.getNewState();
+        if(blockstate.getTypeId() != 78 && blockstate.getTypeId() != 79)
+            return;
+
         Block block = blockstate.getBlock();
 
         WorldManager wm = plugin.getWorldManager(block.getWorld());
@@ -310,22 +311,27 @@ public class ZonesBlockListener extends BlockListener {
     public void onBlockFade(BlockFadeEvent event) {
         if(event.isCancelled()) return;
 
+        
         Block block = event.getBlock();
-
+        int typeId = block.getTypeId();
+        if(typeId != 78 && typeId != 79)
+            return;
+        
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
+        
         if(zone == null) {
-            if(block.getTypeId() == 78 && !wm.getConfig().SNOW_MELT_ENABLED) {
+            if(typeId == 78 && !wm.getConfig().SNOW_MELT_ENABLED) {
                 event.setCancelled(true);
             }
-            if(block.getTypeId() == 79 && !wm.getConfig().ICE_MELT_ENABLED) {
+            if(typeId == 79 && !wm.getConfig().ICE_MELT_ENABLED) {
                 event.setCancelled(true);
             }
         } else {
-            if(block.getTypeId() == 78 && !zone.allowSnowMelt(block)) {
+            if(typeId == 78 && !zone.allowSnowMelt(block)) {
                 event.setCancelled(true);
             }
-            if(block.getTypeId() == 79 && !zone.allowIceMelt(block)) {
+            if(typeId == 79 && !zone.allowIceMelt(block)) {
                 event.setCancelled(true);
             }
 

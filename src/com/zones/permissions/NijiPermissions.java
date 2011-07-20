@@ -1,12 +1,15 @@
 package com.zones.permissions;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import com.nijiko.permissions.Entry;
 import com.nijiko.permissions.PermissionHandler;
+import com.nijiko.permissions.User;
 
 public class NijiPermissions implements Permissions {
 
@@ -41,8 +44,20 @@ public class NijiPermissions implements Permissions {
     }
 
     @Override
+    /*
+     * I seriously couldn't find a more efficient way.
+     * /sadface
+     */
     public List<String> getGroups(Player player) {
-        return Arrays.asList(getHandler().getGroups(player.getWorld().getName(), player.getName()));
+        User u = getHandler().getUserObject(player.getWorld().getName(), player.getName());
+        LinkedHashSet<Entry> ancestors = u.getAncestors();
+        List<String> groups = new ArrayList<String>();
+        for(Entry e : ancestors)
+            if(e.getWorld().equals(player.getWorld().getName()))
+                groups.add(e.getName().toLowerCase());
+        
+        return groups;
+        //return getHandler().getGroups(player.getWorld().getName(), player.getName());
     }
 
     @Override

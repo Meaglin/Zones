@@ -172,6 +172,10 @@ public abstract class ZoneSelection {
                     getPlayer().sendMessage(ChatColor.RED + "Missing selection points.");
                     break;
                 }
+                if(!sellectionAllowed()) {
+                    getPlayer().sendMessage(ChatColor.RED + "All your points need to be in your currently selected zone.");
+                    break;
+                }
                 if (save() != null) {
                     getZoneManager().removeSelection(getPlayer().getEntityId());
                     getPlayer().sendMessage(ChatColor.GREEN + "Zone Saved.");
@@ -185,6 +189,17 @@ public abstract class ZoneSelection {
         }
     }
 
+    
+    public boolean sellectionAllowed() {
+        if(getPlugin().getPermissions().canUse(getPlayer(), "zones.create"))
+            return true;
+        
+        ZoneBase zone = getSelectedZone();
+        if(zone != null && zone instanceof ZoneInherit && zone.getForm().contains(getSelection()) && zone.canAdministrate(getPlayer()))
+            return true;
+        
+        return false;
+    }
     
     public void onRightClick(Block block) {
         if(!insideInherited(block)) {

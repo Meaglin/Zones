@@ -1,5 +1,9 @@
 package com.zones.model;
 
+import java.util.List;
+
+import com.zones.selection.Selection;
+
 /**
  * Abstract base class for any zone form
  * 
@@ -62,6 +66,27 @@ public abstract class ZoneForm {
         int[][] points = f.getPoints();
         for(int i = 0;i < f.getPointsSize();i++) {
             if(!isInsideZone(points[0][i], points[1][i]))
+                return false;
+        }
+        
+        return true;
+    }
+    
+    public boolean contains(Selection s) {
+        if(!s.isValid())
+            return false;
+        
+        if(s.getSize() > getSize())
+            return false;
+        
+        if(s.getHeight().getMin() < getLowZ())
+            return false;
+        if(s.getHeight().getMax() > getHighZ())
+            return false;
+        
+        List<ZoneVertice> points = s.getPoints();
+        for(ZoneVertice v : points) {
+            if(!isInsideZone(v.getX(), v.getY()))
                 return false;
         }
         

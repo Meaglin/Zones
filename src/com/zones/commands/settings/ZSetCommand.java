@@ -26,7 +26,7 @@ public class ZSetCommand extends ZoneCommand {
         lists.put("allowedanimals", ZoneVar.ANIMALS);
         lists.put("animals", ZoneVar.ANIMALS);
         lists.put("mobs", ZoneVar.MOBS);
-        lists.put("allowsmobs" , ZoneVar.MOBS);
+        lists.put("allowedsmobs" , ZoneVar.MOBS);
         
         vars.put("entermessage", ZoneVar.ENTER_MESSAGE);
         vars.put("leavemessage", ZoneVar.LEAVE_MESSAGE);

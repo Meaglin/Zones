@@ -12,8 +12,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Flying;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.inventory.ItemStack;
 
 import com.zones.model.ZoneBase;
@@ -121,11 +123,13 @@ public class ZoneNormal extends ZoneBase{
         if (z != null && z.canDo(right))
             return true;
 
+        List<String> pgroups = getPermissions().getGroups(player);
+        
         for (Entry<String, ZonesAccess> e : groups.entrySet())
             if (e.getValue().canDo(right)) {
-                if(e.getKey().equalsIgnoreCase("default"))
+                if(e.getKey().equals("default"))
                     return true;
-                if (getPermissions().inGroup(getWorld(), player, e.getKey())) { 
+                if (pgroups!= null && pgroups.contains(e.getKey())) { 
                     return true;
                 }
             }
@@ -156,8 +160,9 @@ public class ZoneNormal extends ZoneBase{
         if (users.containsKey(name))
             base = base.merge(users.get(name));
 
+        List<String> pgroups = getPermissions().getGroups(player);
         for (Entry<String, ZonesAccess> e : groups.entrySet())
-            if (getPermissions().inGroup(getWorld(), player, e.getKey())) {
+            if (e.getKey().equals("default") || (pgroups!= null && pgroups.contains(e.getKey()))) {
                 base = base.merge(e.getValue());
             }
 
@@ -175,8 +180,10 @@ public class ZoneNormal extends ZoneBase{
         if (adminusers.contains(player.getName().toLowerCase()))
             return true;
 
-        for (String group : getPermissions().getGroups(player))
-            if (admingroups.contains(group.toLowerCase()))
+        List<String> groups = getPermissions().getGroups(player);
+        
+        for (String group : admingroups)
+            if (groups.contains(group))
                 return true;
 
         return false;
@@ -372,7 +379,7 @@ public class ZoneNormal extends ZoneBase{
         if(!isInsideZone(from.getLocation()))
             return getFlag(ZoneVar.WATER);
         else
-            return true;
+            return getFlag(ZoneVar.PHYSICS);
     }
 
     @Override
@@ -380,7 +387,7 @@ public class ZoneNormal extends ZoneBase{
         if(!isInsideZone(from.getLocation()))
             return getFlag(ZoneVar.LAVA);
         else
-            return true;
+            return getFlag(ZoneVar.PHYSICS);
     }
 
     @Override
@@ -415,7 +422,7 @@ public class ZoneNormal extends ZoneBase{
             } else {
                 return false;
             }
-        } else if(entity instanceof Monster) {
+        } else if(entity instanceof Monster || entity instanceof Flying || entity instanceof Slime) {
             if(getSettings().getBool(ZoneVar.SPAWN_MOBS, getWorldManager().getConfig().MOB_SPAWNING_ENABLED)) {
                 List<?> list = getSettings().getList(ZoneVar.MOBS);
                 if(list != null && !list.contains(type))
@@ -436,7 +443,7 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public boolean allowBlockCreate(Player player, Block block, ItemStack item) {
-        return allowBlockCreate(player,item.getTypeId());
+        return allowBlockCreate(player,(item != null ? item.getTypeId() : (block != null ? block.getTypeId() : 0)));
     }
     
     private boolean allowBlockCreate(Player player, int type) {

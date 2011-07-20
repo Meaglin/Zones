@@ -29,7 +29,7 @@ public class BukkitPermissions implements Permissions {
 
     @Override
     public boolean isValid(String world, String group) {
-        return false;
+        return group.equals("default");
     }
 
 }

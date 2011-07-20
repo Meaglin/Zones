@@ -124,23 +124,22 @@ public class ZonesPlayerListener extends PlayerListener {
                  * This prevents players getting stuck ;).
                  */
                 if (aZone != null && !aZone.allowEnter(player, from)) {
-                    event.setFrom(wm.getWorld().getSpawnLocation());
+                    event.setTo(wm.getWorld().getSpawnLocation());
                     player.sendMessage(ChatColor.RED + "You were moved to spawn because you were in an illigal position.");
-                    wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
+                    //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
+                    return;
                 } 
-                player.teleport(event.getFrom());
                 event.setCancelled(true);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
                 if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
-                        event.setFrom(wm.getWorld().getSpawnLocation());
+                        event.setTo(wm.getWorld().getSpawnLocation());
                         player.sendMessage(ChatColor.RED + "You were moved to spawn because you were in an illigal position.");
-                        wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                        //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         return;
                     }
                     player.sendMessage(ChatColor.RED + "You have reached the border.");
-                    player.teleport(event.getFrom());
                     event.setCancelled(true);
                     return;
                 }
@@ -148,16 +147,12 @@ public class ZonesPlayerListener extends PlayerListener {
         } else if(wm.getConfig().BORDER_ENABLED) {
             if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from)) {
-
-                    event.setFrom(wm.getWorld().getSpawnLocation());
-                    player.teleport(event.getFrom());
-                    event.setCancelled(true);
+                    event.setTo(wm.getWorld().getSpawnLocation());
                     player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
-                    wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                    //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     return;
                 }
                 player.sendMessage(ChatColor.RED + "You have reached the border.");
-                player.teleport(event.getFrom());
                 event.setCancelled(true);
                 return;
             }
@@ -532,6 +527,12 @@ public class ZonesPlayerListener extends PlayerListener {
      * @param event Relevant event details
      */
     public void onPlayerDropItem(PlayerDropItemEvent event) {
+        if(event.isCancelled()) return;
+        ZoneBase zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
+        if(zone != null && !zone.allowEntityHit(event.getPlayer(), event.getItemDrop())) {
+            event.getPlayer().sendMessage(ChatColor.RED + "You're not allowed to drop items in zone '" + zone.getName() + "'!");
+            event.setCancelled(true);
+        }
     }
 
     /**
@@ -540,6 +541,12 @@ public class ZonesPlayerListener extends PlayerListener {
      * @param event Relevant event details
      */
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
+        if(event.isCancelled()) return;
+        ZoneBase zone = plugin.getWorldManager(event.getItem().getWorld()).getActiveZone(event.getItem().getLocation());
+        if(zone != null && !zone.allowEntityHit(event.getPlayer(), event.getItem())) {
+            event.getPlayer().sendMessage(ChatColor.RED + "You're not allowed to pickup items in '" + zone.getName() + "'!");
+            event.setCancelled(true);
+        }
     }
 
     /**

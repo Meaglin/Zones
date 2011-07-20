@@ -132,7 +132,7 @@ public abstract class ZoneBase {
      * @param y
      */
     public boolean isInsideZone(int x, int y) {
-        if (form.isInsideZone(x, y, form.getHighZ()))
+        if (form.isInsideZone(x, y))
             return true;
         else
             return false;

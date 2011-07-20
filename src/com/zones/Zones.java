@@ -65,44 +65,45 @@ public class Zones extends JavaPlugin implements CommandExecutor {
      */
     private void registerEvents() {
         
-        registerEvent(Event.Type.BLOCK_DAMAGE, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_FROMTO, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Low);
-        registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Low);
-        registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Low);
-        registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_BURN, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_DAMAGE, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_FROMTO, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal);
+        registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_BURN, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal);
 
         /**
          * Will be replaced by/fall under BLOCK_FORM after the next RB
          */
-        registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.High);
+        registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.Normal);
         
-        registerEvent(Event.Type.BLOCK_FORM, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_SPREAD, blockListener, Priority.High);
-        registerEvent(Event.Type.BLOCK_FADE, blockListener, Priority.High);
+        registerEvent(Event.Type.BLOCK_FORM, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_SPREAD, blockListener, Priority.Normal);
+        registerEvent(Event.Type.BLOCK_FADE, blockListener, Priority.Normal);
 
-        registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.High);
-        registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.High);
-        registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.High);
-        registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.High);
+        registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal);
+        registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal);
+        registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal);
+        registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal);
         registerEvent(Event.Type.PAINTING_PLACE, entityListener, Priority.Normal);
         registerEvent(Event.Type.PAINTING_BREAK, entityListener, Priority.Normal);
 
-        registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Low);
-        registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.High);
-        registerEvent(Event.Type.PLAYER_PORTAL, playerListener, Priority.High);
-        registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.High);
-        registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.High);
-        registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.High);
+        registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_PORTAL, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
         //registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_BUCKET_FILL, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_BUCKET_EMPTY, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_PICKUP_ITEM, playerListener, Priority.Normal);
 
-        registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.High);
-        registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.High);
+        registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.Normal);
+        registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal);
     }
 
     public void registerWorldEdit() {
@@ -190,7 +191,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private void loadWorlds() {
         worlds.clear();
         for(World world : getServer().getWorlds())
-            worlds.put(world.getId(),new WorldManager(this,world));
+            worlds.put(world.getSeed(),new WorldManager(this,world));
         
     }
     
@@ -210,10 +211,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
      * It's more efficient to do the null call instead of using containskey since it has more underlying calls.
      */
     public WorldManager getWorldManager(World world) {
-        WorldManager wm = worlds.get(world.getId());
+        WorldManager wm = worlds.get(world.getSeed());
         if(wm == null) {
             wm = new WorldManager(this,world);
-            worlds.put(world.getId(), wm);
+            worlds.put(world.getSeed(), wm);
         }
         return wm;
     }
@@ -228,10 +229,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             log.warning("[Zones] Trying to find world '" + world + "' which doesn't exist !");
             return null;
         }
-        WorldManager wm = worlds.get(w.getId());
+        WorldManager wm = worlds.get(w.getSeed());
         if(wm == null) {
             wm = new WorldManager(this,w);
-            worlds.put(w.getId(), wm);
+            worlds.put(w.getSeed(), wm);
         }
         
         return wm;

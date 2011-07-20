@@ -33,7 +33,7 @@ public class ZSelectCommand extends ZoneCommand {
             try {
                 int index = Integer.parseInt(vars[0]);
                 ZoneBase b = getZoneManager().getZone(index);
-                if(b != null) zoneslist.add(b);
+                if(b != null && b.canAdministrate(player)) zoneslist.add(b);
             } catch(NumberFormatException e) {
                 String var = vars[0].toLowerCase();
                 for(ZoneBase b : getZoneManager().getAllZones())
