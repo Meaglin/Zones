@@ -3,6 +3,8 @@ package com.zones;
 import java.io.File;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
+
 import com.zones.util.Properties;
 
 /**
@@ -23,7 +25,26 @@ public class ZonesConfig {
     public static int          CREATION_TOOL_TYPE;
     public static int          CREATION_PILON_TYPE;
     public static int          CREATION_PILON_HEIGHT;
+
     
+    public static final String PLAYER_CANT_BUILD_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot place blocks in '{zname}' !";
+    public static final String PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot change blocks in '{zname}' !";
+    public static final String PLAYER_CANT_DESTROY_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot destroy blocks in '{zname}' !";
+    public static final String PLAYER_CANT_HIT_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot trigger blocks in '{zname}' !";
+    public static final String PLAYER_CANT_HIT_ENTITYS_IN_ZONE = ChatColor.RED + "You cannot hit entities in '{zname}' !";
+    
+    public static final String PLAYER_CANT_PLACE_CHEST_IN_ZONE = ChatColor.RED + "You cannot place Chests/Furnaces in '{zname}' !";
+    public static final String PLAYER_CANT_DESTROY_CHEST_IN_ZONE = ChatColor.RED + "You cannot destroy Chests/Furnaces in '{zname}' !";
+    
+    public static final String PLAYER_CANT_ENTER_INTO_ZONE = ChatColor.RED + "You can't enter '{zname}' !";
+    public static final String PLAYER_CANT_TELEPORT_INTO_ZONE = ChatColor.RED + "You cannot warp into '{zname}', since it is a protected area !";
+    public static final String TELEPORT_INTO_ZONE_DISABLED = ChatColor.RED + "You cannot warp into '{zname}' because it has teleporting disabled !";
+    
+    public static final String PLAYER_ILLIGAL_POSITION = ChatColor.RED + "You were moved to spawn because you were in an illigal position !";
+    
+    public static final String BLOCK_IS_BLACKLISTED = ChatColor.RED + "This block type is protected in '{zname}' !";
+    public static final String BLOCK_IS_PROTECTED = ChatColor.RED + "This block type is blacklisted in '{zname}' !";
+
     public static void load(File f) {
         try {
             Properties zp = new Properties(f);

@@ -1,15 +1,29 @@
 package com.zones.listeners;
 
-import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockCanBuildEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
+import org.bukkit.event.block.BlockListener;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.block.SnowFormEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
+import com.zones.accessresolver.AccessResolver;
+import com.zones.accessresolver.interfaces.BlockFromToResolver;
+import com.zones.accessresolver.interfaces.BlockResolver;
+import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
 import com.zones.selection.ZoneSelection;
 
@@ -69,12 +83,12 @@ public class ZonesBlockListener extends BlockListener {
                 event.setCancelled(true);
         } else {
             if (blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
-                if (!toZone.allowWater(blockFrom,blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo))
+                if (!((BlockFromToResolver)toZone.getResolver(AccessResolver.WATER_FLOW)).isAllowed(toZone, blockFrom, blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo))
                     event.setCancelled(true);
             }
     
             if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
-                if (!toZone.allowLava(blockFrom,blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo))
+                if (!((BlockFromToResolver)toZone.getResolver(AccessResolver.LAVA_FLOW)).isAllowed(toZone, blockFrom, blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo))
                     event.setCancelled(true);
             }
         }
@@ -93,30 +107,7 @@ public class ZonesBlockListener extends BlockListener {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockPlaced();
 
-        WorldManager wm = plugin.getWorldManager(player);
-        if(!wm.getConfig().isProtectedBreakBlock(player, blockPlaced)) {
-            ZoneBase zone = wm.getActiveZone(blockPlaced);
-            if(zone == null){
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,"zones.build")){
-                    player.sendMessage(ChatColor.RED + "You cannot build in this world!");
-                    event.setBuild(false);
-                } else {
-                    wm.getConfig().logBlockPlace(player, blockPlaced);
-                }
-            } else  {
-                if (!zone.allowBlockCreate(player, blockPlaced)) {
-                    // These messages are now handled in the ZoneClass.
-                    //player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' .");
-                    event.setBuild(false);
-                } else if ((blockPlaced.getTypeId() == 54 || blockPlaced.getTypeId() == 61 || blockPlaced.getTypeId() == 62) && !zone.allowBlockModify(player, blockPlaced)) {
-                    player.sendMessage(ChatColor.RED + "You cannot place chests/furnaces in '" + zone.getName() + "' since you don't have modify rights !");
-                    event.setBuild(false);
-                } else {
-                    wm.getConfig().logBlockPlace(player, blockPlaced);
-                    event.setBuild(true);
-                }
-            }
-        }
+        EventUtil.onPlace(plugin, event, player, blockPlaced);
     }
 
     /**
@@ -153,7 +144,8 @@ public class ZonesBlockListener extends BlockListener {
             if(!wm.getConfig().canBurn(player, block, cause))
                 return true;
         } else {
-            if(!zone.allowFire(player, block) || (wm.getConfig().FIRE_ENFORCE_PROTECTED_BLOCKS && !wm.getConfig().canBurnBlock(block))) {
+            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.FIRE)).isAllowed(zone, player, block, -1) || 
+                    (wm.getConfig().FIRE_ENFORCE_PROTECTED_BLOCKS && !wm.getConfig().canBurnBlock(block))) {
                 return true;
             }
         }
@@ -175,7 +167,8 @@ public class ZonesBlockListener extends BlockListener {
      */
     public void onBlockPhysics(BlockPhysicsEvent event) {
         if(event.isCancelled()) return;
-        switch(event.getBlock().getTypeId()) {
+        int typeId = event.getBlock().getTypeId();
+        switch(typeId) {
             case 12:
             case 13:
             case 90:
@@ -185,7 +178,7 @@ public class ZonesBlockListener extends BlockListener {
                     if(!wm.getConfig().PHYSICS_ENABLED)
                         event.setCancelled(true);
                 } else {
-                    if(!zone.allowPhysics(event.getBlock()))
+                    if(!isAllowed(zone,AccessResolver.PHYSICS, event.getBlock()))
                         event.setCancelled(true);
                 }
                 break;
@@ -217,7 +210,7 @@ public class ZonesBlockListener extends BlockListener {
             if(!wm.getConfig().LEAF_DECAY_ENABLED)
                 event.setCancelled(true);
         } else {
-            if(!zone.allowLeafDecay(event.getBlock()))
+            if(!isAllowed(zone,AccessResolver.LEAF_DECAY, event.getBlock()))
                 event.setCancelled(true);
         }
     }
@@ -238,29 +231,7 @@ public class ZonesBlockListener extends BlockListener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        WorldManager wm = plugin.getWorldManager(block.getWorld());
-        if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
-            ZoneBase zone = wm.getActiveZone(block);
-            if(zone == null) {
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")){
-                    player.sendMessage(ChatColor.RED + "You cannot destroy blocks in this world!");
-                    event.setCancelled(true);
-                } else {
-                    wm.getConfig().logBlockPlace(player, block);
-                }
-            } else {
-                if (!zone.allowBlockDestroy(player, block)) {
-                    // These messages are now handled in the ZoneClass.
-                    //player.sendMessage(ChatColor.RED + "You cannot destroy blocks in '" + zone.getName() + "' !");
-                    event.setCancelled(true);
-                } else if ((block.getTypeId() == 54 || block.getTypeId() == 61 || block.getTypeId() == 62) && !zone.allowBlockModify(player, block)) {
-                    player.sendMessage(ChatColor.RED + "You cannot destroy a chest/furnace in '" + zone.getName() + "' since you dont have modify rights!");
-                    event.setCancelled(true);
-                } else {
-                    wm.getConfig().logBlockBreak(player, block);
-                }
-            }
-        }
+        EventUtil.onBreak(plugin, event, player, block);
     }
 
 
@@ -280,7 +251,7 @@ public class ZonesBlockListener extends BlockListener {
             if(!wm.getConfig().SNOW_FALL_ENABLED)
                 event.setCancelled(true);
         } else {
-            if(!zone.allowSnowFall(block))
+            if(!isAllowed(zone,AccessResolver.SNOW_FALL, event.getBlock()))
                 event.setCancelled(true);
         }
     }
@@ -298,12 +269,12 @@ public class ZonesBlockListener extends BlockListener {
         if(zone == null) {
             if(blockstate.getTypeId() == 78 && !wm.getConfig().SNOW_FALL_ENABLED)
                 event.setCancelled(true);
-            if(blockstate.getTypeId() == 79 && !wm.getConfig().ICE_FORM_ENABLED)
+            else if(blockstate.getTypeId() == 79 && !wm.getConfig().ICE_FORM_ENABLED)
                 event.setCancelled(true);
         } else {
-            if(blockstate.getTypeId() == 78 && !zone.allowIceForm(block))
+            if(blockstate.getTypeId() == 78 && !isAllowed(zone,AccessResolver.SNOW_FALL, event.getBlock()))
                 event.setCancelled(true);
-            if(blockstate.getTypeId() == 79 && !zone.allowSnowFall(block))
+            else if(blockstate.getTypeId() == 79 && !isAllowed(zone,AccessResolver.ICE_FORM, event.getBlock()))
                 event.setCancelled(true);
         }
     }
@@ -328,10 +299,10 @@ public class ZonesBlockListener extends BlockListener {
                 event.setCancelled(true);
             }
         } else {
-            if(typeId == 78 && !zone.allowSnowMelt(block)) {
+            if(typeId == 78 && !isAllowed(zone,AccessResolver.SNOW_MELT, event.getBlock())) {
                 event.setCancelled(true);
             }
-            if(typeId == 79 && !zone.allowIceMelt(block)) {
+            if(typeId == 79 && !isAllowed(zone,AccessResolver.ICE_MELT, event.getBlock())) {
                 event.setCancelled(true);
             }
 
@@ -349,9 +320,13 @@ public class ZonesBlockListener extends BlockListener {
             if(!wm.getConfig().MUSHROOM_SPREAD_ENABLED)
                 event.setCancelled(true);
         } else {
-            if(!zone.allowMushroomSpread(block))
+            if(!isAllowed(zone,AccessResolver.MUSHROOM_SPREAD, event.getBlock()))
                 event.setCancelled(true);
         }
+    }
+    
+    private static final boolean isAllowed(ZoneBase zone, AccessResolver resolver, Block block) {
+        return ((BlockResolver)zone.getResolver(resolver)).isAllowed(zone, block);
     }
     
 }

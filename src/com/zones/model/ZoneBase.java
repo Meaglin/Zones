@@ -7,13 +7,12 @@ import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.CreatureType;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
+import com.zones.accessresolver.AccessResolver;
+import com.zones.accessresolver.interfaces.Resolver;
 import com.zones.model.settings.ZoneVar;
 import com.zones.persistence.Zone;
 
@@ -51,6 +50,7 @@ public abstract class ZoneBase {
             this.persistence = persistence;
             id = persistence.getId();
             onLoad(persistence);
+            checkAccessResolvers();
         }
     }
     
@@ -65,34 +65,44 @@ public abstract class ZoneBase {
             }
         }
     }
+    /*
+     * This check is necessary to make sure the zone won't crash the server.
+     */
+    private void checkAccessResolvers() {
+        for(AccessResolver r : AccessResolver.values())
+            if(getResolver(r) == null || !r.isValid(getResolver(r))) {
+                throw new NullPointerException("Missing or invalid AccessResolver for '" + r.name() + "' in zone " + getName() + "[" + getId() + "] !");
+            }
+                
+    }
     /**
      * @return Returns the id.
      */
-    public int getId() {
+    public final int getId() {
         return id;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
     
-    public Zone getPersistence() {
+    public final Zone getPersistence() {
         return persistence;
     }
 
-    public WorldManager getWorldManager() {
+    public final WorldManager getWorldManager() {
         return worldManager;
     }
     
-    public WorldConfig getWorldConfig() {
+    public final WorldConfig getWorldConfig() {
         return getWorldManager().getConfig();
     }
     
-    public World getWorld() {
+    public final World getWorld() {
         return getWorldManager().getWorld();
     }
     
-    public Zones getPlugin() {
+    public final Zones getPlugin() {
         return zones;
     }
 
@@ -101,12 +111,12 @@ public abstract class ZoneBase {
      * 
      * @param zone
      */
-    public void setForm(ZoneForm zone) {
+    public final void setForm(ZoneForm zone) {
         form = zone;
     }
     
     @Deprecated
-    public void setZone(ZoneForm zone) {
+    public final void setZone(ZoneForm zone) {
         setForm(zone);
     }
     
@@ -116,12 +126,12 @@ public abstract class ZoneBase {
      * 
      * @return form
      */
-    public ZoneForm getForm() {
+    public final ZoneForm getForm() {
         return form;
     }
     
     @Deprecated
-    public ZoneForm getZone() {
+    public final ZoneForm getZone() {
         return getForm();
     }
 
@@ -131,7 +141,7 @@ public abstract class ZoneBase {
      * @param x
      * @param y
      */
-    public boolean isInsideZone(int x, int y) {
+    public final boolean isInsideZone(int x, int y) {
         if (form.isInsideZone(x, y))
             return true;
         else
@@ -145,11 +155,15 @@ public abstract class ZoneBase {
      * @param y
      * @param z
      */
-    public boolean isInsideZone(int x, int y, int z) {
+    public final boolean isInsideZone(int x, int y, int z) {
         if (form.isInsideZone(x, y, z))
             return true;
         else
             return false;
+    }
+    
+    public final boolean isInsideZone(Block block) {
+        return isInsideZone(block.getX(),block.getZ(), block.getY());
     }
 
     /**
@@ -157,12 +171,12 @@ public abstract class ZoneBase {
      * 
      * @param player
      */
-    public boolean isInsideZone(Player player)      {return isInsideZone(player.getLocation());}
-    public boolean isInsideZone(Location loc)       {return isInsideZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()), WorldManager.toInt(loc.getY()));}
+    public final boolean isInsideZone(Player player)      {return isInsideZone(player.getLocation());}
+    public final boolean isInsideZone(Location loc)       {return isInsideZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()), WorldManager.toInt(loc.getY()));}
     
-    public double getDistanceToZone(int x, int y)   {return getForm().getDistanceToZone(x, y);}
+    public final double getDistanceToZone(int x, int y)   {return getForm().getDistanceToZone(x, y);}
 
-    public double getDistanceToZone(Player player) {
+    public final double getDistanceToZone(Player player) {
         Location loc = player.getLocation();
         return getForm().getDistanceToZone(WorldManager.toInt(loc.getX()), WorldManager.toInt(loc.getZ()));
     }
@@ -173,8 +187,8 @@ public abstract class ZoneBase {
      * 
      * @param player
      */
-    public void removePlayer(Player player) { removePlayer(player,false); }
-    public void removePlayer(Player player, boolean silent) {
+    public final void removePlayer(Player player) { removePlayer(player,false); }
+    public final void removePlayer(Player player, boolean silent) {
         if (playerList.containsKey(player.getEntityId())) {
             playerList.remove(player.getEntityId());
             if(!silent)onExit(player);
@@ -187,37 +201,14 @@ public abstract class ZoneBase {
      * @param player
      * @return
      */
-    public boolean isPlayerInZone(Player player) {
+    public final boolean isPlayerInZone(Player player) {
         return playerList.containsKey(player.getEntityId());
     }
+    
+    public abstract Resolver getResolver(AccessResolver access);
 
     protected abstract void onEnter(Player player);
     protected abstract void onExit(Player player);
-
-    public abstract boolean allowWater(Block from, Block to);
-    public abstract boolean allowLava(Block from, Block to);
-    public abstract boolean allowDynamite(Block block);
-    public abstract boolean allowHealth(Player player);
-    public abstract boolean allowLeafDecay(Block block);
-    public abstract boolean allowSnowFall(Block block);
-    public abstract boolean allowIceForm(Block block);
-    public abstract boolean allowSnowMelt(Block block);
-    public abstract boolean allowIceMelt(Block block);
-    public abstract boolean allowMushroomSpread(Block block);
-    public abstract boolean allowPhysics(Block block);
-    public abstract boolean allowFire(Player player, Block block);
-    
-    public abstract boolean allowSpawn(Entity entity,CreatureType type);
-    
-    public abstract boolean allowBlockCreate(Player player, Block block);
-    public abstract boolean allowBlockCreate(Player player, Block block, ItemStack item);
-    public abstract boolean allowBlockModify(Player player, Block block);
-    public abstract boolean allowBlockDestroy(Player player, Block block);
-    public abstract boolean allowBlockHit(Player attacker, Block defender);
-    public abstract boolean allowEntityHit(Player attacker, Entity defender);
-    
-    public abstract boolean allowEnter(Player player,Location to);
-    public abstract boolean allowTeleport(Player player,Location to);
     
     public abstract Location getSpawnLocation(Player player);
     
@@ -227,11 +218,11 @@ public abstract class ZoneBase {
     public abstract boolean canAdministrate(Player player);
    
     
-    public TIntObjectHashMap<Player> getPlayersInsideMap() {
+    public final TIntObjectHashMap<Player> getPlayersInsideMap() {
         return playerList;
     }
     
-    public Player[]  getPlayersInside() {
+    public final Player[]  getPlayersInside() {
         return playerList.getValues(new Player[playerList.size()]);
     }
 
@@ -240,25 +231,34 @@ public abstract class ZoneBase {
         return getClass().getSimpleName() + "[" + id + "]";
     }
 
-    public boolean setName(String name) {
-
-        getPersistence().setName(name);
-        zones.getDatabase().update(getPersistence());
-        this.name = name;
+    public final boolean setName(String name) {
+        try {
+            getPersistence().setName(name);
+            zones.getDatabase().update(getPersistence());
+            this.name = name;
+        } catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
     
-    public boolean saveSettings() {
-        getPersistence().setSettings(getSettings().serialize());
-        zones.getDatabase().update(getPersistence());      
+    public final boolean saveSettings() {
+        try {
+            getPersistence().setSettings(getSettings().serialize());
+            zones.getDatabase().update(getPersistence());      
+        } catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
 
 
-    public void revalidateInZone(Player player) {
+    public final void revalidateInZone(Player player) {
         revalidateInZone(player,player.getLocation());
     }
-    public void revalidateInZone(Player player, Location loc) {
+    public final void revalidateInZone(Player player, Location loc) {
         if (isInsideZone(loc)) {
             if (!playerList.containsKey(player.getEntityId())) {
                 playerList.put(player.getEntityId(), player);
@@ -272,7 +272,7 @@ public abstract class ZoneBase {
         }
     }
     
-    public ZoneSettings getSettings() {
+    public final ZoneSettings getSettings() {
         return settings;
     }
     
@@ -282,22 +282,32 @@ public abstract class ZoneBase {
      * @param zoneconfigvar
      * @return the value or default if null.
      */
-    public boolean getFlag(ZoneVar name) {
+    public final boolean getFlag(ZoneVar name) {
         if(!name.getType().equals(Boolean.class))
             return false;
         return getSettings().getBool(name, (Boolean)name.getDefault(this));
     }
     
-    public boolean setSetting(ZoneVar name, boolean b) {
+    public final boolean setSetting(ZoneVar name, boolean b) {
         getSettings().set(name, b);
         return saveSettings();
     }
     
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if(!(o instanceof ZoneBase))
             return false;
         
         return (getId() == ((ZoneBase)o).getId());
+    }
+    
+    public void sendMarkupMessage(String message, Player player) {
+        if(message.trim().equalsIgnoreCase("none")) return;
+        
+        message = message.replace("{zname}", getName());
+        if(message.contains("{access}")) message = message.replace("{access}", getAccess(player).toColorCode());
+        message = message.replace("{pname}", player.getDisplayName());
+        message = message.replace("^", "\u00A7");
+        player.sendMessage(message);
     }
 
 }

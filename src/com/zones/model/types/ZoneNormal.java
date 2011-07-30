@@ -1,28 +1,21 @@
 package com.zones.model.types;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.CreatureType;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Flying;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
-import org.bukkit.inventory.ItemStack;
 
+import com.zones.accessresolver.AccessResolver;
+import com.zones.accessresolver.interfaces.Resolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneVertice;
 import com.zones.model.ZonesAccess;
-import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.settings.ZoneVar;
+import com.zones.model.types.normal.*;
 import com.zones.permissions.Permissions;
 import com.zones.persistence.Zone;
 
@@ -39,8 +32,34 @@ public class ZoneNormal extends ZoneBase{
     protected HashMap<String, ZonesAccess> groups;
     protected HashMap<String, ZonesAccess> users;
     
+    private static final Resolver[] resolvers;
+    
     // We don't want to make a new list every time we need a default empty array.
-    public static final List<Integer> emptyIntList = Arrays.asList();
+    public static final List<Integer> emptyIntList = new ArrayList<Integer>();
+    
+    static {
+        resolvers = new Resolver[AccessResolver.size()];
+        resolvers[AccessResolver.DYNAMITE.ordinal()]        = new NormalBlockResolver(ZoneVar.DYNAMITE);
+        resolvers[AccessResolver.LEAF_DECAY.ordinal()]      = new NormalBlockResolver(ZoneVar.LEAF_DECAY);
+        resolvers[AccessResolver.SNOW_FALL.ordinal()]       = new NormalBlockResolver(ZoneVar.SNOW_FALL);
+        resolvers[AccessResolver.SNOW_MELT.ordinal()]       = new NormalBlockResolver(ZoneVar.SNOW_MELT);
+        resolvers[AccessResolver.ICE_FORM.ordinal()]        = new NormalBlockResolver(ZoneVar.ICE_FORM);
+        resolvers[AccessResolver.ICE_MELT.ordinal()]        = new NormalBlockResolver(ZoneVar.ICE_MELT);
+        resolvers[AccessResolver.MUSHROOM_SPREAD.ordinal()] = new NormalBlockResolver(ZoneVar.MUSHROOM_SPREAD);
+        resolvers[AccessResolver.PHYSICS.ordinal()]         = new NormalBlockResolver(ZoneVar.PHYSICS);
+        resolvers[AccessResolver.DYNAMITE.ordinal()]        = new NormalBlockResolver(ZoneVar.DYNAMITE);
+        resolvers[AccessResolver.LAVA_FLOW.ordinal()]       = new NormalBlockFromToResolver(ZoneVar.WATER);
+        resolvers[AccessResolver.WATER_FLOW.ordinal()]      = new NormalBlockFromToResolver(ZoneVar.LAVA);
+        resolvers[AccessResolver.ENTITY_SPAWN.ordinal()]    = new NormalEntitySpawnResolver();
+        resolvers[AccessResolver.PLAYER_BLOCK_CREATE.ordinal()]     = new NormalPlayerBlockCreateResolver();
+        resolvers[AccessResolver.PLAYER_BLOCK_MODIFY.ordinal()]     = new NormalPlayerBlockModifyResolver();
+        resolvers[AccessResolver.PLAYER_BLOCK_DESTROY.ordinal()]    = new NormalPlayerBlockDestroyResolver();
+        resolvers[AccessResolver.PLAYER_BLOCK_HIT.ordinal()]        = new NormalPlayerBlockHitResolver();
+        resolvers[AccessResolver.PLAYER_ENTITY_HIT.ordinal()]       = new NormalPlayerHitEntityResolver();
+        resolvers[AccessResolver.PLAYER_ENTER.ordinal()]            = new NormalPlayerEnterResolver();
+        resolvers[AccessResolver.PLAYER_TELEPORT.ordinal()]         = new NormalPlayerTeleportResolver();
+        resolvers[AccessResolver.PLAYER_RECEIVE_DAMAGE.ordinal()]   = new NormalPlayerDamageResolver();
+    }
     
     public ZoneNormal() {
         super();
@@ -55,6 +74,7 @@ public class ZoneNormal extends ZoneBase{
     public Permissions getPermissions() {
         return getPlugin().getPermissions();
     }
+    
     @Override
     protected void onLoad(Zone persistence) {
         super.onLoad(persistence);
@@ -64,11 +84,9 @@ public class ZoneNormal extends ZoneBase{
                 String[] item = list[i].split(",");
 
                 switch (Integer.parseInt(item[0])) {
-                    // user
                     case 1:
                         adminusers.add(item[1].toLowerCase());
                         break;
-                    // group
                     case 2:
                         if (getPermissions().isValid(getWorld().getName(),item[1]))
                             admingroups.add(item[1]);
@@ -96,15 +114,11 @@ public class ZoneNormal extends ZoneBase{
                     itemrights = item[2];
 
                 switch (type) {
-                    // user
                     case 1:
-                        // addUser(itemname,itemrights );
                         users.put(itemname.toLowerCase(), new ZonesAccess(itemrights));
                         break;
-                    // group
                     case 2:
                         if (getPermissions().isValid(getWorld().getName(),itemname))
-                            // addGroup(itemname,itemrights);
                             groups.put(itemname, new ZonesAccess(itemrights));
                         else
                             log.info("Invalid grouptype in zone id: " + getId());
@@ -337,7 +351,7 @@ public class ZoneNormal extends ZoneBase{
          */
         String message = getSettings().getString(ZoneVar.ENTER_MESSAGE, (String)ZoneVar.ENTER_MESSAGE.getDefault(this));
         sendMarkupMessage(message, player);
-        if (zone.allowHealth(player)) {
+        if (getFlag(ZoneVar.HEALTH)) {
             player.sendMessage(ChatColor.RED + "WARNING: you can die in this zone!");
         }
         
@@ -363,146 +377,7 @@ public class ZoneNormal extends ZoneBase{
             }
         }
     }
-
-    private void sendMarkupMessage(String message, Player player) {
-        if(message.trim().equalsIgnoreCase("none")) return;
-        
-        message = message.replace("{zname}", getName());
-        if(message.contains("{access}")) message = message.replace("{access}", getAccess(player).toColorCode());
-        message = message.replace("{pname}", player.getDisplayName());
-        message = message.replace("^", "\u00A7");
-        player.sendMessage(message);
-    }
     
-    @Override
-    public boolean allowWater(Block from, Block to) {
-        if(!isInsideZone(from.getLocation()))
-            return getFlag(ZoneVar.WATER);
-        else
-            return getFlag(ZoneVar.PHYSICS);
-    }
-
-    @Override
-    public boolean allowLava(Block from, Block to) {
-        if(!isInsideZone(from.getLocation()))
-            return getFlag(ZoneVar.LAVA);
-        else
-            return getFlag(ZoneVar.PHYSICS);
-    }
-
-    @Override
-    public boolean allowDynamite(Block b) {
-        return getFlag(ZoneVar.DYNAMITE);
-    }
-
-    @Override
-    public boolean allowHealth(Player player) {
-        return getFlag(ZoneVar.HEALTH);
-    }
-
-    @Override
-    public boolean allowLeafDecay(Block block) {
-        return getFlag(ZoneVar.LEAF_DECAY);
-    }
-    
-    @Override
-    public boolean allowFire(Player player,Block block) {
-        return getFlag(ZoneVar.FIRE);
-    }
-    
-    @Override
-    public boolean allowSpawn(Entity entity,CreatureType type) {
-        if(entity instanceof Animals) {
-            if(getSettings().getBool(ZoneVar.SPAWN_ANIMALS, getWorldManager().getConfig().ANIMAL_SPAWNING_ENABLED)) {
-                List<?> list = getSettings().getList(ZoneVar.ANIMALS);
-                if(list != null && !list.contains(type))
-                    return false;
-                else
-                    return true;
-            } else {
-                return false;
-            }
-        } else if(entity instanceof Monster || entity instanceof Flying || entity instanceof Slime) {
-            if(getSettings().getBool(ZoneVar.SPAWN_MOBS, getWorldManager().getConfig().MOB_SPAWNING_ENABLED)) {
-                List<?> list = getSettings().getList(ZoneVar.MOBS);
-                if(list != null && !list.contains(type))
-                    return false;
-                else
-                    return true;
-            } else {
-                return false;
-            }       
-        } else
-            return true;
-    }
-
-    @Override
-    public boolean allowBlockCreate(Player player, Block block) {
-        return allowBlockCreate(player,block.getTypeId());
-    }
-
-    @Override
-    public boolean allowBlockCreate(Player player, Block block, ItemStack item) {
-        return allowBlockCreate(player,(item != null ? item.getTypeId() : (block != null ? block.getTypeId() : 0)));
-    }
-    
-    private boolean allowBlockCreate(Player player, int type) {
-        if(!this.canModify(player, Rights.BUILD)) {
-            player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + getName() + "' !");
-            return false;
-        } else {
-            List<?> list = getSettings().getList(ZoneVar.PLACE_BLOCKS);
-            if(list != null && list.contains(type) && !this.canAdministrate(player)) {
-                player.sendMessage(ChatColor.RED + "This block type is blacklisted in '" + getName() + "' !");
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-    
-    @Override
-    public boolean allowBlockDestroy(Player player, Block block) {
-        if(!this.canModify(player, Rights.DESTROY)) {
-            player.sendMessage(ChatColor.RED + "You cannot destroy blocks in '" + getName() + "' !");
-            return false;
-        } else {
-            List<?> list = getSettings().getList(ZoneVar.BREAK_BLOCKS);
-            if(list != null && list.contains(block.getTypeId()) && !this.canAdministrate(player)) {
-                player.sendMessage(ChatColor.RED + "This block type is protected in '" + getName() + "' !");
-                return false;
-            } else {
-                return true;
-            }
-        }
-        
-    }
-
-    @Override
-    public boolean allowBlockHit(Player attacker, Block defender) {
-        return this.canModify(attacker, Rights.HIT);
-    }
-
-    @Override
-    public boolean allowBlockModify(Player player, Block block) {
-        return this.canModify(player, Rights.MODIFY);
-    }
-
-    @Override
-    public boolean allowEnter(Player player, Location to) {
-        return this.canModify(player, Rights.ENTER);
-    }
-
-    @Override
-    public boolean allowEntityHit(Player attacker, Entity defender) {
-        return this.canModify(attacker, Rights.HIT);
-    }
-
-    @Override
-    public boolean allowTeleport(Player player, Location to) {
-        return this.canModify(player, Rights.ENTER) && (getFlag(ZoneVar.TELEPORT) || canAdministrate(player));
-    }
-
     @Override
     public Location getSpawnLocation(Player player) {
         Object o = getSettings().get(ZoneVar.SPAWN_LOCATION);
@@ -515,33 +390,8 @@ public class ZoneNormal extends ZoneBase{
     }
 
     @Override
-    public boolean allowSnowFall(Block block) {
-        return getFlag(ZoneVar.SNOW_FALL);
-    }
-
-    @Override
-    public boolean allowPhysics(Block block) {
-        return getFlag(ZoneVar.PHYSICS);
-    }
-
-    @Override
-    public boolean allowIceForm(Block block) {
-        return getFlag(ZoneVar.ICE_FORM);
-    }
-
-    @Override
-    public boolean allowIceMelt(Block block) {
-        return getFlag(ZoneVar.ICE_MELT);
-    }
-
-    @Override
-    public boolean allowSnowMelt(Block block) {
-        return getFlag(ZoneVar.SNOW_MELT);
-    }
-
-    @Override
-    public boolean allowMushroomSpread(Block block) {
-        return getFlag(ZoneVar.MUSHROOM_SPREAD);
+    public Resolver getResolver(AccessResolver access) {
+        return resolvers[access.ordinal()];
     }
 
 }

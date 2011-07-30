@@ -15,6 +15,10 @@ import org.bukkit.event.vehicle.VehicleMoveEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
+import com.zones.accessresolver.AccessResolver;
+import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
+import com.zones.accessresolver.interfaces.PlayerLocationResolver;
 import com.zones.model.ZoneBase;
 
 
@@ -56,7 +60,7 @@ public class ZonesVehicleListener extends VehicleListener {
         Player player = (Player)attacker;
 
         ZoneBase zone = plugin.getWorldManager(player).getActiveZone(event.getVehicle().getLocation());
-        if (zone != null && !zone.allowEntityHit(player, event.getVehicle())) {
+        if (zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, event.getVehicle(), -1)) {
             player.sendMessage("You cannot damage vehicles in '" + zone.getName() + "'!");
             event.setCancelled(true);
         }
@@ -117,18 +121,20 @@ public class ZonesVehicleListener extends VehicleListener {
         ZoneBase bZone = wm.getActiveZone(to);
         
         if (bZone != null) {
-            if(!bZone.allowEnter(player, to)) {
-                event.getVehicle().teleport(from);
-                player.sendMessage(ChatColor.RED.toString() + "You can't enter " + bZone.getName() + ".");
+            if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(bZone, player, from, to)) {
+                ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).sendDeniedMessage(bZone, player);
                 /*
                  * In principle this should only occur when someone's access to a zone gets revoked when still inside the zone.
                  * This prevents players getting stuck ;).
                  */
-                if (aZone != null && !aZone.allowEnter(player, from)) {
+                if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                    player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
-                    wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                    //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
+                    event.getVehicle().eject();
+                    return;
                 } 
+                event.getVehicle().teleport(from);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
                 if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
@@ -136,6 +142,7 @@ public class ZonesVehicleListener extends VehicleListener {
                         event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                         player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
                         wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                        event.getVehicle().eject();
                         return;
                     }
                     player.sendMessage(ChatColor.RED + "You have reached the border.");
@@ -149,6 +156,7 @@ public class ZonesVehicleListener extends VehicleListener {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                     player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
                     wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                    event.getVehicle().eject();
                     return;
                 }
                 player.sendMessage(ChatColor.RED + "You have reached the border.");

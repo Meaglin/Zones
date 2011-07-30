@@ -28,7 +28,8 @@
 	</target>
 
 	<target name="compile" depends="init" description="Compile the source.">
-		<javac destdir="${build.classes}" optimize="on" debug="on" source="1.6" target="1.6" nowarn="off">
+		<javac destdir="${build.classes}" optimize="on" debug="on" source="1.6" target="1.6" nowarn="off" deprecation="on" >
+			<compilerarg value="-Xlint" />
 			<src path="${src}" />
 			<classpath refid="classpath" />
 		</javac>

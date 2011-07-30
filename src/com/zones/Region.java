@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import com.zones.model.ZoneBase;
+import com.zones.model.ZoneForm;
 import com.zones.model.types.ZoneInherit;
 
 /**
@@ -54,11 +55,11 @@ public class Region {
 
     public ZoneBase getActiveZone(Player player)                             {return getActiveZone(player.getLocation());}
     public ZoneBase getActiveZone(Location loc)                              {return getActiveZone(loc.getX(), loc.getZ(), loc.getY());}
-    public ZoneBase getActiveZone(double x, double y, double z) {return getActiveZone(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z));}
+    public ZoneBase getActiveZone(double x, double y, double z)              {return getActiveZone(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z));}
 
-    public ArrayList<ZoneBase> getActiveZones(Player player)                             {return getActiveZones(player.getLocation());}
-    public ArrayList<ZoneBase> getActiveZones(Location loc)                              {return getActiveZones(loc.getX(), loc.getZ(), loc.getY());}
-    public ArrayList<ZoneBase> getActiveZones(double x, double y, double z) {return getActiveZones(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z));}
+    public ArrayList<ZoneBase> getActiveZones(Player player)                 {return getActiveZones(player.getLocation());}
+    public ArrayList<ZoneBase> getActiveZones(Location loc)                  {return getActiveZones(loc.getX(), loc.getZ(), loc.getY());}
+    public ArrayList<ZoneBase> getActiveZones(double x, double y, double z)  {return getActiveZones(WorldManager.toInt(x), WorldManager.toInt(y), WorldManager.toInt(z));}
 
     public ZoneBase getActiveZone(int x, int y, int z) {
         ZoneBase primary = null;
@@ -121,6 +122,22 @@ public class Region {
                 z.revalidateInZone(player, loc);
         }
     }
+
+    public void revalidateOutZones(Player player, Location from) {
+        for (ZoneBase z : getZones()) {
+            if (z != null)
+                z.removePlayer(player);
+        }
+    }
+    
+    public boolean contains(ZoneBase zone) {
+        ZoneForm form = zone.getForm();
+        int ax = getX() << WorldManager.SHIFT_SIZE;
+        int bx = (getX() + 1) << WorldManager.SHIFT_SIZE;
+        int ay = getY() << WorldManager.SHIFT_SIZE;
+        int by = (getY() + 1) << WorldManager.SHIFT_SIZE;
+        return form.intersectsRectangle(ax, bx, ay, by);
+    }
     
     public boolean equals(Object object) {
         if(!(object instanceof Region))
@@ -131,10 +148,4 @@ public class Region {
         return (r.getX() == getX() && r.getY() == getY());
     }
 
-    public void revalidateOutZones(Player player, Location from) {
-        for (ZoneBase z : getZones()) {
-            if (z != null)
-                z.removePlayer(player);
-        }
-    }
 }

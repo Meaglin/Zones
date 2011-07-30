@@ -33,6 +33,10 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
+import com.zones.accessresolver.AccessResolver;
+import com.zones.accessresolver.interfaces.PlayerBlockResolver;
+import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
+import com.zones.accessresolver.interfaces.PlayerLocationResolver;
 import com.zones.model.ZoneBase;
 import com.zones.selection.ZoneSelection;
 import com.zones.selection.ZoneSelection.Confirm;
@@ -117,15 +121,15 @@ public class ZonesPlayerListener extends PlayerListener {
         ZoneBase bZone = wm.getActiveZone(to);
         
         if (bZone != null) {
-            if(!bZone.allowEnter(player, to)) {
-                player.sendMessage(ChatColor.RED + "You can't enter " + bZone.getName() + ".");
+            if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(bZone, player, from, to)) {
+                ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).sendDeniedMessage(bZone, player);
                 /*
                  * In principle this should only occur when someone's access to a zone gets revoked when still inside the zone.
                  * This prevents players getting stuck ;).
                  */
-                if (aZone != null && !aZone.allowEnter(player, from)) {
+                if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
                     event.setTo(wm.getWorld().getSpawnLocation());
-                    player.sendMessage(ChatColor.RED + "You were moved to spawn because you were in an illigal position.");
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                     return;
                 } 
@@ -135,7 +139,7 @@ public class ZonesPlayerListener extends PlayerListener {
                 if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         event.setTo(wm.getWorld().getSpawnLocation());
-                        player.sendMessage(ChatColor.RED + "You were moved to spawn because you were in an illigal position.");
+                        player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                         //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         return;
                     }
@@ -176,19 +180,15 @@ public class ZonesPlayerListener extends PlayerListener {
         ZoneBase bZone = wmto.getActiveZone(to);
         
         if(aZone != null) {
-            if(!aZone.allowTeleport(player, from) && aZone.allowEnter(player, from)) {
-                player.sendMessage(ChatColor.RED + "Your area doesn't allow teleporting.");
+            if(!((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_TELEPORT)).isAllowed(aZone, player, from, to)) {
+                //player.sendMessage(ChatColor.RED + "Your area doesn't allow teleporting.");
                 event.setCancelled(true);
                 return;
             }
         }
         if(bZone != null){
-            if(!bZone.allowTeleport(player, to)) {
-                if(bZone.allowEnter(player, to)) {
-                    player.sendMessage(ChatColor.RED + "You cannot warp into " + bZone.getName() + " because it has teleporting disabled.");                    
-                } else {
-                    player.sendMessage(ChatColor.RED + "You cannot warp into " + bZone.getName() + ", since it is a protected area.");                    
-                }
+            if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_TELEPORT)).isAllowed(bZone, player, from, to)) {
+                ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_TELEPORT)).sendDeniedMessage(bZone, player);
                 event.setCancelled(true);
                 return;
             } else if (wmto.getConfig().BORDER_ENABLED && wmto.getConfig().BORDER_ENFORCE) {
@@ -303,7 +303,7 @@ public class ZonesPlayerListener extends PlayerListener {
                             return;
                         }
                     } else {
-                        if(!zone.allowBlockHit(player, event.getClickedBlock())) {
+                        if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, event.getClickedBlock(), blockType)) {
                             player.sendMessage(ChatColor.RED + "You cannot change blocks in '" + zone.getName() + "' !");
                             event.setCancelled(true);
                             return;
@@ -347,92 +347,15 @@ public class ZonesPlayerListener extends PlayerListener {
                 }
                 
                 
-                if(modifyBlocks.contains(blockType)) {
-                    WorldManager wm = plugin.getWorldManager(player.getWorld());
-                    ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
-                    if(zone == null) {
-                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")) {
-                            if (blockType == Material.CHEST.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
-                            else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
-                            else if (blockType == Material.DISPENSER.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
-                            else if (blockType == Material.NOTE_BLOCK.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
-                            
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if(!zone.allowBlockModify(player, event.getClickedBlock())) {
-                            if (blockType == Material.CHEST.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change chests in '" + zone.getName() + "' !");
-                            else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change furnaces in '" + zone.getName() + "' !");
-                            else if (blockType == Material.DISPENSER.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change dispensers in '" + zone.getName() + "' !");
-                            else if (blockType == Material.NOTE_BLOCK.getId())
-                                player.sendMessage(ChatColor.RED + "You cannot change note blocks in '" + zone.getName() + "' !");
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
+                if(modifyBlocks.contains(blockType)) 
+                    EventUtil.onModify(plugin, event, player, event.getClickedBlock(), blockType);
+                else if(placeItems.contains(toolType)) 
+                    EventUtil.onPlace(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()), toolType);
+                else if(placeBlocks.contains(blockType)) 
+                    EventUtil.onPlace(plugin, event, player, event.getClickedBlock(), blockType);
+                else if(destroyItems.contains(toolType)) 
+                    EventUtil.onBreak(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()));
                 
-                if(placeItems.contains(toolType) || placeBlocks.contains(blockType)) {
-                    WorldManager wm = plugin.getWorldManager(player.getWorld());
-                    if(!wm.getConfig().isProtectedPlaceBlock(player, toolType)) {
-                        Block block = event.getClickedBlock().getRelative(event.getBlockFace());
-                        ZoneBase zone = wm.getActiveZone(block);
-                        if(zone == null) {                      
-                            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")) {
-                                player.sendMessage(ChatColor.RED + "You cannot build in this world!");
-                                event.setCancelled(true);
-                                return;
-                            } else {
-                                wm.getConfig().logBlockPlace(player, block,event.getItem());
-                            }
-                        } else {
-                            if(!zone.allowBlockCreate(player,block,event.getItem())) {
-                                event.setCancelled(true);
-                                return;
-                            } else {
-                                wm.getConfig().logBlockPlace(player, block,event.getItem());                                
-                            }
-                        }
-                    } else {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-                
-                else if(destroyItems.contains(toolType)) {
-                    WorldManager wm = plugin.getWorldManager(player.getWorld());
-                    Block block = event.getClickedBlock().getRelative(event.getBlockFace());
-                    if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
-                        ZoneBase zone = wm.getActiveZone(block);
-                        if(zone == null) {        
-                            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")) {
-                                player.sendMessage(ChatColor.RED + "You cannot destroy blocks in this world!");
-                                event.setCancelled(true);
-                                return;
-                            } else {
-                                wm.getConfig().logBlockBreak(player, block);
-                            }
-                        } else {
-                            if(!zone.allowBlockDestroy(player, block)) {
-                                event.setCancelled(true);
-                                return;
-                            } else {
-                                wm.getConfig().logBlockBreak(player, block);                             
-                            }
-                        }
-                    } else {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
                 break;
         }
         
@@ -529,7 +452,7 @@ public class ZonesPlayerListener extends PlayerListener {
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
-        if(zone != null && !zone.allowEntityHit(event.getPlayer(), event.getItemDrop())) {
+        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItemDrop(), -1)) {
             event.getPlayer().sendMessage(ChatColor.RED + "You're not allowed to drop items in zone '" + zone.getName() + "'!");
             event.setCancelled(true);
         }
@@ -543,7 +466,7 @@ public class ZonesPlayerListener extends PlayerListener {
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
         if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItem().getWorld()).getActiveZone(event.getItem().getLocation());
-        if(zone != null && !zone.allowEntityHit(event.getPlayer(), event.getItem())) {
+        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItem(), -1)) {
             event.getPlayer().sendMessage(ChatColor.RED + "You're not allowed to pickup items in '" + zone.getName() + "'!");
             event.setCancelled(true);
         }
@@ -567,27 +490,7 @@ public class ZonesPlayerListener extends PlayerListener {
         
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
         Player player = event.getPlayer();
-
-        WorldManager wm = plugin.getWorldManager(block.getWorld());
-        if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
-            ZoneBase zone = wm.getActiveZone(block);
-            if(zone == null) {
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")){
-                    player.sendMessage(ChatColor.RED + "You cannot destroy blocks in this world!");
-                    event.setCancelled(true);
-                } else {
-                    wm.getConfig().logBlockPlace(player, block);
-                }
-            } else {
-                if (!zone.allowBlockDestroy(player, block)) {
-                    // These messages are now handled in the ZoneClass.
-                    //player.sendMessage(ChatColor.RED + "You cannot destroy blocks in '" + zone.getName() + "' !");
-                    event.setCancelled(true);
-                } else {
-                    wm.getConfig().logBlockBreak(player, block);
-                }
-            }
-        }
+        EventUtil.onBreak(plugin, event, player, block);
     }
 
     /**
@@ -600,26 +503,6 @@ public class ZonesPlayerListener extends PlayerListener {
         
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockClicked().getRelative(event.getBlockFace());
-
-        WorldManager wm = plugin.getWorldManager(player);
-        if(!wm.getConfig().isProtectedBreakBlock(player, blockPlaced)) {
-            ZoneBase zone = wm.getActiveZone(blockPlaced);
-            if(zone == null){
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,"zones.build")){
-                    player.sendMessage(ChatColor.RED + "You cannot build in this world!");
-                    event.setCancelled(true);
-                } else {
-                    wm.getConfig().logBlockPlace(player, blockPlaced);
-                }
-            } else  {
-                if (!zone.allowBlockCreate(player, blockPlaced)) {
-                    // These messages are now handled in the ZoneClass.
-                    //player.sendMessage(ChatColor.RED + "You cannot place blocks in '" + zone.getName() + "' .");
-                    event.setCancelled(true);
-                } else {
-                    wm.getConfig().logBlockPlace(player, blockPlaced);
-                }
-            }
-        }
+        EventUtil.onPlace(plugin, event, player, blockPlaced, event.getItemStack().getTypeId());
     }
 }
