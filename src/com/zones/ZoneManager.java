@@ -11,8 +11,11 @@ import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.bukkit.entity.Player;
 
 /**
  * 
@@ -196,5 +199,34 @@ public class ZoneManager {
         zones.remove(zone.getId());
     }
     
-
+    
+    public List<ZoneBase> matchZone(String search) {
+        List<ZoneBase> list = new ArrayList<ZoneBase>();
+        try {
+            int index = Integer.parseInt(search);
+            ZoneBase b = getZone(index);
+            if(b != null) list.add(b);
+        } catch(NumberFormatException e) {
+            String var = search.toLowerCase();
+            for(ZoneBase b : getAllZones())
+                if(b != null && b.getName().toLowerCase().contains(var))
+                    list.add(b);
+        }
+        return list;
+    }
+    
+    public List<ZoneBase> matchZone(Player player, String search) {
+        List<ZoneBase> list = new ArrayList<ZoneBase>();
+        try {
+            int index = Integer.parseInt(search);
+            ZoneBase b = getZone(index);
+            if(b != null && b.canAdministrate(player)) list.add(b);
+        } catch(NumberFormatException e) {
+            String var = search.toLowerCase();
+            for(ZoneBase b : getAllZones())
+                if(b != null && b.getName().toLowerCase().contains(var) && b.canAdministrate(player))
+                    list.add(b);
+        }
+        return list;
+    }
 }

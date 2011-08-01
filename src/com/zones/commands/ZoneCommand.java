@@ -39,6 +39,10 @@ public abstract class ZoneCommand extends Command {
         return plugin;
     }
     
+    protected boolean canUseCommand(CommandSender sender, String command) {
+        return (sender instanceof Player ? canUseCommand((Player)sender, command) : true);
+    }
+    
     protected boolean canUseCommand(Player p, String command) {
         return getPlugin().getPermissions().canUse(p, command);
     }

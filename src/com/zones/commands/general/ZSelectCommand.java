@@ -1,6 +1,5 @@
 package com.zones.commands.general;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -29,17 +28,7 @@ public class ZSelectCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.GREEN + "Selected zone removed.");
                 return true;
             }
-            List<ZoneBase> zoneslist = new ArrayList<ZoneBase>();
-            try {
-                int index = Integer.parseInt(vars[0]);
-                ZoneBase b = getZoneManager().getZone(index);
-                if(b != null && b.canAdministrate(player)) zoneslist.add(b);
-            } catch(NumberFormatException e) {
-                String var = vars[0].toLowerCase();
-                for(ZoneBase b : getZoneManager().getAllZones())
-                    if(b != null && b.getName().toLowerCase().contains(var) && b.canAdministrate(player))
-                        zoneslist.add(b);
-            }
+            List<ZoneBase> zoneslist = getZoneManager().matchZone(player, vars[0]);
             if(zoneslist.size() < 1)
                 player.sendMessage(ChatColor.YELLOW + "No zones found with key '" + vars[0] + "'(which you can modify).");
             else if(zoneslist.size() == 1){

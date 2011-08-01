@@ -30,6 +30,8 @@ public class ZoneCommandMap {
         //CUI
         registerCommand(new CuiValidateCommand(plugin));
         
+        registerCommand(new ZCommand(plugin));
+        
         // Admin
         registerCommand(new ZAddAdminCommand(plugin));
         registerCommand(new ZDeleteCommand(plugin));
