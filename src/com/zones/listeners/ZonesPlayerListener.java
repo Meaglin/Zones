@@ -109,7 +109,7 @@ public class ZonesPlayerListener extends PlayerListener {
          * We only revalidate when we change actually change from 1 block to another.
          * and since bukkits "check" is allot smaller we have to do this properly ourselves, sadly.
          */
-        if(from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ())
+        if(WorldManager.toInt(from.getX()) == WorldManager.toInt(to.getX()) && WorldManager.toInt(from.getY()) == WorldManager.toInt(to.getY()) && WorldManager.toInt(from.getZ()) == WorldManager.toInt(to.getZ()))
             return;
         /*
          * For the heck of it al:
