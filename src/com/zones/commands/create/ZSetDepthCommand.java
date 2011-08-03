@@ -22,7 +22,7 @@ public class ZSetDepthCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         ZoneSelection selection = getDummy(player);
         if (vars.length < 1 || Integer.parseInt(vars[0]) < 0) {
             player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetdepth [depth]");
@@ -30,6 +30,5 @@ public class ZSetDepthCommand extends ZoneCommand {
             ZoneVertice height = selection.getSelection().getHeight();
             selection.getSelection().setHeight(new ZoneVertice(WorldManager.toInt(player.getLocation().getY()) - Integer.parseInt(vars[0]), height.getMax()));
         }
-        return true;
     }
 }

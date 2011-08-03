@@ -22,7 +22,7 @@ public class ZDefineCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         
         ZoneBase inheritedZone = null;
         if(!canUseCommand(player,"zones.create")) {
@@ -30,21 +30,21 @@ public class ZDefineCommand extends ZoneCommand {
                 inheritedZone = getSelectedZone(player);
                 if(!(inheritedZone instanceof ZoneInherit)) {
                     player.sendMessage(ChatColor.RED + "This zone doesn't allow subzoning.");
-                    return true;
+                    return;
                 }
             } else {
                 player.sendMessage(ChatColor.RED + "You don't have permission to make global zones.");
-                return true;
+                return;
             }
         }
         
         if(!ZonesConfig.WORLDEDIT_ENABLED || getPlugin().getWorldEdit() == null) {
             player.sendMessage(ChatColor.RED + "WorldEdit support needs to be enabled!");
-            return true;
+            return;
         }
         if(vars.length < 1) {
             player.sendMessage(ChatColor.YELLOW + "Usage: /zdefine [zone name]");
-            return true;
+            return;
         }
         String name = "";
         for (int i = 0; i < vars.length; i++)
@@ -54,16 +54,16 @@ public class ZDefineCommand extends ZoneCommand {
         if(name.length() < 4)
         {
             player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
-            return true;
+            return;
         }
         Selection worldeditSelection = getPlugin().getWorldEdit().getSelection(player);
         if(worldeditSelection == null) {
             player.sendMessage(ChatColor.RED + "No WorldEdit selection found.");
-            return true;
+            return;
         }
         if(worldeditSelection.getArea() < 1) {
             player.sendMessage(ChatColor.RED + "Your WorldEdit selection is not a valid selection.");
-            return true;
+            return;
         }
         ZoneVertice point1 = new ZoneVertice(worldeditSelection.getMinimumPoint().getBlockX(), worldeditSelection.getMinimumPoint().getBlockZ());
         ZoneVertice point2 = new ZoneVertice(worldeditSelection.getMaximumPoint().getBlockX(), worldeditSelection.getMaximumPoint().getBlockZ());
@@ -75,7 +75,7 @@ public class ZDefineCommand extends ZoneCommand {
                     !form.isInsideZone(point1.getX(), point1.getY()) ||
                     !form.isInsideZone(point2.getX(), point2.getY()) ) {
                 player.sendMessage(ChatColor.RED + "Your selection is not inside your selected zone, zone cannot be created.");
-                return true;
+                return;
             }
         }
         
@@ -91,7 +91,6 @@ public class ZDefineCommand extends ZoneCommand {
         } else {
             player.sendMessage(ChatColor.RED + "Error saving zone.");
         }
-        return false;
     }
 
 }

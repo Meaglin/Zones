@@ -19,21 +19,18 @@ public class ZSetTypeCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         
-        if(vars.length == 1){
+        if(vars.length == 1) {
             if(vars[0].equalsIgnoreCase("Cuboid"))
                 getDummy(player).setForm(vars[0]);
             else if(vars[0].equalsIgnoreCase("NPoly"))
                 getDummy(player).setForm(vars[0]);
-            else{
+            else
                 player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
-                return true;
-            }
-        }else
+            
+        } else
             player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
-        
-        return true;
     }
 
 }

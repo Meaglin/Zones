@@ -22,13 +22,11 @@ public class ZToggleWaterCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.WATER, !z.getSettings().getBool(ZoneVar.WATER, true)))
             player.sendMessage(ChatColor.GREEN.toString() + "Water is now "+(z.getSettings().getBool(ZoneVar.WATER, true) ? "allowed" : "blocked" )+".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Unable to change water flag, please contact a admin.");
-        
-        return true;
     }
 }

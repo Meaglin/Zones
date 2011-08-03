@@ -21,15 +21,13 @@ public class ZDeleteCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
 
         ZoneBase toDelete = getSelectedZone(player);
         if(getZoneManager().delete(toDelete))
             player.sendMessage(ChatColor.GREEN.toString() + "Succesfully deleted zone " + toDelete.getName() + ".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Problems while deleting zone, please contact admin.");
-        
-        return true;
     }
 
 }

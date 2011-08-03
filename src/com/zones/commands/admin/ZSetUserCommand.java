@@ -22,7 +22,7 @@ public class ZSetUserCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if (vars.length >= 2) {
                 ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
                 for(int i = 0;i < floor(vars.length/2);i++) {
@@ -35,7 +35,6 @@ public class ZSetUserCommand extends ZoneCommand {
         } else {
             player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetuser [username 1] [access1] <username 2> <accces 2>...");
         }
-        return true;
     }
     
     private int floor(double d) { int rt = (int) d; return rt > d ? rt-1 : rt; }

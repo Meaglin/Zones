@@ -23,7 +23,7 @@ public class ZImportCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if(!ZonesConfig.WORLDEDIT_ENABLED) {
             player.sendMessage(ChatColor.RED+"WorldEdit support is turned off!.");
         } else {
@@ -52,6 +52,5 @@ public class ZImportCommand extends ZoneCommand {
                 }
             }
         }
-        return true;
     }
 }

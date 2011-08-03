@@ -22,19 +22,19 @@ public class ZRedefineCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if(!ZonesConfig.WORLDEDIT_ENABLED || getPlugin().getWorldEdit() == null) {
             player.sendMessage(ChatColor.RED + "WorldEdit support needs to be enabled!");
-            return true;
+            return;
         }
         Selection worldeditSelection = getPlugin().getWorldEdit().getSelection(player);
         if(worldeditSelection == null) {
             player.sendMessage(ChatColor.RED + "No WorldEdit selection found.");
-            return true;
+            return;
         }
         if(worldeditSelection.getArea() < 1) {
             player.sendMessage(ChatColor.RED + "Your WorldEdit selection is not a valid selection.");
-            return true;
+            return;
         }
         ZoneBase zone = getSelectedZone(player);
         ZoneVertice point1 = new ZoneVertice(worldeditSelection.getMinimumPoint().getBlockX(), worldeditSelection.getMinimumPoint().getBlockZ());
@@ -53,7 +53,6 @@ public class ZRedefineCommand extends ZoneCommand {
         } else {
             player.sendMessage(ChatColor.RED + "Error saving zone.");
         }
-        return false;
     }
 
 }

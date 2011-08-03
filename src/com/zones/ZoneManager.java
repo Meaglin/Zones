@@ -199,6 +199,10 @@ public class ZoneManager {
         zones.remove(zone.getId());
     }
     
+    public int getZoneCount() {
+        return zones.size();
+    }
+    
     
     public List<ZoneBase> matchZone(String search) {
         List<ZoneBase> list = new ArrayList<ZoneBase>();

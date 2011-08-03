@@ -42,7 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 98;
+    public static final int                 Rev             = 99;
     protected static final Logger           log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -122,10 +122,16 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     private void setupDatabase() {
         try {
-            getDatabase().find(Zone.class);
+            getDatabase().find(Zone.class).findRowCount();
+            getDatabase().find(Vertice.class).findRowCount();
         } catch (PersistenceException ex) {
-            System.out.println("Installing database for " + getDescription().getName() + " due to first time usage");
-            installDDL();
+            log.info("[Zones]Installing database due to first time usage.");
+            try {
+                installDDL();
+            } catch (Throwable t) {
+                log.warning("[Zones]Error installing database.");
+                t.printStackTrace();
+            }
         }
     }
     
@@ -184,10 +190,14 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     private void loadWorlds() {
-        worlds.clear();
-        for(World world : getServer().getWorlds())
-            worlds.put(world.getSeed(),new WorldManager(this,world));
-        
+        try {
+            worlds.clear();
+            for(World world : getServer().getWorlds())
+                worlds.put(world.getSeed(),new WorldManager(this,world));
+        } catch(Throwable t) {
+            log.warning("[Zones]Error loading worlds.");
+            t.printStackTrace();
+        }
     }
     
     

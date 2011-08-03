@@ -18,8 +18,7 @@ public class ZConfirmCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         getDummy(player).confirm();
-        return true;
     }
 }

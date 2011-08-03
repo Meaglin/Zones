@@ -19,9 +19,7 @@ public class ZWhoCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
-        
-        
+    public void run(Player player, String[] vars) {
         if(hasSelected(player)) {
             sendZone(player,getSelectedZone(player), null);
         } else {      
@@ -47,8 +45,6 @@ public class ZWhoCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.GREEN + "No zones found.");
             }
         }
-        
-        return true;
     }
 
     

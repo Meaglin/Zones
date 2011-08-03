@@ -24,7 +24,7 @@ public class ZCreateCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         
         ZoneBase inheritedZone = null;
         if(!canUseCommand(player,"zones.create")) {
@@ -32,11 +32,11 @@ public class ZCreateCommand extends ZoneCommand {
                 inheritedZone = getSelectedZone(player);
                 if(!(inheritedZone instanceof ZoneInherit)) {
                     player.sendMessage(ChatColor.RED + "This zone doesn't allow subzoning.");
-                    return true;
+                    return;
                 }
             } else {
                 player.sendMessage(ChatColor.RED + "You don't have permission to make global zones.");
-                return true;
+                return;
             }
         }
         
@@ -51,7 +51,7 @@ public class ZCreateCommand extends ZoneCommand {
             if(name.length() < 4)
             {
                 player.sendMessage(ChatColor.RED.toString() + "Too short zone name.");
-                return true;
+                return;
             }
             ZoneSelection selection = new ZoneCreateSelection(getPlugin(),player,name);
             selection.setInherited(inheritedZone);
@@ -61,7 +61,6 @@ public class ZCreateCommand extends ZoneCommand {
             player.sendMessage(ChatColor.RED + "Right clicking blocks with " + Material.getMaterial(ZonesConfig.CREATION_TOOL_TYPE).name().toLowerCase() + "[" + ZonesConfig.CREATION_TOOL_TYPE + "].");
             if(ZonesConfig.WORLDEDIT_ENABLED) player.sendMessage("Or you can import a worldedit selection using /zimport");
         }
-        return true;
     }
 
 }

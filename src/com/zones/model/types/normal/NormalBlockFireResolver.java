@@ -15,7 +15,7 @@ public class NormalBlockFireResolver implements PlayerBlockResolver {
         if(player == null)
             return zone.getFlag(ZoneVar.FIRE);
         else
-            return zone.getFlag(ZoneVar.FIRE) || (zone.getWorldConfig().LIGHTER_ALLOWED && zone.canAdministrate(player));
+            return zone.getFlag(ZoneVar.LIGHTER) || (zone.getWorldConfig().LIGHTER_ALLOWED && zone.canAdministrate(player));
     }
 
     @Override

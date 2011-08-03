@@ -21,16 +21,16 @@ public class ZReloadCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
-        return runConsole(player, vars);
+    public void run(Player player, String[] vars) {
+        runConsole(player, vars);
     }
     
     @Override
-    public boolean runConsole(CommandSender sender, String[] vars) {
+    public void runConsole(CommandSender sender, String[] vars) {
 
         if(vars.length < 1) {
             sender.sendMessage(ChatColor.RED + "Usage: /zreload config|zones|all|zone <zone id>");
-            return true;
+            return;
         }
         String type = vars[0];
         if(type.equalsIgnoreCase("config")) {
@@ -51,24 +51,22 @@ public class ZReloadCommand extends ZoneCommand {
         } else if (type.equalsIgnoreCase("zone")) {
             if(vars.length < 2) {
                 sender.sendMessage(ChatColor.RED + "Usage: /zreload zone [zone id]");
-                return true;
+                return;
             }
             int id = -1;
             try { id = Integer.parseInt(vars[1]); } catch(NumberFormatException e) { }
             if(id == -1) {
                 sender.sendMessage(ChatColor.RED + "'" + vars[1] + "' is not a valid zone id.");
-                return true;
+                return;
             }
             ZoneBase base = getZoneManager().getZone(id);
             if(base == null) {
                 sender.sendMessage(ChatColor.RED + "No zone found with id " + id + ".");
-                return true;
+                return;
             }
             getZoneManager().reloadZone(id);
             sender.sendMessage(ChatColor.GREEN + "Zone " + getZoneManager().getZone(id).getName() + " reloaded.");
         }
-        
-        return true;
     }
 
 }

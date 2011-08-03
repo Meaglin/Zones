@@ -20,9 +20,8 @@ public class ZStopCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         player.sendMessage(ChatColor.YELLOW.toString() + "Delete the zone? If yes do /zconfirm");
         getDummy(player).setConfirm(Confirm.STOP);
-        return true;
     }
 }

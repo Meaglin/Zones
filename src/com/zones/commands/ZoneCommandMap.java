@@ -8,6 +8,8 @@ import com.zones.ZonesConfig;
 import com.zones.commands.admin.*;
 import com.zones.commands.create.*;
 import com.zones.commands.general.*;
+import com.zones.commands.god.GodCommand;
+import com.zones.commands.god.UnGodCommand;
 import com.zones.commands.settings.*;
 
 /**
@@ -27,10 +29,9 @@ public class ZoneCommandMap {
     public void load() {
         commands.clear();
         
+        registerCommand(new ZCommand(plugin));
         //CUI
         registerCommand(new CuiValidateCommand(plugin));
-        
-        registerCommand(new ZCommand(plugin));
         
         // Admin
         registerCommand(new ZAddAdminCommand(plugin));
@@ -62,6 +63,10 @@ public class ZoneCommandMap {
         registerCommand(new ZSelectCommand(plugin));
         registerCommand(new ZWhoCommand(plugin));
 
+        // God
+        registerCommand(new GodCommand(plugin));
+        registerCommand(new UnGodCommand(plugin));
+        
         // Settings
         registerCommand(new ZAddCommand(plugin));
         registerCommand(new ZRemoveCommand(plugin));

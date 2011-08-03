@@ -21,10 +21,11 @@ public class ZSaveCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         ZoneSelection selection = getDummy(player);
         if(!selection.getSelection().isValid()) {
             player.sendMessage(ChatColor.RED + "You don't have a valid selection.");
+            return;
         }
         if (selection.getSelection().getHeight().getMax() == 130 && selection.getSelection().getHeight().getMin() == 0)
             player.sendMessage(ChatColor.RED.toString() + "WARNING: default z values not changed!");
@@ -32,6 +33,5 @@ public class ZSaveCommand extends ZoneCommand {
         player.sendMessage(ChatColor.YELLOW.toString() + "If you are sure you want to save this zone do /zconfirm");
 
         selection.setConfirm(Confirm.SAVE);
-        return true;
     }
 }

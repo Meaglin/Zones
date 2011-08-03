@@ -14,6 +14,12 @@ public enum ZoneVar {
             @Override
             public Object getDefault(ZoneBase zone) {return true;}
         },
+        LIGHTER("AllowLighter", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().LIGHTER_ALLOWED;
+            }
+        },
         FIRE("AllowFire", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {

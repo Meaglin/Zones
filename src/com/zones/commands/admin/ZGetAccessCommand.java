@@ -21,9 +21,8 @@ public class ZGetAccessCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
        ((ZoneNormal)getSelectedZone(player)).sendAccess(player);
-        return true;
     }
 
 }

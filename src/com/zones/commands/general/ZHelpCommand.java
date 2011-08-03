@@ -23,7 +23,7 @@ public class ZHelpCommand extends ZoneCommand {
 
     private static final int ITEMS_PER_PAGE = 8;
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         List<String> availableCommands = new ArrayList<String>();
 
         for (Entry<String, String[]> entry : getCommands().entrySet())
@@ -55,7 +55,7 @@ public class ZHelpCommand extends ZoneCommand {
             for(String part : info)
                 player.sendMessage(ChatColor.AQUA.toString() + part);
 
-            return true;
+            return;
         }
 
         player.sendMessage(ChatColor.BLUE.toString() + "Available commands (Page " + (vars.length == 1 ? vars[0] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") [] = required <> = optional:");
@@ -63,8 +63,6 @@ public class ZHelpCommand extends ZoneCommand {
         for (int i = amount; i < amount + ITEMS_PER_PAGE; i++)
             if (availableCommands.size() > i)
                 player.sendMessage(ChatColor.RED.toString() + availableCommands.get(i));
-        
-        return true;
     }
 
 }

@@ -22,14 +22,12 @@ public class ZToggleDynamiteCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.DYNAMITE, !z.getSettings().getBool(ZoneVar.DYNAMITE, z.getWorldManager().getConfig().ALLOW_TNT_TRIGGER)))
             player.sendMessage(ChatColor.GREEN + "Dynamite is now "+(z.getSettings().getBool(ZoneVar.DYNAMITE, z.getWorldManager().getConfig().ALLOW_TNT_TRIGGER) ? "enabled" : "disabled" )+".");
         else
             player.sendMessage(ChatColor.RED + "Unable to change dynamite flag, please contact a admin.");
-        
-        return true;
     }
 }

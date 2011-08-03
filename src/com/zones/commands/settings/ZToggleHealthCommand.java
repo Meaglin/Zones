@@ -22,15 +22,13 @@ public class ZToggleHealthCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.HEALTH, !z.getSettings().getBool(ZoneVar.HEALTH, z.getWorldManager().getConfig().PLAYER_HEALTH_ENABLED)))
             player.sendMessage(ChatColor.GREEN.toString() + "Health is now "+(z.getSettings().getBool(ZoneVar.HEALTH, z.getWorldManager().getConfig().PLAYER_HEALTH_ENABLED) ? "enabled" : "disabled" )+".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Unable to change health flag, please contact a admin.");
-        
-        return true;
     }
 
 }

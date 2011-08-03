@@ -28,16 +28,16 @@ public class ZAddCommand extends ZoneCommand{
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if(vars.length < 2){
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
-            return true;
+            return;
         }
         ZoneVar v = ZSetCommand.lists.get(vars[0].toLowerCase());
         if(v == null) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + vars[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
-            return true;
+            return;
         }
         
         ZoneBase zone = getSelectedZone(player);
@@ -54,7 +54,7 @@ public class ZAddCommand extends ZoneCommand{
             Material m = Material.matchMaterial(vars[1]);
             if(m == null) {
                 player.sendMessage(ChatColor.RED + "Unknown block " + vars[1] + "!");
-                return true;
+                return;
             }
             toset.add(m.getId());
             zone.getSettings().set(v, toset);
@@ -63,7 +63,7 @@ public class ZAddCommand extends ZoneCommand{
             CreatureType t = CreatureType.fromName(vars[1].substring(0, 1).toUpperCase() + vars[1].substring(1).toLowerCase());
             if(t == null) {
                 player.sendMessage(ChatColor.RED + "Unknown mob type " + vars[1] + "!");
-                return true;
+                return;
             }
             toset.add(t);
             zone.getSettings().set(v, toset);
@@ -71,8 +71,6 @@ public class ZAddCommand extends ZoneCommand{
         
         zone.saveSettings();
         player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " now changed to " + v.serialize(zone.getSettings().get(v)));
-        
-        return true;
     }
 
 }

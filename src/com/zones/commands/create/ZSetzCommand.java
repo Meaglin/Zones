@@ -20,13 +20,11 @@ public class ZSetzCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
-        if (vars.length < 2 || Integer.parseInt(vars[0]) < 0 || Integer.parseInt(vars[0]) > 130 || Integer.parseInt(vars[1]) < 0 || Integer.parseInt(vars[1]) > 130) {
+    public void run(Player player, String[] vars) {
+        if (vars.length < 2 || Integer.parseInt(vars[0]) < 0 || Integer.parseInt(vars[0]) > 130 || Integer.parseInt(vars[1]) < 0 || Integer.parseInt(vars[1]) > 130) 
             player.sendMessage(ChatColor.YELLOW + "Usage: /zsetz [min Z] [max Z]");
-        } else {
+         else 
             getDummy(player).getSelection().setHeight(new ZoneVertice(Integer.parseInt(vars[0]),Integer.parseInt(vars[1]) ));
-            //player.sendMessage(ChatColor.GREEN.toString() + "Min z and Max z now changed to : " + dummy.getMin() + " and " + dummy.getMax());
-        }
-        return true;
+        
     }
 }

@@ -12,11 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.CreatureType;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
@@ -469,7 +465,7 @@ public class WorldConfig {
     public boolean canSpawn(Entity entity, CreatureType type) {
         if(entity instanceof Animals) {
             return this.ANIMAL_SPAWNING_ENABLED && (!this.ALLOWED_ANIMALS_ENABLED || this.ALLOWED_ANIMALS.contains(type));
-        } else if(entity instanceof Monster) {
+        } else if(entity instanceof Monster || entity instanceof Flying || entity instanceof Slime) {
             return this.MOB_SPAWNING_ENABLED && (!this.ALLOWED_MOBS_ENABLED || this.ALLOWED_MOBS.contains(type));
         } else {
             return true;
@@ -586,11 +582,11 @@ public class WorldConfig {
         return true;
     }
     
-    public void setGodMode(Player player, boolean mode) {
+    public void setGodMode(Player player, boolean enabled) {
         if(!this.GOD_MODE_ENABLED)
             return;
         
-        if(mode)
+        if(enabled)
             godMode.remove(player.getEntityId());
         else
             godMode.add(player.getEntityId());

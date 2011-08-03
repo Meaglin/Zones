@@ -21,7 +21,7 @@ public class ZAddAdminCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if (vars.length >= 1) {
             ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
             for(int i = 0;i < vars.length;i++) {
@@ -30,7 +30,6 @@ public class ZAddAdminCommand extends ZoneCommand {
         } else {
             player.sendMessage(ChatColor.YELLOW + "Usage: /zaddadmin [user 1] <user 2> <user 3>...");
         }
-        return true;
     }
     
     private void addAdmin(Player owner, ZoneNormal zone, String username) {

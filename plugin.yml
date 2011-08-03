@@ -1,6 +1,6 @@
 name: Zones
 main: com.zones.Zones
-version: 2.0b22
+version: 2.0b23
 author: Meaglin
 website: https://github.com/Meaglin/0xFFFF
 description: The Over optimized Area Protection tool with integrated Anti Grief options.
@@ -161,5 +161,13 @@ commands:
         usage: /<command>  
     z:
         aliases: [zone]
+        description: see /zhelp
+        usage: /<command>  
+    ungod_proxy:
+        aliases: [ungod]
+        description: see /zhelp
+        usage: /<command>  
+    god_proxy:
+        aliases: [god]
         description: see /zhelp
         usage: /<command>  

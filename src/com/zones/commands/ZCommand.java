@@ -325,37 +325,37 @@ public class ZCommand extends ZoneCommand {
     }
     
     @Override
-    public boolean run(Player sender, String[] vars) {
-        return run(sender, vars);
+    public void run(Player sender, String[] vars) {
+        run(sender, vars);
     }
     
     @Override
-    public boolean runConsole(CommandSender sender, String[] vars) {
-        return run(sender, vars);
+    public void runConsole(CommandSender sender, String[] vars) {
+        run(sender, vars);
     }
     
-    public boolean run(CommandSender sender, String[] vars) {
+    public void run(CommandSender sender, String[] vars) {
         if(vars.length < 1) {
             sender.sendMessage(ChatColor.RED + getUsage());
-            return true;
+            return;
         }
         String actionname = vars[0];
         Action action = Action.fromName(actionname);
         if(action == null) {
             sender.sendMessage(ChatColor.RED + "Invalid action specified.");
             sender.sendMessage(ChatColor.RED + getUsage());
-            return true;
+            return;
         }
         if(action.requiredcount + 2 < vars.length) {
             sender.sendMessage(ChatColor.RED + "Not enough arguments.");
             sender.sendMessage(ChatColor.RED + action.getUsage());
-            return true;
+            return;
         }
         
         if(vars.length < 2) {
             sender.sendMessage(ChatColor.RED + "No zone name specified.");
             sender.sendMessage(ChatColor.RED + getUsage());            
-            return true;
+            return;
         }
         String zonename = vars[1];
         ZoneBase zone = null;
@@ -363,7 +363,7 @@ public class ZCommand extends ZoneCommand {
             List<ZoneBase> zoneslist = (sender instanceof Player ? getZoneManager().matchZone(((Player)sender), zonename) : getZoneManager().matchZone(zonename));
             if(zoneslist.size() < 1) {
                 sender.sendMessage(ChatColor.YELLOW + "No zones found with key '" + zonename + "'(which you can modify).");
-                return true;
+                return;
             } else if(zoneslist.size() > 1) {
                 sender.sendMessage(ChatColor.YELLOW +  "Too many zones found, please be more specific.");
                 String temp = "";
@@ -371,16 +371,13 @@ public class ZCommand extends ZoneCommand {
                     temp += z.getName() + "[" + z.getId() + "]";
                 }
                 sender.sendMessage(ChatColor.DARK_GREEN + "Zones found: " + temp);
-                return true;
+                return;
             }
             zone = zoneslist.get(0);
             sender.sendMessage(ChatColor.GREEN + "Using zone '" + zone.getName() + "' .");
         }
         String[] arguments = Arrays.copyOfRange(vars, action.zoneRequired() ? 2 : 1, vars.length);
         action.onCommand(this, zone, sender, arguments);
-        
-        
-        return true;
     }
 
 }

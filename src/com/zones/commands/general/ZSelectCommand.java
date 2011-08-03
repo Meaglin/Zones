@@ -21,12 +21,12 @@ public class ZSelectCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if(vars.length == 1){
             if(vars[0].equalsIgnoreCase("reset")) {
                 getZoneManager().removeSelected(player.getEntityId());
                 player.sendMessage(ChatColor.GREEN + "Selected zone removed.");
-                return true;
+                return;
             }
             List<ZoneBase> zoneslist = getZoneManager().matchZone(player, vars[0]);
             if(zoneslist.size() < 1)
@@ -66,7 +66,6 @@ public class ZSelectCommand extends ZoneCommand {
                 player.sendMessage("Zones found: " + temp);
             }
         }
-        return true;
     }
 
 }

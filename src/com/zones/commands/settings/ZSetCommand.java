@@ -26,7 +26,7 @@ public class ZSetCommand extends ZoneCommand {
         lists.put("allowedanimals", ZoneVar.ANIMALS);
         lists.put("animals", ZoneVar.ANIMALS);
         lists.put("mobs", ZoneVar.MOBS);
-        lists.put("allowedsmobs" , ZoneVar.MOBS);
+        lists.put("allowedmobs" , ZoneVar.MOBS);
         
         vars.put("entermessage", ZoneVar.ENTER_MESSAGE);
         vars.put("leavemessage", ZoneVar.LEAVE_MESSAGE);
@@ -41,19 +41,18 @@ public class ZSetCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         
-       
         if(vars.length < 1){
             player.sendMessage(ChatColor.RED + "Usage: /zset [variable name] <value>");
-            return true;
+            return;
         }
 
         ZoneVar v = ZSetCommand.vars.get(vars[0].toLowerCase());
         if(v == null) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + vars[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zset [variable name] <value>");
-            return true;
+            return;
         }
         
         ZoneBase zone = getSelectedZone(player);
@@ -61,7 +60,7 @@ public class ZSetCommand extends ZoneCommand {
             zone.getSettings().set(v, null);
             zone.saveSettings();
             player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " has now been reset to default.");
-            return true;
+            return;
         }
         /**
          * Some variables require special treatment.
@@ -75,7 +74,7 @@ public class ZSetCommand extends ZoneCommand {
             default:
                 if(vars.length < 2){
                     player.sendMessage(ChatColor.RED + "Usage: /zset [variable name] <value>");
-                    return true;
+                    return;
                 }  
                 String name = "";
                 for (int i = 1; i < vars.length; i++)
@@ -88,8 +87,6 @@ public class ZSetCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " now changed to " + ZoneSettings.unEscape(v.serialize(zone.getSettings().get(v))));
                 break;
         }
-        
-        return true;
     }
 
 }

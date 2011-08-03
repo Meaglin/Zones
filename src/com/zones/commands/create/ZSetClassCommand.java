@@ -15,13 +15,12 @@ public class ZSetClassCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if(vars.length != 1) {
             player.sendMessage(ChatColor.YELLOW + "Usage: /zsetclass ZoneNormal|ZonePlot|ZoneInherit");
-            return true;
+            return;
         }
-        this.getDummy(player).setClass(vars[0]);
-        return true;
+        getDummy(player).setClass(vars[0]);
     }
 
     

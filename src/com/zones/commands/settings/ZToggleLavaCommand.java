@@ -22,13 +22,11 @@ public class ZToggleLavaCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.LAVA, !z.getSettings().getBool(ZoneVar.LAVA, true)))
             player.sendMessage(ChatColor.GREEN.toString() + "Lava is now "+(z.getSettings().getBool(ZoneVar.LAVA, true) ? "allowed" : "blocked" )+".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Unable to change lava flag, please contact a admin.");
-        
-        return true;
     }
 }

@@ -20,10 +20,10 @@ public class ZExportCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         if(!ZonesConfig.WORLDEDIT_ENABLED || getPlugin().getWorldEdit() == null) {
             player.sendMessage(ChatColor.RED + "WorldEdit support needs to be enabled!");
-            return true;
+            return;
         }
         
         ZoneBase zone = getSelectedZone(player);
@@ -37,7 +37,6 @@ public class ZExportCommand extends ZoneCommand {
         } else {
             player.sendMessage(ChatColor.RED + "NPoly is not supported yet.");
         }
-        return true;
     }
 
 }

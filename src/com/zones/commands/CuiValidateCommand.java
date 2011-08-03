@@ -10,20 +10,19 @@ public class CuiValidateCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         
         
-        if(vars.length < 1) return false;
-        if(!vars[0].equals("cui")) return false;
+        if(vars.length < 1) return;
+        if(!vars[0].equals("cui")) return;
         
         if(hasDummy(player)) { /*
             ZoneSelection z = getDummy(player);
             if(!z.hasCUIEnabled()) {
                 z.enableCUI();
-                return true;
+                return;
             } */
         }
-        return false;
     }
 
 }

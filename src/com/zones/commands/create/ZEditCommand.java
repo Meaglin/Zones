@@ -21,12 +21,10 @@ public class ZEditCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         ZoneBase z = getSelectedZone(player);
         ZoneEditSelection selection = new ZoneEditSelection(getPlugin(),player,z.getName());
         getZoneManager().addSelection(player.getEntityId(), selection);
         player.sendMessage(ChatColor.GREEN + "Loaded zone " + z.getName() + " into your edit selection.");
-        
-        return true;
     }
 }

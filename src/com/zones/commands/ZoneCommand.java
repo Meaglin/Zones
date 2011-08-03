@@ -135,16 +135,16 @@ public abstract class ZoneCommand extends Command {
             
             return true;
         } else if(sender instanceof ConsoleCommandSender){
-            return runConsole(sender, vars);
+            runConsole(sender, vars);
+            return true;
         } else {
             return false;
         }
     }
     
-    public abstract boolean run(Player player, String[] vars) ;
-    public boolean runConsole(CommandSender sender, String[] vars) {
+    public abstract void run(Player player, String[] vars) ;
+    public void runConsole(CommandSender sender, String[] vars) {
         sender.sendMessage(ChatColor.RED + "This command doesn't support console usage.");
-        return true;
     }
     
     public static final Map<String, String[]> commands;

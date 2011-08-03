@@ -13,11 +13,11 @@ public class ZAboutCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
+    public void run(Player player, String[] vars) {
         player.sendMessage(ChatColor.GOLD + "Zones Area Protection plugin by Meaglin.");
         player.sendMessage(ChatColor.GREEN + "Bukkit version: " + getPlugin().getDescription().getVersion());
         player.sendMessage(ChatColor.GREEN + "Revision: " + Zones.Rev);
-        return true;
+        player.sendMessage(ChatColor.GREEN + "Loaded zones count: " + this.getZoneManager().getZoneCount());
     }
 
 }

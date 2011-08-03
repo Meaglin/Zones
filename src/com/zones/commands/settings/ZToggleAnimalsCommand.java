@@ -22,14 +22,11 @@ public class ZToggleAnimalsCommand extends ZoneCommand {
     }
 
     @Override
-    public boolean run(Player player, String[] vars) {
-        
+    public void run(Player player, String[] vars) {
         ZoneBase z = getSelectedZone(player);
         if(z.setSetting(ZoneVar.SPAWN_ANIMALS, !z.getSettings().getBool(ZoneVar.SPAWN_ANIMALS, z.getWorldManager().getConfig().ANIMAL_SPAWNING_ENABLED)))
             player.sendMessage(ChatColor.GREEN.toString() + "Animal spawning is now "+(z.getSettings().getBool(ZoneVar.SPAWN_ANIMALS, z.getWorldManager().getConfig().ANIMAL_SPAWNING_ENABLED) ? "enabled" : "disabled" )+".");
         else
             player.sendMessage(ChatColor.RED.toString() + "Unable to change animals flag, please contact a admin.");
-        
-        return true;
     }
 }
