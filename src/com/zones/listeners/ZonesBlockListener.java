@@ -15,7 +15,6 @@ import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
-import org.bukkit.event.block.SnowFormEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -232,28 +231,6 @@ public class ZonesBlockListener extends BlockListener {
         Player player = event.getPlayer();
 
         EventUtil.onBreak(plugin, event, player, block);
-    }
-
-
-    /**
-     * Will be replaced by onBlockForm in the next RB
-     * @param event
-     */
-    @Override
-    public void onSnowForm(SnowFormEvent event) {
-        if(event.isCancelled()) return;
-        
-        Block block = event.getBlock();
-
-        WorldManager wm = plugin.getWorldManager(block.getWorld());
-        ZoneBase zone = wm.getActiveZone(block);
-        if(zone == null) {
-            if(!wm.getConfig().SNOW_FALL_ENABLED)
-                event.setCancelled(true);
-        } else {
-            if(!isAllowed(zone,AccessResolver.SNOW_FALL, event.getBlock()))
-                event.setCancelled(true);
-        }
     }
     
     public void onBlockForm(org.bukkit.event.block.BlockFormEvent event) {

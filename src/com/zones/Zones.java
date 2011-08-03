@@ -73,11 +73,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.Normal);
         registerEvent(Event.Type.BLOCK_BURN, blockListener, Priority.Normal);
         registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal);
-
-        /**
-         * Will be replaced by/fall under BLOCK_FORM after the next RB
-         */
-        registerEvent(Event.Type.SNOW_FORM, blockListener, Priority.Normal);
         
         registerEvent(Event.Type.BLOCK_FORM, blockListener, Priority.Normal);
         registerEvent(Event.Type.BLOCK_SPREAD, blockListener, Priority.Normal);
