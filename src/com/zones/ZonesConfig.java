@@ -35,6 +35,7 @@ public class ZonesConfig {
     
     public static final String PLAYER_CANT_PLACE_CHEST_IN_ZONE = ChatColor.RED + "You cannot place Chests/Furnaces in '{zname}' !";
     public static final String PLAYER_CANT_DESTROY_CHEST_IN_ZONE = ChatColor.RED + "You cannot destroy Chests/Furnaces in '{zname}' !";
+    public static final String PLAYER_CANT_USE_LIGHTER = ChatColor.RED + "You cannot use lighters in '{zname}' !";
     
     public static final String PLAYER_CANT_ENTER_INTO_ZONE = ChatColor.RED + "You can't enter '{zname}' !";
     public static final String PLAYER_CANT_TELEPORT_INTO_ZONE = ChatColor.RED + "You cannot warp into '{zname}', since it is a protected area !";

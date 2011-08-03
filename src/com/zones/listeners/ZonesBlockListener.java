@@ -145,6 +145,7 @@ public class ZonesBlockListener extends BlockListener {
         } else {
             if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.FIRE)).isAllowed(zone, player, block, -1) || 
                     (wm.getConfig().FIRE_ENFORCE_PROTECTED_BLOCKS && !wm.getConfig().canBurnBlock(block))) {
+                ((PlayerBlockResolver)zone.getResolver(AccessResolver.FIRE)).sendDeniedMessage(zone, player);
                 return true;
             }
         }
