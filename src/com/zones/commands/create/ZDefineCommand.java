@@ -14,6 +14,7 @@ import com.zones.model.types.ZoneInherit;
 import com.zones.selection.CuboidSelection;
 import com.zones.selection.ZoneCreateSelection;
 import com.zones.selection.ZoneSelection;
+import com.zones.util.Log;
 
 public class ZDefineCommand extends ZoneCommand {
 
@@ -86,8 +87,10 @@ public class ZDefineCommand extends ZoneCommand {
         sel.setPoint1(point1);
         sel.setPoint2(point2);
         selection.setSelection(sel);
-        if(selection.save() != null) {
+        ZoneBase zone = selection.save();
+        if(zone != null) {
             player.sendMessage(ChatColor.GREEN + "Zone '" + name + "' saved.");
+            Log.info(player.getName() + " created zone " + zone.getName() + "[" + zone.getId() + "]");
         } else {
             player.sendMessage(ChatColor.RED + "Error saving zone.");
         }

@@ -131,9 +131,11 @@ public class ZoneCuboid extends ZoneForm {
     }
 
     @Override
-    public int getSize() {
-
-        return ((_x2 - _x1 + 1) * (_y2 - _y1 + 1) * (_z2 - _z1 + 1));
+    public long getSize() {
+        long size = _x2 - _x1 + 1;
+        size *= (_y2 - _y1 + 1);
+        size *= (_z2 - _z1 + 1);
+        return size;
     }
 
     @Override

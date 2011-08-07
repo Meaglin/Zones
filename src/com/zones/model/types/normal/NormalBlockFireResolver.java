@@ -7,11 +7,13 @@ import com.zones.ZonesConfig;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.settings.ZoneVar;
+import com.zones.util.Log;
 
 public class NormalBlockFireResolver implements PlayerBlockResolver {
 
     @Override
     public boolean isAllowed(ZoneBase zone,Player player, Block block, int typeId) {
+        Log.info(player, "trigger fire '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + typeId);
         if(player == null)
             return zone.getFlag(ZoneVar.FIRE);
         else

@@ -22,6 +22,7 @@ import com.zones.selection.CuboidSelection;
 import com.zones.selection.ZoneCreateSelection;
 import com.zones.selection.ZoneEditSelection;
 import com.zones.selection.ZoneSelection;
+import com.zones.util.Log;
 
 public class ZCommand extends ZoneCommand {
 
@@ -93,8 +94,10 @@ public class ZCommand extends ZoneCommand {
                 sel.setPoint1(point1);
                 sel.setPoint2(point2);
                 selection.setSelection(sel);
-                if(selection.save() != null) {
+                ZoneBase zone = selection.save();
+                if(zone != null) {
                     player.sendMessage(ChatColor.GREEN + "Zone '" + name + "' saved.");
+                    Log.info(player.getName() + " created zone " + zone.getName() + "[" + zone.getId() + "]");
                 } else {
                     player.sendMessage(ChatColor.RED + "Error saving zone.");
                 }
@@ -138,8 +141,10 @@ public class ZCommand extends ZoneCommand {
                 sel.setPoint1(point1);
                 sel.setPoint2(point2);
                 selection.setSelection(sel);
-                if(selection.save() != null) {
-                    player.sendMessage(ChatColor.GREEN + "Zone '" + zone.getName() + "' redefined.");
+                ZoneBase save = selection.save();
+                if(save != null) {
+                    player.sendMessage(ChatColor.GREEN + "Zone '" + save.getName() + "' redefined.");
+                    Log.info(player.getName() + " resized zone " + save.getName() + "[" + save.getId() + "]");
                 } else {
                     player.sendMessage(ChatColor.RED + "Error saving zone.");
                 }
@@ -263,9 +268,10 @@ public class ZCommand extends ZoneCommand {
                     return;
                 }
                 
-                if(command.getZoneManager().delete(zone))
+                if(command.getZoneManager().delete(zone)) {
                     sender.sendMessage(ChatColor.GREEN.toString() + "Succesfully deleted zone " + zone.getName() + ".");
-                else
+                    Log.info(sender.toString() + " delete zone " + zone.getName() + "[" + zone.getId() + "].");
+                } else
                     sender.sendMessage(ChatColor.RED.toString() + "Problems while deleting zone, please contact admin.");
             }
             

@@ -40,9 +40,12 @@ public class CuboidSelection extends Selection {
     }
 
     @Override
-    public int getSize() {
+    public long getSize() {
         if(p1 != null && p2 != null) {
-            return (Math.abs(p1.getX() - p2.getX())+1) * (Math.abs(p1.getY() - p2.getY())+1) * (getHeight().getMax() - getHeight().getMin() + 1);
+            long size = Math.abs(p1.getX() - p2.getX())+1;
+            size *= Math.abs(p1.getY() - p2.getY())+1;
+            size *= getHeight().getMax() - getHeight().getMin() + 1;
+            return size;
         } else {
             return -1;
         }

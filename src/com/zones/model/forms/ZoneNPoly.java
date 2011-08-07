@@ -16,7 +16,7 @@ public class ZoneNPoly extends ZoneForm {
     private int[] _y;
     private int   _z1;
     private int   _z2;
-    private int   _size;
+    private long   _size;
 
     public ZoneNPoly(int[] x, int[] y, int z1, int z2) {
         _x = x;
@@ -128,7 +128,7 @@ public class ZoneNPoly extends ZoneForm {
     }
 
     @Override
-    public int getSize() {
+    public long getSize() {
         return _size;
     }
 
@@ -138,7 +138,7 @@ public class ZoneNPoly extends ZoneForm {
      * .com/questions/451426/how-do-i-calculate-the-surface-area-of-a-2d-polygon
      */
     private void calculateSize() {
-        int size = 0;
+        long size = 0;
         for (int i = 0, j = _x.length - 1; i < _x.length; j = i++) {
             int x0 = _x[j];
             int y0 = _y[j];
@@ -146,7 +146,7 @@ public class ZoneNPoly extends ZoneForm {
             int y1 = _y[i];
             size += x0 * y1 - x1 * y0;
         }
-        _size = (int) Math.round(Math.abs(size) * 0.5) * (_z2 - _z1 + 1);
+        _size = Math.round(Math.abs(size) * 0.5) * ((long)(_z2 - _z1 + 1));
     }
 
     @Override

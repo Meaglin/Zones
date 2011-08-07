@@ -10,6 +10,7 @@ import com.zones.model.ZoneBase;
 import com.zones.model.ZoneVertice;
 import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
+import com.zones.util.Log;
 
 public class ZoneCreateSelection extends ZoneSelection {
 
@@ -55,6 +56,7 @@ public class ZoneCreateSelection extends ZoneSelection {
         if(zone != null) {
             getZoneManager().setSelected(getPlayer().getEntityId(), zone.getId());
             getPlayer().sendMessage(ChatColor.GREEN + "Selected zone '" + zone.getName() + "' .");
+            Log.info(getPlayer().getName() + " created zone " + zone.getName() + "[" + zone.getId() + "]");
         }
         return zone;
     }

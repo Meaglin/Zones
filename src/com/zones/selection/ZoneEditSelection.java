@@ -2,6 +2,7 @@ package com.zones.selection;
 
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
@@ -12,6 +13,7 @@ import com.zones.model.forms.ZoneCuboid;
 import com.zones.model.forms.ZoneNPoly;
 import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
+import com.zones.util.Log;
 
 public class ZoneEditSelection extends ZoneSelection {
 
@@ -80,7 +82,13 @@ public class ZoneEditSelection extends ZoneSelection {
         }
         getZoneManager().removeZone(z);
         revertGhostBlocks();
-        return getZoneManager().loadFromPersistentData(getWorldManager(), pZ);
+        ZoneBase zone = getZoneManager().loadFromPersistentData(getWorldManager(), pZ);
+        if(zone != null) {
+            getZoneManager().setSelected(getPlayer().getEntityId(), zone.getId());
+            getPlayer().sendMessage(ChatColor.GREEN + "Selected zone '" + zone.getName() + "' .");
+            Log.info(getPlayer().getName() + " resized zone " + zone.getName() + "[" + zone.getId() + "]");
+        }
+        return zone;
     }
 
 }

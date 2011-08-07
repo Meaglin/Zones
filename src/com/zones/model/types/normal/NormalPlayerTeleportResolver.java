@@ -9,6 +9,7 @@ import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.ZoneNormal;
+import com.zones.util.Log;
 
 public class NormalPlayerTeleportResolver implements PlayerLocationResolver {
 
@@ -18,6 +19,8 @@ public class NormalPlayerTeleportResolver implements PlayerLocationResolver {
 
     @Override
     public boolean isAllowed(ZoneBase zone, Player player, Location from, Location to) {
+        Log.info(player, "trigger teleport '" + zone.getName() + "'[" + zone.getId() + "] (" + from.getX() + "," + from.getY() + "," + from.getZ() + ") " + "(" + to.getX() + "," + to.getY() + "," + to.getZ() + ")" );
+
         if(!zone.getFlag(ZoneVar.TELEPORT) && !zone.canAdministrate(player)) {
             zone.sendMarkupMessage(ZonesConfig.TELEPORT_INTO_ZONE_DISABLED, player);
             return false;

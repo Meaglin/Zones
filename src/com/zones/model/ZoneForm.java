@@ -28,7 +28,7 @@ public abstract class ZoneForm {
 
     public abstract int getHighZ();
 
-    public abstract int getSize();
+    public abstract long getSize();
 
     // landing coordinates.
 

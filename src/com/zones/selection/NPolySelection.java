@@ -42,7 +42,7 @@ public class NPolySelection extends Selection {
      * .com/questions/451426/how-do-i-calculate-the-surface-area-of-a-2d-polygon
      */
     @Override
-    public int getSize() {
+    public long getSize() {
         if(points.size() < 3) 
             return -1;
         
@@ -54,7 +54,7 @@ public class NPolySelection extends Selection {
             int y1 = points.get(i).getY();
             size += x0 * y1 - x1 * y0;
         }
-        return (int) Math.round(Math.abs(size) * 0.5) * (getHeight().getMax() - getHeight().getMin() + 1);
+        return Math.round(Math.abs(size) * 0.5) * ((long)(getHeight().getMax() - getHeight().getMin() + 1));
     }
 
     @Override

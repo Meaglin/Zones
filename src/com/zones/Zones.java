@@ -42,8 +42,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 99;
-    protected static final Logger           log             = Logger.getLogger("Minecraft");
+    public static final int                 Rev             = 100;
+    public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
     private final ZonesEntityListener       entityListener  = new ZonesEntityListener(this);
@@ -56,6 +56,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     private final TLongObjectHashMap<WorldManager> worlds   = new TLongObjectHashMap<WorldManager>(1);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
+    
+    public static final boolean             debugEnabled    = false;
     
     public Zones() {
     }

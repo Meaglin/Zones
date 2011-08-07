@@ -44,7 +44,7 @@ public abstract class Selection {
     
     public abstract boolean isValid();
     
-    public abstract int getSize();
+    public abstract long getSize();
     
     public abstract int getPointsSize();
     public abstract List<ZoneVertice> getPoints();

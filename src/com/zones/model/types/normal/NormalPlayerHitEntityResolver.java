@@ -8,6 +8,7 @@ import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.types.ZoneNormal;
+import com.zones.util.Log;
 
 public class NormalPlayerHitEntityResolver implements PlayerHitEntityResolver{
 
@@ -18,6 +19,8 @@ public class NormalPlayerHitEntityResolver implements PlayerHitEntityResolver{
 
     @Override
     public boolean isAllowed(ZoneBase zone, Player attacker, Entity defender, int damage) {
+        Log.info(attacker, "trigger hit '" + zone.getName() + "'[" + zone.getId() + "] " + defender.getClass().getName() + " " + damage);
+
         return ((ZoneNormal)zone).canModify(attacker, Rights.HIT);
     }
 

@@ -11,6 +11,7 @@ import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.ZoneNormal;
+import com.zones.util.Log;
 
 public class NormalPlayerBlockDestroyResolver implements PlayerBlockResolver {
 
@@ -20,6 +21,7 @@ public class NormalPlayerBlockDestroyResolver implements PlayerBlockResolver {
 
     @Override
     public boolean isAllowed(ZoneBase zone, Player player, Block block, int typeId) {
+        Log.info(player, "trigger block destroy '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + typeId);
         if(!((ZoneNormal)zone).canModify(player, Rights.DESTROY)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DESTROY_BLOCKS_IN_ZONE, player);
             return false;

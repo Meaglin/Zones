@@ -9,6 +9,7 @@ import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.types.ZoneNormal;
+import com.zones.util.Log;
 
 public class NormalPlayerBlockHitResolver implements PlayerBlockResolver {
     
@@ -19,6 +20,8 @@ public class NormalPlayerBlockHitResolver implements PlayerBlockResolver {
 
     @Override
     public boolean isAllowed(ZoneBase zone, Player player, Block block, int typeId) {
+        Log.info(player, "trigger block hit '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + typeId);
+
         return ((ZoneNormal)zone).canModify(player, Rights.HIT);
     }
 
