@@ -128,8 +128,10 @@ public class ZonesPlayerListener extends PlayerListener {
                  * This prevents players getting stuck ;).
                  */
                 if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
-                    event.setTo(wm.getWorld().getSpawnLocation());
+                    //event.setTo(wm.getWorld().getSpawnLocation());
                     player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                    player.teleport(wm.getWorld().getSpawnLocation());
+                    event.setCancelled(false);
                     //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                     return;
                 } 
@@ -138,8 +140,9 @@ public class ZonesPlayerListener extends PlayerListener {
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
                 if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
-                        event.setTo(wm.getWorld().getSpawnLocation());
                         player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                        player.teleport(wm.getWorld().getSpawnLocation());
+                        event.setCancelled(false);
                         //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         return;
                     }
@@ -151,8 +154,9 @@ public class ZonesPlayerListener extends PlayerListener {
         } else if(wm.getConfig().BORDER_ENABLED) {
             if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from)) {
-                    event.setTo(wm.getWorld().getSpawnLocation());
-                    player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                    player.teleport(wm.getWorld().getSpawnLocation());
+                    event.setCancelled(false);
                     //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     return;
                 }

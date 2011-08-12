@@ -57,7 +57,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private final TLongObjectHashMap<WorldManager> worlds   = new TLongObjectHashMap<WorldManager>(1);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
     
-    public static final boolean             debugEnabled    = false;
+    public static final boolean             debugEnabled    = true;
     
     public Zones() {
     }
@@ -98,6 +98,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.PLAYER_BUCKET_FILL, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_BUCKET_EMPTY, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_PICKUP_ITEM, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_DROP_ITEM, playerListener, Priority.Normal);
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.Normal);
         registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal);
