@@ -125,8 +125,8 @@ public class ZoneManager {
 
         //plugin.getDatabase().find(Vertice.class).where().gt("id", toDelete.getId());
         //plugin.getDatabase().delete(toDelete.getPersistence().getVertices());
-        plugin.getDatabase().execute(plugin.getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id  = " + toDelete.getId() + ""));
         plugin.getDatabase().delete(toDelete.getPersistence());
+        //plugin.getDatabase().execute(plugin.getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id  = " + toDelete.getId() + ""));
         //plugin.getDatabase().createUpdate(Vertice.class, "delete from zones_vertices where id = " + toDelete.getId()).execute();
 
         removeZone(toDelete);

@@ -90,6 +90,8 @@ public class WorldConfig {
     public boolean GOD_MODE_ENABLED;
     public boolean GOD_MODE_AUTOMATIC;
     
+    public boolean PLAYER_FOOD_ENABLED;
+    
     public boolean PLAYER_HEALTH_ENABLED;
     
     public boolean PLAYER_ENFORCE_SPECIFIC_DAMAGE;
@@ -234,6 +236,8 @@ public class WorldConfig {
                 GOD_MODE_AUTOMATIC = p.getBool("AutoOnGodMode", true);
             }
             
+            PLAYER_FOOD_ENABLED = p.getBool("PlayerFoodEnabled", true);
+
             PLAYER_HEALTH_ENABLED = p.getBool("PlayerHealthEnabled", true);
             
             PLAYER_ENFORCE_SPECIFIC_DAMAGE = p.getBool("EnforcePlayerSpecificDamage", true);
@@ -256,6 +260,8 @@ public class WorldConfig {
             SPONGE_LAVA_EMULATION     = p.getBool("EmulateLavaSponges", false);
             SPONGE_LAVA_RADIUS      = p.getInt("LavaSpongeRadius", 2);
             SPONGE_LAVA_OVERRIDE_NEEDED = p.getBool("LavaSpongeOverrideNeeded", false);
+            log.info("[Zones]Loaded world config for world " + manager.getWorldName() + "!");
+            if(BORDER_ENABLED) log.info("[Zones]Border Enabled, Range:" + BORDER_RANGE);
         } catch (Exception e) {
             log.warning("[Zones]Error loading configurations for world '" + manager.getWorld().getName() + "' !");
             e.printStackTrace();

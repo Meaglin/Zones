@@ -1,5 +1,6 @@
 package com.zones.commands;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +56,7 @@ public class ZCommand extends ZoneCommand {
                     return;
                 }
                 if(arguments.length < 1) {
-                    player.sendMessage(ChatColor.YELLOW + "Usage: /zdefine [zone name]");
+                    player.sendMessage(ChatColor.YELLOW + "Usage: /z define [zone name]");
                     return ;
                 }
                 String name = arguments[0];
@@ -277,7 +278,7 @@ public class ZCommand extends ZoneCommand {
             
         };
         
-        private final String[] aliases;
+        private final List<String> aliases;
         private final String usage;
         private final int requiredcount;
         private final boolean zonerequired;
@@ -288,17 +289,14 @@ public class ZCommand extends ZoneCommand {
             this(usage, requiredcount, true, aliases);
         }
         private Action(String usage, int requiredcount, boolean zonerequired, String... aliases) {
-            if(aliases == null)
-                aliases = new String[] { name().toLowerCase() };
-            else 
-                aliases[aliases.length] = name().toLowerCase();
-            this.aliases = aliases;
+            if(aliases == null) this.aliases = new ArrayList<String>();
+            else this.aliases = Arrays.asList(aliases);
             this.usage = usage;
             this.requiredcount = requiredcount;
             this.zonerequired = zonerequired;
         }
         public abstract void onCommand(ZoneCommand command, ZoneBase zone, CommandSender sender, String[] arguments); 
-        public String[] getAliases() {
+        public List<String> getAliases() {
             return aliases;
         }
         public String getUsage() {
@@ -318,6 +316,7 @@ public class ZCommand extends ZoneCommand {
         static {
             map = new HashMap<String, Action>();
             for(Action a : values()) {
+                map.put(a.name().toLowerCase(), a);
                 for(String s : a.getAliases())
                     map.put(s, a);
             }
@@ -332,7 +331,7 @@ public class ZCommand extends ZoneCommand {
     
     @Override
     public void run(Player sender, String[] vars) {
-        run(sender, vars);
+        run((CommandSender)sender, vars);
     }
     
     @Override

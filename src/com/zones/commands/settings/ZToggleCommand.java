@@ -34,6 +34,11 @@ public class ZToggleCommand extends ZoneCommand {
             "Tnt",
             ZoneVar.DYNAMITE
         } );
+        variables.put("food", new Object[] {
+            "zones.toggle.food",
+            "Food",
+            ZoneVar.FOOD
+        });
         variables.put("health" , new Object[] { 
             "zones.toggle.health",
             "Health",

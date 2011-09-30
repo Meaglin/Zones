@@ -10,8 +10,8 @@ import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneSettings;
-import com.zones.model.ZoneVertice;
 import com.zones.model.settings.ZoneVar;
+import com.zones.util.Point;
 
 public class ZSetCommand extends ZoneCommand {
 
@@ -67,7 +67,7 @@ public class ZSetCommand extends ZoneCommand {
          */
         switch(v) {
             case SPAWN_LOCATION:
-                zone.getSettings().set(v, new ZoneVertice(player.getLocation().getBlockX(),player.getLocation().getBlockZ()));
+                zone.getSettings().set(v, new Point(player.getLocation().getBlockX(),player.getLocation().getBlockY(), player.getLocation().getBlockZ()));
                 zone.saveSettings();
                 player.sendMessage(ChatColor.GREEN + "The respawn location of your zone is now changed to your current location");
                 break;

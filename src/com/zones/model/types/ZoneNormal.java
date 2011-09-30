@@ -12,12 +12,12 @@ import org.bukkit.entity.Player;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.Resolver;
 import com.zones.model.ZoneBase;
-import com.zones.model.ZoneVertice;
 import com.zones.model.ZonesAccess;
 import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.normal.*;
 import com.zones.permissions.Permissions;
 import com.zones.persistence.Zone;
+import com.zones.util.Point;
 
 /**
  * 
@@ -25,8 +25,6 @@ import com.zones.persistence.Zone;
  *
  */
 public class ZoneNormal extends ZoneBase{
-
-    protected List<String>                 admingroups;
     protected List<String>                 adminusers;
 
     protected HashMap<String, ZonesAccess> groups;
@@ -52,6 +50,7 @@ public class ZoneNormal extends ZoneBase{
         resolvers[AccessResolver.WATER_FLOW.ordinal()]      = new NormalBlockFromToResolver(ZoneVar.LAVA);
         resolvers[AccessResolver.FIRE.ordinal()]            = new NormalBlockFireResolver();
         resolvers[AccessResolver.ENTITY_SPAWN.ordinal()]    = new NormalEntitySpawnResolver();
+        resolvers[AccessResolver.FOOD.ordinal()]            = new NormalPlayerFoodResolver();
         resolvers[AccessResolver.PLAYER_BLOCK_CREATE.ordinal()]     = new NormalPlayerBlockCreateResolver();
         resolvers[AccessResolver.PLAYER_BLOCK_MODIFY.ordinal()]     = new NormalPlayerBlockModifyResolver();
         resolvers[AccessResolver.PLAYER_BLOCK_DESTROY.ordinal()]    = new NormalPlayerBlockDestroyResolver();
@@ -64,8 +63,6 @@ public class ZoneNormal extends ZoneBase{
     
     public ZoneNormal() {
         super();
-        
-        admingroups = new ArrayList<String>();
         adminusers = new ArrayList<String>();
 
         groups = new HashMap<String, ZonesAccess>();
@@ -87,12 +84,6 @@ public class ZoneNormal extends ZoneBase{
                 switch (Integer.parseInt(item[0])) {
                     case 1:
                         adminusers.add(item[1].toLowerCase());
-                        break;
-                    case 2:
-                        if (getPermissions().isValid(getWorld().getName(),item[1]))
-                            admingroups.add(item[1]);
-                        else
-                            log.info("Invalid admin grouptype in zone id: " + getId());
                         break;
                     default:
                         log.info("Unknown admin grouptype in zone id: " + getId());
@@ -195,12 +186,13 @@ public class ZoneNormal extends ZoneBase{
         if (adminusers.contains(player.getName().toLowerCase()))
             return true;
 
-        List<String> groups = getPermissions().getGroups(player);
+        return false;
+    }
+    
+    protected boolean isAdminUser(Player player) {
+        if (adminusers.contains(player.getName().toLowerCase()))
+            return true;
         
-        for (String group : admingroups)
-            if (groups.contains(group))
-                return true;
-
         return false;
     }
     
@@ -273,18 +265,6 @@ public class ZoneNormal extends ZoneBase{
         updateRights();
     }
 
-    public void addAdminGroup(String group) {
-        if (admingroups.contains(group.toLowerCase()))
-            return;
-
-        if (!getPermissions().isValid(getWorld().getName(), group)) {
-            log.info("Trying to add an invalid adminGroup '" + group + "' in zone '" + getName() + "'[" + getId() + "].");
-            return;
-        }
-        admingroups.add(group.toLowerCase());
-        updateRights();
-    }
-
     public void removeAdmin(String admin) {
         if (adminusers.contains(admin.toLowerCase())) {
             adminusers.remove(admin.toLowerCase());
@@ -309,9 +289,6 @@ public class ZoneNormal extends ZoneBase{
 
         for (String user : adminusers) {
             admins += "1," + user + ";";
-        }
-        for (String group : admingroups) {
-            admins += "2," + group + ";";
         }
 
         if (admins.length() > 0)
@@ -383,10 +360,10 @@ public class ZoneNormal extends ZoneBase{
     public Location getSpawnLocation(Player player) {
         Object o = getSettings().get(ZoneVar.SPAWN_LOCATION);
         if(o == null) { 
-            return getWorld().getSpawnLocation();
+            return null;
         } else {
-            ZoneVertice z = (ZoneVertice)o;
-            return new Location(getWorld(),z.getX(),getWorld().getHighestBlockYAt(z.getX(), z.getY()),z.getY());
+            Point p = (Point)o;
+            return new Location(getWorld(),p.getX(), p.getY(), p.getZ());
         }
     }
 

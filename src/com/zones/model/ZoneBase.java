@@ -228,7 +228,7 @@ public abstract class ZoneBase {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + id + "]";
+        return getClass().getSimpleName() + "[" + id + "]" + getName();
     }
 
     public final boolean setName(String name) {

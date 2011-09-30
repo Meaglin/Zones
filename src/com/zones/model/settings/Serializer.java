@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.entity.CreatureType;
 
 import com.zones.model.ZoneVertice;
+import com.zones.util.Point;
 
 public enum Serializer {
     INTEGER {
@@ -185,7 +186,35 @@ public enum Serializer {
         public Class<? extends Object> getType() {
             return ZoneVertice.class;
         }
+    },
+    
+    LOCATION {
+        @Override
+        public String serialize(Object data) {
+            if(data != null && data instanceof Point) {
+                return "(" + ((Point)data).getX() + ":" + ((Point)data).getY() + ":" + ((Point)data).getZ() + ")";
+            } return null;
+        }
+
+        @Override
+        public Object unSerialize(String serializedData) {
+            Point p = null;
+            String[] split = serializedData.replace("(","").replace(")", "").split(":");
+            try {
+                p = new Point(Integer.parseInt(split[0]),Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+            } catch (NumberFormatException e) { return null; }
+            catch(ArrayIndexOutOfBoundsException e) { return null; }
+            
+            return p;
+        }
+        
+        @Override
+        public Class<? extends Object> getType() {
+            return Point.class;
+        }
     };
+    
+    
     
     public abstract String serialize(Object data);
     public abstract Object unSerialize(String serializedData);

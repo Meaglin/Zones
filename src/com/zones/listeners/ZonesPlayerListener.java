@@ -12,7 +12,6 @@ import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -233,6 +232,8 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.LAVA_BUCKET.getId(),
             Material.WATER_BUCKET.getId(),
             Material.MINECART.getId(),
+            Material.STORAGE_MINECART.getId(),
+            Material.POWERED_MINECART.getId(),
             Material.BOAT.getId(),
             Material.SEEDS.getId(),
             Material.SIGN.getId(),
@@ -364,19 +365,6 @@ public class ZonesPlayerListener extends PlayerListener {
         }
         
     }
-    
-    
-    
-    /**
-     * 
-     * 
-     * 
-     */
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        if(event.getMessage().toLowerCase().startsWith("/worldedit")) {
-            plugin.onCommand(event.getPlayer(), null, "worldedit", Arrays.copyOfRange(event.getMessage().split(" "), 1, event.getMessage().split(" ").length));
-        }
-    }
 
     /**
      * Called when a player gets kicked from the server
@@ -403,8 +391,10 @@ public class ZonesPlayerListener extends PlayerListener {
         ZoneBase z = plugin.getWorldManager(event.getPlayer()).getActiveZone(event.getPlayer());
         if(z != null) {
             Location loc = z.getSpawnLocation(event.getPlayer());
-            loc.setY(loc.getY()+2);
-            event.setRespawnLocation(loc);
+            if(loc != null) {
+                loc.setY(loc.getY()+1);
+                event.setRespawnLocation(loc);
+            }
         }
     }
 

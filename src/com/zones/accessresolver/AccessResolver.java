@@ -14,6 +14,7 @@ public enum AccessResolver {
     WATER_FLOW(BlockFromToResolver.class),
     LAVA_FLOW(BlockFromToResolver.class),
     FIRE(PlayerBlockResolver.class),
+    FOOD(PlayerFoodResolver.class),
     ENTITY_SPAWN(EntitySpawnResolver.class),
     PLAYER_BLOCK_CREATE(PlayerBlockResolver.class),
     PLAYER_BLOCK_MODIFY(PlayerBlockResolver.class),

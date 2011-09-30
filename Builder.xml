@@ -10,7 +10,7 @@
 
 	<path id="classpath">
 		<fileset dir="libs">
-			<include name="craftbukkit-0.0.1-SNAPSHOT.jar" />
+			<include name="craftbukkit.jar" />
 			<include name="WorldEdit.jar" />
 			<include name="Permissions.jar" />
 			<include name="trove-2.1.0.jar" />

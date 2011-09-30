@@ -15,6 +15,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.painting.PaintingBreakByEntityEvent;
 import org.bukkit.event.painting.PaintingBreakEvent;
 import org.bukkit.event.painting.PaintingPlaceEvent;
@@ -25,6 +26,7 @@ import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.BlockResolver;
 import com.zones.accessresolver.interfaces.EntitySpawnResolver;
 import com.zones.accessresolver.interfaces.PlayerDamageResolver;
+import com.zones.accessresolver.interfaces.PlayerFoodResolver;
 import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
 import com.zones.model.ZoneBase;
 
@@ -129,6 +131,28 @@ public class ZonesEntityListener extends EntityListener {
     }
 
     public void onEntityCombust(EntityCombustEvent event) {
+        if(event.isCancelled()) return;
+        Entity entity = event.getEntity();
+        if(entity == null || !(entity instanceof Player)) return;
+        Player player = (Player)entity;
+        
+        WorldManager wm = plugin.getWorldManager(player);
+        ZoneBase zone = wm.getActiveZone(player);
+        if(zone != null ) {
+            if (!((PlayerDamageResolver)zone.getResolver(AccessResolver.PLAYER_RECEIVE_DAMAGE)).isAllowed(zone, player, DamageCause.FIRE, 0) || (wm.getConfig().PLAYER_ENFORCE_SPECIFIC_DAMAGE && !wm.getConfig().canReceiveSpecificDamage(player, DamageCause.FIRE))) {
+                event.setCancelled(true);
+                return;
+            }
+        } else {
+            if(!wm.getConfig().canReceiveDamage(player, DamageCause.FIRE)) {
+                event.setCancelled(true);
+                return;
+            }
+            if(wm.getConfig().hasGodMode(player)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 
     public void onExplosionPrime(ExplosionPrimeEvent event) {
@@ -170,6 +194,28 @@ public class ZonesEntityListener extends EntityListener {
 
         EventUtil.onBreak(plugin, event, player, block);
         
+    }
+    
+    /**
+     * Called when a human entity's food level changes
+     *
+     * @param event Relevant event details
+     */
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        if(event.isCancelled()) return;
+        Entity entity = event.getEntity();
+        if(entity == null || !(entity instanceof Player)) return;
+        Player player = (Player)entity;
+        WorldManager wm = plugin.getWorldManager(player);
+        ZoneBase zone = wm.getActiveZone(player);
+        if(zone != null) {
+            if(!( ( PlayerFoodResolver ) zone.getResolver(AccessResolver.FOOD)).isAllowed(zone, player) ) {
+                event.setCancelled(true);
+            }
+        } else {
+            if(!wm.getConfig().PLAYER_FOOD_ENABLED)
+                event.setCancelled(true);
+        }
     }
 
 }

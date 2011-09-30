@@ -10,10 +10,15 @@ import com.zones.model.ZoneBase;
 public class ZoneInherit extends ZoneNormal {
 
     private List<ZoneBase> inheritedZones;
+    /**
+     * Warning: this list only contains zones that have this zone as inherited zone.
+     */
+    private List<ZoneBase> subZones;
     
     public ZoneInherit() {
         super();
         inheritedZones = new ArrayList<ZoneBase>();
+        subZones = new ArrayList<ZoneBase>();
     }
     
     public void addInherited(ZoneBase b) {
@@ -30,6 +35,22 @@ public class ZoneInherit extends ZoneNormal {
     
     public List<ZoneBase> getInheritedZones() {
         return inheritedZones;
+    }
+    
+    public void addSub(ZoneBase b) {
+        subZones.add(b);
+    }
+    
+    public void removeSub(ZoneBase b) {
+        subZones.remove(b);
+    }
+
+    public boolean containsSub(ZoneBase b) {
+        return subZones.contains(b);
+    }
+    
+    public List<ZoneBase> getSubZones() {
+        return subZones;
     }
     
     @Override

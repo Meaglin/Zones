@@ -1,23 +1,42 @@
+--
+-- Table structure for table `zones`
+--
 
 CREATE TABLE IF NOT EXISTS `zones` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
-  `class` varchar(255) DEFAULT 'ZoneNormal',
-  `type` varchar(255) DEFAULT 'ZoneCuboid',
-  `world` varchar(255) NOT NULL DEFAULT 'world',
-  `admins` text,
-  `users` text,
-  `minz` int(10) DEFAULT NULL,
-  `maxz` int(10) DEFAULT NULL,
-  `settings` longtext not null,
-  `size` int(10) DEFAULT '2',
+  `zonetype` varchar(255) DEFAULT NULL,
+  `formtype` varchar(255) DEFAULT NULL,
+  `world` varchar(255) DEFAULT NULL,
+  `admins` longtext,
+  `users` longtext,
+  `settings` longtext,
+  `minz` int(11) DEFAULT NULL,
+  `maxz` int(11) DEFAULT NULL,
+  `size` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `zones_vertices`
+--
 
 CREATE TABLE IF NOT EXISTS `zones_vertices` (
   `id` int(11) NOT NULL,
-  `order` int(11) NOT NULL,
-  `x` int(11) NOT NULL,
-  `y` int(11) NOT NULL,
-  PRIMARY KEY (`id`,`order`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  `vertexorder` int(11) DEFAULT NULL,
+  `x` int(11) DEFAULT NULL,
+  `y` int(11) DEFAULT NULL,
+  UNIQUE KEY `uq_zones_vertices_1` (`id`,`vertexorder`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `zones_vertices`
+--
+ALTER TABLE `zones_vertices`
+  ADD CONSTRAINT `zones_vertices_ibfk_1` FOREIGN KEY (`id`) REFERENCES `zones` (`id`) ON DELETE CASCADE;

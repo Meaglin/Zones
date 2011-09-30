@@ -25,7 +25,7 @@ public class ZSelectCommand extends ZoneCommand {
         if(vars.length == 1){
             if(vars[0].equalsIgnoreCase("reset")) {
                 getZoneManager().removeSelected(player.getEntityId());
-                player.sendMessage(ChatColor.GREEN + "Selected zone removed.");
+                player.sendMessage(ChatColor.GREEN + "Zone deselected.");
                 return;
             }
             List<ZoneBase> zoneslist = getZoneManager().matchZone(player, vars[0]);
@@ -61,9 +61,15 @@ public class ZSelectCommand extends ZoneCommand {
             } else {
                 player.sendMessage(ChatColor.YELLOW +  "Too much zones found, please specify a zone id.(/zselect <id>)");
                 String temp = "";
-                for (ZoneBase zone : zoneslist)
+                ZoneBase smallest = null;
+                for (ZoneBase zone : zoneslist) {
+                    if(smallest == null || zone.getForm().getSize() < smallest.getForm().getSize())
+                        smallest = zone;
                     temp += zone.getName() + "[" + zone.getId() + "]";
-                player.sendMessage("Zones found: " + temp);
+                }
+                player.sendMessage(ChatColor.DARK_GREEN + "Zones found: " + temp);
+                player.sendMessage(ChatColor.GOLD + "Selected smallest '" + smallest.getName() +"' .");
+                getZoneManager().setSelected(player.getEntityId(), smallest.getId());
             }
         }
     }

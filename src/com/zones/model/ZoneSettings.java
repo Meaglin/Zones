@@ -1,7 +1,8 @@
 package com.zones.model;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.zones.model.settings.*;
@@ -13,10 +14,10 @@ import com.zones.model.settings.*;
  */
 public class ZoneSettings {
     
-    private HashMap<ZoneVar, Object> settings;
+    private Map<ZoneVar, Object> settings;
     
     public ZoneSettings() {
-        settings = new HashMap<ZoneVar,Object>();
+        settings = new EnumMap<ZoneVar,Object>(ZoneVar.class);
     }
     
     public void set(ZoneVar name, boolean value) {

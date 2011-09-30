@@ -32,9 +32,13 @@ public class Region {
         for(ZoneBase b : _zones) {
             if(b instanceof ZoneInherit && !((ZoneInherit)b).containsInherited(zone) && zone.getForm().contains(b.getForm())) {
                 ((ZoneInherit)b).addInherited(zone);
+                if(zone instanceof ZoneInherit && !((ZoneInherit)zone).containsSub(b))
+                    ((ZoneInherit)zone).addSub(b);
             } 
             if(zone instanceof ZoneInherit && !((ZoneInherit)zone).containsInherited(b) && b.getForm().contains(zone.getForm())) {
                 ((ZoneInherit)zone).addInherited(b);
+                if(b instanceof ZoneInherit && !((ZoneInherit)b).containsSub(zone))
+                    ((ZoneInherit)b).addSub(zone);
             }
         }
         _zones.add(zone);

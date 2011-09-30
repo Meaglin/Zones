@@ -28,7 +28,7 @@ public class WorldManager {
     public static final int            MIN_Z       = 0;
     public static final int            MAX_Z       = 127;
 
-    public static final int            SHIFT_SIZE  = 7;
+    public static final int            SHIFT_SIZE  = 6;
     public static final int            BLOCK_SIZE  = (int) (Math.pow(2, SHIFT_SIZE) - 1);
 
     public static final int            X_REGIONS   = ((MAX_X - MIN_X) >> SHIFT_SIZE) + 1;

@@ -34,6 +34,11 @@ public enum ZoneVar {
             @Override
             public Object getDefault(ZoneBase zone) {return true;}
         },
+        FOOD("FoodEnabled", Serializer.BOOLEAN) {
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().PLAYER_FOOD_ENABLED;
+            }
+        },
         HEALTH("HealthEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
@@ -135,9 +140,9 @@ public enum ZoneVar {
                 return ZonesConfig.DEFAULT_LEAVE_MESSAGE;
             }
         },
-        SPAWN_LOCATION("SpawnLocation", Serializer.ZONEVERTICE) {
+        SPAWN_LOCATION("SpawnLocation", Serializer.LOCATION) {
             @Override
-            public Object getDefault(ZoneBase zone) {return null;}
+            public Object getDefault(ZoneBase zone) {return zone.getWorld().getSpawnLocation();}
         }; 
 
         

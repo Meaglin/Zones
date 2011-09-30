@@ -50,8 +50,10 @@ public class NijiPermissions implements Permissions {
      */
     public List<String> getGroups(Player player) {
         User u = getHandler().getUserObject(player.getWorld().getName(), player.getName());
-        LinkedHashSet<Entry> ancestors = u.getAncestors();
         List<String> groups = new ArrayList<String>();
+        if(u == null) return groups;
+        LinkedHashSet<Entry> ancestors = u.getAncestors();
+        if(ancestors == null) return groups;
         for(Entry e : ancestors)
             if(e.getWorld().equals(player.getWorld().getName()))
                 groups.add(e.getName().toLowerCase());

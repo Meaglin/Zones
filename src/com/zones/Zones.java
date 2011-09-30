@@ -42,7 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 100;
+    public static final int                 Rev             = 105;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -54,10 +54,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private WorldEditPlugin                 worldedit;
     private Permissions                     permissionsManager;
 
-    private final TLongObjectHashMap<WorldManager> worlds   = new TLongObjectHashMap<WorldManager>(1);
+    private final TLongObjectHashMap<WorldManager> worlds   = new TLongObjectHashMap<WorldManager>(2);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
     
-    public static final boolean             debugEnabled    = true;
+    public static final boolean             debugEnabled    = false;
     
     public Zones() {
     }
@@ -83,6 +83,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal);
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal);
         registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal);
+        registerEvent(Event.Type.FOOD_LEVEL_CHANGE, entityListener, Priority.Normal);
         registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal);
         registerEvent(Event.Type.PAINTING_PLACE, entityListener, Priority.Normal);
         registerEvent(Event.Type.PAINTING_BREAK, entityListener, Priority.Normal);
@@ -93,7 +94,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
-        //registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_BUCKET_FILL, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_BUCKET_EMPTY, playerListener, Priority.Normal);
@@ -171,10 +171,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         loadWorlds();
         registerEvents();
         if(ZonesConfig.WORLDEDIT_ENABLED) {
-            log.info("[Zones] Loading worldedit support...");
+            log.info("[Zones]Loading worldedit support...");
             registerWorldEdit();
         }
-        log.info("[Zones]finished Loading.");
+        log.info("[Zones]Finished Loading.");
         
     }
     
@@ -196,7 +196,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         try {
             worlds.clear();
             for(World world : getServer().getWorlds())
-                worlds.put(world.getSeed(),new WorldManager(this,world));
+                worlds.put(world.getUID().getLeastSignificantBits(),new WorldManager(this,world));
         } catch(Throwable t) {
             log.warning("[Zones]Error loading worlds.");
             t.printStackTrace();
@@ -219,10 +219,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
      * It's more efficient to do the null call instead of using containskey since it has more underlying calls.
      */
     public WorldManager getWorldManager(World world) {
-        WorldManager wm = worlds.get(world.getSeed());
+        WorldManager wm = worlds.get(world.getUID().getLeastSignificantBits());
         if(wm == null) {
             wm = new WorldManager(this,world);
-            worlds.put(world.getSeed(), wm);
+            worlds.put(world.getUID().getLeastSignificantBits(), wm);
         }
         return wm;
     }
@@ -237,10 +237,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             log.warning("[Zones] Trying to find world '" + world + "' which doesn't exist !");
             return null;
         }
-        WorldManager wm = worlds.get(w.getSeed());
+        WorldManager wm = worlds.get(w.getUID().getLeastSignificantBits());
         if(wm == null) {
             wm = new WorldManager(this,w);
-            worlds.put(w.getSeed(), wm);
+            worlds.put(w.getUID().getLeastSignificantBits(), wm);
         }
         
         return wm;

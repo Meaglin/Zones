@@ -25,6 +25,7 @@ public class ZInfoCommand extends ZoneCommand {
     public void run(Player player, String[] vars) {
         ZoneBase b = getSelectedZone(player);
         player.sendMessage(ChatColor.DARK_GREEN + "Zone: " + b.getName() + ChatColor.BLUE + "(" + b.getId() + ")" + ChatColor.WHITE + "[" + b.getAccess(player).toColorCode() + "]" );
+        player.sendMessage(ChatColor.AQUA + "World: " + b.getWorld().getName());
         ZoneForm f = b.getForm();
         player.sendMessage(ChatColor.AQUA + "Type: " + getClassName(b.getClass()) + " Form: " + getClassName(f.getClass()));
         player.sendMessage(ChatColor.AQUA + "Size: " + f.getSize() + " (" + Math.abs(f.getHighX()-f.getLowX()) + "," + Math.abs(f.getHighY()-f.getLowY()) + "," + Math.abs(f.getHighZ()-f.getLowZ()) + ")" );
@@ -64,6 +65,16 @@ public class ZInfoCommand extends ZoneCommand {
                 player.sendMessage(ChatColor.AQUA + "InheritedZones: " + message.substring(2));
             } else {
                 player.sendMessage(ChatColor.AQUA + "InheritedZones: None.");
+            }
+            List<ZoneBase> subs = ((ZoneInherit)b).getSubZones();
+            if(subs.size() > 0) {
+                String message = "";
+                for(ZoneBase zone : subs) {
+                    message += ", " + zone.getName() + "[" + zone.getId() + "]";
+                }
+                player.sendMessage(ChatColor.AQUA + "SubZones: " + message.substring(2));
+            } else {
+                player.sendMessage(ChatColor.AQUA + "SubZones: None.");
             }
         }
     }
