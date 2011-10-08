@@ -9,8 +9,8 @@ import org.bukkit.entity.Player;
 
 import com.zones.Zones;
 import com.zones.commands.ZoneCommand;
-import gnu.trove.THashMap;
-import java.util.Iterator;
+import java.util.HashMap;
+
 
 /**
  * 
@@ -19,13 +19,13 @@ import java.util.Iterator;
  */
 public class ZHelpCommand extends ZoneCommand {
 
-    private THashMap<String, String> commandgrp;
+    private HashMap<String, String> commandgrp;
 
     public ZHelpCommand(Zones plugin) {
         super("zhelp", plugin);
 
         //Adding the different categories
-        commandgrp = new THashMap<String, String>();
+        commandgrp = new HashMap<String, String>();
         commandgrp.put("admin", " - Commands for user administration of a zone");
         commandgrp.put("create", " - Commands for creation of a zone");
         commandgrp.put("general", " - General commands for zones");
@@ -43,8 +43,9 @@ public class ZHelpCommand extends ZoneCommand {
          */
         if (vars.length > 0) 
             for (Entry<String, String> tmpgrp : commandgrp.entrySet()) 
-                if (vars[0].compareTo(tmpgrp.getValue()) == 0) 
-                    group = tmpgrp.getValue();
+                if (vars[0].compareTo(tmpgrp.getKey()) == 0) {
+                    group = tmpgrp.getKey();
+                }
 
 
         /*
@@ -67,7 +68,7 @@ public class ZHelpCommand extends ZoneCommand {
          */
         if (group != null) {
             for (Entry<String, String[]> entry : getCommands().entrySet()) {
-                if (entry.getValue()[0] == null || canUseCommand(player, entry.getValue()[0]) && (group.compareTo(entry.getValue()[1]) == 0)) {
+                if ((entry.getValue()[0] == null || canUseCommand(player, entry.getValue()[0])) && (group.compareTo(entry.getValue()[1]) == 0)) {
                     availableCommands.add(ChatColor.BLUE.toString() + entry.getKey() + " " + ChatColor.WHITE.toString() +entry.getValue()[2]);
                 }
             }
@@ -85,8 +86,8 @@ public class ZHelpCommand extends ZoneCommand {
                     amount = 0;
                 }
             }
-            player.sendMessage(ChatColor.BLUE.toString() + "---------------" + ChatColor.WHITE.toString() + " Zone Commands " + ChatColor.BLUE.toString() + "---------------");
-            player.sendMessage(ChatColor.BLUE.toString() + "Available commands (Page " + (vars.length == 1 ? vars[0] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") [] = required <> = optional:");
+            player.sendMessage(ChatColor.BLUE.toString() + "--------" + ChatColor.WHITE.toString() + " Zone " + group +" commands (Page " + (vars.length == 2 ? vars[1] : "1") + " of " + (int) Math.ceil((double) availableCommands.size() / (double) ITEMS_PER_PAGE) + ") " + ChatColor.BLUE.toString() + "--------");
+            player.sendMessage(ChatColor.BLUE.toString() + "[] = required <> = optional:");
             player.sendMessage(ChatColor.BLUE.toString() + "For more info: /zhelp <command name>");
             for (int i = amount; i < amount + ITEMS_PER_PAGE; i++) {
                 if (availableCommands.size() > i) {
@@ -101,7 +102,7 @@ public class ZHelpCommand extends ZoneCommand {
          */
         player.sendMessage(ChatColor.BLUE.toString() + "---------------" + ChatColor.WHITE.toString() + " Zone Commands " + ChatColor.BLUE.toString() + "---------------");
         for (Entry<String, String> groups : commandgrp.entrySet()) {
-            player.sendMessage(ChatColor.BLUE.toString() + "zhelp " + groups.getKey() + ChatColor.WHITE.toString() + groups.getValue());
+            player.sendMessage(ChatColor.BLUE.toString() + "/zhelp " + groups.getKey() + ChatColor.WHITE.toString() + groups.getValue());
         }
 
     }
