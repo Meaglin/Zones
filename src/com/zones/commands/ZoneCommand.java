@@ -44,7 +44,7 @@ public abstract class ZoneCommand extends Command {
     }
     
     protected boolean canUseCommand(Player p, String command) {
-        return getPlugin().getPermissions().canUse(p, command);
+        return getPlugin().getPermissions().canUse(p,p.getWorld().getName(), command);
     }
     
     protected WorldManager getWorldManager(Player p) {

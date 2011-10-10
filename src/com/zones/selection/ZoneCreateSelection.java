@@ -33,20 +33,21 @@ public class ZoneCreateSelection extends ZoneSelection {
             pZ.setSettings("");
             pZ.setAdmins("");
             pZ.setUsers("2,default,he");
-            getPlugin().getDatabase().save(pZ);
+            //getPlugin().getDatabase().save(pZ);
             List<ZoneVertice> points = getSelection().getPoints();
             for (int i = 0; i < getSelection().getPointsSize(); i++) {
                 if (points.get(i) == null)
                     continue;
                 Vertice v = new Vertice();
-                v.setId(pZ.getId());
+                //v.setId(pZ.getId());
                 v.setVertexorder(i);
                 v.setX(points.get(i).getX());
                 v.setY(points.get(i).getY());
                 v.setZone(pZ);
                 pZ.addVertice(v);
             }
-            getPlugin().getDatabase().save(pZ.getVertices());
+            getPlugin().getMysqlDatabase().save(pZ);
+            //getPlugin().getDatabase().save(pZ);
         } catch(Exception e) {
             e.printStackTrace();
             return null;

@@ -129,7 +129,7 @@ public class ZoneNormal extends ZoneBase{
         if (z != null && z.canDo(right))
             return true;
 
-        List<String> pgroups = getPermissions().getGroups(player);
+        List<String> pgroups = getPermissions().getGroups(player, getWorld().getName());
         
         for (Entry<String, ZonesAccess> e : groups.entrySet())
             if (e.getValue().canDo(right)) {
@@ -166,7 +166,7 @@ public class ZoneNormal extends ZoneBase{
         if (users.containsKey(name))
             base = base.merge(users.get(name));
 
-        List<String> pgroups = getPermissions().getGroups(player);
+        List<String> pgroups = getPermissions().getGroups(player, getWorld().getName());
         for (Entry<String, ZonesAccess> e : groups.entrySet())
             if (e.getKey().equals("default") || (pgroups!= null && pgroups.contains(e.getKey()))) {
                 base = base.merge(e.getValue());
@@ -180,7 +180,7 @@ public class ZoneNormal extends ZoneBase{
     }
 
     protected boolean isAdmin(Player player) {
-        if (getPermissions().canUse(player, "zones.admin"))
+        if (getPermissions().canUse(player, getWorld().getName(), "zones.admin"))
             return true;
 
         if (adminusers.contains(player.getName().toLowerCase()))
@@ -296,7 +296,8 @@ public class ZoneNormal extends ZoneBase{
 
         getPersistence().setUsers(users);
         getPersistence().setAdmins(admins);
-        zones.getDatabase().update(getPersistence());
+        zones.getMysqlDatabase().update(getPersistence());
+        //zones.getDatabase().update(getPersistence());
     }
 
     public void addUser(String username) {

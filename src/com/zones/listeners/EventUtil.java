@@ -23,7 +23,7 @@ public class EventUtil {
         if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null){
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,"zones.build")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
                     player.sendMessage(ChatColor.RED + "You cannot build in this world!");
                     event.setCancelled(true);
                 } else {
@@ -46,6 +46,8 @@ public class EventUtil {
                 
                 wm.getConfig().logBlockPlace(player, block);
             }
+        } else {
+            event.setCancelled(true);
         }
     }
     
@@ -53,7 +55,7 @@ public class EventUtil {
         WorldManager wm = plugin.getWorldManager(player);
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")) {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")) {
                 if (blockType == Material.CHEST.getId())
                     player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
                 else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
@@ -80,11 +82,11 @@ public class EventUtil {
         if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null) {
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")){
                     player.sendMessage(ChatColor.RED + "You cannot destroy blocks in this world!");
                     event.setCancelled(true);
                 } else {
-                    wm.getConfig().logBlockPlace(player, block);
+                    wm.getConfig().logBlockBreak(player, block);
                 }
             } else {
                 if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).isAllowed(zone, player, block, -1)) {
@@ -101,6 +103,8 @@ public class EventUtil {
                 }
                 wm.getConfig().logBlockBreak(player, block);
             }
+        } else {
+            event.setCancelled(true);
         }
     }
 }

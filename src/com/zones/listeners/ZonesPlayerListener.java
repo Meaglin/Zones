@@ -137,7 +137,7 @@ public class ZonesPlayerListener extends PlayerListener {
                 event.setCancelled(true);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
-                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
+                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                         player.teleport(wm.getWorld().getSpawnLocation());
@@ -146,21 +146,24 @@ public class ZonesPlayerListener extends PlayerListener {
                         return;
                     }
                     player.sendMessage(ChatColor.RED + "You have reached the border.");
-                    event.setCancelled(true);
+                    player.teleport(from);
+                    event.setCancelled(false);
+                    
                     return;
                 }
             }
         } else if(wm.getConfig().BORDER_ENABLED) {
-            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
-                if(wm.getConfig().isOutsideBorder(from)) {
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
+                if(wm.getConfig().isOutsideBorder(from) && (wm.getConfig().BORDER_ENFORCE || (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)))) {
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION); 
                     player.teleport(wm.getWorld().getSpawnLocation());
                     event.setCancelled(false);
                     //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     return;
                 }
                 player.sendMessage(ChatColor.RED + "You have reached the border.");
-                event.setCancelled(true);
+                player.teleport(from);
+                event.setCancelled(false);
                 return;
             }
         }
@@ -195,14 +198,14 @@ public class ZonesPlayerListener extends PlayerListener {
                 event.setCancelled(true);
                 return;
             } else if (wmto.getConfig().BORDER_ENABLED && wmto.getConfig().BORDER_ENFORCE) {
-                if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
+                if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wmto.getWorldName(), "zones.override.border"))) {
                     player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
                     event.setCancelled(true);
                     return;
                 }
             }
         } else if(wmto.getConfig().BORDER_ENABLED) {
-            if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
+            if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wmto.getWorldName(), "zones.override.border"))) {
                 player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
                 event.setCancelled(true);
                 return;
@@ -302,7 +305,7 @@ public class ZonesPlayerListener extends PlayerListener {
                     WorldManager wm = plugin.getWorldManager(player.getWorld());
                     ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
                     if(zone == null) {
-                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, "zones.build")) {
+                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.build")) {
                             player.sendMessage(ChatColor.RED + "You cannot change blocks in this world !");
                             event.setCancelled(true);
                             return;

@@ -152,6 +152,11 @@ public abstract class ZoneSelection {
     }
     
     public void setConfirm(Confirm confirm) {
+        if(confirm == Confirm.STOP) {
+            this.confirm = Confirm.STOP;
+            return;
+        }
+        
         if(!getSelection().isValid()) {
             getPlayer().sendMessage(ChatColor.RED + "Missing selection points.");
             return;
@@ -191,7 +196,7 @@ public abstract class ZoneSelection {
 
     
     public boolean sellectionAllowed() {
-        if(getPlugin().getPermissions().canUse(getPlayer(), "zones.create"))
+        if(getPlugin().getPermissions().canUse(getPlayer(), getWorld().getName(), "zones.create"))
             return true;
         
         ZoneBase zone = getSelectedZone();

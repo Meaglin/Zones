@@ -13,7 +13,8 @@
 			<include name="craftbukkit.jar" />
 			<include name="WorldEdit.jar" />
 			<include name="Permissions.jar" />
-			<include name="trove-2.1.0.jar" />
+			<include name="PermissionsEx.jar" />
+			<!-- <include name="trove-3.0.0.jar" /> -->
 		</fileset>
 	</path>
 	
@@ -28,7 +29,7 @@
 	</target>
 
 	<target name="compile" depends="init" description="Compile the source.">
-		<javac destdir="${build.classes}" optimize="on" debug="on" source="1.6" target="1.6" nowarn="off" deprecation="on" >
+		<javac destdir="${build.classes}" debug="on" nowarn="off" deprecation="on" >
 			<compilerarg value="-Xlint" />
 			<src path="${src}" />
 			<classpath refid="classpath" />
@@ -36,7 +37,7 @@
 	</target>
 
 	<target name="jar" depends="compile" description="Create the jar file">
-		<jar destfile="${build}/Zones.jar">
+		<jar destfile="../Zones.jar">
 			<fileset dir="${build.classes}" />
 			<zipfileset dir="${src}/com/zones/config/" prefix="com/zones/config/" >
 				<include name="*.properties" />
@@ -50,10 +51,10 @@
 			<zipfileset dir="" prefix="src" >
 				<include name="db.sql" />
 			</zipfileset>
-			<zipfileset src="libs/trove-2.1.0.jar" prefix="" >
+			<!-- <zipfileset src="libs/trove-3.0.0.jar" prefix="" >
 				<include name="**" />
 				<exclude name="META-INF/*" />
-			</zipfileset>
+			</zipfileset> -->
 		</jar>
 	</target>
 	

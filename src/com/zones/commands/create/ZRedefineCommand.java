@@ -12,7 +12,6 @@ import com.zones.model.ZoneVertice;
 import com.zones.selection.CuboidSelection;
 import com.zones.selection.ZoneEditSelection;
 import com.zones.selection.ZoneSelection;
-import com.zones.util.Log;
 
 public class ZRedefineCommand extends ZoneCommand {
 
@@ -52,7 +51,7 @@ public class ZRedefineCommand extends ZoneCommand {
         ZoneBase save = selection.save();
         if(save != null) {
             player.sendMessage(ChatColor.GREEN + "Zone '" + save.getName() + "' redefined.");
-            Log.info(player.getName() + " resized zone " + save.getName() + "[" + save.getId() + "]");
+            //Log.info(player.getName() + " resized zone " + save.getName() + "[" + save.getId() + "]");
         } else {
             player.sendMessage(ChatColor.RED + "Error saving zone.");
         }

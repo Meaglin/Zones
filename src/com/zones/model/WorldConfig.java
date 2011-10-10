@@ -1,9 +1,8 @@
 package com.zones.model;
 
-import gnu.trove.TIntHashSet;
-
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -203,7 +202,7 @@ public class WorldConfig {
             
             MOB_SPAWNING_ENABLED = p.getBool("MobSpawningEnabled", true);
             ALLOWED_MOBS_ENABLED = p.getBool("EnableAllowedMobs", false);
-            if(MOB_SPAWNING_ENABLED && ALLOWED_MOBS_ENABLED) {
+            if(ALLOWED_MOBS_ENABLED) {
                 ALLOWED_MOBS = new ArrayList<CreatureType>();
                 CreatureType t = null;
                 for(String m : p.getProperty("AllowedMobs", "Creeper,Ghast,PigZombie,Skeleton,Spider,Zombie").split(",")) {
@@ -217,7 +216,7 @@ public class WorldConfig {
             
             ANIMAL_SPAWNING_ENABLED = p.getBool("AnimalSpawningEnabled", true);
             ALLOWED_ANIMALS_ENABLED = p.getBool("EnableAllowedAnimals", false);
-            if(ANIMAL_SPAWNING_ENABLED && ALLOWED_ANIMALS_ENABLED) {
+            if(ALLOWED_ANIMALS_ENABLED) {
                 ALLOWED_ANIMALS = new ArrayList<CreatureType>();
                 CreatureType t = null;
                 for(String a : p.getProperty("AllowedAnimals", "Chicken,Cow,Pig,Sheep,Squid").split(",")) {
@@ -232,7 +231,7 @@ public class WorldConfig {
             
             GOD_MODE_ENABLED = p.getBool("AllowGodMode", false);
             if(GOD_MODE_ENABLED) {
-                godMode = new TIntHashSet();
+                godMode = new HashSet<Integer>();
                 GOD_MODE_AUTOMATIC = p.getBool("AutoOnGodMode", true);
             }
             
@@ -268,24 +267,29 @@ public class WorldConfig {
         }
     }
     
-    public boolean isProtectedPlaceBlock(Player player, int type) { 
+    public boolean isProtectedPlaceBlock(Player player, int type, boolean message) { 
         if(PROTECTED_BLOCKS_ENABLED) {
-            if(this.PROTECTED_BLOCKS_BREAK.contains(type) && getPermissions().canUse(player, "zones.override.place")) {
-                player.sendMessage(ChatColor.RED + "This blocktype is blacklisted!");
+            if(this.PROTECTED_BLOCKS_BREAK.contains(type) && !getPermissions().canUse(player, player.getWorld().getName(), "zones.override.place")) {
+                if(message)player.sendMessage(ChatColor.RED + "This blocktype is blacklisted!");
                 return true;
             }
         }
         return false;
     }
-    
+    public boolean isProtectedPlaceBlock(Player player, Block b, boolean message) {        
+        return isProtectedPlaceBlock(player,b.getTypeId(), message);
+    }
     public boolean isProtectedPlaceBlock(Player player, Block b) {
-        return isProtectedPlaceBlock(player,b.getTypeId());
+        return isProtectedPlaceBlock(player,b.getTypeId(), true);
     } 
-
     public boolean isProtectedBreakBlock(Player player, Block b) {
+        return isProtectedBreakBlock(player,b,true);
+    }
+    
+    public boolean isProtectedBreakBlock(Player player, Block b, boolean message) {
         if(PROTECTED_BLOCKS_ENABLED) {
-            if(this.PROTECTED_BLOCKS_BREAK.contains(b.getTypeId()) && getPermissions().canUse(player, "zones.override.break")) {
-                player.sendMessage(ChatColor.RED + "This blocktype is protected!");
+            if(this.PROTECTED_BLOCKS_BREAK.contains(b.getTypeId()) && !getPermissions().canUse(player, player.getWorld().getName(), "zones.override.break")) {
+                if(message)player.sendMessage(ChatColor.RED + "This blocktype is protected!");
                 return true;
             }
         }
@@ -299,7 +303,7 @@ public class WorldConfig {
         if(LOGGED_BLOCKS_ENABLED) {
             if(this.LOGGED_BLOCKS_BREAK.contains(block.getTypeId())){
                 for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
-                    if(getPermissions().canUse(p, "zones.log.break")) {
+                    if(getPermissions().canUse(p, p.getWorld().getName(), "zones.log.break")) {
                         p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has broken " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
                     }
                 log.info("Player " + player.getName() + " has broken " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
@@ -345,7 +349,7 @@ public class WorldConfig {
         if(LOGGED_BLOCKS_ENABLED) {
             if(this.LOGGED_BLOCKS_PLACE.contains(block.getTypeId())){
                 for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
-                    if(getPermissions().canUse(p, "zones.log.place")) {
+                    if(getPermissions().canUse(p, p.getWorld().getName(), "zones.log.place")) {
                         p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
                     }
                 log.info("Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
@@ -353,29 +357,27 @@ public class WorldConfig {
         }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
         if(block.getTypeId() == Material.SPONGE.getId()) {
-            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_RADIUS ; z <= block.getZ() + SPONGE_RADIUS;z++) {
                         for(int y = block.getY() - SPONGE_RADIUS ; y <= block.getY() + SPONGE_RADIUS;y++) {
                             type = block.getWorld().getBlockTypeIdAt(x, y, z);
                             if(type == 8 || type == 9) {
-                                // Prevent any physics calls since it could get messy :<
-                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0);
                             }
                         }
                     }
                 }
             }
-            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().canUse(player, "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_LAVA_RADIUS ; x <= block.getX() + SPONGE_LAVA_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_LAVA_RADIUS ; z <= block.getZ() + SPONGE_LAVA_RADIUS;z++) {
                         for(int y = block.getY() - SPONGE_LAVA_RADIUS ; y <= block.getY() + SPONGE_LAVA_RADIUS;y++) {
                             type = block.getWorld().getBlockTypeIdAt(x, y, z);
                             if(type == 10 || type == 11) {
-                                // Prevent any physics calls since it could get messy :<
-                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0);
                             }
                         }
                     }
@@ -392,7 +394,7 @@ public class WorldConfig {
         if(LOGGED_BLOCKS_ENABLED) {
             if(this.LOGGED_BLOCKS_PLACE.contains(block.getTypeId())){
                 for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
-                    if(getPermissions().canUse(p, "zones.log.place")) {
+                    if(getPermissions().canUse(p, p.getWorld().getName(), "zones.log.place")) {
                         p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has placed " + item.getType().name() + "[" + item.getTypeId() + "] at " + block.getLocation().toString() + "!");
                     }
                 log.info("Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
@@ -400,7 +402,7 @@ public class WorldConfig {
         }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
         if(block.getTypeId() == Material.SPONGE.getId()) {
-            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_RADIUS ; z <= block.getZ() + SPONGE_RADIUS;z++) {
@@ -414,7 +416,7 @@ public class WorldConfig {
                     }
                 }
             }
-            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().canUse(player, "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_LAVA_RADIUS ; x <= block.getX() + SPONGE_LAVA_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_LAVA_RADIUS ; z <= block.getZ() + SPONGE_LAVA_RADIUS;z++) {
@@ -530,7 +532,7 @@ public class WorldConfig {
     public boolean canBurn(Player player, Block block, IgniteCause cause) {
         switch(cause) {
             case FLINT_AND_STEEL:
-                return this.LIGHTER_ALLOWED || getPermissions().canUse(player, "zones.override.lighter");
+                return this.LIGHTER_ALLOWED || getPermissions().canUse(player, player.getWorld().getName(), "zones.override.lighter");
             case LAVA:
                 return this.FIRE_ENABLED && this.LAVA_FIRE_ENABLED && canBurnBlock(block);
             default:
@@ -543,27 +545,29 @@ public class WorldConfig {
     }
     
     public boolean isOutsideBorder(Location loc) {
-        double x = 0;
-        double z = 0;
+        int x = 0;
+        int z = 0;
+        int locx = WorldManager.toInt(loc.getX());
+        int locz = WorldManager.toInt(loc.getZ());
         if(!BORDER_USE_SPAWN && BORDER_ALTERNATE_CENTER != null) {
             x = BORDER_ALTERNATE_CENTER.getX();
             z = BORDER_ALTERNATE_CENTER.getY();
         } else {
             Location spawn = loc.getWorld().getSpawnLocation();
-            x = spawn.getX();
-            z = spawn.getZ();
+            x = WorldManager.toInt(spawn.getX());
+            z = WorldManager.toInt(spawn.getZ());
         }
         switch (this.BORDER_TYPE) {
             case 1:
-                if(loc.getZ() > (z+this.BORDER_RANGE) || loc.getZ() < (z-this.BORDER_RANGE))
+                if(locz > (z+this.BORDER_RANGE) || locz < (z-this.BORDER_RANGE))
                     return true;
-                if(loc.getX() > (x+this.BORDER_RANGE) || loc.getX() < (x-this.BORDER_RANGE))
+                if(locx > (x+this.BORDER_RANGE) || locx < (x-this.BORDER_RANGE))
                     return true;
                 
                 return false;
             case 2:
-                double xdistance = x - loc.getX();
-                double zdistance = z - loc.getZ();
+                int xdistance = x - locx;
+                int zdistance = z - locz;
                 double range = StrictMath.sqrt(xdistance * xdistance + zdistance * zdistance);
                 if(range > this.BORDER_RANGE)
                     return true;
@@ -577,7 +581,7 @@ public class WorldConfig {
     /*
      *  TODO: move to separate handler ? 
      */
-    private TIntHashSet godMode;
+    private HashSet<Integer> godMode;
     public boolean hasGodMode(Player player) {
         if(!this.GOD_MODE_ENABLED)
             return false;

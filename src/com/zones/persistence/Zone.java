@@ -3,6 +3,7 @@ package com.zones.persistence;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,9 +14,10 @@ import javax.persistence.Table;
 import com.avaje.ebean.validation.Length;
 import com.avaje.ebean.validation.NotEmpty;
 import com.zones.Zones;
-
+/*
 @Entity()
 @Table(name = "zones")
+*/
 public class Zone {
     
     
@@ -53,7 +55,7 @@ public class Zone {
     
     private int size;
 
-    @OneToMany(mappedBy = "zone")
+    @OneToMany(mappedBy = "zone", cascade = CascadeType.ALL)
     @OrderBy("vertexorder ASC")
     private List<Vertice> vertices;
 
@@ -165,6 +167,7 @@ public class Zone {
         vertices.clear();
     }
     
+    @Deprecated
     public boolean save(Zones plugin) {
         try {
             if(getId() == 0) {
@@ -179,6 +182,7 @@ public class Zone {
         return true;
     }
     
+    @Deprecated
     public boolean saveAll(Zones plugin) {
         if(save(plugin)) {
             try {

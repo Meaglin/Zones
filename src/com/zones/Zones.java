@@ -7,17 +7,16 @@ import com.zones.listeners.ZonesBlockListener;
 import com.zones.listeners.ZonesEntityListener;
 import com.zones.listeners.ZonesPlayerListener;
 import com.zones.listeners.ZonesVehicleListener;
-import com.zones.permissions.BukkitPermissions;
-import com.zones.permissions.NijiPermissions;
 import com.zones.permissions.Permissions;
-import com.zones.persistence.Vertice;
-import com.zones.persistence.Zone;
+import com.zones.permissions.PermissionsResolver;
+import com.zones.persistence.Database;
 import com.zones.util.FileUtil;
-
-import gnu.trove.TLongObjectHashMap;
+import com.zones.util.ZoneUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -42,7 +41,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 105;
+    public static final int                 Rev             = 109;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -54,8 +53,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private WorldEditPlugin                 worldedit;
     private Permissions                     permissionsManager;
 
-    private final TLongObjectHashMap<WorldManager> worlds   = new TLongObjectHashMap<WorldManager>(2);
+    private final HashMap<Long, WorldManager> worlds   = new HashMap<Long, WorldManager>(2);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
+    private Database                        database        = null;
+    private final ZoneUtil                  util            = new ZoneUtil(this);
     
     public static final boolean             debugEnabled    = false;
     
@@ -123,10 +124,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvent(type, listener, priority, this);
     }
     
+    @SuppressWarnings("unused")
+    @Deprecated
     private void setupDatabase() {
         try {
-            getDatabase().find(Zone.class).findRowCount();
-            getDatabase().find(Vertice.class).findRowCount();
+            //getDatabase().find(Zone.class).findRowCount();
+            //getDatabase().find(Vertice.class).findRowCount();
         } catch (PersistenceException ex) {
             log.info("[Zones]Installing database due to first time usage.");
             try {
@@ -141,8 +144,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     @Override
     public List<Class<?>> getDatabaseClasses() {
         List<Class<?>> list = new ArrayList<Class<?>>();
-        list.add(Zone.class);
-        list.add(Vertice.class);
+        //list.add(Zone.class);
+        //list.add(Vertice.class);
         return list;
     }
 
@@ -164,8 +167,9 @@ public class Zones extends JavaPlugin implements CommandExecutor {
                 log.info("[Zones]Error while restorting configuration file.");
             }       
         }  
+        database = new Database(this);
         resolvePermissions();
-        setupDatabase();
+        //setupDatabase();
         ZonesConfig.load(configFile);
         commandMap.load();
         loadWorlds();
@@ -179,6 +183,9 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     private void resolvePermissions() {
+        permissionsManager = PermissionsResolver.resolve(this);
+        log.info("[Zones]Using " + permissionsManager.getName() + " for permissions managing.");
+        /*
         Plugin plugin = getServer().getPluginManager().getPlugin("Permissions");
         if(plugin != null && plugin instanceof com.nijikokun.bukkit.Permissions.Permissions) {
             if(!plugin.isEnabled()) {
@@ -190,6 +197,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             permissionsManager = new BukkitPermissions();
             log.info("[Zones]Using built in isOp() for permissions managing.");
         }
+        */
     }
     
     private void loadWorlds() {
@@ -227,8 +235,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return wm;
     }
     
-    public WorldManager[] getWorlds() {
-        return worlds.getValues(new WorldManager[worlds.size()]);
+    public Collection<WorldManager> getWorlds() {
+        return worlds.values();
     }
 
     protected WorldManager getWorldManager(String world) {
@@ -264,7 +272,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     public boolean reloadZones() {
         try {
-            for(WorldManager w : worlds.getValues(new WorldManager[worlds.size()]))
+            for(WorldManager w : worlds.values())
                 w.loadRegions();
             
         } catch(Throwable t) {
@@ -277,7 +285,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public boolean reloadConfig() {
         try {
             ZonesConfig.load(new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE));
-            for(WorldManager w : worlds.getValues(new WorldManager[worlds.size()]))
+            for(WorldManager w : worlds.values())
                 w.loadConfig();
         } catch(Throwable t) {
             t.printStackTrace();
@@ -286,6 +294,22 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return true;
     }
 
+    public Database getMysqlDatabase() {
+        return database;
+    }
+    
+    public ZoneUtil getUtils() {
+        return util;
+    }
+    
+    public ZoneUtil getApi() {
+        return getUtils();
+    }
+    
+    @Deprecated
+    public com.avaje.ebean.EbeanServer getDatabase() {
+        return super.getDatabase();
+    }
     
 }
 

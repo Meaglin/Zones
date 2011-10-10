@@ -2,9 +2,13 @@ package com.zones.listeners;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Flying;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -124,7 +128,20 @@ public class ZonesEntityListener extends EntityListener {
                 event.setCancelled(true);
             }
         } else {
-            if (!((EntitySpawnResolver)zone.getResolver(AccessResolver.ENTITY_SPAWN)).isAllowed(zone, event.getEntity(), event.getCreatureType())){
+            Entity entity = event.getEntity();
+            if(entity instanceof Animals) {
+                if (wm.getConfig().ALLOWED_ANIMALS_ENABLED && !wm.getConfig().ALLOWED_ANIMALS.contains(event.getCreatureType())) {
+                    event.setCancelled(true);
+                    return;
+                }
+            } else if(entity instanceof Monster || entity instanceof Flying || entity instanceof Slime) {
+                if (wm.getConfig().ALLOWED_MOBS_ENABLED && !wm.getConfig().ALLOWED_MOBS.contains(event.getCreatureType())) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+                
+            if (!((EntitySpawnResolver)zone.getResolver(AccessResolver.ENTITY_SPAWN)).isAllowed(zone, entity, event.getCreatureType())){
                 event.setCancelled(true);
             }
         }
@@ -210,11 +227,18 @@ public class ZonesEntityListener extends EntityListener {
         ZoneBase zone = wm.getActiveZone(player);
         if(zone != null) {
             if(!( ( PlayerFoodResolver ) zone.getResolver(AccessResolver.FOOD)).isAllowed(zone, player) ) {
+                if(player.getFoodLevel() < 20) player.setFoodLevel(20);
+                if(player.getSaturation() < 3.0F) player.setSaturation(5.0F);
+                if(player.getExhaustion() > 3.0F) player.setExhaustion(0.0F);
                 event.setCancelled(true);
             }
         } else {
-            if(!wm.getConfig().PLAYER_FOOD_ENABLED)
+            if(!wm.getConfig().PLAYER_FOOD_ENABLED) {
+                if(player.getFoodLevel() < 20) player.setFoodLevel(20);
+                if(player.getSaturation() < 3.0F) player.setSaturation(5.0F);
+                if(player.getExhaustion() > 3.0F) player.setExhaustion(0.0F);
                 event.setCancelled(true);
+            }
         }
     }
 

@@ -1,7 +1,6 @@
 package com.zones;
 
-import gnu.trove.TLongObjectHashMap;
-
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Location;
@@ -40,7 +39,7 @@ public class WorldManager {
     public static final int            OFFSET_X    = ((MIN_X * XMOD) >> SHIFT_SIZE) * XMOD;
     public static final int            OFFSET_Y    = ((MIN_Y * YMOD) >> SHIFT_SIZE) * YMOD;
 
-    private TLongObjectHashMap<Region> regions     = new TLongObjectHashMap<Region>();
+    private HashMap<Long, Region> regions     = new HashMap<Long, Region>();
     private static final Region        emptyRegion = new Region(0, 0);
 
     private WorldConfig                worldConfig;
@@ -171,7 +170,7 @@ public class WorldManager {
     }
 
     public void removeZone(ZoneBase toDelete) {
-        for(Region reg : regions.getValues(new Region[regions.size()]))
+        for(Region reg : regions.values())
             reg.removeZone(toDelete);
     }
     

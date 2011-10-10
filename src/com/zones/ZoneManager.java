@@ -7,11 +7,10 @@ import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
 import com.zones.selection.ZoneSelection;
 
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntObjectHashMap;
-
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -23,22 +22,22 @@ import org.bukkit.entity.Player;
  *
  */
 public class ZoneManager {
-    private TIntObjectHashMap<ZoneBase>       zones;
-    private TIntObjectHashMap<ZoneSelection>  selections;
-    private TIntIntHashMap                    selectedZones;
+    private HashMap<Integer, ZoneBase>       zones;
+    private HashMap<Integer, ZoneSelection>  selections;
+    private HashMap<Integer, Integer>        selectedZones;
     protected static final Logger             log = Logger.getLogger("Minecraft");
     private Zones                             plugin;
     
     protected ZoneManager(Zones plugin) {
-        zones = new TIntObjectHashMap<ZoneBase>();
-        selections = new TIntObjectHashMap<ZoneSelection>();
-        selectedZones = new TIntIntHashMap();
+        zones = new HashMap<Integer, ZoneBase>();
+        selections = new HashMap<Integer, ZoneSelection>();
+        selectedZones = new HashMap<Integer, Integer>();
         this.plugin = plugin;
     }
 
     public void cleanUp(WorldManager world) {
         selectedZones.clear();
-        for(ZoneBase z : zones.getValues(new ZoneBase[zones.size()])) {
+        for(ZoneBase z : zones.values()) {
             if(z.getWorldManager().equals(world)) {
                 zones.remove(z.getId());
             }
@@ -48,7 +47,8 @@ public class ZoneManager {
         cleanUp(world);
         int count = 0;
         try {
-            List<Zone> zones = plugin.getDatabase().find(Zone.class).where().ieq("world", world.getWorldName()).findList();
+            //List<Zone> zones = plugin.getDatabase().find(Zone.class).where().ieq("world", world.getWorldName()).findList();
+            List<Zone> zones = plugin.getMysqlDatabase().get(world.getWorldName());
             for(Zone zone : zones) {
                 if(loadFromPersistentData(world, zone) != null)
                     count++;
@@ -124,8 +124,10 @@ public class ZoneManager {
             return false;
 
         //plugin.getDatabase().find(Vertice.class).where().gt("id", toDelete.getId());
+        //plugin.getDatabase().delete(Vertice.class, toDelete.getPersistence().getVertices());
         //plugin.getDatabase().delete(toDelete.getPersistence().getVertices());
-        plugin.getDatabase().delete(toDelete.getPersistence());
+        plugin.getMysqlDatabase().delete(toDelete.getPersistence());
+        //plugin.getDatabase().delete(toDelete.getPersistence());
         //plugin.getDatabase().execute(plugin.getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id  = " + toDelete.getId() + ""));
         //plugin.getDatabase().createUpdate(Vertice.class, "delete from zones_vertices where id = " + toDelete.getId()).execute();
 
@@ -174,8 +176,8 @@ public class ZoneManager {
         selectedZones.remove(playerId);
     }
 
-    public ZoneBase[] getAllZones() {
-        return zones.getValues(new ZoneBase[zones.size()]);
+    public Collection<ZoneBase> getAllZones() {
+        return zones.values();
     }
 
     public void reloadZone(int id) {
@@ -183,7 +185,8 @@ public class ZoneManager {
         if(zone != null)
             removeZone(zone);
         
-        Zone persistentZone = plugin.getDatabase().find(Zone.class, id);
+        //Zone persistentZone = plugin.getDatabase().find(Zone.class, id);
+        Zone persistentZone = plugin.getMysqlDatabase().get(id);
         if(persistentZone != null) {
             WorldManager wm = plugin.getWorldManager(persistentZone.getWorld());
             if(wm == null) {

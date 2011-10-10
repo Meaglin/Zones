@@ -42,7 +42,7 @@ public enum ZoneVar {
         HEALTH("HealthEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().PLAYER_HEALTH_ENABLED;
+                return zone.getWorldConfig().PLAYER_HEALTH_ENABLED && !(zone.getWorldConfig().GOD_MODE_ENABLED && zone.getWorldConfig().GOD_MODE_AUTOMATIC);
             }
         },
         DYNAMITE("DynamiteEnabled", Serializer.BOOLEAN) {
@@ -142,7 +142,7 @@ public enum ZoneVar {
         },
         SPAWN_LOCATION("SpawnLocation", Serializer.LOCATION) {
             @Override
-            public Object getDefault(ZoneBase zone) {return zone.getWorld().getSpawnLocation();}
+            public Object getDefault(ZoneBase zone) {return null; }
         }; 
 
         

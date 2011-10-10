@@ -1,7 +1,7 @@
 package com.zones.model;
 
-import gnu.trove.TIntObjectHashMap;
-
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
@@ -26,7 +26,7 @@ public abstract class ZoneBase {
 
     private int                 id;
     protected ZoneForm                form;
-    protected TIntObjectHashMap<Player> playerList;
+    protected HashMap<Integer, Player> playerList;
 
     private String                    name;
     private ZoneSettings              settings = new ZoneSettings();
@@ -39,7 +39,7 @@ public abstract class ZoneBase {
     private boolean                   initialized;
     
     protected ZoneBase() {
-        playerList = new TIntObjectHashMap<Player>();
+        playerList = new HashMap<Integer, Player>();
     }
     
     public final void initialize(Zones plugin, WorldManager worldManager, Zone persistence) {
@@ -218,12 +218,12 @@ public abstract class ZoneBase {
     public abstract boolean canAdministrate(Player player);
    
     
-    public final TIntObjectHashMap<Player> getPlayersInsideMap() {
+    public final HashMap<Integer, Player> getPlayersInsideMap() {
         return playerList;
     }
     
-    public final Player[]  getPlayersInside() {
-        return playerList.getValues(new Player[playerList.size()]);
+    public final Collection<Player>  getPlayersInside() {
+        return playerList.values();
     }
 
     @Override
@@ -234,7 +234,8 @@ public abstract class ZoneBase {
     public final boolean setName(String name) {
         try {
             getPersistence().setName(name);
-            zones.getDatabase().update(getPersistence());
+            zones.getMysqlDatabase().update(getPersistence());
+            //zones.getDatabase().update(getPersistence());
             this.name = name;
         } catch(Exception e) {
             e.printStackTrace();
@@ -246,7 +247,8 @@ public abstract class ZoneBase {
     public final boolean saveSettings() {
         try {
             getPersistence().setSettings(getSettings().serialize());
-            zones.getDatabase().update(getPersistence());      
+            zones.getMysqlDatabase().update(getPersistence());
+            //zones.getDatabase().update(getPersistence());      
         } catch(Exception e) {
             e.printStackTrace();
             return false;

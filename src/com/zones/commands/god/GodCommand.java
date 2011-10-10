@@ -10,7 +10,7 @@ import com.zones.model.WorldConfig;
 public class GodCommand extends ZoneCommand {
 
     public GodCommand(Zones plugin) {
-        super("god_mask", plugin);
+        super("god", plugin);
         this.setRequiredAccess("zones.god");
     }
 

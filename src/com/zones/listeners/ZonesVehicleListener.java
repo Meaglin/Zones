@@ -137,7 +137,7 @@ public class ZonesVehicleListener extends VehicleListener {
                 event.getVehicle().teleport(from);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
-                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
+                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                         player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
@@ -151,7 +151,7 @@ public class ZonesVehicleListener extends VehicleListener {
                 }
             }
         } else if(wm.getConfig().BORDER_ENABLED) {
-            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, "zones.override.border"))) {
+            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                     player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");

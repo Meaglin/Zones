@@ -49,19 +49,22 @@ public class ZoneEditSelection extends ZoneSelection {
         if (z == null)
             return null;
         
-        
-        
         Zone pZ = z.getPersistence();
         try {
+            //getPlugin().getDatabase().delete(pZ);
             pZ.setFormtype(getClassName(getForm()));
             pZ.setZonetype(getClassName(getType()));
             pZ.setWorld(getWorld().getName());
             pZ.setMinz(getSelection().getHeight().getMin());
             pZ.setMaxz(getSelection().getHeight().getMax());
             pZ.setSize(getSelection().getPointsSize());
-            getPlugin().getDatabase().execute(getPlugin().getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id  = " + pZ.getId() + ""));
-            //getPlugin().getDatabase().delete(getPlugin().getDatabase().find(Vertice.class).where().eq("id", pZ.getId()).findList());
+            //getPlugin().getDatabase().delete(Vertice.class, pZ.getVertices());
+            //getPlugin().getDatabase().execute(getPlugin().getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id = " + pZ.getId() + " "));
+            // getPlugin().getDatabase().delete(getPlugin().getDatabase().find(Vertice.class).where().eq("id", pZ.getId()).findList());
+            getPlugin().getMysqlDatabase().deleteVertices(pZ);
+            
             pZ.clearVertices();
+//            getPlugin().getDatabase().update(pZ);
             List<ZoneVertice> points = getSelection().getPoints();
             for (int i = 0; i < points.size(); i++) {
                 if (points.get(i) == null)
@@ -71,11 +74,14 @@ public class ZoneEditSelection extends ZoneSelection {
                 v.setVertexorder(i);
                 v.setX(points.get(i).getX());
                 v.setY(points.get(i).getY());
-                v.setZone(pZ);
+                //v.setZone(pZ);
                 pZ.addVertice(v);
+                getPlugin().getMysqlDatabase().save(v);
             }
-            getPlugin().getDatabase().update(pZ);
-            getPlugin().getDatabase().save(pZ.getVertices());
+  //          getPlugin().getDatabase().update(pZ);
+            getPlugin().getMysqlDatabase().update(pZ);
+            //getPlugin().getDatabase().save(pZ);
+            //getPlugin().getDatabase().save(pZ.getVertices());
         } catch(Exception e) {
             e.printStackTrace();
             return null;

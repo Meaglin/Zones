@@ -9,11 +9,13 @@ import javax.persistence.UniqueConstraint;
 
 import com.avaje.ebean.validation.NotNull;
 
+
+/*
 @Entity
 @Table( name = "zones_vertices", 
         uniqueConstraints=
             @UniqueConstraint(columnNames={"id", "vertexorder"})
-)
+) */
 public class Vertice {
     
     @NotNull

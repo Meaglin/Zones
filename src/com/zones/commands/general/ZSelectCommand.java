@@ -59,14 +59,15 @@ public class ZSelectCommand extends ZoneCommand {
                 getZoneManager().setSelected(player.getEntityId(), zoneslist.get(0).getId());
                 player.sendMessage(ChatColor.GREEN + "Selected zone '" + zoneslist.get(0).getName() + "' .");
             } else {
-                player.sendMessage(ChatColor.YELLOW +  "Too much zones found, please specify a zone id.(/zselect <id>)");
+                //player.sendMessage(ChatColor.YELLOW +  "Too much zones found, please specify a zone id.(/zselect <id>)");
                 String temp = "";
                 ZoneBase smallest = null;
                 for (ZoneBase zone : zoneslist) {
                     if(smallest == null || zone.getForm().getSize() < smallest.getForm().getSize())
                         smallest = zone;
-                    temp += zone.getName() + "[" + zone.getId() + "]";
+                    temp += "," + zone.getName() + "[" + zone.getId() + "]";
                 }
+                if(!temp.equals("")) temp = temp.substring(1);
                 player.sendMessage(ChatColor.DARK_GREEN + "Zones found: " + temp);
                 player.sendMessage(ChatColor.GOLD + "Selected smallest '" + smallest.getName() +"' .");
                 getZoneManager().setSelected(player.getEntityId(), smallest.getId());
