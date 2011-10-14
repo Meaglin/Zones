@@ -3,10 +3,7 @@ package com.zones;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.zones.commands.ZoneCommand;
 import com.zones.commands.ZoneCommandMap;
-import com.zones.listeners.ZonesBlockListener;
-import com.zones.listeners.ZonesEntityListener;
-import com.zones.listeners.ZonesPlayerListener;
-import com.zones.listeners.ZonesVehicleListener;
+import com.zones.listeners.*;
 import com.zones.permissions.Permissions;
 import com.zones.permissions.PermissionsResolver;
 import com.zones.persistence.Database;
@@ -41,12 +38,13 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 109;
+    public static final int                 Rev             = 110;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
     private final ZonesEntityListener       entityListener  = new ZonesEntityListener(this);
     private final ZonesVehicleListener      vehicleListener = new ZonesVehicleListener(this);
+    private final ZonesWeatherListener      weatherListener = new ZonesWeatherListener(this);
 
     private final ZoneCommandMap            commandMap      = new ZoneCommandMap(this);
 
@@ -103,6 +101,9 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
         registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.Normal);
         registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal);
+        
+        registerEvent(Event.Type.WEATHER_CHANGE, weatherListener, Priority.Normal);
+        registerEvent(Event.Type.THUNDER_CHANGE, weatherListener, Priority.Normal);
     }
 
     public void registerWorldEdit() {

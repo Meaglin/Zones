@@ -135,7 +135,8 @@ public class ZoneNormal extends ZoneBase{
             if (e.getValue().canDo(right)) {
                 if(e.getKey().equals("default"))
                     return true;
-                if (pgroups!= null && pgroups.contains(e.getKey())) { 
+                //if(getPermissions().inGroup(player, e.getKey().toLowerCase()));
+                if (pgroups!= null && pgroups.contains(e.getKey().toLowerCase())) { 
                     return true;
                 }
             }

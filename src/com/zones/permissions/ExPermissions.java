@@ -3,6 +3,7 @@ package com.zones.permissions;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
@@ -22,18 +23,15 @@ public class ExPermissions extends Permissions {
 
     @Override
     public boolean inGroup(String world, String playername, String group) {
-        return group.equalsIgnoreCase("default") || manager.getUser(playername).inGroup(group, world, true);
+        return group.equalsIgnoreCase("default") || manager.getUser(playername).inGroup(group, true);
     }
 
     @Override
     public boolean isValid(String world, String group) {
         PermissionGroup g = manager.getGroup(group);
         if(g == null) return false;
-        for(String w : g.getWorlds())
-            if(world.equals(w))
-                return true;
         
-        return false;
+        return true;
     }
 
     @Override
@@ -49,22 +47,29 @@ public class ExPermissions extends Permissions {
         PermissionUser user = manager.getUser(playername);
         List<String> rt = new ArrayList<String>();
         if(user == null) return rt;
-        PermissionGroup[] groups = user.getGroups(world);
-        for(PermissionGroup g : groups)
-            rt.add(g.getName());
-        
+        append(rt, user.getGroups()); // Bah, i guess we have to do it ourselves again....
         return rt;
+    }
+    
+    private List<String> append(List<String> groups, PermissionGroup[] grp) {
+        for(PermissionGroup g: grp) {
+            groups.add(g.getName());
+            append(groups, g.getParentGroups());
+        }
+        return groups;
     }
 
     @Override
     public void setGroup(String world, String playername, String group) {
         PermissionUser user = manager.getUser(playername);
         if(user == null) return;
-        for(PermissionGroup g : user.getGroups(world)) {
-            user.removeGroup(g, world);
+        for(PermissionGroup g : user.getGroups()) {
+            user.removeGroup(g);
         }
         if(group == null) return;
-        user.setGroups(new String[] { group }, world);
+        PermissionGroup grp = manager.getGroup(group);
+        if(grp == null) return;
+        user.addGroup(grp);
     }
     
 
@@ -74,12 +79,7 @@ public class ExPermissions extends Permissions {
         if(user == null) return;
         PermissionGroup g = manager.getGroup(group);
         if(g == null) return;
-        for(String w : g.getWorlds())
-            if(world.equals(w)) {
-                user.addGroup(g);
-                return;
-            }
-        
+        user.addGroup(g);
     }
 
     @Override

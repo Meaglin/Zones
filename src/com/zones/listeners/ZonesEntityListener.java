@@ -16,6 +16,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
@@ -33,6 +34,7 @@ import com.zones.accessresolver.interfaces.PlayerDamageResolver;
 import com.zones.accessresolver.interfaces.PlayerFoodResolver;
 import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
 import com.zones.model.ZoneBase;
+import com.zones.model.settings.ZoneVar;
 
 
 /**
@@ -242,4 +244,19 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
 
+    @Override
+    public void onEntityInteract(EntityInteractEvent event) {
+        if(event.isCancelled()) return;
+        if(event.getBlock() == null) return;
+        if(event.getBlock().getTypeId() != 60) return;
+        WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
+        ZoneBase zone = wm.getActiveZone(event.getBlock());
+        if(zone == null) {
+            if(wm.getConfig().CROPS_PROTECTED)
+                event.setCancelled(true);
+        } else {
+            if(zone.getFlag(ZoneVar.CROPS_PROTECTED))
+                event.setCancelled(true);
+        }
+    }
 }

@@ -157,14 +157,6 @@ public abstract class ZoneCommand extends Command {
             "Starts Zone creation mode in which you define \n the area/height and type of the zone."
         });
 
-        /*
-        commands.put("/zsetplot", new String[] {
-            "zones.create",
-            "- set height and depth to according to plot specs.",
-            "Changes the zone you are making to a plot type \n with the related height and depth of the zone relative to \n your z position."
-        });
-        */
-
         commands.put("/zhelp",new String[] {
             null,
             "general",
@@ -245,7 +237,6 @@ public abstract class ZoneCommand extends Command {
             + "Example: /zsetuser default bde this will give all users access \n"
             + " to build,destroy and walk around in your zone but not to \n"
             + "access your chests."
-
         });
 
         commands.put("/zaddadmin",new String[] {
@@ -340,13 +331,13 @@ public abstract class ZoneCommand extends Command {
                 "settings",
                 "Enables or disables mobs spawning inside the zone.",
                 "Nothing extra here."
-            });
+        });
         commands.put("/ztoggleanimals", new String[] {
                 "zones.toggle.animals",
                 "settings",
                 "Enables or disables animals spawning inside the zone.",
                 "Nothing extra here."
-            });
+        });
         commands.put("/zedit", new String[] {
             "zones.create",
             "create",
@@ -356,13 +347,6 @@ public abstract class ZoneCommand extends Command {
             + "and merged back into an active zone.\n" +
             		"This is used to adjust the area of a zone."
         });
-        /*
-        commands.put("/zmerge", new String[] {
-            "zones.create",
-            "Merges your current edit selection with your selected\n",
-            "zone replacing the area of the zone with your selection."
-        });
-        */
         commands.put("/zreload", new String[] {
                 "zones.admin",
                 "admin",
@@ -385,9 +369,9 @@ public abstract class ZoneCommand extends Command {
                 + "fire - Enables/Disables fire in the zone.\n"
                 + "snowfall|iceform - Enables/Disables snowfall|iceform.\n"
                 + "physics - Enables/Disables physics in the zone.\n" 
-                + "notify - Toggles enter/leave notifications in the zone."
-                
-        } );
+                + "notify - Toggles enter/leave notifications in the zone.\n"
+                + "crop - Toggles Crop Protection."
+        });
         
         commands.put("/zadd", new String[] {
             "zones.settings.add",
@@ -399,7 +383,6 @@ public abstract class ZoneCommand extends Command {
             "protectedbreak - blocks which cannot be destroyed.\n" +
             "allowedanimals - list of animals that can spawn.\n" +
             "allowedmobs - list of mobs that can spawn."
-            
         });
 
         commands.put("/zremove", new String[] {
@@ -437,7 +420,7 @@ public abstract class ZoneCommand extends Command {
              "admin",
              "Gives basic explenation about access tags.",
              "Use the command damnit :<."
-        } );
+        });
         
         commands.put("/zinfo", new String[] {
             null,
@@ -445,7 +428,7 @@ public abstract class ZoneCommand extends Command {
             "Gives basic info about the selected zone.",
             "Displays zone size,min-max coordinates \n" +
             "and all set settings."
-        } );
+        });
         
         commands.put("/zsetclass", new String[] {
                null,
@@ -460,7 +443,7 @@ public abstract class ZoneCommand extends Command {
                 "[zone naam] - defines a zone.",
                 "based on your word edit selection a zone \n" +
                 "is defind with name [zone name]."
-        } );
+        });
         
         commands.put("/zredefine", new String[] {
                 "zones.create",
@@ -468,7 +451,7 @@ public abstract class ZoneCommand extends Command {
                 "- changes the form of your selected zone.",
                 "Changes the form of your current selected\n" +
                 "zone to your world edit selection."
-        } );
+        });
         
         commands.put("/zexport", new String[] {
                 null,
@@ -476,7 +459,7 @@ public abstract class ZoneCommand extends Command {
                 "- see description./zhelp /zexport",
                 "Exports the selected zone to your\n" +
                 "world edit selection."
-        } );
+        });
         
         commands.put("/zwho", new String[] { 
            null,

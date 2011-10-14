@@ -110,6 +110,11 @@ public enum ZoneVar {
             public Object getDefault(ZoneBase zone) {return false;}
         },
         
+        CROPS_PROTECTED("CropsProtected", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return zone.getWorldConfig().CROPS_PROTECTED;}
+        },
+        
         PLACE_BLOCKS("ProtectedPlaceBlocks", Serializer.INTEGERLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {return null;}

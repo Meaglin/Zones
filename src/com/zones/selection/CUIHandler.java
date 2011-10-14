@@ -8,7 +8,7 @@ import com.zones.model.ZoneVertice;
 
 public class CUIHandler {
     private final ZoneSelection selection;
-    private static final String CUI = "§5§6§4§5";
+    private static final String CUI = "\u00A75\u00A76\u00A74\u00A75";
     
     public CUIHandler(ZoneSelection selection) {
         this.selection = selection;

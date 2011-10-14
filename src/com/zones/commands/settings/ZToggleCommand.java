@@ -119,6 +119,11 @@ public class ZToggleCommand extends ZoneCommand {
             "Enters/Leaves Notify's",
             ZoneVar.NOTIFY
         });
+        variables.put("crop", new Object[] {
+                "zones.toggle.crop",
+                "Crop protection",
+                ZoneVar.CROPS_PROTECTED
+        });
     }
 
     @Override

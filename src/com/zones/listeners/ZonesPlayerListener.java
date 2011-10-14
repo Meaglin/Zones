@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -37,6 +38,7 @@ import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
 import com.zones.accessresolver.interfaces.PlayerLocationResolver;
 import com.zones.model.ZoneBase;
+import com.zones.model.settings.ZoneVar;
 import com.zones.selection.ZoneSelection;
 import com.zones.selection.ZoneSelection.Confirm;
 
@@ -366,7 +368,18 @@ public class ZonesPlayerListener extends PlayerListener {
                 
                 break;
         }
-        
+        if(!event.isCancelled() && event.getAction() == Action.PHYSICAL &&
+                event.getClickedBlock() != null && event.getClickedBlock().getTypeId() == 60) {
+            WorldManager wm = plugin.getWorldManager(player.getWorld());
+            ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
+            if(zone == null) {
+                if(wm.getConfig().CROPS_PROTECTED)
+                    event.setCancelled(true);
+            } else {
+                if(zone.getFlag(ZoneVar.CROPS_PROTECTED))
+                    event.setCancelled(true);
+            }
+        }
     }
 
     /**

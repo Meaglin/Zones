@@ -133,9 +133,10 @@ public class ZoneNPoly extends ZoneForm {
     }
 
     /*
+     * 
      * see Greens theorem http://en.wikipedia.org/wiki/Green%27s_theorem
-     * http://stackoverflow
-     * .com/questions/451426/how-do-i-calculate-the-surface-area-of-a-2d-polygon
+     * http://stackoverflow.com/questions/451426/how-do-i-calculate-the-surface-area-of-a-2d-polygon
+     * 
      */
     private void calculateSize() {
         long size = 0;

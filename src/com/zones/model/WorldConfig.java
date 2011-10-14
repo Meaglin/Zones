@@ -29,7 +29,6 @@ public class WorldConfig {
 
     protected static final Logger      log             = Logger.getLogger("Minecraft");
     
-    
     public boolean BORDER_ENABLED;
     public int BORDER_RANGE;
     public int BORDER_TYPE;
@@ -72,6 +71,8 @@ public class WorldConfig {
     public List<Integer> PROTECTED_BLOCKS_PLACE;
     public List<Integer> PROTECTED_BLOCKS_BREAK;
     
+    public boolean CROPS_PROTECTED;
+    
     public boolean LOGGED_BLOCKS_ENABLED;
     public List<Integer> LOGGED_BLOCKS_PLACE;
     public List<Integer> LOGGED_BLOCKS_BREAK;
@@ -107,6 +108,9 @@ public class WorldConfig {
     public boolean PLAYER_VOID_DAMAGE_ENABLED;
     public boolean PLAYER_CONTACT_DAMAGE_ENABLED;
     
+    public boolean WEATHER_RAIN_ENABLED;
+    public boolean WEATHER_THUNDER_ENABLED;
+    
     public boolean SPONGE_EMULATION;
     public int SPONGE_RADIUS;
     public boolean SPONGE_OVERRIDE_NEEDED;
@@ -115,22 +119,33 @@ public class WorldConfig {
     public int SPONGE_LAVA_RADIUS;
     public boolean SPONGE_LAVA_OVERRIDE_NEEDED;
     
-    
-    
     public WorldConfig(WorldManager manager,String filename) {
         this.filename = filename;
         this.manager = manager;
         File worldConfigFile = new File(filename);
         if(!worldConfigFile.exists()) {
             if(FileUtil.writeFile(worldConfigFile, FileUtil.readFile(Zones.class.getResourceAsStream("/com/zones/config/world.properties")).replace("{$worldname}", manager.getWorldName()))) {                
-                log.info("[Zones]Restored configuration file of world '" + manager.getWorld().getName() + "'.");
+                log.info("[Zones]Restored configuration file of world '" + manager.getWorldName() + "'.");
             } else {
-                log.info("[Zones]Error while restoring configuration file of world '" + manager.getWorld().getName() + "'!");            
+                log.info("[Zones]Error while restoring configuration file of world '" + manager.getWorldName() + "'!");            
             }
         }
         load();
+        
         for(Player player : manager.getPlugin().getServer().getOnlinePlayers())
             this.setGodMode(player, GOD_MODE_AUTOMATIC);
+
+        /**
+         * Weather
+         */
+        if(!WEATHER_THUNDER_ENABLED) {
+            if(manager.getWorld().isThundering())
+                manager.getWorld().setThundering(false);
+        }
+        if(!WEATHER_RAIN_ENABLED) {
+            if(manager.getWorld().hasStorm())
+                manager.getWorld().setStorm(false);
+        }
     }
     
     public Permissions getPermissions() {
@@ -194,6 +209,8 @@ public class WorldConfig {
                 PROTECTED_BLOCKS_BREAK = p.getIntList("ProtectedBlocksBreak", "");
             }
             
+            CROPS_PROTECTED = p.getBool("ProtectCrops", false);
+            
             LOGGED_BLOCKS_ENABLED = p.getBool("LoggedBlocksEnabled", true);
             if(LOGGED_BLOCKS_ENABLED){
                 LOGGED_BLOCKS_PLACE = p.getIntList("LoggedBlocksPlace", "");
@@ -252,6 +269,9 @@ public class WorldConfig {
             PLAYER_CREEPER_DAMAGE_ENABLED = p.getBool("PlayerCreeperDamageEnabled", true);
             PLAYER_VOID_DAMAGE_ENABLED = p.getBool("PlayerVoidDamageEnabled", true);
             PLAYER_CONTACT_DAMAGE_ENABLED = p.getBool("PlayerContactDamageEnabled", true);
+            
+            WEATHER_RAIN_ENABLED = p.getBool("RainEnabled", true);
+            WEATHER_THUNDER_ENABLED = p.getBool("ThunderEnabled", true);
             
             SPONGE_EMULATION          = p.getBool("EmulateSponges", false);
             SPONGE_RADIUS           = p.getInt("SpongeRadius", 2);
