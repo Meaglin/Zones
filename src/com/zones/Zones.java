@@ -186,19 +186,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private void resolvePermissions() {
         permissionsManager = PermissionsResolver.resolve(this);
         log.info("[Zones] Using " + permissionsManager.getName() + " for permissions managing.");
-        /*
-        Plugin plugin = getServer().getPluginManager().getPlugin("Permissions");
-        if(plugin != null && plugin instanceof com.nijikokun.bukkit.Permissions.Permissions) {
-            if(!plugin.isEnabled()) {
-                getPluginLoader().enablePlugin(plugin);
-            }
-            permissionsManager = new NijiPermissions((com.nijikokun.bukkit.Permissions.Permissions)plugin);
-            log.info("[Zones]Using Nijikokun Permissions for permissions managing.");
-        } else {
-            permissionsManager = new BukkitPermissions();
-            log.info("[Zones]Using built in isOp() for permissions managing.");
-        }
-        */
     }
     
     private void loadWorlds() {
@@ -266,7 +253,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         ZoneCommand cmd = commandMap.getCommand(command.getName());
         if(cmd != null) {
-            return cmd.execute(sender, label, args);
+            boolean rt = cmd.execute(sender, label, args);
+            String arg = "";
+            for(int i = 0;i < args.length; i++) arg += args[i] + " ";
+            log.info("[Zones] " + sender.getName() + " issued " + cmd.getName() + " with args: " + arg + "!");
+            return rt;
+            //return cmd.execute(sender, label, args);
         }
         return false;
     }
