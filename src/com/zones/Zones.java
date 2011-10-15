@@ -38,7 +38,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 110;
+    public static final int                 Rev             = 111;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -132,11 +132,11 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             //getDatabase().find(Zone.class).findRowCount();
             //getDatabase().find(Vertice.class).findRowCount();
         } catch (PersistenceException ex) {
-            log.info("[Zones]Installing database due to first time usage.");
+            log.info("[Zones] Installing database due to first time usage.");
             try {
                 installDDL();
             } catch (Throwable t) {
-                log.warning("[Zones]Error installing database.");
+                log.warning("[Zones] Error installing database.");
                 t.printStackTrace();
             }
         }
@@ -152,20 +152,20 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     @Override
     public void onDisable() {
-        log.info("[Zones]plugin disabled!");
+        log.info("[Zones] plugin disabled!");
     }
 
     @Override
     public void onEnable() {
-        log.info("[Zones]Rev " + Rev + "  Loading...");
+        log.info("[Zones] Rev " + Rev + "  Loading...");
         
         File configFile = new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE);
         if(!configFile.exists()) {
             getDataFolder().mkdirs();
             if(FileUtil.copyFile(Zones.class.getResourceAsStream("/com/zones/config/Zones.properties"), configFile)) {
-                log.info("[Zones]Missing configuration file restored.");                
+                log.info("[Zones] Missing configuration file restored.");                
             } else {
-                log.info("[Zones]Error while restorting configuration file.");
+                log.info("[Zones] Error while restorting configuration file.");
             }       
         }  
         database = new Database(this);
@@ -176,16 +176,16 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         loadWorlds();
         registerEvents();
         if(ZonesConfig.WORLDEDIT_ENABLED) {
-            log.info("[Zones]Loading worldedit support...");
+            log.info("[Zones] Loading worldedit support...");
             registerWorldEdit();
         }
-        log.info("[Zones]Finished Loading.");
+        log.info("[Zones] Finished Loading.");
         
     }
     
     private void resolvePermissions() {
         permissionsManager = PermissionsResolver.resolve(this);
-        log.info("[Zones]Using " + permissionsManager.getName() + " for permissions managing.");
+        log.info("[Zones] Using " + permissionsManager.getName() + " for permissions managing.");
         /*
         Plugin plugin = getServer().getPluginManager().getPlugin("Permissions");
         if(plugin != null && plugin instanceof com.nijikokun.bukkit.Permissions.Permissions) {
@@ -207,7 +207,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             for(World world : getServer().getWorlds())
                 worlds.put(world.getUID().getLeastSignificantBits(),new WorldManager(this,world));
         } catch(Throwable t) {
-            log.warning("[Zones]Error loading worlds.");
+            log.warning("[Zones] Error loading worlds.");
             t.printStackTrace();
         }
     }

@@ -30,13 +30,3 @@ CREATE TABLE IF NOT EXISTS `zones_vertices` (
   `y` int(11) DEFAULT NULL,
   UNIQUE KEY `uq_zones_vertices_1` (`id`,`vertexorder`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `zones_vertices`
---
-ALTER TABLE `zones_vertices`
-  ADD CONSTRAINT `zones_vertices_ibfk_1` FOREIGN KEY (`id`) REFERENCES `zones` (`id`) ON DELETE CASCADE;

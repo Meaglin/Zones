@@ -126,11 +126,19 @@ public enum ZoneVar {
         
         MOBS("AllowedMobs", Serializer.CREATURELIST) {
             @Override
-            public Object getDefault(ZoneBase zone) {return null;}
+            public Object getDefault(ZoneBase zone) {
+                if(zone.getWorldConfig().ALLOWED_MOBS_ENABLED)
+                    return zone.getWorldConfig().ALLOWED_MOBS;
+                return null;
+            }
         },
         ANIMALS("AllowedAnimals", Serializer.CREATURELIST) {
             @Override
-            public Object getDefault(ZoneBase zone) {return null;}
+            public Object getDefault(ZoneBase zone) {
+                if(zone.getWorldConfig().ALLOWED_ANIMALS_ENABLED)
+                    return zone.getWorldConfig().ALLOWED_ANIMALS;
+                return null;
+            }
         },
         
         ENTER_MESSAGE("EnterMessage", Serializer.STRING) {

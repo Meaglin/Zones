@@ -35,19 +35,19 @@ public class ZReloadCommand extends ZoneCommand {
         String type = vars[0];
         if(type.equalsIgnoreCase("config")) {
             if(!getPlugin().reloadConfig())
-                sender.sendMessage("[Zones]Error while reloading config, please contact an server admin.");
+                sender.sendMessage("[Zones] Error while reloading config, please contact an server admin.");
             else
-                sender.sendMessage("[Zones]Config reloaded.");
+                sender.sendMessage("[Zones] Config reloaded.");
         } else if (type.equalsIgnoreCase("zones")) {
             if(!getPlugin().reloadZones())
-                sender.sendMessage("[Zones]Error while reloading zones, please contact an server admin.");
+                sender.sendMessage("[Zones] Error while reloading zones, please contact an server admin.");
             else
-                sender.sendMessage("[Zones]Zones reloaded.");
+                sender.sendMessage("[Zones] Zones reloaded.");
         } else if (type.equalsIgnoreCase("all")) {
             if(!getPlugin().reload())
-                sender.sendMessage("[Zones]Error while reloading, please contact an server admin.");
+                sender.sendMessage("[Zones] Error while reloading, please contact an server admin.");
             else
-                sender.sendMessage("[Zones]Revision " + Zones.Rev + " reloaded.");
+                sender.sendMessage("[Zones ]Revision " + Zones.Rev + " reloaded.");
         } else if (type.equalsIgnoreCase("zone")) {
             if(vars.length < 2) {
                 sender.sendMessage(ChatColor.RED + "Usage: /zreload zone [zone id]");

@@ -49,6 +49,14 @@ public class FileUtil {
         return true;
     }
     
+    public static String[] readLines(File in) {
+        return readFile(in).replace("\r\n", "\n").split("\n");
+    }
+    
+    public static String[] readLines(InputStream in) {
+        return readFile(in).replace("\r\n", "\n").split("\n");
+    }
+    
     public static String readFile(File in) {
         try {
             return readFile(new FileInputStream(in));
@@ -79,6 +87,16 @@ public class FileUtil {
         }
         
         return rt;
+    }
+    
+    public static boolean writeFile(File out, String[] lines) {
+        String write = "";
+        for(int i = 0;i < (lines.length-1);i++)
+            write += lines[i] + "\n"; 
+        
+        //do not add a empty line at the end of the file.
+        write += lines[lines.length-1];
+        return writeFile(out, write);
     }
     
     public static boolean writeFile(File out, String text) {

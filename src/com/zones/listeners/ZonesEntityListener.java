@@ -1,14 +1,9 @@
 package com.zones.listeners;
 
-import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Animals;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Flying;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -27,6 +22,7 @@ import org.bukkit.event.painting.PaintingPlaceEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.BlockResolver;
 import com.zones.accessresolver.interfaces.EntitySpawnResolver;
@@ -88,7 +84,7 @@ public class ZonesEntityListener extends EntityListener {
             if(attacker != null && attacker instanceof Player) {
                 Player att = (Player)attacker;
                 if(!((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, att, defender, event.getDamage())) {
-                    att.sendMessage(ChatColor.RED + "You cannot kill entities in " + zone.getName() + "!");
+                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, att);
                     event.setCancelled(true);
                     return;
                 }
@@ -131,6 +127,7 @@ public class ZonesEntityListener extends EntityListener {
             }
         } else {
             Entity entity = event.getEntity();
+            /*
             if(entity instanceof Animals) {
                 if (wm.getConfig().ALLOWED_ANIMALS_ENABLED && !wm.getConfig().ALLOWED_ANIMALS.contains(event.getCreatureType())) {
                     event.setCancelled(true);
@@ -142,6 +139,7 @@ public class ZonesEntityListener extends EntityListener {
                     return;
                 }
             }
+            */
                 
             if (!((EntitySpawnResolver)zone.getResolver(AccessResolver.ENTITY_SPAWN)).isAllowed(zone, entity, event.getCreatureType())){
                 event.setCancelled(true);

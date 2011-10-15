@@ -18,9 +18,11 @@ import org.bukkit.inventory.ItemStack;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.permissions.Permissions;
 import com.zones.util.FileUtil;
-import com.zones.util.Properties;
+import com.zones.util.properties.ExtendedProperties;
+import com.zones.util.properties.Properties;
 
 public class WorldConfig {
     
@@ -119,6 +121,8 @@ public class WorldConfig {
     public int SPONGE_LAVA_RADIUS;
     public boolean SPONGE_LAVA_OVERRIDE_NEEDED;
     
+    private static final Properties defaultproperties = new Properties(Zones.class.getResourceAsStream("/com/zones/config/world.properties"));
+    
     public WorldConfig(WorldManager manager,String filename) {
         this.filename = filename;
         this.manager = manager;
@@ -154,8 +158,8 @@ public class WorldConfig {
     
     public void load() {
         try {
-            Properties p = new Properties(new File(filename));
-            
+            ExtendedProperties p = new ExtendedProperties(new File(filename));
+            p.load();
             BORDER_ENABLED = p.getBool("BorderEnabled", false);
             BORDER_RANGE = p.getInt("BorderRange", 1000);
             BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAIR") ? 2 : 1);
@@ -271,7 +275,7 @@ public class WorldConfig {
             PLAYER_CONTACT_DAMAGE_ENABLED = p.getBool("PlayerContactDamageEnabled", true);
             
             WEATHER_RAIN_ENABLED = p.getBool("RainEnabled", true);
-            WEATHER_THUNDER_ENABLED = p.getBool("ThunderEnabled", true);
+            WEATHER_THUNDER_ENABLED = p.getBool("LightningEnabled", true);
             
             SPONGE_EMULATION          = p.getBool("EmulateSponges", false);
             SPONGE_RADIUS           = p.getInt("SpongeRadius", 2);
@@ -279,10 +283,16 @@ public class WorldConfig {
             SPONGE_LAVA_EMULATION     = p.getBool("EmulateLavaSponges", false);
             SPONGE_LAVA_RADIUS      = p.getInt("LavaSpongeRadius", 2);
             SPONGE_LAVA_OVERRIDE_NEEDED = p.getBool("LavaSpongeOverrideNeeded", false);
-            log.info("[Zones]Loaded world config for world " + manager.getWorldName() + "!");
-            if(BORDER_ENABLED) log.info("[Zones]Border Enabled, Range:" + BORDER_RANGE);
+            if(p.isMissingProperties() && ZonesConfig.RESTORE_MISSING_PROPERTIES) {
+                int count = p.restore(defaultproperties);
+                p.save(true);
+                log.info("[Zones] Restored " + count + " missing properties in " + p.getFile().getName() + "!");
+            }
+            
+            log.info("[Zones] Loaded world config for world " + manager.getWorldName() + "!");
+            //if(BORDER_ENABLED) log.info("[Zones] Border Enabled, Range:" + BORDER_RANGE);
         } catch (Exception e) {
-            log.warning("[Zones]Error loading configurations for world '" + manager.getWorld().getName() + "' !");
+            log.warning("[Zones] Error loading configurations for world '" + manager.getWorld().getName() + "' !");
             e.printStackTrace();
         }
     }
@@ -354,6 +364,7 @@ public class WorldConfig {
                         triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()-SPONGE_LAVA_RADIUS-1)); // West
                         triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()+SPONGE_LAVA_RADIUS+1)); // East
                         triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+SPONGE_LAVA_RADIUS+1, block.getZ()+o)); // Up
+                        // Wait where is down? Oh snap....
                     }
                 }
             }

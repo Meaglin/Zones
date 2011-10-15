@@ -1,6 +1,5 @@
 package com.zones.listeners;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -61,7 +60,7 @@ public class ZonesVehicleListener extends VehicleListener {
 
         ZoneBase zone = plugin.getWorldManager(player).getActiveZone(event.getVehicle().getLocation());
         if (zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, event.getVehicle(), -1)) {
-            player.sendMessage("You cannot damage vehicles in '" + zone.getName() + "'!");
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
             event.setCancelled(true);
         }
     }
@@ -129,9 +128,9 @@ public class ZonesVehicleListener extends VehicleListener {
                  */
                 if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                     event.getVehicle().eject();
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     return;
                 } 
                 event.getVehicle().teleport(from);
@@ -140,12 +139,12 @@ public class ZonesVehicleListener extends VehicleListener {
                 if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                        player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
-                        wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                        //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         event.getVehicle().eject();
+                        player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                         return;
                     }
-                    player.sendMessage(ChatColor.RED + "You have reached the border.");
+                    player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
                     event.getVehicle().teleport(from);
                     return;
                 }
@@ -154,12 +153,12 @@ public class ZonesVehicleListener extends VehicleListener {
             if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                    player.sendMessage(ChatColor.RED.toString() + "You were moved to spawn because you were in an illigal position.");
-                    wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                    //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     event.getVehicle().eject();
                     return;
                 }
-                player.sendMessage(ChatColor.RED + "You have reached the border.");
+                player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
                 event.getVehicle().teleport(from);
                 return;
             } 

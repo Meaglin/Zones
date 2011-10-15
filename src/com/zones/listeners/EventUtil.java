@@ -24,7 +24,7 @@ public class EventUtil {
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null){
                 if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
-                    player.sendMessage(ChatColor.RED + "You cannot build in this world!");
+                    player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
                     event.setCancelled(true);
                 } else {
                     wm.getConfig().logBlockPlace(player, block);
@@ -83,7 +83,7 @@ public class EventUtil {
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null) {
                 if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")){
-                    player.sendMessage(ChatColor.RED + "You cannot destroy blocks in this world!");
+                    player.sendMessage(ZonesConfig.PLAYER_CANT_DESTROY_WORLD);
                     event.setCancelled(true);
                 } else {
                     wm.getConfig().logBlockBreak(player, block);

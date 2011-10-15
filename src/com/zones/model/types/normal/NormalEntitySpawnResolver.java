@@ -18,27 +18,27 @@ public class NormalEntitySpawnResolver implements EntitySpawnResolver {
     @Override
     public boolean isAllowed(ZoneBase zone, Entity entity, CreatureType type) {
         if(entity instanceof Animals) {
-            if(zone.getSettings().getBool(ZoneVar.SPAWN_ANIMALS, zone.getWorldManager().getConfig().ANIMAL_SPAWNING_ENABLED)) {
-                List<?> list = zone.getSettings().getList(ZoneVar.ANIMALS);
-                if(list != null && !list.contains(type))
-                    return false;
-                else
-                    return true;
-            } else {
-                return false;
-            }
+            if(zone.getFlag(ZoneVar.SPAWN_ANIMALS)) {
+                Object obj = zone.getSetting(ZoneVar.ANIMALS);
+                if(obj != null) {
+                    if(!((List<?>)obj).contains(type))
+                        return false;
+                }
+                return true;
+            } 
+            return false;
         } else if(entity instanceof Monster || entity instanceof Flying || entity instanceof Slime) {
-            if(zone.getSettings().getBool(ZoneVar.SPAWN_MOBS, zone.getWorldManager().getConfig().MOB_SPAWNING_ENABLED)) {
-                List<?> list = zone.getSettings().getList(ZoneVar.MOBS);
-                if(list != null && !list.contains(type))
-                    return false;
-                else
-                    return true;
-            } else {
-                return false;
-            }       
-        } else
-            return true;
+            if(zone.getFlag(ZoneVar.SPAWN_MOBS)) {
+                Object obj = zone.getSetting(ZoneVar.MOBS);
+                if(obj != null) {
+                    if(!((List<?>)obj).contains(type))
+                        return false;
+                }
+                return true;
+            } 
+            return false;
+        } 
+        return true;
     }
     
 }

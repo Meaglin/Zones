@@ -11,7 +11,9 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
@@ -37,10 +39,11 @@ public class ZoneManager {
 
     public void cleanUp(WorldManager world) {
         selectedZones.clear();
-        for(ZoneBase z : zones.values()) {
-            if(z.getWorldManager().equals(world)) {
-                zones.remove(z.getId());
-            }
+        Iterator<Entry<Integer, ZoneBase>> it = zones.entrySet().iterator();
+        while(it.hasNext()) {
+            Entry<Integer, ZoneBase> zone = it.next();
+            if(zone.getValue().getWorldManager().equals(world))
+                it.remove();
         }
     }
     public void load(WorldManager world) {
@@ -54,14 +57,14 @@ public class ZoneManager {
                     count++;
             }
         } catch(Exception e) {
-            log.warning("[Zones]Error loading world " + world.getWorldName() + ".");
+            log.warning("[Zones] Error loading world " + world.getWorldName() + ".");
             e.printStackTrace();
             return;
         } finally {
             if (count == 1)
-                log.info("[Zones]Loaded " + count + " Zone for world " + world.getWorldName() + ".");
+                log.info("[Zones] Loaded " + count + " Zone for world " + world.getWorldName() + ".");
             else
-                log.info("[Zones]Loaded " + count + " Zones for world " + world.getWorldName() + ".");
+                log.info("[Zones] Loaded " + count + " Zones for world " + world.getWorldName() + ".");
         }
     }
 
@@ -72,14 +75,14 @@ public class ZoneManager {
             try {
                 newZone = Class.forName("com.zones.model.types."+zone.getZonetype());
             } catch (ClassNotFoundException e) {
-                log.warning("[Zones]No such zone class: " + zone.getZonetype() + " id: " + zone.getId());
+                log.warning("[Zones] No such zone class: " + zone.getZonetype() + " id: " + zone.getId());
                 return null;
             }
             try {
                 Constructor<?> zoneConstructor = newZone.getConstructor();
                 temp = (ZoneBase) zoneConstructor.newInstance();
             } catch(Exception e) {
-                log.warning("[Zones]Error in constructing zone: " + zone.getId() + ".");
+                log.warning("[Zones] Error in constructing zone: " + zone.getId() + ".");
                 e.printStackTrace();
                 return null;
             }
@@ -90,19 +93,19 @@ public class ZoneManager {
                 if (vertices.size() == 2) {
                     temp.setForm(new ZoneCuboid(vertices, zone.getMinz(), zone.getMaxz()));
                 } else {
-                    log.info("[Zones]Missing zone vertex for cuboid zone id: " + zone.getId());
+                    log.info("[Zones] Missing zone vertex for cuboid zone id: " + zone.getId());
                     return null;
                 }
             } else if(zone.getFormtype().equalsIgnoreCase("ZoneNPoly")) {
                 if (vertices.size() > 2) {
                     temp.setForm(new ZoneNPoly(vertices, zone.getMinz() , zone.getMaxz()));
                 } else {
-                    log.warning("[Zones]Bad data for zone: " + zone.getId());
+                    log.warning("[Zones] Bad data for zone: " + zone.getId());
                     return null;
                 }
             }
         } catch(Exception e) {
-            log.warning("[Zones]Error loading zone " + zone.getId() + ".");
+            log.warning("[Zones] Error loading zone " + zone.getId() + ".");
             e.printStackTrace();
             return null;
         }

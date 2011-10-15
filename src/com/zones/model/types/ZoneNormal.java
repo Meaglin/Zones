@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import com.zones.ZonesConfig;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.Resolver;
 import com.zones.model.ZoneBase;
@@ -332,13 +332,13 @@ public class ZoneNormal extends ZoneBase{
         String message = getSettings().getString(ZoneVar.ENTER_MESSAGE, (String)ZoneVar.ENTER_MESSAGE.getDefault(this));
         sendMarkupMessage(message, player);
         if (getFlag(ZoneVar.HEALTH)) {
-            player.sendMessage(ChatColor.RED + "WARNING: you can die in this zone!");
+            this.sendMarkupMessage(ZonesConfig.PLAYER_CAN_DIE_IN_ZONE, player);
         }
         
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
             for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(player)) {
-                    insidePlayer.sendMessage(ChatColor.YELLOW + "Player " + player.getDisplayName() + ChatColor.YELLOW + " has entered " + getName() + ".");
+                    this.sendMarkupMessage(ZonesConfig.PLAYER_ENTERED_ZONE, insidePlayer);
                 }
             }
         }
@@ -352,7 +352,7 @@ public class ZoneNormal extends ZoneBase{
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
             for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(player)) {
-                    insidePlayer.sendMessage(ChatColor.YELLOW + "Player " + player.getDisplayName() + ChatColor.YELLOW + " has left " + getName() + ".");
+                    this.sendMarkupMessage(ZonesConfig.PLAYER_LEFT_ZONE, insidePlayer);
                 }
             }
         }

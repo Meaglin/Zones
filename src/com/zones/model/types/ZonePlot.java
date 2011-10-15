@@ -1,8 +1,8 @@
 package com.zones.model.types;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
 
 /**
@@ -14,14 +14,14 @@ public class ZonePlot extends ZoneInherit {
     
     public boolean claim(Player player) {
         if(adminusers.size() != 0) {
-            sendMarkupMessage(ChatColor.RED + "Zone {zname} is already claimed.", player);
+            sendMarkupMessage(ZonesConfig.ZONE_ALREADY_CLAIMED, player);
             return false;
         }
         for(ZoneBase b : getInheritedZones()) {
             if(b instanceof ZoneInherit) {
                 for(ZoneBase sub : ((ZoneInherit)b).getSubZones()) {
                     if(!sub.equals(this) && sub instanceof ZonePlot && ((ZoneInherit)sub).isAdminUser(player)) {
-                        b.sendMarkupMessage(ChatColor.RED + "You have already claimed a zone in {zname}!", player);
+                        b.sendMarkupMessage(ZonesConfig.PLAYER_ALREADY_CLAIMED_ZONE, player);
                         return false;
                     }
                 }
@@ -29,7 +29,7 @@ public class ZonePlot extends ZoneInherit {
         }
         
         addAdmin(player.getName());
-        sendMarkupMessage(ChatColor.GREEN + "You are now the proud owner of {zname}!", player);
+        sendMarkupMessage(ZonesConfig.PLAYER_CLAIMES_ZONES, player);
         return true;
     }
 }

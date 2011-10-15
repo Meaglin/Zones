@@ -147,7 +147,7 @@ public class ZonesPlayerListener extends PlayerListener {
                         //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         return;
                     }
-                    player.sendMessage(ChatColor.RED + "You have reached the border.");
+                    player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
                     player.teleport(from);
                     event.setCancelled(false);
                     
@@ -163,7 +163,7 @@ public class ZonesPlayerListener extends PlayerListener {
                     //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     return;
                 }
-                player.sendMessage(ChatColor.RED + "You have reached the border.");
+                player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
                 player.teleport(from);
                 event.setCancelled(false);
                 return;
@@ -201,14 +201,14 @@ public class ZonesPlayerListener extends PlayerListener {
                 return;
             } else if (wmto.getConfig().BORDER_ENABLED && wmto.getConfig().BORDER_ENFORCE) {
                 if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wmto.getWorldName(), "zones.override.border"))) {
-                    player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
+                    player.sendMessage(ZonesConfig.PLAYER_CANT_WARP_OUTSIDE_BORDER);
                     event.setCancelled(true);
                     return;
                 }
             }
         } else if(wmto.getConfig().BORDER_ENABLED) {
             if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wmto.getWorldName(), "zones.override.border"))) {
-                player.sendMessage(ChatColor.RED + "You cannot warp outside the border.");
+                player.sendMessage(ZonesConfig.PLAYER_CANT_WARP_OUTSIDE_BORDER);
                 event.setCancelled(true);
                 return;
             }
@@ -308,13 +308,13 @@ public class ZonesPlayerListener extends PlayerListener {
                     ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
                     if(zone == null) {
                         if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.build")) {
-                            player.sendMessage(ChatColor.RED + "You cannot change blocks in this world !");
+                            player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
                             event.setCancelled(true);
                             return;
                         }
                     } else {
                         if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, event.getClickedBlock(), blockType)) {
-                            player.sendMessage(ChatColor.RED + "You cannot change blocks in '" + zone.getName() + "' !");
+                            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
                             event.setCancelled(true);
                             return;
                         }
@@ -463,7 +463,7 @@ public class ZonesPlayerListener extends PlayerListener {
         if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
         if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItemDrop(), -1)) {
-            event.getPlayer().sendMessage(ChatColor.RED + "You're not allowed to drop items in zone '" + zone.getName() + "'!");
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PICKUP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
     }
@@ -477,7 +477,7 @@ public class ZonesPlayerListener extends PlayerListener {
         if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItem().getWorld()).getActiveZone(event.getItem().getLocation());
         if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItem(), -1)) {
-            event.getPlayer().sendMessage(ChatColor.RED + "You're not allowed to pickup items in '" + zone.getName() + "'!");
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DROP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
     }

@@ -19,7 +19,7 @@ import com.zones.persistence.Zone;
 /**
  * Abstract base class for any zone type Handles basic operations
  * 
- * @author durgus, Meaglin
+ * @author Meaglin
  */
 public abstract class ZoneBase {
     protected static final Logger     log = Logger.getLogger(ZoneBase.class.getName());
@@ -293,6 +293,12 @@ public abstract class ZoneBase {
     public final boolean setSetting(ZoneVar name, boolean b) {
         getSettings().set(name, b);
         return saveSettings();
+    }
+    
+    public final Object getSetting(ZoneVar name) {
+        Object obj = getSettings().get(name);
+        if(obj == null) return name.getDefault(this);
+        else return obj;
     }
     
     public final boolean equals(Object o) {
