@@ -437,7 +437,7 @@ public abstract class ZoneCommand extends Command {
                "ZoneNormal - A normal zone\n" +
                "ZoneInherit - Creates a parent zone that can contain\n" +
                "multiple subzones. The subzones inherit the settings of the\n" +
-               "parent zone." +
+               "parent zone.\n" +
                "ZonePlot - A subzone zone of a ZoneInherit zone\n" 
         });
         
