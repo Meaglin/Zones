@@ -18,7 +18,7 @@ public class GodCommand extends ZoneCommand {
     public void run(Player player, String[] vars) {
         WorldConfig config = this.getWorldManager(player).getConfig();
         if(!config.GOD_MODE_ENABLED) {
-            player.sendMessage(ChatColor.RED + "Godmode is not availeble here.");
+            player.sendMessage(ChatColor.RED + "Godmode is not available here.");
             return;
         }
         config.setGodMode(player, !config.hasGodMode(player));
