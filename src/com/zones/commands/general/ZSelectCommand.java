@@ -53,7 +53,7 @@ public class ZSelectCommand extends ZoneCommand {
         }else{
             List<ZoneBase> zoneslist = getWorldManager(player).getAdminZones(player);
             if(zoneslist.size() < 1) {
-                player.sendMessage(ChatColor.YELLOW + "No zones found in your current area(which you can modify).");
+                player.sendMessage(ChatColor.YELLOW + "No zones found in your current area (which you can modify).");
                 player.sendMessage(ChatColor.YELLOW + "Please select a zone by specifying a zone id.");
             } else if(zoneslist.size() == 1){
                 getZoneManager().setSelected(player.getEntityId(), zoneslist.get(0).getId());
