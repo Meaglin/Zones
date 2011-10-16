@@ -227,7 +227,6 @@ public abstract class ZoneCommand extends Command {
             "admin",
             "[groupname 1] [access 1] <groupname 2> <access 2> ...",
             "Sets the access of groupnames to what is specified \n "
-            + "Possible group names: beunhaas, default, builder and vip \n"
             + "b = Build(placing blocks),\n"
             + "c = Modify(accessing chest/furnaces/note blocks),\n "
             + "d = Destroy(destroying blocks),\n"
@@ -342,10 +341,10 @@ public abstract class ZoneCommand extends Command {
             "zones.create",
             "create",
             "see extended help.",
-            "loads the current selected zone into your \n"
-            + "edit selection so that it can be editten.\n"
-            + "and merged back into an active zone.\n" +
-            		"This is used to adjust the area of a zone."
+            "loads the current selected zone into your \n" + 
+            "edit selection so that it can be editten.\n" +
+            "and merged back into an active zone.\n" +
+            "This is used to adjust the area of a zone."
         });
         commands.put("/zreload", new String[] {
                 "zones.admin",
@@ -434,13 +433,18 @@ public abstract class ZoneCommand extends Command {
                null,
                "create",
                "[class] - changes selection class to [class].",
-               "Beh"
+               "Defines the class of the zone:\n" +
+               "ZoneNormal - A normal zone\n" +
+               "ZoneInherit - Creates a parent zone that can contain\n" +
+               "multiple subzones. The subzones inherit the settings of the\n" +
+               "parent zone." +
+               "ZonePlot - A subzone zone of a ZoneInherit zone\n" 
         });
         
         commands.put("/zdefine", new String[] {
                 null,
                 "create",
-                "[zone naam] - defines a zone.",
+                "[zone name] - defines a zone.",
                 "based on your word edit selection a zone \n" +
                 "is defind with name [zone name]."
         });
@@ -456,11 +460,11 @@ public abstract class ZoneCommand extends Command {
         commands.put("/zexport", new String[] {
                 null,
                 "create",
-                "- see description./zhelp /zexport",
+                "- see description./zhelp zexport",
                 "Exports the selected zone to your\n" +
                 "world edit selection."
         });
-        
+       
         commands.put("/zwho", new String[] { 
            null,
            "general",
