@@ -48,9 +48,6 @@ public class Database {
             Zones.log.warning("[Zones]Warning JDBC not availeble.");
             return;
         }
-        //System.out.println("l:" + db.getDataSourceConfig().getUrl());
-        //System.out.println("u:" + db.getDataSourceConfig().getUsername());
-        //System.out.println("p:" + db.getDataSourceConfig().getPassword());
         
         this.url = db.getDataSourceConfig().getUrl();
         this.username = db.getDataSourceConfig().getUsername();

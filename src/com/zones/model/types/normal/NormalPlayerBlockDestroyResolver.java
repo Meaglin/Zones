@@ -26,8 +26,8 @@ public class NormalPlayerBlockDestroyResolver implements PlayerBlockResolver {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DESTROY_BLOCKS_IN_ZONE, player);
             return false;
         } else {
-            List<?> list = zone.getSettings().getList(ZoneVar.BREAK_BLOCKS);
-            if(list != null && list.contains(typeId) && !((ZoneNormal)zone).canAdministrate(player)) {
+            Object list = zone.getSetting(ZoneVar.BREAK_BLOCKS);
+            if(list != null && ((List<?>)list).contains(typeId) && !zone.canAdministrate(player)) {
                 zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_BLACKLISTED, player);
                 return false;
             } else {

@@ -48,7 +48,7 @@
 			<zipfileset dir="${src}" prefix="src" >
 				<include name="**" />
 			</zipfileset>
-			<zipfileset dir="" prefix="src" >
+			<zipfileset dir="" prefix="" >
 				<include name="db.sql" />
 			</zipfileset>
 			<!-- <zipfileset src="libs/trove-3.0.0.jar" prefix="" >
@@ -56,6 +56,10 @@
 				<exclude name="META-INF/*" />
 			</zipfileset> -->
 		</jar>
+		<zip destfile="../Zones-2.0.zip" >
+		  <fileset dir=".." includes="Zones.jar" />
+		  <fileset dir="./" includes="db.sql" />
+		</zip>
 	</target>
 	
 	<target name="clean" description="Remove the output directories">
