@@ -246,7 +246,9 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.INK_SACK.getId(),
             Material.PAINTING.getId(),
             Material.WOOD_DOOR.getId(),
-            Material.IRON_DOOR.getId()
+            Material.IRON_DOOR.getId(),
+            Material.TNT.getId(),
+            Material.REDSTONE_TORCH_ON.getId()
             );
     
     private static final List<Integer> destroyItems = Arrays.asList(

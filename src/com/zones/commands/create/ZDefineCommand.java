@@ -87,6 +87,7 @@ public class ZDefineCommand extends ZoneCommand {
         sel.setPoint1(point1);
         sel.setPoint2(point2);
         selection.setSelection(sel);
+        if(inheritedZone != null) selection.setClass("ZoneInherit");
         ZoneBase zone = selection.save();
         if(zone != null) {
             player.sendMessage(ChatColor.GREEN + "Zone '" + name + "' saved.");

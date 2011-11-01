@@ -303,6 +303,12 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
     
+    public void onSignChange(org.bukkit.event.block.SignChangeEvent event) {
+        if(event.isCancelled()) return;
+
+        EventUtil.onPlace(plugin, event, event.getPlayer(), event.getBlock());
+    }
+    
     private static final boolean isAllowed(ZoneBase zone, AccessResolver resolver, Block block) {
         return ((BlockResolver)zone.getResolver(resolver)).isAllowed(zone, block);
     }

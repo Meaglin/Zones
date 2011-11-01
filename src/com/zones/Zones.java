@@ -38,7 +38,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 111;
+    public static final int                 Rev             = 113;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -74,6 +74,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.Normal);
         registerEvent(Event.Type.BLOCK_BURN, blockListener, Priority.Normal);
         registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal);
+        registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Normal);
         
         registerEvent(Event.Type.BLOCK_FORM, blockListener, Priority.Normal);
         registerEvent(Event.Type.BLOCK_SPREAD, blockListener, Priority.Normal);

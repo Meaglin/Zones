@@ -13,7 +13,7 @@ import com.mysql.jdbc.Statement;
 import com.zones.Zones;
 public class Database {
     
-    private String url,username,password;
+    private final String url,username,password;
     //private Zones plugin;
     public static final String SAVE_ZONE = "INSERT INTO `zones` (name, zonetype, formtype, world, admins, users, settings, minz, maxz, size) VALUES (?,?,?,?,?,?,?,?,?,?)";
     public static final String SAVE_VERTICE = "INSERT INTO `zones_vertices` (id, vertexorder, x, y) values (?,?,?,?)";
@@ -46,7 +46,6 @@ public class Database {
             Class.forName(db.getDataSourceConfig().getDriver());
         } catch(Exception e) {
             Zones.log.warning("[Zones]Warning JDBC not availeble.");
-            return;
         }
         
         this.url = db.getDataSourceConfig().getUrl();
