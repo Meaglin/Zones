@@ -34,7 +34,7 @@ public class ZReloadCommand extends ZoneCommand {
         }
         String type = vars[0];
         if(type.equalsIgnoreCase("config")) {
-            if(!getPlugin().reloadConfig())
+            if(!getPlugin().reloadZonesConfig())
                 sender.sendMessage("[Zones] Error while reloading config, please contact an server admin.");
             else
                 sender.sendMessage("[Zones] Config reloaded.");

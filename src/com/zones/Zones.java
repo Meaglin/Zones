@@ -38,7 +38,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 113;
+    public static final int                 Rev             = 115;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -158,7 +158,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     @Override
     public void onEnable() {
-        log.info("[Zones] Rev " + Rev + "  Loading...");
+        //log.info("[Zones] Rev " + Rev + "  Loading...");
         
         File configFile = new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE);
         if(!configFile.exists()) {
@@ -177,16 +177,16 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         loadWorlds();
         registerEvents();
         if(ZonesConfig.WORLDEDIT_ENABLED) {
-            log.info("[Zones] Loading worldedit support...");
+            //log.info("[Zones] Loading worldedit support...");
             registerWorldEdit();
         }
-        log.info("[Zones] Finished Loading.");
+        log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorlEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + " Permissions:" + getPermissions().getName() + ".");
         
     }
     
     private void resolvePermissions() {
         permissionsManager = PermissionsResolver.resolve(this);
-        log.info("[Zones] Using " + permissionsManager.getName() + " for permissions managing.");
+        //log.info("[Zones] Using " + permissionsManager.getName() + " for permissions managing.");
     }
     
     private void loadWorlds() {
@@ -248,7 +248,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     public boolean reload() {
-        return reloadConfig() && reloadZones();
+        return reloadZonesConfig() && reloadZones();
     }
     
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -276,7 +276,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return true;
     }
 
-    public boolean reloadConfig() {
+    public boolean reloadZonesConfig() {
         try {
             ZonesConfig.load(new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE));
             for(WorldManager w : worlds.values())

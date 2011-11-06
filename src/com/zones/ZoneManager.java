@@ -61,10 +61,12 @@ public class ZoneManager {
             e.printStackTrace();
             return;
         } finally {
+            /*
             if (count == 1)
                 log.info("[Zones] Loaded " + count + " Zone for world " + world.getWorldName() + ".");
             else
                 log.info("[Zones] Loaded " + count + " Zones for world " + world.getWorldName() + ".");
+             */
         }
     }
 

@@ -129,20 +129,20 @@ public class ZonesPlayerListener extends PlayerListener {
                  * This prevents players getting stuck ;).
                  */
                 if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
-                    //event.setTo(wm.getWorld().getSpawnLocation());
                     player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
-                    player.teleport(wm.getWorld().getSpawnLocation());
+                    player.teleport(from.getWorld().getSpawnLocation());
                     event.setCancelled(false);
                     //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                     return;
                 } 
-                event.setCancelled(true);
+                player.teleport(from);
+                event.setCancelled(false);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
                 if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
-                        player.teleport(wm.getWorld().getSpawnLocation());
+                        player.teleport(from.getWorld().getSpawnLocation());
                         event.setCancelled(false);
                         //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                         return;
@@ -156,9 +156,16 @@ public class ZonesPlayerListener extends PlayerListener {
             }
         } else if(wm.getConfig().BORDER_ENABLED) {
             if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
-                if(wm.getConfig().isOutsideBorder(from) && (wm.getConfig().BORDER_ENFORCE || (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)))) {
+                if(wm.getConfig().isOutsideBorder(from) && 
+                        (
+                             wm.getConfig().BORDER_ENFORCE || 
+                             aZone == null || 
+                             !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)
+                         )
+                            
+                   ) {
                     player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION); 
-                    player.teleport(wm.getWorld().getSpawnLocation());
+                    player.teleport(from.getWorld().getSpawnLocation());
                     event.setCancelled(false);
                     //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     return;
@@ -188,8 +195,9 @@ public class ZonesPlayerListener extends PlayerListener {
         ZoneBase bZone = wmto.getActiveZone(to);
         
         if(aZone != null) {
-            if(!((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_TELEPORT)).isAllowed(aZone, player, from, to)) {
-                //player.sendMessage(ChatColor.RED + "Your area doesn't allow teleporting.");
+            // TODO: fix properly.
+            if(!aZone.getFlag(ZoneVar.TELEPORT) && !aZone.canAdministrate(player)) {
+                aZone.sendMarkupMessage(ZonesConfig.TELEPORT_INTO_ZONE_DISABLED, player);
                 event.setCancelled(true);
                 return;
             }
@@ -271,6 +279,7 @@ public class ZonesPlayerListener extends PlayerListener {
     
     private static final List<Integer> modifyBlocks = Arrays.asList(
             Material.NOTE_BLOCK.getId(),
+            Material.JUKEBOX.getId(),
             Material.FURNACE.getId(),
             Material.BURNING_FURNACE.getId(),
             Material.CHEST.getId(),

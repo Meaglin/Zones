@@ -301,11 +301,20 @@ public abstract class ZoneBase {
         else return obj;
     }
     
+    @Override
     public final boolean equals(Object o) {
+        if(super.equals(o))
+            return true;
+        
         if(!(o instanceof ZoneBase))
             return false;
         
         return (getId() == ((ZoneBase)o).getId());
+    }
+    
+    @Override
+    public final int hashCode() {
+        return getId();
     }
     
     public void sendMarkupMessage(String message, Player player) {

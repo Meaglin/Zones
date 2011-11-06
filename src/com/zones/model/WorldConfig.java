@@ -289,7 +289,7 @@ public class WorldConfig {
                 log.info("[Zones] Restored " + count + " missing properties in " + p.getFile().getName() + "!");
             }
             
-            log.info("[Zones] Loaded world config for world " + manager.getWorldName() + "!");
+            //log.info("[Zones] Loaded world config for world " + manager.getWorldName() + "!");
             //if(BORDER_ENABLED) log.info("[Zones] Border Enabled, Range:" + BORDER_RANGE);
         } catch (Exception e) {
             log.warning("[Zones] Error loading configurations for world '" + manager.getWorld().getName() + "' !");
