@@ -124,6 +124,11 @@ public class ZToggleCommand extends ZoneCommand {
                 "Crop protection",
                 ZoneVar.CROPS_PROTECTED
         });
+        variables.put("enderman", new Object[] {
+                "zones.toggle.enderman",
+                "Enderman Grief",
+                ZoneVar.ALLOW_ENDER_GRIEF
+        });
     }
 
     @Override

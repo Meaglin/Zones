@@ -316,15 +316,18 @@ public abstract class ZoneBase {
     public final int hashCode() {
         return getId();
     }
-    
     public void sendMarkupMessage(String message, Player player) {
+        sendMarkupMessage(message, player, player);
+    }
+    
+    public void sendMarkupMessage(String message, Player content, Player receiver) {
         if(message.trim().equalsIgnoreCase("none")) return;
         
         message = message.replace("{zname}", getName());
-        if(message.contains("{access}")) message = message.replace("{access}", getAccess(player).toColorCode());
-        message = message.replace("{pname}", player.getDisplayName());
+        if(message.contains("{access}")) message = message.replace("{access}", getAccess(content).toColorCode());
+        message = message.replace("{pname}", content.getDisplayName());
         message = message.replace("^", "\u00A7");
-        player.sendMessage(message);
+        receiver.sendMessage(message);
     }
 
 }

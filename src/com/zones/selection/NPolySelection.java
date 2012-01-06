@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 
+import com.sk89q.worldedit.BlockVector2D;
 import com.zones.model.ZoneForm;
 import com.zones.model.ZoneVertice;
 import com.zones.model.forms.ZoneNPoly;
@@ -83,6 +84,34 @@ public class NPolySelection extends Selection {
     @Override
     public Class<? extends ZoneForm> getType() {
         return ZoneNPoly.class;
+    }
+
+    @Override
+    public boolean importWorldeditSelection() {
+        com.sk89q.worldedit.bukkit.selections.Selection worldeditSelection = getSelection().getPlugin().getWorldEdit().getSelection(getPlayer());
+        if(worldeditSelection == null) {
+            getPlayer().sendMessage(ChatColor.RED + "No WorldEdit selection found.");
+            return false;
+        }
+        
+        if(worldeditSelection.getArea() < 1) {
+            getPlayer().sendMessage(ChatColor.RED + "Your WorldEdit selection is not a valid selection.");
+            return false;
+        }
+        
+        if(!(worldeditSelection instanceof com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection)) {
+            getPlayer().sendMessage(ChatColor.RED + "Your worldedit selection is invalid type.");
+            return false;
+        }
+        
+        com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection npolysel = (com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection) worldeditSelection;
+        clearPoints();
+        for(BlockVector2D vec : npolysel.getNativePoints()) {
+            addPoint(new ZoneVertice(vec.getBlockX(), vec.getBlockZ()));
+        }
+        setHeight(new ZoneVertice(npolysel.getMinimumPoint().getBlockY(), npolysel.getMaximumPoint().getBlockY()), true);
+        
+        return true;
     }
 
 }

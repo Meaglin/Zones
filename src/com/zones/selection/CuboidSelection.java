@@ -78,5 +78,32 @@ public class CuboidSelection extends Selection {
     public void setPoint2(ZoneVertice p2) {
         this.p2 = p2;
     }
+
+    @Override
+    public boolean importWorldeditSelection() {
+        com.sk89q.worldedit.bukkit.selections.Selection worldeditSelection = getSelection().getPlugin().getWorldEdit().getSelection(getPlayer());
+        if(worldeditSelection == null) {
+           // getPlayer().sendMessage(ChatColor.RED + "No WorldEdit selection found.");
+            return false;
+        }
+        
+        if(worldeditSelection.getArea() < 1) {
+           // getPlayer().sendMessage(ChatColor.RED + "Your WorldEdit selection is not a valid selection.");
+            return false;
+        }
+        
+        if(!(worldeditSelection instanceof com.sk89q.worldedit.bukkit.selections.CuboidSelection)) {
+           // getPlayer().sendMessage(ChatColor.RED + "Your worldedit selection is invalid type.");
+            return false;
+        }
+        
+        com.sk89q.worldedit.bukkit.selections.CuboidSelection csel = (com.sk89q.worldedit.bukkit.selections.CuboidSelection) worldeditSelection;
+        
+        setPoint1(new ZoneVertice(csel.getMinimumPoint().getBlockX(), csel.getMinimumPoint().getBlockZ()));
+        setPoint2(new ZoneVertice(csel.getMaximumPoint().getBlockX(), csel.getMaximumPoint().getBlockZ()));
+        setHeight(new ZoneVertice(csel.getMinimumPoint().getBlockY(), csel.getMaximumPoint().getBlockY()), true);
+        
+        return true;
+    }
     
 }

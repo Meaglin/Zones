@@ -67,7 +67,7 @@ public abstract class ZoneCommand extends Command {
         this.requiresAdmin = requiresAdmin;
     }
 
-    protected void setRequiresDummy(boolean requiresDummy) {
+    protected void setRequiresZoneSelection(boolean requiresDummy) {
         this.requiresDummy = requiresDummy;
     }
     
@@ -88,10 +88,10 @@ public abstract class ZoneCommand extends Command {
     }
 
     protected boolean hasDummy(Player p) {
-        return getDummy(p) != null;
+        return getZoneSelection(p) != null;
     }
     
-    protected ZoneSelection getDummy(Player p) {
+    protected ZoneSelection getZoneSelection(Player p) {
         return getZoneManager().getSelection(p.getEntityId());
     }
     
@@ -128,7 +128,7 @@ public abstract class ZoneCommand extends Command {
                 p.sendMessage(ChatColor.RED + "You don't have the required permissions to use this command.");
             } else {
                 if(requiresDummy() && !(this instanceof ZConfirmCommand)){
-                    getDummy(p).setConfirm(null);
+                    getZoneSelection(p).setConfirm(null);
                 }
                 run((Player)sender,vars);
             }

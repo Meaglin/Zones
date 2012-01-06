@@ -18,12 +18,12 @@ public class ZSetHeightCommand extends ZoneCommand {
     
     public ZSetHeightCommand(Zones plugin) {
         super("zsetheight", plugin);
-        this.setRequiresDummy(true);
+        this.setRequiresZoneSelection(true);
     }
 
     @Override
     public void run(Player player, String[] vars) {
-        ZoneSelection selection = getDummy(player);
+        ZoneSelection selection = getZoneSelection(player);
         if (vars.length < 1 || Integer.parseInt(vars[0]) < 1) {
             player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsetheight [height]");
         } else {

@@ -15,7 +15,7 @@ public class ZSetTypeCommand extends ZoneCommand {
 
     public ZSetTypeCommand(Zones plugin) {
         super("zsettype", plugin);
-        this.setRequiresDummy(true);
+        this.setRequiresZoneSelection(true);
     }
 
     @Override
@@ -23,9 +23,9 @@ public class ZSetTypeCommand extends ZoneCommand {
         
         if(vars.length == 1) {
             if(vars[0].equalsIgnoreCase("Cuboid"))
-                getDummy(player).setForm(vars[0]);
+                getZoneSelection(player).setForm(vars[0]);
             else if(vars[0].equalsIgnoreCase("NPoly"))
-                getDummy(player).setForm(vars[0]);
+                getZoneSelection(player).setForm(vars[0]);
             else
                 player.sendMessage(ChatColor.YELLOW.toString() + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
             

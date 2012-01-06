@@ -74,21 +74,25 @@ public class ZonesBlockListener extends BlockListener {
         Block blockFrom = event.getBlock();
         Block blockTo = event.getToBlock();
 
-
         WorldManager wm = plugin.getWorldManager(blockFrom.getWorld());
         ZoneBase toZone = wm.getActiveZone(blockTo);
         if(toZone == null) {
             if(!wm.getConfig().canFlow(blockFrom, blockTo))
                 event.setCancelled(true);
         } else {
-            if (blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
-                if (!((BlockFromToResolver)toZone.getResolver(AccessResolver.WATER_FLOW)).isAllowed(toZone, blockFrom, blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo))
+            int typeId = blockFrom.getTypeId();
+            if (typeId == 8 || typeId == 9 || typeId == 0) {
+                if (!((BlockFromToResolver)toZone.getResolver(AccessResolver.WATER_FLOW)).isAllowed(toZone, blockFrom, blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo)) {
                     event.setCancelled(true);
+                    return;
+                }
             }
     
-            if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
-                if (!((BlockFromToResolver)toZone.getResolver(AccessResolver.LAVA_FLOW)).isAllowed(toZone, blockFrom, blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo))
+            if (typeId == 10 || typeId == 11 || typeId == 0) {
+                if (!((BlockFromToResolver)toZone.getResolver(AccessResolver.LAVA_FLOW)).isAllowed(toZone, blockFrom, blockTo) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo)) {
                     event.setCancelled(true);
+                    return;
+                }
             }
         }
     }
@@ -167,8 +171,23 @@ public class ZonesBlockListener extends BlockListener {
      */
     public void onBlockPhysics(BlockPhysicsEvent event) {
         if(event.isCancelled()) return;
+        if(event.getChangedTypeId() == -1337) {
+            WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
+            ZoneBase zone = wm.getActiveZone(event.getBlock());
+            if(zone == null) {
+                if(!wm.getConfig().PHYSICS_ENABLED)
+                    event.setCancelled(true);
+            } else {
+                if(!isAllowed(zone,AccessResolver.PHYSICS, event.getBlock()))
+                    event.setCancelled(true);
+            }
+            return;
+        }
         int typeId = event.getBlock().getTypeId();
         switch(typeId) {
+            case 0:
+                
+                break;
             case 12:
             case 13:
             case 90:

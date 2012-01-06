@@ -133,6 +133,7 @@ public class ZonesVehicleListener extends VehicleListener {
                     player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     return;
                 } 
+                player.teleport(from);
                 event.getVehicle().teleport(from);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
@@ -145,6 +146,7 @@ public class ZonesVehicleListener extends VehicleListener {
                         return;
                     }
                     player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
+                    player.teleport(from);
                     event.getVehicle().teleport(from);
                     return;
                 }
@@ -159,6 +161,7 @@ public class ZonesVehicleListener extends VehicleListener {
                     return;
                 }
                 player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
+                player.teleport(from);
                 event.getVehicle().teleport(from);
                 return;
             } 

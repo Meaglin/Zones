@@ -25,9 +25,11 @@ public class ZDeleteCommand extends ZoneCommand {
     public void run(Player player, String[] vars) {
         
         ZoneBase toDelete = getSelectedZone(player);
-        if(toDelete instanceof ZoneInherit && !((ZoneInherit)toDelete).isInheritAdmin(player)) {
-            toDelete.sendMarkupMessage(ChatColor.RED + "You do not have the required permission to delete {zname}.", player);
-            return;
+        if(toDelete instanceof ZoneInherit) {
+            if(!((ZoneInherit)toDelete).isInheritAdmin(player)) {
+                toDelete.sendMarkupMessage(ChatColor.RED + "You do not have the required permission to delete {zname}.", player);
+                return;
+            }
         } else if(!canUseCommand(player, "zones.admin")){
             toDelete.sendMarkupMessage(ChatColor.RED + "You do not have the required permission to delete {zname}.", player);
             return;

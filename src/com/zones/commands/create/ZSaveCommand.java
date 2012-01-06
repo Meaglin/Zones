@@ -17,12 +17,12 @@ public class ZSaveCommand extends ZoneCommand {
     
     public ZSaveCommand(Zones plugin) {
         super("zsave", plugin);
-        this.setRequiresDummy(true);
+        this.setRequiresZoneSelection(true);
     }
 
     @Override
     public void run(Player player, String[] vars) {
-        ZoneSelection selection = getDummy(player);
+        ZoneSelection selection = getZoneSelection(player);
         if(!selection.getSelection().isValid()) {
             player.sendMessage(ChatColor.RED + "You don't have a valid selection.");
             return;

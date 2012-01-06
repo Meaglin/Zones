@@ -148,7 +148,7 @@ public class ZoneUtil {
                 }
             }
             if(attacker != null && attacker instanceof Player) {
-                Player att = (Player)attacker;
+                Player att = attacker;
                 if(!((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, att, defender, 0)) {
                     return false;
                 }

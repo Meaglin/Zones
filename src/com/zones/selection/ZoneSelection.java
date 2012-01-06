@@ -128,6 +128,22 @@ public abstract class ZoneSelection {
         }
     }
     
+    public  boolean importWorldeditSelection() {
+        com.sk89q.worldedit.bukkit.selections.Selection worldeditSelection = getPlugin().getWorldEdit().getSelection(getPlayer());
+        Selection sel = null;
+        if(worldeditSelection == null) {
+            return false;
+        } else if(worldeditSelection instanceof com.sk89q.worldedit.bukkit.selections.CuboidSelection) {
+            sel = new CuboidSelection(this);
+        } else if(worldeditSelection instanceof com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection) {
+            sel = new NPolySelection(this);
+        }
+        if(sel == null || !sel.importWorldeditSelection()) return false;
+        setSelection(sel);
+        return true;
+    }
+    
+    
     public void addGhostBlock(Block block) { 
         GhostBlock gb = new GhostBlock(block);
         ghostBlocks.add(gb); gb.show(getPlayer()); 

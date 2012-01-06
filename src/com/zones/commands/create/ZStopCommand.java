@@ -16,12 +16,12 @@ public class ZStopCommand extends ZoneCommand {
     
     public ZStopCommand(Zones plugin) {
         super("zstop", plugin);
-        this.setRequiresDummy(true);
+        this.setRequiresZoneSelection(true);
     }
 
     @Override
     public void run(Player player, String[] vars) {
         player.sendMessage(ChatColor.YELLOW.toString() + "Delete the zone? If yes do /zconfirm");
-        getDummy(player).setConfirm(Confirm.STOP);
+        getZoneSelection(player).setConfirm(Confirm.STOP);
     }
 }

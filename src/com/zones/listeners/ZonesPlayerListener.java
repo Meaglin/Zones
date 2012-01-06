@@ -7,7 +7,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -15,6 +17,7 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerInventoryEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -181,6 +184,7 @@ public class ZonesPlayerListener extends PlayerListener {
     }
 
     public void onPlayerPortal(PlayerPortalEvent event) {
+        if(event.getTo() == null) return;
         onPlayerTeleport(event);
     }
     public void onPlayerTeleport(PlayerTeleportEvent event) {
@@ -256,7 +260,8 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.WOOD_DOOR.getId(),
             Material.IRON_DOOR.getId(),
             Material.TNT.getId(),
-            Material.REDSTONE_TORCH_ON.getId()
+            Material.REDSTONE_TORCH_ON.getId(),
+            Material.PUMPKIN.getId()
             );
     
     private static final List<Integer> destroyItems = Arrays.asList(
@@ -265,7 +270,8 @@ public class ZonesPlayerListener extends PlayerListener {
     
     private static final List<Integer> placeBlocks = Arrays.asList(
             Material.DIODE_BLOCK_OFF.getId(),
-            Material.DIODE_BLOCK_ON.getId()
+            Material.DIODE_BLOCK_ON.getId(),
+            Material.DIRT.getId()
             );
     
     private static final List<Integer> hitBlocks = Arrays.asList(
@@ -274,7 +280,9 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.STONE_PLATE.getId(),
             Material.WOOD_PLATE.getId(),
             Material.STONE_BUTTON.getId(),
-            Material.WOODEN_DOOR.getId()
+            Material.WOODEN_DOOR.getId(),
+            Material.TRAP_DOOR.getId(),
+            Material.FENCE_GATE.getId()
             );
     
     private static final List<Integer> modifyBlocks = Arrays.asList(
@@ -525,5 +533,22 @@ public class ZonesPlayerListener extends PlayerListener {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockClicked().getRelative(event.getBlockFace());
         EventUtil.onPlace(plugin, event, player, blockPlaced, event.getItemStack().getTypeId());
+    }
+    
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        if(event.isCancelled()) return;
+        
+        Player player = event.getPlayer();
+        Entity target = event.getRightClicked();
+        if(target == null) return;
+        
+        if(target instanceof Sheep) {
+            ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+            if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, target, -1)){
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_SHEAR_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 }

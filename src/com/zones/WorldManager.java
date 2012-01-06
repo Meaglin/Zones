@@ -187,12 +187,12 @@ public class WorldManager {
         return worldConfig;
     }
     
-    public static int toInt(double b) {
+    public static final int toInt(double b) {
         int r = (int) b;
         return b < r ? r - 1 : r;
     }
     
-    public static long toLong(int x, int y) {
+    public static final long toLong(int x, int y) {
         return ((((long)x) << 32) | ((long)y & 0xFFFFFFFFL));
     }
     

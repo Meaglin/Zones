@@ -11,13 +11,9 @@ import com.zones.util.FileUtil;
 import com.zones.util.ZoneUtil;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Logger;
-
-import javax.persistence.PersistenceException;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -38,7 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 115;
+    public static final int                 Rev             = 116;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -51,7 +47,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private WorldEditPlugin                 worldedit;
     private Permissions                     permissionsManager;
 
-    private final HashMap<Long, WorldManager> worlds   = new HashMap<Long, WorldManager>(2);
+    private final HashMap<Long, WorldManager> worlds        = new HashMap<Long, WorldManager>(2);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
     private Database                        database        = null;
     private final ZoneUtil                  util            = new ZoneUtil(this);
@@ -83,12 +79,16 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal);
         registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal);
         registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal);
+        registerEvent(Event.Type.ENTITY_INTERACT, entityListener, Priority.Normal);
         registerEvent(Event.Type.FOOD_LEVEL_CHANGE, entityListener, Priority.Normal);
         registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal);
         registerEvent(Event.Type.PAINTING_PLACE, entityListener, Priority.Normal);
         registerEvent(Event.Type.PAINTING_BREAK, entityListener, Priority.Normal);
+        registerEvent(Event.Type.ENDERMAN_PICKUP, entityListener, Priority.Normal);
+        registerEvent(Event.Type.ENDERMAN_PLACE, entityListener, Priority.Normal);
 
         registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_INTERACT_ENTITY, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_PORTAL, playerListener, Priority.Normal);
         registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal);
@@ -126,31 +126,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvent(type, listener, priority, this);
     }
     
-    @SuppressWarnings("unused")
-    @Deprecated
-    private void setupDatabase() {
-        try {
-            //getDatabase().find(Zone.class).findRowCount();
-            //getDatabase().find(Vertice.class).findRowCount();
-        } catch (PersistenceException ex) {
-            log.info("[Zones] Installing database due to first time usage.");
-            try {
-                installDDL();
-            } catch (Throwable t) {
-                log.warning("[Zones] Error installing database.");
-                t.printStackTrace();
-            }
-        }
-    }
-    
-    @Override
-    public List<Class<?>> getDatabaseClasses() {
-        List<Class<?>> list = new ArrayList<Class<?>>();
-        //list.add(Zone.class);
-        //list.add(Vertice.class);
-        return list;
-    }
-
     @Override
     public void onDisable() {
         log.info("[Zones] plugin disabled!");
@@ -298,11 +273,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     public ZoneUtil getApi() {
         return getUtils();
-    }
-    
-    @Deprecated
-    public com.avaje.ebean.EbeanServer getDatabase() {
-        return super.getDatabase();
     }
     
 }

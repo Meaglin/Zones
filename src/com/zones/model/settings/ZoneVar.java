@@ -115,6 +115,11 @@ public enum ZoneVar {
             public Object getDefault(ZoneBase zone) {return zone.getWorldConfig().CROPS_PROTECTED;}
         },
         
+        ALLOW_ENDER_GRIEF("AllowEnderGrief", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return zone.getWorldConfig().ALLOW_ENDER_GRIEF;}
+        },
+        
         PLACE_BLOCKS("ProtectedPlaceBlocks", Serializer.INTEGERLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {return null;}

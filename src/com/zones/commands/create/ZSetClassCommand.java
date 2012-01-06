@@ -11,7 +11,7 @@ public class ZSetClassCommand extends ZoneCommand {
 
     public ZSetClassCommand(Zones plugin) {
         super("zsetclass", plugin);
-        this.setRequiresDummy(true);
+        this.setRequiresZoneSelection(true);
     }
 
     @Override
@@ -20,7 +20,7 @@ public class ZSetClassCommand extends ZoneCommand {
             player.sendMessage(ChatColor.YELLOW + "Usage: /zsetclass ZoneNormal|ZonePlot|ZoneInherit");
             return;
         }
-        getDummy(player).setClass(vars[0]);
+        getZoneSelection(player).setClass(vars[0]);
     }
 
     

@@ -31,6 +31,7 @@ public abstract class Selection {
     }
     
     public void setHeight(ZoneVertice height, boolean silent) {
+        if(height.getMax() == 127) height = new ZoneVertice(height.getMin(), 130);
         this.height = height;
         if(!silent) getPlayer().sendMessage(ChatColor.GREEN + "Selection height changed to: " + height.getMin() + "-" + height.getMax() + ".");
     }
@@ -50,4 +51,6 @@ public abstract class Selection {
     public abstract List<ZoneVertice> getPoints();
     
     public abstract  Class<? extends ZoneForm> getType();
+    
+    public abstract boolean importWorldeditSelection();
 }

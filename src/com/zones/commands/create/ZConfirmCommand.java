@@ -14,11 +14,11 @@ public class ZConfirmCommand extends ZoneCommand {
     
     public ZConfirmCommand(Zones plugin) {
         super("zconfirm", plugin);
-        this.setRequiresDummy(true);
+        this.setRequiresZoneSelection(true);
     }
 
     @Override
     public void run(Player player, String[] vars) {
-        getDummy(player).confirm();
+        getZoneSelection(player).confirm();
     }
 }

@@ -4,7 +4,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EndermanPickupEvent;
+import org.bukkit.event.entity.EndermanPlaceEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -51,35 +54,47 @@ public class ZonesEntityListener extends EntityListener {
         if(event.isCancelled()) return;
         
         Entity defender = event.getEntity();
+        WorldManager wm = plugin.getWorldManager(defender.getWorld());
+        
+        if(event.getCause() == DamageCause.BLOCK_EXPLOSION  || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
+            if(!wm.getConfig().EXPLOSION_DAMAGE_ENTITIES) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+        
         Entity attacker = null;
         if(event instanceof EntityDamageByEntityEvent) {
             attacker = ((EntityDamageByEntityEvent)event).getDamager();
-        }
-        WorldManager wm = plugin.getWorldManager(defender.getWorld());
-        ZoneBase zone = wm.getActiveZone(defender.getLocation());
-        Player player = (defender instanceof Player ? (Player)defender : null);
-        if (zone == null) {
-            if(player != null) {
-                if(!wm.getConfig().canReceiveDamage(player, event.getCause())) {
-                    event.setCancelled(true);
-                    return;
-                }
-                if(wm.getConfig().hasGodMode(player)) {
-                    event.setCancelled(true);
-                    return;
-                }
-            } else if(event.getCause() == DamageCause.BLOCK_EXPLOSION) {
-                if(!wm.getConfig().EXPLOSION_DAMAGE_ENTITIES) {
-                    event.setCancelled(true);
-                    return;
-                }
+            if(attacker != null && attacker instanceof Projectile) {
+                Entity ent = ((Projectile)attacker).getShooter();
+                if(ent != null) attacker = ent;
             }
-        } else {
-            if (player != null) {                
-                if (!((PlayerDamageResolver)zone.getResolver(AccessResolver.PLAYER_RECEIVE_DAMAGE)).isAllowed(zone, player, event.getCause(), event.getDamage()) || (wm.getConfig().PLAYER_ENFORCE_SPECIFIC_DAMAGE && !wm.getConfig().canReceiveSpecificDamage(player, event.getCause()))) {
-                    event.setCancelled(true);
-                    return;
-                }
+        }
+
+        if(!(defender instanceof Player) && (attacker == null || !(attacker instanceof Player))) return;
+        
+        ZoneBase zone = wm.getActiveZone(defender.getLocation());
+        
+        if (zone == null) {
+            if(!(defender instanceof Player)) return;
+            Player player = (Player) defender;
+            if(!wm.getConfig().canReceiveDamage(player, event.getCause())) {
+                event.setCancelled(true);
+                return;
+            }
+            if(wm.getConfig().hasGodMode(player)) {
+                event.setCancelled(true);
+                return;
+            }
+        } else {            
+            if (defender instanceof Player && (!((PlayerDamageResolver)zone.getResolver(AccessResolver.PLAYER_RECEIVE_DAMAGE)).isAllowed(zone, ((Player)defender), event.getCause(), event.getDamage()) 
+                || (
+                        wm.getConfig().PLAYER_ENFORCE_SPECIFIC_DAMAGE 
+                        && !wm.getConfig().canReceiveSpecificDamage(((Player)defender), event.getCause()))
+                )) {
+                event.setCancelled(true);
+                return;
             }
             if(attacker != null && attacker instanceof Player) {
                 Player att = (Player)attacker;
@@ -88,7 +103,7 @@ public class ZonesEntityListener extends EntityListener {
                     event.setCancelled(true);
                     return;
                 }
-            }            
+            }
         }
     }
 
@@ -241,7 +256,33 @@ public class ZonesEntityListener extends EntityListener {
             }
         }
     }
+    
+    public void onEndermanPlace(EndermanPlaceEvent event) {
+        if(event.isCancelled()) return;
+        WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
+        ZoneBase zone = wm.getActiveZone(event.getLocation());
+        if(zone == null) {
+            if(!wm.getConfig().ALLOW_ENDER_GRIEF)
+                event.setCancelled(true);
+        } else {
+            if(!zone.getFlag(ZoneVar.ALLOW_ENDER_GRIEF))
+                event.setCancelled(true);
+        }
+    }
 
+    public void onEndermanPickup(EndermanPickupEvent event) {
+        if(event.isCancelled()) return;
+        WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
+        ZoneBase zone = wm.getActiveZone(event.getBlock());
+        if(zone == null) {
+            if(!wm.getConfig().ALLOW_ENDER_GRIEF)
+                event.setCancelled(true);
+        } else {
+            if(!zone.getFlag(ZoneVar.ALLOW_ENDER_GRIEF))
+                event.setCancelled(true);
+        }
+    }
+    
     @Override
     public void onEntityInteract(EntityInteractEvent event) {
         if(event.isCancelled()) return;

@@ -74,6 +74,7 @@ public class WorldConfig {
     public List<Integer> PROTECTED_BLOCKS_BREAK;
     
     public boolean CROPS_PROTECTED;
+    public boolean ALLOW_ENDER_GRIEF;
     
     public boolean LOGGED_BLOCKS_ENABLED;
     public List<Integer> LOGGED_BLOCKS_PLACE;
@@ -214,6 +215,7 @@ public class WorldConfig {
             }
             
             CROPS_PROTECTED = p.getBool("ProtectCrops", false);
+            ALLOW_ENDER_GRIEF = p.getBool("AllowEnderGrief", true);
             
             LOGGED_BLOCKS_ENABLED = p.getBool("LoggedBlocksEnabled", true);
             if(LOGGED_BLOCKS_ENABLED){
@@ -542,7 +544,7 @@ public class WorldConfig {
     
     public boolean isFlowProtectedBlock(Block from,Block to) {
         int type = from.getTypeId();
-        if (type == 8 || type == 9) {
+        if (type == 8 || type == 9 || type == 0) {
             if(!WATER_PROTECTED_BLOCKS.isEmpty() && this.WATER_PROTECTED_BLOCKS.contains(to.getTypeId()))
                 return true;
             if(this.SPONGE_EMULATION && isNearSponge(to,this.SPONGE_RADIUS))
@@ -550,7 +552,7 @@ public class WorldConfig {
             return false;
         }
 
-        if (type == 10 || type == 11) {
+        if (type == 10 || type == 11 || type == 0) {
             if(!LAVA_PROTECTED_BLOCKS.isEmpty() && (this.LAVA_PROTECTED_BLOCKS.contains(to.getTypeId()) || this.LAVA_PROTECTED_BLOCKS.contains(to.getRelative(BlockFace.DOWN))))
                 return true;
             if(this.SPONGE_LAVA_EMULATION && isNearSponge(to,this.SPONGE_LAVA_RADIUS))

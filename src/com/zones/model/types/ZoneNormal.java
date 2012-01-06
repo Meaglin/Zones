@@ -337,8 +337,8 @@ public class ZoneNormal extends ZoneBase{
         
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
             for(Player insidePlayer : getPlayersInside()) {
-                if(!insidePlayer.equals(player) && canAdministrate(player)) {
-                    this.sendMarkupMessage(ZonesConfig.PLAYER_ENTERED_ZONE, insidePlayer);
+                if(!insidePlayer.equals(player) && canAdministrate(insidePlayer)) {
+                    this.sendMarkupMessage(ZonesConfig.PLAYER_ENTERED_ZONE, player, insidePlayer);
                 }
             }
         }
@@ -351,8 +351,8 @@ public class ZoneNormal extends ZoneBase{
         
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
             for(Player insidePlayer : getPlayersInside()) {
-                if(!insidePlayer.equals(player) && canAdministrate(player)) {
-                    this.sendMarkupMessage(ZonesConfig.PLAYER_LEFT_ZONE, insidePlayer);
+                if(!insidePlayer.equals(player) && canAdministrate(insidePlayer)) {
+                    this.sendMarkupMessage(ZonesConfig.PLAYER_LEFT_ZONE, player, insidePlayer);
                 }
             }
         }
