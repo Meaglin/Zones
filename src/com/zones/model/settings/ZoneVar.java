@@ -161,7 +161,11 @@ public enum ZoneVar {
         SPAWN_LOCATION("SpawnLocation", Serializer.LOCATION) {
             @Override
             public Object getDefault(ZoneBase zone) {return null; }
-        }; 
+        }, 
+        INHERIT_GROUP("GroupInherit", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) { return true; }
+        };
 
         
         private final String name;

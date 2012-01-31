@@ -1,6 +1,7 @@
 package com.zones.commands;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
@@ -14,6 +15,7 @@ import com.zones.ZoneManager;
 import com.zones.Zones;
 import com.zones.commands.create.ZConfirmCommand;
 import com.zones.model.ZoneBase;
+import com.zones.model.types.ZoneInherit;
 import com.zones.selection.ZoneSelection;
 
 /**
@@ -105,6 +107,31 @@ public abstract class ZoneCommand extends Command {
     
     protected ZoneBase getSelectedZone(Player p) {
         return getZoneManager().getSelectedZone(p.getEntityId());
+    }
+    
+    protected boolean canCreateOrSubzone(Player p, ZoneSelection sel) {
+        if(this.canUseCommand(p, "zones.create")) return true;
+        if(!this.hasSelected(p)) return false;
+        ZoneBase zone = getSelectedZone(p);
+        if(!(zone instanceof ZoneInherit)) return false;
+        if(!zone.getForm().contains(sel.getSelection())) return false;
+        
+        return true;
+    }
+    
+    protected boolean canEdit(Player p, ZoneBase base, ZoneSelection sel) {
+        if(this.canUseCommand(p, "zones.create")) return true;
+        if(!this.hasSelected(p)) return false;
+        ZoneBase zone = getSelectedZone(p);
+        if(!(zone instanceof ZoneInherit)) return false;
+        List<ZoneBase> zones = ((ZoneInherit)zone).getInheritedZones();
+        for(ZoneBase z : zones) {
+            if(z instanceof ZoneInherit && ((ZoneInherit)z).isAdmin(p) && z.getForm().contains(sel.getSelection())) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     @Override

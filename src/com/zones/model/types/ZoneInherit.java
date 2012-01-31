@@ -61,15 +61,18 @@ public class ZoneInherit extends ZoneNormal {
         return isInheritAdmin(player);
     }
     
+    public boolean isAdmin(Player player) {
+        return super.isAdmin(player);
+    }
+    
     public boolean isInheritAdmin(Player player) {
         for(ZoneBase b : inheritedZones) {
             if(b instanceof ZoneNormal) {
                 if(((ZoneNormal)b).isAdmin(player))
                     return true;
             } else {
-                if(b.canAdministrate(player)) {
+                if(b.canAdministrate(player))
                     return true;
-                }
             }
         }
         

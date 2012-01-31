@@ -129,6 +129,11 @@ public class ZToggleCommand extends ZoneCommand {
                 "Enderman Grief",
                 ZoneVar.ALLOW_ENDER_GRIEF
         });
+        variables.put("inheritgroups", new Object[] {
+           "zones.toggle.inheritgroup",
+           "Inherit Group",
+           ZoneVar.INHERIT_GROUP
+        });
     }
 
     @Override

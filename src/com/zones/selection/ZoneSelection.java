@@ -216,8 +216,13 @@ public abstract class ZoneSelection {
             return true;
         
         ZoneBase zone = getSelectedZone();
-        if(zone != null && zone instanceof ZoneInherit && zone.getForm().contains(getSelection()) && zone.canAdministrate(getPlayer()))
-            return true;
+        if(!(zone instanceof ZoneInherit)) return false;
+        List<ZoneBase> zones = ((ZoneInherit)zone).getInheritedZones();
+        for(ZoneBase z : zones) {
+            if(z instanceof ZoneInherit && ((ZoneInherit)z).isAdmin(getPlayer()) && z.getForm().contains(getSelection())) {
+                return true;
+            }
+        }
         
         return false;
     }

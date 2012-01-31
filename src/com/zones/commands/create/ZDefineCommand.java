@@ -55,21 +55,6 @@ public class ZDefineCommand extends ZoneCommand {
             return;
         }
         
-        /*
-        Selection worldeditSelection = getPlugin().getWorldEdit().getSelection(player);
-        if(worldeditSelection == null) {
-            player.sendMessage(ChatColor.RED + "No WorldEdit selection found.");
-            return;
-        }
-        if(worldeditSelection.getArea() < 1) {
-            player.sendMessage(ChatColor.RED + "Your WorldEdit selection is not a valid selection.");
-            return;
-        }
-        ZoneVertice point1 = new ZoneVertice(worldeditSelection.getMinimumPoint().getBlockX(), worldeditSelection.getMinimumPoint().getBlockZ());
-        ZoneVertice point2 = new ZoneVertice(worldeditSelection.getMaximumPoint().getBlockX(), worldeditSelection.getMaximumPoint().getBlockZ());
-        ZoneVertice height = new ZoneVertice(worldeditSelection.getMinimumPoint().getBlockY(), (worldeditSelection.getMaximumPoint().getBlockY() >= 127 ? 130 : worldeditSelection.getMaximumPoint().getBlockY()));
-        */
-        
         ZoneSelection selection = new ZoneCreateSelection(getPlugin(),player,name);
         if(!selection.importWorldeditSelection()) {
             player.sendMessage(ChatColor.RED + "Invalid/Missing worldedit Selection");

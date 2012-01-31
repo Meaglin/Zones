@@ -129,18 +129,22 @@ public class ZoneNormal extends ZoneBase{
         if (z != null && z.canDo(right))
             return true;
 
-        List<String> pgroups = getPermissions().getGroups(player, getWorld().getName());
-        
-        for (Entry<String, ZonesAccess> e : groups.entrySet())
-            if (e.getValue().canDo(right)) {
-                if(e.getKey().equals("default"))
-                    return true;
-                //if(getPermissions().inGroup(player, e.getKey().toLowerCase()));
-                if (pgroups!= null && pgroups.contains(e.getKey().toLowerCase())) { 
-                    return true;
-                }
-            }
+        if(this.getFlag(ZoneVar.INHERIT_GROUP)) {
+            List<String> pgroups = getPermissions().getGroups(player, getWorld().getName());
             
+            for (Entry<String, ZonesAccess> e : groups.entrySet())
+                if (e.getValue().canDo(right)) {
+                    if(e.getKey().equals("default"))
+                        return true;
+                    //if(getPermissions().inGroup(player, e.getKey().toLowerCase()));
+                    if (pgroups!= null && pgroups.contains(e.getKey().toLowerCase())) { 
+                        return true;
+                    }
+                }
+        } else {
+            String group = getPermissions().getGroup(player);
+            if(group != null && groups.get(group).canDo(right)) return true;
+        }
 
         return canAdministrate(player);
     }
