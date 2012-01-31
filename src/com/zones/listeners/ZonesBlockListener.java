@@ -3,15 +3,15 @@ package com.zones.listeners;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
-import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
@@ -31,7 +31,7 @@ import com.zones.selection.ZoneSelection;
  * @author Meaglin
  *
  */
-public class ZonesBlockListener extends BlockListener {
+public class ZonesBlockListener implements Listener {
 
     private Zones plugin;
 
@@ -39,13 +39,7 @@ public class ZonesBlockListener extends BlockListener {
         this.plugin = plugin;
     }
 
-    /**
-     * Called when a block is damaged (or broken)
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    @Override
+    @EventHandler
     public void onBlockDamage(BlockDamageEvent event) {
 
         Player player = event.getPlayer();
@@ -61,13 +55,7 @@ public class ZonesBlockListener extends BlockListener {
 
     }
 
-    /**
-     * Called when a block flows (water/lava)
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    @Override
+    @EventHandler
     public void onBlockFromTo(BlockFromToEvent event) {
         if(event.isCancelled()) return;
         
@@ -97,13 +85,7 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
 
-    /**
-     * Called when a player places a block
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    @Override
+    @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         if(event.isCancelled()) return;
         
@@ -113,12 +95,7 @@ public class ZonesBlockListener extends BlockListener {
         EventUtil.onPlace(plugin, event, player, blockPlaced);
     }
 
-    /**
-     * Called when a block is destroyed from burning
-     * 
-     * @param event
-     *            Relevant event details
-     */
+    @EventHandler
     public void onBlockBurn(BlockBurnEvent event) {
         if(event.isCancelled())return;
         
@@ -126,12 +103,7 @@ public class ZonesBlockListener extends BlockListener {
             event.setCancelled(true);
     }
     
-    /**
-     * Called when a block gets ignited
-     * 
-     * @param event
-     *            Relevant event details
-     */
+    @EventHandler
     public void onBlockIgnite(BlockIgniteEvent event) { 
         if(event.isCancelled())return;
         
@@ -139,6 +111,7 @@ public class ZonesBlockListener extends BlockListener {
             event.setCancelled(true);
     }
     
+    @EventHandler
     public boolean onFire(Player player, Block block, IgniteCause cause) {
         
         WorldManager wm = plugin.getWorldManager(block.getWorld());
@@ -155,20 +128,8 @@ public class ZonesBlockListener extends BlockListener {
         }
         return false;
     }
-
-    /**
-     * Called when we try to place a block, to see if we can build it
-     */
-    public void onBlockCanBuild(BlockCanBuildEvent event) {
-
-    }
     
-    /**
-     * Called when block physics occurs
-     * 
-     * @param event
-     *            Relevant event details
-     */
+    @EventHandler
     public void onBlockPhysics(BlockPhysicsEvent event) {
         if(event.isCancelled()) return;
         if(event.getChangedTypeId() == -1337) {
@@ -204,22 +165,7 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
     
-    /**
-     * Called when redstone changes From: the source of the redstone change To:
-     * The redstone dust that changed
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    public void onBlockRedstoneChange(BlockFromToEvent event) {
-    }
-
-    /**
-     * Called when leaves are decaying naturally
-     * 
-     * @param event
-     *            Relevant event details
-     */
+    @EventHandler
     public void onLeavesDecay(LeavesDecayEvent event) {
         if(event.isCancelled()) return;
         
@@ -236,14 +182,7 @@ public class ZonesBlockListener extends BlockListener {
 
 
 
-    /**
-     * Called when a block is destroyed by a player.
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    
-    @Override
+    @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         if(event.isCancelled()) return;
         
@@ -253,6 +192,7 @@ public class ZonesBlockListener extends BlockListener {
         EventUtil.onBreak(plugin, event, player, block);
     }
     
+    @EventHandler
     public void onBlockForm(org.bukkit.event.block.BlockFormEvent event) {
         if(event.isCancelled()) return;
         BlockState blockstate = event.getNewState();
@@ -276,6 +216,7 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
 
+    @EventHandler
     public void onBlockFade(BlockFadeEvent event) {
         if(event.isCancelled()) return;
 
@@ -306,6 +247,7 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
     
+    @EventHandler
     public void onBlockSpread(org.bukkit.event.block.BlockSpreadEvent event) {
         if(event.isCancelled()) return;
         
@@ -322,6 +264,7 @@ public class ZonesBlockListener extends BlockListener {
         }
     }
     
+    @EventHandler
     public void onSignChange(org.bukkit.event.block.SignChangeEvent event) {
         if(event.isCancelled()) return;
 

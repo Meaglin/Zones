@@ -10,28 +10,21 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerInventoryEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerListener;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -51,7 +44,7 @@ import com.zones.selection.ZoneSelection.Confirm;
  * @author Meaglin
  *
  */
-public class ZonesPlayerListener extends PlayerListener {
+public class ZonesPlayerListener implements Listener {
 
     private Zones plugin;
 
@@ -59,13 +52,7 @@ public class ZonesPlayerListener extends PlayerListener {
         this.plugin = plugin;
     }
 
-    /**
-     * Called when a player joins a server
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    @Override
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         plugin.getWorldManager(event.getPlayer()).getRegion(event.getPlayer()).revalidateZones(event.getPlayer());
         for(WorldManager wm : plugin.getWorlds())
@@ -73,13 +60,7 @@ public class ZonesPlayerListener extends PlayerListener {
                 wm.getConfig().setGodMode(event.getPlayer(), wm.getConfig().GOD_MODE_AUTOMATIC);
     }
 
-    /**
-     * Called when a player leaves a server
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    @Override
+    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         List<ZoneBase> zones = plugin.getWorldManager(player).getActiveZones(player);
@@ -96,13 +77,7 @@ public class ZonesPlayerListener extends PlayerListener {
                 wm.getConfig().setGodMode(event.getPlayer(), true); // remove from list.
     }
 
-    /**
-     * Called when a player attempts to move location in a world
-     * 
-     * @param event
-     *            Relevant event details
-     */
-    @Override
+    @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         if(event.isCancelled()) return;
         
@@ -183,10 +158,13 @@ public class ZonesPlayerListener extends PlayerListener {
         wm.revalidateZones(player, from, to);
     }
 
+    @EventHandler
     public void onPlayerPortal(PlayerPortalEvent event) {
         if(event.getTo() == null) return;
         onPlayerTeleport(event);
     }
+    
+    @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         if(event.isCancelled()) return;
         
@@ -294,7 +272,7 @@ public class ZonesPlayerListener extends PlayerListener {
             Material.DISPENSER.getId()
             );
     
-    @Override
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         
         /*
@@ -401,27 +379,7 @@ public class ZonesPlayerListener extends PlayerListener {
         }
     }
 
-    /**
-     * Called when a player gets kicked from the server
-     * 
-     * @param event Relevant event details
-     */
-    public void onPlayerKick(PlayerKickEvent event) {
-    }
-
-    /**
-     * Called when a player sends a chat message
-     *
-     * @param event Relevant event details
-     */
-    public void onPlayerChat(PlayerChatEvent event) {
-    }
-
-    /**
-     * Called when a player respawns
-     * 
-     * @param event Relevant event details
-     */
+    @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         ZoneBase z = plugin.getWorldManager(event.getPlayer()).getActiveZone(event.getPlayer());
         if(z != null) {
@@ -433,51 +391,7 @@ public class ZonesPlayerListener extends PlayerListener {
         }
     }
 
-    /**
-     * Called when a player attempts to log in to the server
-     *
-     * @param event Relevant event details
-     */
-    public void onPlayerLogin(PlayerLoginEvent event) {
-    }
-
-    /**
-     * Called when a player throws an egg and it might hatch
-     *
-     * @param event Relevant event details
-     */
-    public void onPlayerEggThrow(PlayerEggThrowEvent event) {
-    }
-
-    /**
-     * Called when a player plays an animation, such as an arm swing
-     *
-     * @param event Relevant event details
-     */
-    public void onPlayerAnimation(PlayerAnimationEvent event) {
-    }
-
-    /**
-     * Called when a player opens an inventory
-     *
-     * @param event Relevant event details
-     */
-    public void onInventoryOpen(PlayerInventoryEvent event) {
-    }
-
-    /**
-     * Called when a player changes their held item
-     *
-     * @param event Relevant event details
-     */
-    public void onItemHeldChange(PlayerItemHeldEvent event) {
-    }
-
-    /**
-     * Called when a player drops an item from their inventory
-     *
-     * @param event Relevant event details
-     */
+    @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
@@ -487,11 +401,7 @@ public class ZonesPlayerListener extends PlayerListener {
         }
     }
 
-    /**
-     * Called when a player picks an item up off the ground
-     *
-     * @param event Relevant event details
-     */
+    @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
         if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItem().getWorld()).getActiveZone(event.getItem().getLocation());
@@ -501,19 +411,7 @@ public class ZonesPlayerListener extends PlayerListener {
         }
     }
 
-    /**
-     * Called when a player toggles sneak mode
-     *
-     * @param event Relevant event details
-     */
-    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
-    }
-
-    /**
-     * Called when a player fills a bucket
-     * 
-     * @param event Relevant event details
-     */
+    @EventHandler
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
         if(event.isCancelled()) return;
         
@@ -522,11 +420,7 @@ public class ZonesPlayerListener extends PlayerListener {
         EventUtil.onBreak(plugin, event, player, block);
     }
 
-    /**
-     * Called when a player empties a bucket
-     * 
-     * @param event Relevant event details
-     */
+    @EventHandler
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
         if(event.isCancelled()) return;
         
@@ -535,6 +429,7 @@ public class ZonesPlayerListener extends PlayerListener {
         EventUtil.onPlace(plugin, event, player, blockPlaced, event.getItemStack().getTypeId());
     }
     
+    @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if(event.isCancelled()) return;
         

@@ -5,6 +5,8 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EndermanPickupEvent;
 import org.bukkit.event.entity.EndermanPlaceEvent;
@@ -12,11 +14,8 @@ import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
-import org.bukkit.event.entity.EntityListener;
-import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.painting.PaintingBreakByEntityEvent;
@@ -41,7 +40,7 @@ import com.zones.model.settings.ZoneVar;
  * @author Meaglin
  *
  */
-public class ZonesEntityListener extends EntityListener {
+public class ZonesEntityListener implements Listener {
 
     private Zones plugin;
 
@@ -49,7 +48,7 @@ public class ZonesEntityListener extends EntityListener {
         this.plugin = zones;
     }
 
-    @Override
+    @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if(event.isCancelled()) return;
         
@@ -107,7 +106,7 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
 
-    @Override
+    @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
         if(event.isCancelled()) return;
         
@@ -130,7 +129,7 @@ public class ZonesEntityListener extends EntityListener {
 
     }
 
-    @Override
+    @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         if(event.isCancelled()) return;
         
@@ -162,6 +161,7 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
 
+    @EventHandler
     public void onEntityCombust(EntityCombustEvent event) {
         if(event.isCancelled()) return;
         Entity entity = event.getEntity();
@@ -187,6 +187,7 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
 
+    @EventHandler
     public void onExplosionPrime(ExplosionPrimeEvent event) {
         if(event.isCancelled()) return;
         
@@ -198,12 +199,7 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
 
-    public void onEntityDeath(EntityDeathEvent event) {
-    }
-
-    public void onEntityTarget(EntityTargetEvent event) {
-    }
-    
+    @EventHandler
     public void onPaintingPlace(PaintingPlaceEvent event) {
         if(event.isCancelled()) return;
         
@@ -214,6 +210,7 @@ public class ZonesEntityListener extends EntityListener {
         
     }
 
+    @EventHandler
     public void onPaintingBreak(PaintingBreakEvent event) {
         if(event.isCancelled()) return;
         if(!(event instanceof PaintingBreakByEntityEvent)) return;
@@ -228,11 +225,7 @@ public class ZonesEntityListener extends EntityListener {
         
     }
     
-    /**
-     * Called when a human entity's food level changes
-     *
-     * @param event Relevant event details
-     */
+    @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         if(event.isCancelled()) return;
         Entity entity = event.getEntity();
@@ -257,6 +250,7 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
     
+    @EventHandler
     public void onEndermanPlace(EndermanPlaceEvent event) {
         if(event.isCancelled()) return;
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
@@ -270,6 +264,7 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
 
+    @EventHandler
     public void onEndermanPickup(EndermanPickupEvent event) {
         if(event.isCancelled()) return;
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
@@ -283,7 +278,7 @@ public class ZonesEntityListener extends EntityListener {
         }
     }
     
-    @Override
+    @EventHandler
     public void onEntityInteract(EntityInteractEvent event) {
         if(event.isCancelled()) return;
         if(event.getBlock() == null) return;

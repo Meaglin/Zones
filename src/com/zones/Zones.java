@@ -21,10 +21,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -61,50 +59,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
      * Register used events.
      */
     private void registerEvents() {
-        
-        registerEvent(Event.Type.BLOCK_DAMAGE, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_FROMTO, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal);
-        registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_BURN, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal);
-        registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Normal);
-        
-        registerEvent(Event.Type.BLOCK_FORM, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_SPREAD, blockListener, Priority.Normal);
-        registerEvent(Event.Type.BLOCK_FADE, blockListener, Priority.Normal);
-
-        registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal);
-        registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal);
-        registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal);
-        registerEvent(Event.Type.ENTITY_INTERACT, entityListener, Priority.Normal);
-        registerEvent(Event.Type.FOOD_LEVEL_CHANGE, entityListener, Priority.Normal);
-        registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal);
-        registerEvent(Event.Type.PAINTING_PLACE, entityListener, Priority.Normal);
-        registerEvent(Event.Type.PAINTING_BREAK, entityListener, Priority.Normal);
-        registerEvent(Event.Type.ENDERMAN_PICKUP, entityListener, Priority.Normal);
-        registerEvent(Event.Type.ENDERMAN_PLACE, entityListener, Priority.Normal);
-
-        registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_INTERACT_ENTITY, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_TELEPORT, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_PORTAL, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_BUCKET_FILL, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_BUCKET_EMPTY, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_PICKUP_ITEM, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_DROP_ITEM, playerListener, Priority.Normal);
-
-        registerEvent(Event.Type.VEHICLE_DAMAGE, vehicleListener, Priority.Normal);
-        registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal);
-        
-        registerEvent(Event.Type.WEATHER_CHANGE, weatherListener, Priority.Normal);
-        registerEvent(Event.Type.THUNDER_CHANGE, weatherListener, Priority.Normal);
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(blockListener, this);
+        pm.registerEvents(entityListener, this);
+        pm.registerEvents(playerListener, this);
+        pm.registerEvents(vehicleListener, this);
+        pm.registerEvents(weatherListener, this);
     }
 
     public void registerWorldEdit() {
@@ -115,17 +75,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         }
     }
 
-    /**
-     * Register an event.
-     * 
-     * @param type
-     * @param listener
-     * @param priority
-     */
-    private void registerEvent(Event.Type type, Listener listener, Priority priority) {
-        getServer().getPluginManager().registerEvent(type, listener, priority, this);
-    }
-    
     @Override
     public void onDisable() {
         log.info("[Zones] plugin disabled!");

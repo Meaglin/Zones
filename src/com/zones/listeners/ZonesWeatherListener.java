@@ -1,16 +1,18 @@
 package com.zones.listeners;
 
-import org.bukkit.event.weather.WeatherListener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import com.zones.Zones;
 
-public class ZonesWeatherListener extends WeatherListener {
+public class ZonesWeatherListener implements Listener {
     
     private Zones plugin;
     public ZonesWeatherListener(Zones plugin) {
         this.plugin = plugin;
     }
     
+    @EventHandler
     public void onThunderChange(org.bukkit.event.weather.ThunderChangeEvent event) {
         if(event.isCancelled()) return;
         if(!event.toThunderState()) return;
@@ -19,6 +21,7 @@ public class ZonesWeatherListener extends WeatherListener {
             event.setCancelled(true);
     }
     
+    @EventHandler
     public void onWeatherChange(org.bukkit.event.weather.WeatherChangeEvent event) {
         if(event.isCancelled()) return;
         if(!event.toWeatherState()) return;

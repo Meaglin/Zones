@@ -3,13 +3,9 @@ package com.zones.listeners;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
-import org.bukkit.event.vehicle.VehicleCreateEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.event.vehicle.VehicleListener;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 
 import com.zones.WorldManager;
@@ -26,7 +22,7 @@ import com.zones.model.ZoneBase;
  * @author Meaglin
  *
  */
-public class ZonesVehicleListener extends VehicleListener {
+public class ZonesVehicleListener implements Listener {
 
     private Zones plugin;
 
@@ -34,21 +30,7 @@ public class ZonesVehicleListener extends VehicleListener {
         this.plugin = zones;
     }
 
-    /**
-     * Called when a vehicle is created by a player. This hook will be called
-     * for all vehicles created.
-     * 
-     * @param event
-     */
-    public void onVehicleCreate(VehicleCreateEvent event) {
-    }
-
-    /**
-     * Called when a vehicle is damaged by the player.
-     * 
-     * @param event
-     */
-    @Override
+    @EventHandler
     public void onVehicleDamage(VehicleDamageEvent event) {
         if(event.isCancelled()) return;
         
@@ -65,44 +47,7 @@ public class ZonesVehicleListener extends VehicleListener {
         }
     }
 
-    /**
-     * Called when a vehicle collides with a block.
-     * 
-     * @param event
-     */
-    public void onVehicleBlockCollision(VehicleBlockCollisionEvent event) {
-    }
-
-    /**
-     * Called when a vehicle collides with an entity.
-     * 
-     * @param event
-     */
-    public void onVehicleEntityCollision(VehicleEntityCollisionEvent event) {
-    }
-
-    /**
-     * Called when an entity enters a vehicle.
-     * 
-     * @param event
-     */
-    public void onVehicleEnter(VehicleEnterEvent event) {
-    }
-
-    /**
-     * Called when an entity exits a vehicle.
-     * 
-     * @param event
-     */
-    public void onVehicleExit(VehicleExitEvent event) {
-    }
-
-    /**
-     * Called when an vehicle moves.
-     * 
-     * @param event
-     */
-    @Override
+    @EventHandler
     public void onVehicleMove(VehicleMoveEvent event) {
         Entity entity = event.getVehicle().getPassenger();
         if (entity == null || !(entity instanceof Player))
