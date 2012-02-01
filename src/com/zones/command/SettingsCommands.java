@@ -11,7 +11,6 @@ import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.commands.settings.ZSetCommand;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneSettings;
 import com.zones.model.settings.ZoneVar;
@@ -85,7 +84,7 @@ public class SettingsCommands extends CommandsBase {
             requiresSelected = true
     )
     public void set(Player player, String[] params) {
-        ZoneVar v = ZSetCommand.vars.get(params[0].toLowerCase());
+        ZoneVar v = vars.get(params[0].toLowerCase());
         if(v == null) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + params[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zset [variable name] [value]");
@@ -200,7 +199,7 @@ public class SettingsCommands extends CommandsBase {
             requiresSelected = true
     )
     public void remove(Player player, String[] params) {
-        ZoneVar v = ZSetCommand.lists.get(params[0].toLowerCase());
+        ZoneVar v = lists.get(params[0].toLowerCase());
         if(v == null) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + params[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
