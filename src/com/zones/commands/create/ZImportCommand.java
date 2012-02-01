@@ -29,31 +29,6 @@ public class ZImportCommand extends ZoneCommand {
             } else {
                 player.sendMessage(ChatColor.RED + "Invalid/Missing worldedit Selection");
             }
-            /*
-            if(!(selection.getSelection() instanceof CuboidSelection))
-            {
-                player.sendMessage(ChatColor.RED+"Only cuboid selections are supported.");
-            } else {
-                Selection worldeditSelection = getPlugin().getWorldEdit().getSelection(player);
-                if(worldeditSelection == null)
-                {
-                    player.sendMessage(ChatColor.YELLOW+"Can't find your current worldedit selection!");
-                } else {
-                    player.sendMessage(ChatColor.YELLOW+"Trying to import your current worldedit selection as zone coords.");
-                    //selection.setClass("ZoneNormal");
-                    CuboidSelection sel = new CuboidSelection(selection);
-
-                    Location min = worldeditSelection.getMinimumPoint();
-                    Location max = worldeditSelection.getMaximumPoint();
-                    sel.setHeight(new ZoneVertice(min.getBlockY(), (max.getBlockY() >= 127 ? 130 : max.getBlockY())));
-                    sel.setPoint1(new ZoneVertice(min.getBlockX(), min.getBlockZ()));
-                    sel.setPoint2(new ZoneVertice(max.getBlockX(), max.getBlockZ()));
-                    selection.setSelection(sel);
-                    
-                    player.sendMessage(ChatColor.YELLOW+"Added your worldedit selection as zone points.");
-                }
-            }
-            */
         }
     }
 }

@@ -66,6 +66,9 @@ public class ZoneInherit extends ZoneNormal {
     }
     
     public boolean isInheritAdmin(Player player) {
+        if (getPermissions().canUse(player, getWorld().getName(), "zones.admin"))
+            return true;
+        
         for(ZoneBase b : inheritedZones) {
             if(b instanceof ZoneNormal) {
                 if(((ZoneNormal)b).isAdmin(player))

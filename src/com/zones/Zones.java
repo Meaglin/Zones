@@ -1,8 +1,7 @@
 package com.zones;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.zones.commands.ZoneCommand;
-import com.zones.commands.ZoneCommandMap;
+import com.zones.command.CommandMap;
 import com.zones.listeners.*;
 import com.zones.permissions.Permissions;
 import com.zones.permissions.PermissionsResolver;
@@ -32,7 +31,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 120;
+    public static final int                 Rev             = 128;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -40,8 +39,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private final ZonesVehicleListener      vehicleListener = new ZonesVehicleListener(this);
     private final ZonesWeatherListener      weatherListener = new ZonesWeatherListener(this);
 
-    private final ZoneCommandMap            commandMap      = new ZoneCommandMap(this);
-
+    private CommandMap                      commandMap;
+    
     private WorldEditPlugin                 worldedit;
     private Permissions                     permissionsManager;
 
@@ -82,8 +81,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     @Override
     public void onEnable() {
-        //log.info("[Zones] Rev " + Rev + "  Loading...");
-        
         File configFile = new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE);
         if(!configFile.exists()) {
             getDataFolder().mkdirs();
@@ -92,16 +89,16 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             } else {
                 log.info("[Zones] Error while restorting configuration file.");
             }       
-        }  
-        database = new Database(this);
-        resolvePermissions();
-        //setupDatabase();
+        }
         ZonesConfig.load(configFile);
-        commandMap.load();
+        commandMap = new CommandMap(this);  
+        database = new Database(this);
+        
+        resolvePermissions();
+        
         loadWorlds();
         registerEvents();
         if(ZonesConfig.WORLDEDIT_ENABLED) {
-            //log.info("[Zones] Loading worldedit support...");
             registerWorldEdit();
         }
         log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorlEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + " Permissions:" + getPermissions().getName() + ".");
@@ -110,7 +107,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     private void resolvePermissions() {
         permissionsManager = PermissionsResolver.resolve(this);
-        //log.info("[Zones] Using " + permissionsManager.getName() + " for permissions managing.");
     }
     
     private void loadWorlds() {
@@ -176,16 +172,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        ZoneCommand cmd = commandMap.getCommand(command.getName());
-        if(cmd != null) {
-            boolean rt = cmd.execute(sender, label, args);
-            String arg = "";
-            for(int i = 0;i < args.length; i++) arg += args[i] + " ";
-            log.info("[Zones] " + sender.getName() + " issued " + cmd.getName() + " with args: " + arg + "!");
-            return rt;
-            //return cmd.execute(sender, label, args);
-        }
-        return false;
+        return commandMap.run(sender, command, label, args);
     }
 
     public boolean reloadZones() {
@@ -222,6 +209,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     public ZoneUtil getApi() {
         return getUtils();
+    }
+
+    public CommandMap getCommandMap() {
+        return commandMap;
     }
     
 }
