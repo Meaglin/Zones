@@ -143,7 +143,10 @@ public class ZoneNormal extends ZoneBase{
                 }
         } else {
             String group = getPermissions().getGroup(player);
-            if(group != null && groups.get(group).canDo(right)) return true;
+            if(group != null) {
+                ZonesAccess a = groups.get(group);
+                if(a != null && a.canDo(right)) return true;
+            }
         }
 
         return canAdministrate(player);

@@ -101,7 +101,7 @@ public class CommandMap {
             }
             if(sender instanceof Player) {
                 Player player = (Player)sender;
-                if(ann.requiresSelected() && plugin.getZoneManager().getSelectedZone(player.getEntityId()) != null) {
+                if(ann.requiresSelected() && plugin.getZoneManager().getSelectedZone(player.getEntityId()) == null) {
                     sender.sendMessage(ChatColor.RED + "Please select a zone first with /zselect !");
                     return true;
                 }
@@ -111,6 +111,7 @@ public class CommandMap {
                 }
                 if(!ann.requiredPermission().equals("") && !plugin.getPermissions().canUse(player, ann.requiredPermission())) {
                     sender.sendMessage(ChatColor.RED + "You're not allowed to use this command.");
+                    return true;
                 }
                 if(!ann.requiredType().equals(ZoneBase.class) && 
                     (plugin.getZoneManager().getSelected(player.getEntityId()) == 0 || 
