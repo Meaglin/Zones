@@ -105,4 +105,17 @@ public class MiscCommands extends CommandsBase {
             
         }
      */
+    
+    @Command(
+            name = "zrefresh",
+            aliases = { "" },
+            description = "Refreshes the currently selected zone.",
+            requiresPlayer = true,
+            requiresSelected = true
+    )
+    public void refresh(Player player, String[] params) {
+        ZoneBase zone = getSelectedZone(player);
+        getPlugin().getZoneManager().reloadZone(zone.getId());
+        player.sendMessage(ChatColor.GREEN + "Zone reloaded.");
+    }
 }

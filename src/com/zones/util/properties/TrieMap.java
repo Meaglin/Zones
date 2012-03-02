@@ -9,7 +9,7 @@ import java.util.Set;
  * Implements very fast dictionary storage and retrieval.
  * Only depends upon the core String class.
  * 
- * @author Melinda Green - © 2010 Superliminal Software.
+ * @author Melinda Green - 2010 Superliminal Software.
  * Free for all uses with attribution.
  */
 public class TrieMap<V> implements Map<String, V>{

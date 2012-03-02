@@ -96,7 +96,7 @@ public class CreateCommands extends CommandsBase {
             requiresSelection = true
     )
     public void setZ(Player player, String[] params) {
-        if (Integer.parseInt(params[0]) < 0 || Integer.parseInt(params[0]) > 130 || Integer.parseInt(params[1]) < 0 || Integer.parseInt(params[1]) > 130) 
+        if (Integer.parseInt(params[0]) < 0 || Integer.parseInt(params[0]) > 260 || Integer.parseInt(params[1]) < 0 || Integer.parseInt(params[1]) > 260) 
             player.sendMessage(ChatColor.YELLOW + "Usage: /zsetz [min Z] [max Z]");
          else 
             getZoneSelection(player).getSelection().setHeight(new ZoneVertice(Integer.parseInt(params[0]),Integer.parseInt(params[1]) ));

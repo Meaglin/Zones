@@ -48,25 +48,15 @@ public class ZoneManager {
     }
     public void load(WorldManager world) {
         cleanUp(world);
-        int count = 0;
         try {
-            //List<Zone> zones = plugin.getDatabase().find(Zone.class).where().ieq("world", world.getWorldName()).findList();
             List<Zone> zones = plugin.getMysqlDatabase().get(world.getWorldName());
             for(Zone zone : zones) {
-                if(loadFromPersistentData(world, zone) != null)
-                    count++;
+                loadFromPersistentData(world, zone);
             }
         } catch(Exception e) {
             log.warning("[Zones] Error loading world " + world.getWorldName() + ".");
             e.printStackTrace();
             return;
-        } finally {
-            /*
-            if (count == 1)
-                log.info("[Zones] Loaded " + count + " Zone for world " + world.getWorldName() + ".");
-            else
-                log.info("[Zones] Loaded " + count + " Zones for world " + world.getWorldName() + ".");
-             */
         }
     }
 
@@ -128,13 +118,7 @@ public class ZoneManager {
         if (!zones.containsKey(toDelete.getId()))
             return false;
 
-        //plugin.getDatabase().find(Vertice.class).where().gt("id", toDelete.getId());
-        //plugin.getDatabase().delete(Vertice.class, toDelete.getPersistence().getVertices());
-        //plugin.getDatabase().delete(toDelete.getPersistence().getVertices());
         plugin.getMysqlDatabase().delete(toDelete.getPersistence());
-        //plugin.getDatabase().delete(toDelete.getPersistence());
-        //plugin.getDatabase().execute(plugin.getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id  = " + toDelete.getId() + ""));
-        //plugin.getDatabase().createUpdate(Vertice.class, "delete from zones_vertices where id = " + toDelete.getId()).execute();
 
         removeZone(toDelete);
         return true;
@@ -143,7 +127,6 @@ public class ZoneManager {
     /*
      * A little note on using playerId(entity id):
      * I used this mainly because it is waay more efficient then using strings.
-     * 
      */
     public void addSelection(int playerId, ZoneSelection zone) {
         selections.put(playerId, zone);
@@ -190,7 +173,6 @@ public class ZoneManager {
         if(zone != null)
             removeZone(zone);
         
-        //Zone persistentZone = plugin.getDatabase().find(Zone.class, id);
         Zone persistentZone = plugin.getMysqlDatabase().get(id);
         if(persistentZone != null) {
             WorldManager wm = plugin.getWorldManager(persistentZone.getWorld());

@@ -32,6 +32,7 @@ public abstract class Selection {
     
     public void setHeight(ZoneVertice height, boolean silent) {
         if(height.getMax() == 127) height = new ZoneVertice(height.getMin(), 130);
+        if(height.getMax() >= 254) height = new ZoneVertice(height.getMin(), 260);
         this.height = height;
         if(!silent) getPlayer().sendMessage(ChatColor.GREEN + "Selection height changed to: " + height.getMin() + "-" + height.getMax() + ".");
     }

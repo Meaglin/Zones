@@ -2,14 +2,14 @@ package com.zones.listeners;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EndermanPickupEvent;
-import org.bukkit.event.entity.EndermanPlaceEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -250,23 +250,9 @@ public class ZonesEntityListener implements Listener {
         }
     }
     
-    @EventHandler
-    public void onEndermanPlace(EndermanPlaceEvent event) {
-        if(event.isCancelled()) return;
-        WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
-        ZoneBase zone = wm.getActiveZone(event.getLocation());
-        if(zone == null) {
-            if(!wm.getConfig().ALLOW_ENDER_GRIEF)
-                event.setCancelled(true);
-        } else {
-            if(!zone.getFlag(ZoneVar.ALLOW_ENDER_GRIEF))
-                event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onEndermanPickup(EndermanPickupEvent event) {
-        if(event.isCancelled()) return;
+    @EventHandler(ignoreCancelled = true)
+    public void onEndermanPlace(EntityChangeBlockEvent event) {
+        if(!(event.getEntity() instanceof Enderman)) return;
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
         ZoneBase zone = wm.getActiveZone(event.getBlock());
         if(zone == null) {
@@ -277,7 +263,7 @@ public class ZonesEntityListener implements Listener {
                 event.setCancelled(true);
         }
     }
-    
+
     @EventHandler
     public void onEntityInteract(EntityInteractEvent event) {
         if(event.isCancelled()) return;
