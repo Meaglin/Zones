@@ -12,6 +12,7 @@ import com.zones.ZonesConfig;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
+import com.zones.selection.ZoneSelection;
 
 public class EventUtil {
 
@@ -80,6 +81,14 @@ public class EventUtil {
     public static final void onBreak(Zones plugin, Cancellable event, Player player, Block block) {
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
+           if (player.getItemInHand().getTypeId() == ZonesConfig.CREATION_TOOL_TYPE) {
+                ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
+                if (selection != null) {
+                    selection.onLeftClick(block);
+                    event.setCancelled(true);
+                    return;
+                }
+            }
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null) {
                 if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")){

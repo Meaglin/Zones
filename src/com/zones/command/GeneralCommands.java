@@ -38,8 +38,8 @@ public class GeneralCommands extends CommandsBase {
         player.sendMessage(ChatColor.AQUA + "World: " + b.getWorld().getName());
         ZoneForm f = b.getForm();
         player.sendMessage(ChatColor.AQUA + "Type: " + getClassName(b.getClass()) + " Form: " + getClassName(f.getClass()));
-        player.sendMessage(ChatColor.AQUA + "Size: " + f.getSize() + " (" + Math.abs(f.getHighX()-f.getLowX()) + "," + Math.abs(f.getHighY()-f.getLowY()) + "," + Math.abs(f.getHighZ()-f.getLowZ()) + ")" );
-        player.sendMessage(ChatColor.AQUA + "Location: (" + f.getLowX() + "," + f.getHighX() + ";" + f.getLowY() + "," + f.getHighY() + ";" + f.getLowZ() + "," + f.getHighZ() + ")");
+        player.sendMessage(ChatColor.AQUA + "Size: " + f.getSize() + " (X:" + Math.abs(f.getHighX()-f.getLowX()) + ", Y:" + Math.abs(f.getHighY()-f.getLowY()) + ", Z:" + Math.abs(f.getHighZ()-f.getLowZ()) + ")" );
+        player.sendMessage(ChatColor.AQUA + "Location: (X:" + f.getLowX() + "," + f.getHighX() + "; Y:" + f.getLowY() + "," + f.getHighY() + "; Z:" + f.getLowZ() + "," + f.getHighZ() + ")");
         
         String bools = "";
         for(ZoneVar v : ZoneVar.values()) {
@@ -64,7 +64,7 @@ public class GeneralCommands extends CommandsBase {
             player.sendMessage(ChatColor.AQUA + "Settings:" + settings);
         Region min = b.getWorldManager().getRegion(b.getForm().getLowX(),b.getForm().getLowZ());
         Region max = b.getWorldManager().getRegion(b.getForm().getHighX(),b.getForm().getHighZ());
-        player.sendMessage(ChatColor.AQUA + "Region: " +  "(" + min.getX() + "," + max.getX() + ";" + min.getY() + "," + max.getY() + ")" );
+        player.sendMessage(ChatColor.AQUA + "Region: " +  "(X:" + min.getX() + "," + max.getX() + "; Y:" + min.getY() + "," + max.getY() + ")" );
         if(b instanceof ZoneInherit) {
             List<ZoneBase> inherits = ((ZoneInherit)b).getInheritedZones();
             if(inherits.size() > 0) {
@@ -217,7 +217,7 @@ public class GeneralCommands extends CommandsBase {
     )
     public void regioninfo(Player player, String[] params) {
         Region r = getPlugin().getWorldManager(player).getRegion(player);
-        player.sendMessage(ChatColor.GREEN + "Region[" + r.getX() + "," + r.getY() + "] Zone count: " + r.getZones().size() + ".");
+        player.sendMessage(ChatColor.GREEN + "Region[X: " + r.getX() + ", Y: " + r.getY() + "] Zone count: " + r.getZones().size() + ".");
         player.sendMessage(ChatColor.GREEN + "Calculated region: [" + (WorldManager.toInt(player.getLocation().getX()) >> WorldManager.SHIFT_SIZE) + "," + (WorldManager.toInt(player.getLocation().getZ()) >> WorldManager.SHIFT_SIZE) +  "].");
     }
     
@@ -253,7 +253,7 @@ public class GeneralCommands extends CommandsBase {
          */
         if (params.length > 0) 
             for (String category : cmds.getHelpCategories().keySet()) 
-                if (params[0].compareTo(category) == 0) {
+                if (params[0].compareToIgnoreCase(category) == 0) {
                     group = category;
                 }
 
@@ -261,6 +261,7 @@ public class GeneralCommands extends CommandsBase {
          * CASE 1: Group is entered with or without pagenumbers
          */
         if (group != null) {
+            group = group.toLowerCase();
             for (Command cmd : cmds.getHelpCategories().get(group)) {
                 if ((cmd.requiredPermission().equals("") || canUseCommand(sender, cmd.requiredPermission())) ) {
                     availableCommands.add(ChatColor.BLUE + cmd.usage().replace("<command>", cmd.name()));

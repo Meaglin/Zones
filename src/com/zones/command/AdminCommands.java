@@ -50,7 +50,7 @@ public class AdminCommands extends CommandsBase {
     @Command(
         name = "zremoveadmin", 
         aliases = { "zra" }, 
-        description = "Removes an admin from the zone.\nNote: only superowning entities can use this commands\nBeeing serveradmins or inherited zone admins.", 
+        description = "Removes an admin from the zone.\nNote: only superowning entities can use this commands\nBeing serveradmins or inherited zone admins.", 
         usage = "/<command> [admin1] <admin2> ...",
         min = 1,
         requiresPlayer = true,
@@ -198,7 +198,7 @@ public class AdminCommands extends CommandsBase {
     @Command(
             name = "zdelete",
             aliases = { "" },
-            description = "Deletes your selected zones.\nWARNING: this is NOT revertable!\nNote: only superowning entities can use this commands\nBeeing serveradmins or inherited zone admins.",
+            description = "Deletes your selected zones.\nWARNING: this is NOT revertable!\nNote: only superowning entities can use this commands\nBeing serveradmins or inherited zone admins.",
             requiresPlayer = true,
             requiresSelected = true
     )

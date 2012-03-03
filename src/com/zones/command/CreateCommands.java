@@ -166,7 +166,7 @@ public class CreateCommands extends CommandsBase {
     @Command(
             name = "zstop",
             aliases = { "" },
-            description = "Deletes your current selection.",
+            description = "Deletes your current selection and reverts all modifications.",
             requiresPlayer = true,
             requiresSelection = true
     )

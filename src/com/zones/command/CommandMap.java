@@ -68,6 +68,7 @@ public class CommandMap {
     }
     
     private void registerCommand(String category, Command command) {
+        category = category.toLowerCase();
         List<Command> cat = helpCategories.get(category);
         if(cat == null) {
             cat = new ArrayList<Command>();
