@@ -26,7 +26,7 @@ public class CuboidSelection extends Selection {
         }
         getSelection().addGhostBlock(block);
         p2 = new ZoneVertice(block.getX(),block.getZ());
-        getPlayer().sendMessage(ChatColor.GREEN + "Selected " + block.getX() + "," + block.getZ() + " as second point"  + (getSize() != -1 ? ", size: " + getSize() + " blocks" : "" ) + ".");
+        getPlayer().sendMessage(ChatColor.GREEN + "Selected X:" + block.getX() + ", Z:" + block.getZ() + " as second point"  + (getSize() != -1 ? ", size: " + getSize() + " blocks" : "" ) + ".");
     }
 
     @Override
@@ -36,7 +36,7 @@ public class CuboidSelection extends Selection {
         }
         getSelection().addGhostBlock(block);
         p1 = new ZoneVertice(block.getX(),block.getZ());
-        getPlayer().sendMessage(ChatColor.GREEN + "Selected " + block.getX() + "," + block.getZ() + " as first point"  + (getSize() != -1 ? ", size: " + getSize() + " blocks" : "" ) + ".");
+        getPlayer().sendMessage(ChatColor.GREEN + "Selected X:" + block.getX() + ", Z:" + block.getZ() + " as first point"  + (getSize() != -1 ? ", size: " + getSize() + " blocks" : "" ) + ".");
     }
 
     @Override
