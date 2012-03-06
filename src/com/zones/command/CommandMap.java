@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,19 +54,23 @@ public class CommandMap {
         for(Method method : object.getClass().getMethods()) {
             if(method.isAnnotationPresent(Command.class)) {
                 Command annotation = method.getAnnotation(Command.class);
-                for(String alias : annotation.aliases()) {
-                    aliases.put(alias, method);
-                }
-                aliases.put(annotation.name(), method);
-                owners.put(method, object);
-                
-                registerCommandWithBukkitBecauseIFuckingWantTo(annotation);
-                registerCommand(getClassName(object.getClass()).replace("Commands", ""), annotation);
+                if(annotation.name() == null || annotation.name().trim().equals("")) continue;
+                registerCommand(annotation, method, object);
             }
         }
     }
     
-    private void registerCommand(String category, Command command) {
+    private void registerCommand(Command command, Method method, Object owner) {
+        List<String> aliases = new ArrayList<String>();
+        for(String alias : command.aliases()) {
+            if(alias != null && !alias.trim().equals("")) {
+                aliases.add(alias);
+                this.aliases.put(alias, method);
+            }
+        }
+        this.aliases.put(command.name(), method);
+
+        String category = getClassName(owner.getClass()).replace("Commands", "");
         category = category.toLowerCase();
         List<Command> cat = helpCategories.get(category);
         if(cat == null) {
@@ -76,6 +79,9 @@ public class CommandMap {
         }
         cat.add(command);
         commands.put(command.name().toLowerCase(), command);
+        
+        registerCommandWithBukkitBecauseIFuckingWantTo(command, aliases);
+        owners.put(method, owner);
     }
     
     public Map<String, List<Command>> getHelpCategories() {
@@ -154,13 +160,13 @@ public class CommandMap {
         }
     }
     
-    private void registerCommandWithBukkitBecauseIFuckingWantTo(Command command) {
+    private void registerCommandWithBukkitBecauseIFuckingWantTo(Command command, List<String> aliases) {
         if(bukkitMap != null) {
             try {
                 PluginCommand cmd = con.newInstance(command.name(), plugin);
                 cmd.setUsage(command.usage());
                 cmd.setDescription(command.description());
-                cmd.setAliases(Arrays.asList(command.aliases()));
+                cmd.setAliases(aliases);
                 
                 cmd.setExecutor(plugin);
                 

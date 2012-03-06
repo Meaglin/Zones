@@ -12,9 +12,8 @@ public class ZonesWeatherListener implements Listener {
         this.plugin = plugin;
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onThunderChange(org.bukkit.event.weather.ThunderChangeEvent event) {
-        if(event.isCancelled()) return;
         if(!event.toThunderState()) return;
         
         if(!plugin.getWorldManager(event.getWorld()).getConfig().WEATHER_THUNDER_ENABLED)
@@ -23,7 +22,6 @@ public class ZonesWeatherListener implements Listener {
     
     @EventHandler
     public void onWeatherChange(org.bukkit.event.weather.WeatherChangeEvent event) {
-        if(event.isCancelled()) return;
         if(!event.toWeatherState()) return;
         
         if(!plugin.getWorldManager(event.getWorld()).getConfig().WEATHER_RAIN_ENABLED)

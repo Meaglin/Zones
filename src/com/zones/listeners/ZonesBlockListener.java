@@ -39,9 +39,8 @@ public class ZonesBlockListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockDamage(BlockDamageEvent event) {
-
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
@@ -55,10 +54,8 @@ public class ZonesBlockListener implements Listener {
 
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockFromTo(BlockFromToEvent event) {
-        if(event.isCancelled()) return;
-        
         Block blockFrom = event.getBlock();
         Block blockTo = event.getToBlock();
 
@@ -85,35 +82,27 @@ public class ZonesBlockListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
-        if(event.isCancelled()) return;
-        
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockPlaced();
 
         EventUtil.onPlace(plugin, event, player, blockPlaced);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBurn(BlockBurnEvent event) {
-        if(event.isCancelled())return;
-        
         if(onFire(null, event.getBlock(), IgniteCause.SPREAD))
             event.setCancelled(true);
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockIgnite(BlockIgniteEvent event) { 
-        if(event.isCancelled())return;
-        
         if(onFire(event.getPlayer(),event.getBlock(),event.getCause()))
             event.setCancelled(true);
     }
     
-    @EventHandler
     public boolean onFire(Player player, Block block, IgniteCause cause) {
-        
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
@@ -129,9 +118,8 @@ public class ZonesBlockListener implements Listener {
         return false;
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockPhysics(BlockPhysicsEvent event) {
-        if(event.isCancelled()) return;
         if(event.getChangedTypeId() == -1337) {
             WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
             ZoneBase zone = wm.getActiveZone(event.getBlock());
@@ -165,10 +153,8 @@ public class ZonesBlockListener implements Listener {
         }
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onLeavesDecay(LeavesDecayEvent event) {
-        if(event.isCancelled()) return;
-        
         WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
         ZoneBase zone = wm.getActiveZone(event.getBlock());
         if(zone == null) {
@@ -182,19 +168,16 @@ public class ZonesBlockListener implements Listener {
 
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        if(event.isCancelled()) return;
-        
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
         EventUtil.onBreak(plugin, event, player, block);
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockForm(org.bukkit.event.block.BlockFormEvent event) {
-        if(event.isCancelled()) return;
         BlockState blockstate = event.getNewState();
         if(blockstate.getTypeId() != 78 && blockstate.getTypeId() != 79)
             return;
@@ -216,11 +199,8 @@ public class ZonesBlockListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockFade(BlockFadeEvent event) {
-        if(event.isCancelled()) return;
-
-        
         Block block = event.getBlock();
         int typeId = block.getTypeId();
         if(typeId != 78 && typeId != 79)
@@ -247,10 +227,8 @@ public class ZonesBlockListener implements Listener {
         }
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockSpread(org.bukkit.event.block.BlockSpreadEvent event) {
-        if(event.isCancelled()) return;
-        
         Block block = event.getBlock();
 
         WorldManager wm = plugin.getWorldManager(block.getWorld());
@@ -264,10 +242,8 @@ public class ZonesBlockListener implements Listener {
         }
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onSignChange(org.bukkit.event.block.SignChangeEvent event) {
-        if(event.isCancelled()) return;
-
         EventUtil.onPlace(plugin, event, event.getPlayer(), event.getBlock());
     }
     

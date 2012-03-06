@@ -13,7 +13,7 @@ public @interface Command {
     
     String name();
     String usage() default "/<command>";
-    String[] aliases();
+    String[] aliases() default { "" } ;
     String description();
     
     int min() default 0;
@@ -21,7 +21,7 @@ public @interface Command {
     
     boolean requiresSelected() default false;
     boolean requiresSelection() default false;
-    boolean requiresPlayer() default true;
+    boolean requiresPlayer() default false;
     Class<? extends ZoneBase> requiredType() default ZoneBase.class;
     String requiredPermission() default "";
     

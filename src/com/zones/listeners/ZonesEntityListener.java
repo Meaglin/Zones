@@ -48,9 +48,8 @@ public class ZonesEntityListener implements Listener {
         this.plugin = zones;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event) {
-        if(event.isCancelled()) return;
         
         Entity defender = event.getEntity();
         WorldManager wm = plugin.getWorldManager(defender.getWorld());
@@ -106,9 +105,8 @@ public class ZonesEntityListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event) {
-        if(event.isCancelled()) return;
         
         WorldManager wm = plugin.getWorldManager(event.getLocation());
         ZoneBase zone = wm.getActiveZone(event.getLocation());
@@ -129,9 +127,8 @@ public class ZonesEntityListener implements Listener {
 
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        if(event.isCancelled()) return;
         
         WorldManager wm = plugin.getWorldManager(event.getLocation());
         ZoneBase zone = wm.getActiveZone(event.getLocation());
@@ -161,9 +158,8 @@ public class ZonesEntityListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityCombust(EntityCombustEvent event) {
-        if(event.isCancelled()) return;
         Entity entity = event.getEntity();
         if(entity == null || !(entity instanceof Player)) return;
         Player player = (Player)entity;
@@ -187,10 +183,8 @@ public class ZonesEntityListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onExplosionPrime(ExplosionPrimeEvent event) {
-        if(event.isCancelled()) return;
-        
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
         if(event.getEntity() instanceof Creeper) {
             event.setRadius(wm.getConfig().CREEPER_EXPLOSION_RANGE);
@@ -199,10 +193,8 @@ public class ZonesEntityListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPaintingPlace(PaintingPlaceEvent event) {
-        if(event.isCancelled()) return;
-        
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlock().getRelative(event.getBlockFace());
 
@@ -210,9 +202,8 @@ public class ZonesEntityListener implements Listener {
         
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPaintingBreak(PaintingBreakEvent event) {
-        if(event.isCancelled()) return;
         if(!(event instanceof PaintingBreakByEntityEvent)) return;
         Entity entity = ((PaintingBreakByEntityEvent)event).getRemover();
         if(entity == null) return;
@@ -225,9 +216,8 @@ public class ZonesEntityListener implements Listener {
         
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        if(event.isCancelled()) return;
         Entity entity = event.getEntity();
         if(entity == null || !(entity instanceof Player)) return;
         Player player = (Player)entity;
@@ -264,9 +254,8 @@ public class ZonesEntityListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityInteract(EntityInteractEvent event) {
-        if(event.isCancelled()) return;
         if(event.getBlock() == null) return;
         if(event.getBlock().getTypeId() != 60) return;
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());

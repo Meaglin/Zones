@@ -77,9 +77,8 @@ public class ZonesPlayerListener implements Listener {
                 wm.getConfig().setGodMode(event.getPlayer(), true); // remove from list.
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        if(event.isCancelled()) return;
         
         Player player = event.getPlayer();
         Location from = event.getFrom();
@@ -158,15 +157,14 @@ public class ZonesPlayerListener implements Listener {
         wm.revalidateZones(player, from, to);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerPortal(PlayerPortalEvent event) {
         if(event.getTo() == null) return;
         onPlayerTeleport(event);
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if(event.isCancelled()) return;
         
         Player player = event.getPlayer();
         Location from = event.getFrom();
@@ -272,7 +270,7 @@ public class ZonesPlayerListener implements Listener {
             Material.DISPENSER.getId()
             );
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         
         /*
@@ -282,8 +280,6 @@ public class ZonesPlayerListener implements Listener {
                 "\t p:" + event.getClickedBlock().getRelative(event.getBlockFace()).getTypeId());
         */
         
-        
-        if(event.isCancelled()) return;
 
         Player player = event.getPlayer();
         int blockType = (event.getClickedBlock() != null ? event.getClickedBlock().getTypeId() : 0);
@@ -391,9 +387,8 @@ public class ZonesPlayerListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
         if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItemDrop(), -1)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PICKUP_ITEMS_IN_ZONE, event.getPlayer());
@@ -420,19 +415,15 @@ public class ZonesPlayerListener implements Listener {
         EventUtil.onBreak(plugin, event, player, block);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-        if(event.isCancelled()) return;
-        
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockClicked().getRelative(event.getBlockFace());
         EventUtil.onPlace(plugin, event, player, blockPlaced, event.getItemStack().getTypeId());
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        if(event.isCancelled()) return;
-        
         Player player = event.getPlayer();
         Entity target = event.getRightClicked();
         if(target == null) return;

@@ -100,7 +100,7 @@ public class GeneralCommands extends CommandsBase {
     
     @Command(
             name = "zselect",
-            aliases = { "zs" },
+            aliases = { "zs", "zsel" },
             description = "Select a zone to modify.\nReset your selected zone with 'reset'.",
             usage = "/<command> <zone id|zone name|reset>",
             requiresPlayer = true

@@ -104,6 +104,7 @@ public class ZoneSettings {
                 if(part == null || part.trim().equals(""))continue;
                 
                 split = part.split(",");
+                if(split.length != 2) continue;
                 type = ZoneVar.fromName(split[0]);
                 if(type != null) {
                     rt.set(type, type.unSerialize(split[1]));
@@ -111,7 +112,7 @@ public class ZoneSettings {
             }
         } catch(Exception e) {
             e.printStackTrace();
-            return null;
+            return rt;
         }
         
         return rt;

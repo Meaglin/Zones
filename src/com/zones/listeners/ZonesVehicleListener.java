@@ -30,10 +30,8 @@ public class ZonesVehicleListener implements Listener {
         this.plugin = zones;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onVehicleDamage(VehicleDamageEvent event) {
-        if(event.isCancelled()) return;
-        
         Entity attacker = event.getAttacker();
         if (!(attacker instanceof Player))
             return;
