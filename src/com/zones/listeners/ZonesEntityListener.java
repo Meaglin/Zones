@@ -33,6 +33,7 @@ import com.zones.accessresolver.interfaces.PlayerFoodResolver;
 import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.settings.ZoneVar;
+import org.bukkit.event.EventPriority;
 
 
 /**
@@ -48,7 +49,7 @@ public class ZonesEntityListener implements Listener {
         this.plugin = zones;
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityDamage(EntityDamageEvent event) {
         
         Entity defender = event.getEntity();
@@ -105,7 +106,7 @@ public class ZonesEntityListener implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityExplode(EntityExplodeEvent event) {
         
         WorldManager wm = plugin.getWorldManager(event.getLocation());
@@ -127,7 +128,7 @@ public class ZonesEntityListener implements Listener {
 
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         
         WorldManager wm = plugin.getWorldManager(event.getLocation());
@@ -152,13 +153,13 @@ public class ZonesEntityListener implements Listener {
             }
             */
                 
-            if (!((EntitySpawnResolver)zone.getResolver(AccessResolver.ENTITY_SPAWN)).isAllowed(zone, entity, event.getCreatureType())){
+            if (!((EntitySpawnResolver)zone.getResolver(AccessResolver.ENTITY_SPAWN)).isAllowed(zone, entity, event.getEntityType())){
                 event.setCancelled(true);
             }
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityCombust(EntityCombustEvent event) {
         Entity entity = event.getEntity();
         if(entity == null || !(entity instanceof Player)) return;
