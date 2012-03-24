@@ -25,7 +25,6 @@ import com.zones.accessresolver.interfaces.BlockResolver;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
 import com.zones.selection.ZoneSelection;
-import org.bukkit.ChatColor;
 import org.bukkit.event.EventPriority;
 
 /**

@@ -12,7 +12,6 @@ import org.bukkit.entity.Slime;
 import com.zones.accessresolver.interfaces.EntitySpawnResolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.settings.ZoneVar;
-import org.bukkit.entity.*;
 
 public class NormalEntitySpawnResolver implements EntitySpawnResolver {
 
