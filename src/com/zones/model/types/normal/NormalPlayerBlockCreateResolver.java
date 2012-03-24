@@ -28,16 +28,15 @@ public class NormalPlayerBlockCreateResolver implements PlayerBlockResolver {
             return false;
         } else {
             List<?> list = zone.getSettings().getList(ZoneVar.PLACE_BLOCKS);
-            if(list == null)
+            if(list != null && !((ZoneNormal)zone).canAdministrate(player)) {
+                typeId = (typeId == -1  ? block.getTypeId() : typeId);
+                
+                if(list.contains(typeId) ) {
+                    zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_PROTECTED, player);
+                    return false;
+                }
+            }            
                 return true;
-            
-            typeId = (typeId == -1  ? block.getTypeId() : typeId);
-            if(list.contains(typeId) && !((ZoneNormal)zone).canAdministrate(player)) {
-                zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_PROTECTED, player);
-                return false;
-            } else {
-                return true;
-            }
         }
     }
 

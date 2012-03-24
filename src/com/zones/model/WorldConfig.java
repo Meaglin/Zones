@@ -11,7 +11,13 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Flying;
+import org.bukkit.entity.Monster;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
@@ -64,6 +70,7 @@ public class WorldConfig {
     public boolean SNOW_FALL_ENABLED;
     public boolean ICE_FORM_ENABLED;
     public boolean MUSHROOM_SPREAD_ENABLED;
+    public boolean VINES_SPREAD_ENABLED;
     public boolean PHYSICS_ENABLED;
 
     public boolean ICE_MELT_ENABLED;
@@ -82,11 +89,11 @@ public class WorldConfig {
     
     public boolean MOB_SPAWNING_ENABLED;
     public boolean ALLOWED_MOBS_ENABLED;
-    public List<CreatureType> ALLOWED_MOBS;
+    public List<EntityType> ALLOWED_MOBS;
     
     public boolean ANIMAL_SPAWNING_ENABLED;
     public boolean ALLOWED_ANIMALS_ENABLED;
-    public List<CreatureType> ALLOWED_ANIMALS;
+    public List<EntityType> ALLOWED_ANIMALS;
     
     public boolean LIMIT_BUILD_BY_FLAG;
     
@@ -203,6 +210,7 @@ public class WorldConfig {
             SNOW_FALL_ENABLED = p.getBool("SnowFallEnabled", true);
             ICE_FORM_ENABLED = p.getBool("IceFormEnabled", true);
             MUSHROOM_SPREAD_ENABLED = p.getBool("MushroomSpreadEnabled", true);
+            VINES_SPREAD_ENABLED = p.getBool("VinesSpreadEnabled", true);
             PHYSICS_ENABLED             = p.getBool("PhysicsEnabled", true);
 
             ICE_MELT_ENABLED = p.getBool("IceMeltEnabled", true);
@@ -226,10 +234,10 @@ public class WorldConfig {
             MOB_SPAWNING_ENABLED = p.getBool("MobSpawningEnabled", true);
             ALLOWED_MOBS_ENABLED = p.getBool("EnableAllowedMobs", false);
             if(ALLOWED_MOBS_ENABLED) {
-                ALLOWED_MOBS = new ArrayList<CreatureType>();
-                CreatureType t = null;
+                ALLOWED_MOBS = new ArrayList<EntityType>();
+                EntityType t = null;
                 for(String m : p.getProperty("AllowedMobs", "Creeper,Ghast,PigZombie,Skeleton,Spider,Zombie").split(",")) {
-                    t = CreatureType.fromName(m);
+                    t = EntityType.fromName(m);
                     if(t != null && !ALLOWED_MOBS.contains(t)) {
                         ALLOWED_MOBS.add(t);
                     }
@@ -240,10 +248,10 @@ public class WorldConfig {
             ANIMAL_SPAWNING_ENABLED = p.getBool("AnimalSpawningEnabled", true);
             ALLOWED_ANIMALS_ENABLED = p.getBool("EnableAllowedAnimals", false);
             if(ALLOWED_ANIMALS_ENABLED) {
-                ALLOWED_ANIMALS = new ArrayList<CreatureType>();
-                CreatureType t = null;
+                ALLOWED_ANIMALS = new ArrayList<EntityType>();
+                EntityType t = null;
                 for(String a : p.getProperty("AllowedAnimals", "Chicken,Cow,Pig,Sheep,Squid").split(",")) {
-                    t = CreatureType.fromName(a);
+                    t = EntityType.fromName(a);
                     if(t != null && !ALLOWED_ANIMALS.contains(t))
                         ALLOWED_ANIMALS.add(t);
                     
@@ -503,7 +511,7 @@ public class WorldConfig {
         }
     }
     
-    public boolean canSpawn(Entity entity, CreatureType type) {
+    public boolean canSpawn(Entity entity, EntityType type) {
         if(entity instanceof Animals) {
             return this.ANIMAL_SPAWNING_ENABLED && (!this.ALLOWED_ANIMALS_ENABLED || this.ALLOWED_ANIMALS.contains(type));
         } else if(entity instanceof Monster || entity instanceof Flying || entity instanceof Slime) {

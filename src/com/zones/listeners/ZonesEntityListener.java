@@ -133,7 +133,7 @@ public class ZonesEntityListener implements Listener {
         WorldManager wm = plugin.getWorldManager(event.getLocation());
         ZoneBase zone = wm.getActiveZone(event.getLocation());
         if (zone == null) {
-            if(!wm.getConfig().canSpawn(event.getEntity(), event.getCreatureType())){
+            if(!wm.getConfig().canSpawn(event.getEntity(), event.getEntityType())){
                 event.setCancelled(true);
             }
         } else {
@@ -152,7 +152,7 @@ public class ZonesEntityListener implements Listener {
             }
             */
                 
-            if (!((EntitySpawnResolver)zone.getResolver(AccessResolver.ENTITY_SPAWN)).isAllowed(zone, entity, event.getCreatureType())){
+            if (!((EntitySpawnResolver)zone.getResolver(AccessResolver.ENTITY_SPAWN)).isAllowed(zone, entity, event.getEntityType())){
                 event.setCancelled(true);
             }
         }

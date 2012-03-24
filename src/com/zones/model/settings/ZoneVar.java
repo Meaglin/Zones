@@ -87,6 +87,12 @@ public enum ZoneVar {
                 return zone.getWorldConfig().MUSHROOM_SPREAD_ENABLED;
             }
         },
+        VINES_SPREAD("VinesSpread", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().VINES_SPREAD_ENABLED;
+            }
+        },
         PHYSICS("PhysicsEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
@@ -129,7 +135,7 @@ public enum ZoneVar {
             public Object getDefault(ZoneBase zone) {return null;}
         },
         
-        MOBS("AllowedMobs", Serializer.CREATURELIST) {
+        MOBS("AllowedMobs", Serializer.ENTITYLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {
                 if(zone.getWorldConfig().ALLOWED_MOBS_ENABLED)
@@ -137,7 +143,7 @@ public enum ZoneVar {
                 return null;
             }
         },
-        ANIMALS("AllowedAnimals", Serializer.CREATURELIST) {
+        ANIMALS("AllowedAnimals", Serializer.ENTITYLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {
                 if(zone.getWorldConfig().ALLOWED_ANIMALS_ENABLED)
