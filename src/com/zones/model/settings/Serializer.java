@@ -3,7 +3,7 @@ package com.zones.model.settings;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.EntityType;
 
 import com.zones.model.ZoneVertice;
 import com.zones.util.Point;
@@ -117,16 +117,16 @@ public enum Serializer {
             return Integer.class;
         }
     },
-    CREATURELIST {
+    ENTITYLIST {
         @Override
         public String serialize(Object data) {
             if(data != null && data instanceof List<?>) {
                 
                 List<?> list =  ( List<?> ) data;
-                if(!list.isEmpty() && list.get(0) instanceof CreatureType) {
+                if(!list.isEmpty() && list.get(0) instanceof EntityType) {
                     String rt = "";
                     for(Object i : list)
-                        rt += ((CreatureType)i).getName() + ",";
+                        rt += ((EntityType)i).getName() + ",";
                     
                     rt = rt.substring(0, rt.length()-1);
                     
@@ -141,9 +141,9 @@ public enum Serializer {
 
         @Override
         public Object unSerialize(String serializedData) {
-            List<CreatureType> list = new ArrayList<CreatureType>();
+            List<EntityType> list = new ArrayList<EntityType>();
             for(String i : unEscape(serializedData).split(",")) {
-                CreatureType t = CreatureType.fromName(i); 
+                EntityType t = EntityType.fromName(i); 
                 if(t != null)list.add(t);
             }
             if(list.isEmpty()) return null;
@@ -157,7 +157,7 @@ public enum Serializer {
         
         @Override
         public Class<? extends Object> getListType() {
-            return CreatureType.class;
+            return EntityType.class;
         }
     },
     

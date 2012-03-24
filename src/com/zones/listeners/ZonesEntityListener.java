@@ -134,7 +134,7 @@ public class ZonesEntityListener implements Listener {
         WorldManager wm = plugin.getWorldManager(event.getLocation());
         ZoneBase zone = wm.getActiveZone(event.getLocation());
         if (zone == null) {
-            if(!wm.getConfig().canSpawn(event.getEntity(), event.getCreatureType())){
+            if(!wm.getConfig().canSpawn(event.getEntity(), event.getEntityType())){
                 event.setCancelled(true);
             }
         } else {

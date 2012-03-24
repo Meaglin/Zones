@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
@@ -41,6 +41,7 @@ public class SettingsCommands extends CommandsBase {
         toggles.put("icemelt",          new Object[] { "zones.toggle.icemelt", "IceMelt", ZoneVar.ICE_MELT });
         toggles.put("snowmelt",         new Object[] { "zones.toggle.snowmelt", "SnowMelt", ZoneVar.SNOW_MELT });
         toggles.put("mushroomspread",   new Object[] { "zones.toggle.mushroomspread", "MushroomSpread", ZoneVar.MUSHROOM_SPREAD});
+        toggles.put("vinespread",       new Object[] { "zones.toggle.vinespread", "VineSpread", ZoneVar.VINES_SPREAD});
         toggles.put("physics",          new Object[] { "zones.toggle.physics", "Physics", ZoneVar.PHYSICS });
         toggles.put("notify",           new Object[] { "zones.toggle.notify", "Enters/Leaves Notify's", ZoneVar.NOTIFY });
         toggles.put("crop",             new Object[] { "zones.toggle.crop", "Crop protection", ZoneVar.CROPS_PROTECTED });
@@ -167,9 +168,9 @@ public class SettingsCommands extends CommandsBase {
             }
             toset.add(m.getId());
             zone.getSettings().set(v, toset);
-        } else if (v.getListType().equals(CreatureType.class)) {
-            List<CreatureType> toset = (List<CreatureType>) list;
-            CreatureType t = CreatureType.fromName(params[1].substring(0, 1).toUpperCase() + params[1].substring(1).toLowerCase());
+        } else if (v.getListType().equals(EntityType.class)) {
+            List<EntityType> toset = (List<EntityType>) list;
+            EntityType t = EntityType.fromName(params[1].substring(0, 1).toUpperCase() + params[1].substring(1).toLowerCase());
             if(t == null) {
                 player.sendMessage(ChatColor.RED + "Unknown mob type " + params[1] + "!");
                 return;
@@ -228,9 +229,9 @@ public class SettingsCommands extends CommandsBase {
             }
             toset.remove(m.getId());
             zone.getSettings().set(v, toset);
-        } else if (v.getListType().equals(CreatureType.class)) {
-            List<CreatureType> toset = (List<CreatureType>) list;
-            CreatureType t = CreatureType.fromName(params[1].substring(0, 1).toUpperCase() + params[1].substring(1).toLowerCase());
+        } else if (v.getListType().equals(EntityType.class)) {
+            List<EntityType> toset = (List<EntityType>) list;
+            EntityType t = EntityType.fromName(params[1].substring(0, 1).toUpperCase() + params[1].substring(1).toLowerCase());
             if(t == null) {
                 player.sendMessage(ChatColor.RED + "Unknown mob type " + params[1] + "!");
                 return;

@@ -1,6 +1,5 @@
 package com.zones.accessresolver.interfaces;
 
-
 import com.zones.model.ZoneBase;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;

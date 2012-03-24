@@ -3,8 +3,8 @@ package com.zones.model.types.normal;
 import java.util.List;
 
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Flying;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Slime;

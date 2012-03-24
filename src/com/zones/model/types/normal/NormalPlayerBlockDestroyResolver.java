@@ -27,13 +27,17 @@ public class NormalPlayerBlockDestroyResolver implements PlayerBlockResolver {
             return false;
         } else {
             Object list = zone.getSetting(ZoneVar.BREAK_BLOCKS);
-            if(list != null && ((List<?>)list).contains(typeId) && !zone.canAdministrate(player)) {
-                zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_BLACKLISTED, player);
-                return false;
-            } else {
-                return true;
+            if(list != null && !zone.canAdministrate(player)) {
+                if(typeId == -1) {
+                    typeId = block.getTypeId();
+                }
+                if(((List<?>)list).contains(typeId)) {
+                    zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_BLACKLISTED, player);
+                    return false;
+                }
             }
         }
+        return true;
     }
 
 }
