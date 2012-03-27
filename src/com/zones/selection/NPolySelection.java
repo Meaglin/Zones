@@ -7,6 +7,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 
 import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.regions.Region;
 import com.zones.model.ZoneForm;
 import com.zones.model.ZoneVertice;
 import com.zones.model.forms.ZoneNPoly;
@@ -88,25 +91,26 @@ public class NPolySelection extends Selection {
 
     @Override
     public boolean importWorldeditSelection() {
-        com.sk89q.worldedit.bukkit.selections.Selection worldeditSelection = getSelection().getPlugin().getWorldEdit().getSelection(getPlayer());
-        if(worldeditSelection == null) {
-            getPlayer().sendMessage(ChatColor.RED + "No WorldEdit selection found.");
+        LocalSession worldeditsession = getSelection().getPlugin().getWorldEdit().getSession(getPlayer());
+        if(worldeditsession == null) {
             return false;
         }
         
-        if(worldeditSelection.getArea() < 1) {
-            getPlayer().sendMessage(ChatColor.RED + "Your WorldEdit selection is not a valid selection.");
+        Region region;
+        try {
+            region = worldeditsession.getSelection(worldeditsession.getSelectionWorld());
+        } catch (IncompleteRegionException e) {
             return false;
         }
         
-        if(!(worldeditSelection instanceof com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection)) {
-            getPlayer().sendMessage(ChatColor.RED + "Your worldedit selection is invalid type.");
+        if(!(region instanceof com.sk89q.worldedit.regions.Polygonal2DRegion)) {
+           // getPlayer().sendMessage(ChatColor.RED + "Your worldedit selection is invalid type.");
             return false;
         }
         
-        com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection npolysel = (com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection) worldeditSelection;
+        com.sk89q.worldedit.regions.Polygonal2DRegion npolysel = (com.sk89q.worldedit.regions.Polygonal2DRegion) region;
         clearPoints();
-        for(BlockVector2D vec : npolysel.getNativePoints()) {
+        for(BlockVector2D vec : npolysel.getPoints()) {
             addPoint(new ZoneVertice(vec.getBlockX(), vec.getBlockZ()));
         }
         setHeight(new ZoneVertice(npolysel.getMinimumPoint().getBlockY(), npolysel.getMaximumPoint().getBlockY()), true);

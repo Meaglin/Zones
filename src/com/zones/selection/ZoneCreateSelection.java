@@ -32,7 +32,7 @@ public class ZoneCreateSelection extends ZoneSelection {
             pZ.setSize(getSelection().getPointsSize());
             pZ.setSettings("");
             pZ.setAdmins("");
-            pZ.setUsers("2,default,he");
+            pZ.setUsers("2,default,e;2,user,h");
             //getPlugin().getDatabase().save(pZ);
             List<ZoneVertice> points = getSelection().getPoints();
             for (int i = 0; i < getSelection().getPointsSize(); i++) {

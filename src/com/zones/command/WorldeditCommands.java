@@ -1,15 +1,28 @@
 package com.zones.command;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.LocalPlayer;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldedit.regions.CuboidRegionSelector;
+import com.sk89q.worldedit.regions.CylinderRegionSelector;
+import com.sk89q.worldedit.regions.Polygonal2DRegionSelector;
+import com.sk89q.worldedit.regions.SphereRegionSelector;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneCylinder;
+import com.zones.model.forms.ZoneNPoly;
+import com.zones.model.forms.ZoneSphere;
 import com.zones.model.types.ZoneInherit;
 import com.zones.selection.ZoneCreateSelection;
 import com.zones.selection.ZoneEditSelection;
@@ -133,14 +146,54 @@ public class WorldeditCommands extends CommandsBase {
             return;
         }
         
+        LocalPlayer localPlayer = getPlugin().getWorldEdit().wrapPlayer(player);
+        LocalSession local = getPlugin().getWorldEdit().getWorldEdit().getSession(localPlayer);
+        LocalWorld localWorld = localPlayer.getWorld();
+        
         ZoneBase zone = getSelectedZone(player);
         ZoneForm form = zone.getForm();
         if(form instanceof ZoneCuboid) {
+            CuboidRegionSelector cuboid = new CuboidRegionSelector(localWorld);
             Vector pt1 = new Vector(form.getLowX(),form.getLowZ(),form.getLowY());
             Vector pt2 = new Vector(form.getHighX(),form.getHighZ(),form.getHighY());
-            CuboidSelection selection = new CuboidSelection(zone.getWorld(), pt1, pt2);
-            getPlugin().getWorldEdit().setSelection(player, selection);
+            cuboid.selectPrimary(pt1);
+            cuboid.selectSecondary(pt2);
+            
+            local.setRegionSelector(localWorld, cuboid);
+            local.dispatchCUISelection(localPlayer);
             player.sendMessage(ChatColor.GREEN + "Zone " + zone.getName() + " selected as cuboid selection.");
+        } else if(form instanceof ZoneNPoly)     {
+            ZoneNPoly poly = (ZoneNPoly) form;
+            List<BlockVector2D> points = new ArrayList<BlockVector2D>();
+            for(int i = 0; i < poly.getPointsSize(); i ++) {
+                points.add(new BlockVector2D(poly.getX()[i], poly.getY()[i]));
+            }
+            
+            Polygonal2DRegionSelector npoly = new Polygonal2DRegionSelector(localWorld, points, poly.getLowZ(), poly.getHighZ());
+            
+            local.setRegionSelector(localWorld, npoly);
+            local.dispatchCUISelection(localPlayer);
+            player.sendMessage(ChatColor.GREEN + "Zone " + zone.getName() + " selected as polygon selection.");
+        } else if(form instanceof ZoneCylinder) {
+            ZoneCylinder cyl = (ZoneCylinder) form; 
+            
+            CylinderRegionSelector cylinder = new CylinderRegionSelector(localWorld);
+            cylinder.selectPrimary(new Vector(cyl.getCenterX(), cyl.getCenterY(), cyl.getLowZ()));
+            cylinder.selectSecondary(new Vector(cyl.getCenterX() + cyl.getRadius(), cyl.getCenterY() + cyl.getRadius(), cyl.getHighZ()));
+            
+            local.setRegionSelector(localWorld, cylinder);
+            local.dispatchCUISelection(localPlayer);
+            player.sendMessage(ChatColor.GREEN + "Zone " + zone.getName() + " selected as cylinder selection.");
+        } else if(form instanceof ZoneSphere) {
+            ZoneSphere sphere = (ZoneSphere) form; 
+            
+            SphereRegionSelector spheresel = new SphereRegionSelector(localWorld);
+            spheresel.selectPrimary(new Vector(sphere.getCenterX(), sphere.getCenterY(), sphere.getCenterZ()));
+            spheresel.selectSecondary(new Vector(sphere.getCenterX() + sphere.getRadius(), sphere.getCenterY() + sphere.getRadius(), sphere.getCenterZ() + sphere.getRadius()));
+            
+            local.setRegionSelector(localWorld, spheresel);
+            local.dispatchCUISelection(localPlayer);
+            player.sendMessage(ChatColor.GREEN + "Zone " + zone.getName() + " selected as sphere selection.");
         } else {
             player.sendMessage(ChatColor.RED + "NPoly is not supported yet.");
         }

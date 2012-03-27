@@ -9,6 +9,9 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.regions.Region;
 import com.zones.WorldManager;
 import com.zones.ZoneManager;
 import com.zones.Zones;
@@ -125,18 +128,47 @@ public abstract class ZoneSelection {
             }
             selection = new NPolySelection(this);
             getPlayer().sendMessage(ChatColor.GREEN + "Selection is now a polygon selection.");
+        } else if(name.equalsIgnoreCase("Cylinder")) {
+            if(getSelection() instanceof CylinderSelection) {
+                getPlayer().sendMessage(ChatColor.YELLOW + "Selection is already a cylinder selection.");
+                return;
+            }
+            selection = new CylinderSelection(this);
+            getPlayer().sendMessage(ChatColor.GREEN + "Selection is now a cylinder selection.");
+        } else if(name.equalsIgnoreCase("Sphere")) {
+            if(getSelection() instanceof SphereSelection) {
+                getPlayer().sendMessage(ChatColor.YELLOW + "Selection is already a sphere selection.");
+                return;
+            }
+            selection = new SphereSelection(this);
+            getPlayer().sendMessage(ChatColor.GREEN + "Selection is now a sphere selection.");
         }
     }
     
-    public  boolean importWorldeditSelection() {
-        com.sk89q.worldedit.bukkit.selections.Selection worldeditSelection = getPlugin().getWorldEdit().getSelection(getPlayer());
-        Selection sel = null;
-        if(worldeditSelection == null) {
+    public boolean importWorldeditSelection() {
+        LocalSession worldeditsession = getPlugin().getWorldEdit().getSession(getPlayer());
+        if(worldeditsession == null) {
             return false;
-        } else if(worldeditSelection instanceof com.sk89q.worldedit.bukkit.selections.CuboidSelection) {
+        }
+        
+        Region region;
+        try {
+            region = worldeditsession.getSelection(worldeditsession.getSelectionWorld());
+        } catch (IncompleteRegionException e) {
+            return false;
+        }
+        
+        Selection sel = null;
+        if(region == null) {
+            return false;
+        } else if(region instanceof com.sk89q.worldedit.regions.CuboidRegion) {
             sel = new CuboidSelection(this);
-        } else if(worldeditSelection instanceof com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection) {
+        } else if(region instanceof com.sk89q.worldedit.regions.Polygonal2DRegion) {
             sel = new NPolySelection(this);
+        } else if(region instanceof com.sk89q.worldedit.regions.CylinderRegion) {
+            sel = new CylinderSelection(this);
+        } else if(region instanceof com.sk89q.worldedit.regions.EllipsoidRegion) {
+            sel = new SphereSelection(this);
         }
         if(sel == null || !sel.importWorldeditSelection()) return false;
         setSelection(sel);

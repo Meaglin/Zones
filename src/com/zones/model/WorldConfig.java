@@ -351,37 +351,49 @@ public class WorldConfig {
         }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
         if(block.getTypeId() == Material.SPONGE.getId()) {
-            if(this.SPONGE_EMULATION) {
-                // We only update once every 2 Blocks since the basic notch physics check 1 block around the checked block.
-                // TODO: optimize.
-                for(int i = -SPONGE_RADIUS;i <= SPONGE_RADIUS;i = i+2) {
-                    for(int o = -SPONGE_RADIUS;o <= SPONGE_RADIUS;o = o+2) {
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()-SPONGE_RADIUS-1, block.getY()+i, block.getZ()+o)); // North
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+SPONGE_RADIUS, block.getY()+i, block.getZ()+o)); // South
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()-SPONGE_RADIUS-1)); // West
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()+SPONGE_RADIUS+1)); // East
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+SPONGE_RADIUS+1, block.getZ()+o)); // Up
-                    }
+            triggerSpongePhysics(block);
+        }
+    }
+    
+    private void triggerSpongePhysics(Block block) {
+        if(this.SPONGE_EMULATION) {
+            // We only update once every 2 Blocks since the basic notch physics check 1 block around the checked block.
+            // TODO: optimize.
+            for(int i = -SPONGE_RADIUS;i <= SPONGE_RADIUS;i++) {
+                for(int o = -SPONGE_RADIUS;o <= SPONGE_RADIUS;o++) {
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()-SPONGE_RADIUS-1, block.getY()+i, block.getZ()+o)); // North
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+SPONGE_RADIUS, block.getY()+i, block.getZ()+o)); // South
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()-SPONGE_RADIUS-1)); // West
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()+SPONGE_RADIUS+1)); // East
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+SPONGE_RADIUS+1, block.getZ()+o)); // Up
                 }
             }
-            if(this.SPONGE_LAVA_EMULATION) {
-                // We only update once every 2 Blocks since the basic notch physics check 1 block around the checked block.
-                // TODO: optimize.
-                for(int i = -SPONGE_LAVA_RADIUS;i <= SPONGE_LAVA_RADIUS;i = i+2) {
-                    for(int o = -SPONGE_LAVA_RADIUS;o <= SPONGE_LAVA_RADIUS;o = o+2) {
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()-SPONGE_LAVA_RADIUS-1, block.getY()+i, block.getZ()+o)); // North
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+SPONGE_LAVA_RADIUS, block.getY()+i, block.getZ()+o)); // South
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()-SPONGE_LAVA_RADIUS-1)); // West
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()+SPONGE_LAVA_RADIUS+1)); // East
-                        triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+SPONGE_LAVA_RADIUS+1, block.getZ()+o)); // Up
-                        // Wait where is down? Oh snap....
-                    }
+        }
+        if(this.SPONGE_LAVA_EMULATION) {
+            // We only update once every 2 Blocks since the basic notch physics check 1 block around the checked block.
+            // TODO: optimize.
+            for(int i = -SPONGE_LAVA_RADIUS;i <= SPONGE_LAVA_RADIUS;i++) {
+                for(int o = -SPONGE_LAVA_RADIUS;o <= SPONGE_LAVA_RADIUS;o++) {
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()-SPONGE_LAVA_RADIUS-1, block.getY()+i, block.getZ()+o)); // North
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+SPONGE_LAVA_RADIUS, block.getY()+i, block.getZ()+o)); // South
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()-SPONGE_LAVA_RADIUS-1)); // West
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+o, block.getZ()+SPONGE_LAVA_RADIUS+1)); // East
+                    triggerPhysics(block.getWorld().getBlockAt(block.getX()+i, block.getY()+SPONGE_LAVA_RADIUS+1, block.getZ()+o)); // Up
+                    // Wait where is down? Oh snap....
                 }
             }
         }
     }
+    
     private static void triggerPhysics(Block b) {
-        b.setTypeId(b.getTypeId());
+        int type = b.getTypeId();
+        switch(type) {
+            case 8: case 9: case 10: case 11:
+                byte data = b.getData();
+                b.setTypeId(0);
+                b.setTypeIdAndData(type, data, true);
+                break;
+        }
     }
     /*
      * TODO: extend logging to allow logging to database.
@@ -398,6 +410,7 @@ public class WorldConfig {
         }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
         if(block.getTypeId() == Material.SPONGE.getId()) {
+            boolean affected = false;
             if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
@@ -406,6 +419,7 @@ public class WorldConfig {
                             type = block.getWorld().getBlockTypeIdAt(x, y, z);
                             if(type == 8 || type == 9) {
                                 block.getWorld().getBlockAt(x, y, z).setTypeId(0);
+                                affected = true;
                             }
                         }
                     }
@@ -419,11 +433,13 @@ public class WorldConfig {
                             type = block.getWorld().getBlockTypeIdAt(x, y, z);
                             if(type == 10 || type == 11) {
                                 block.getWorld().getBlockAt(x, y, z).setTypeId(0);
+                                affected = true;
                             }
                         }
                     }
                 }
             }
+            if(affected) triggerSpongePhysics(block);
         }
         
     }
@@ -443,6 +459,7 @@ public class WorldConfig {
         }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
         if(block.getTypeId() == Material.SPONGE.getId()) {
+            boolean affected = false;
             if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
@@ -451,7 +468,8 @@ public class WorldConfig {
                             type = block.getWorld().getBlockTypeIdAt(x, y, z);
                             if(type == 8 || type == 9) {
                                 // Prevent any physics calls since it could get messy :<
-                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0);
+                                affected = true;
                             }
                         }
                     }
@@ -465,15 +483,19 @@ public class WorldConfig {
                             type = block.getWorld().getBlockTypeIdAt(x, y, z);
                             if(type == 10 || type == 11) {
                                 // Prevent any physics calls since it could get messy :<
-                                block.getWorld().getBlockAt(x, y, z).setTypeId(0,false);
+                                block.getWorld().getBlockAt(x, y, z).setTypeId(0);
+                                affected = true;
                             }
                         }
                     }
                 }
             }
+            if(affected) triggerSpongePhysics(block);
         }
         
     }
+    
+    
     
     public boolean canReceiveDamage(Player player, DamageCause cause) {
         if(this.PLAYER_HEALTH_ENABLED) {

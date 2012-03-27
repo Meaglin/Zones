@@ -8,17 +8,18 @@ import org.bukkit.block.Block;
 
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.regions.CylinderRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.zones.model.ZoneForm;
 import com.zones.model.ZoneVertice;
-import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneCylinder;
 
-public class CuboidSelection extends Selection {
+public class CylinderSelection extends Selection {
 
     private ZoneVertice p1;
     private ZoneVertice p2;
 
-    public CuboidSelection(ZoneSelection selection) {
+    public CylinderSelection(ZoneSelection selection) {
         super(selection);
     }
     
@@ -45,9 +46,12 @@ public class CuboidSelection extends Selection {
     @Override
     public long getSize() {
         if(p1 != null && p2 != null) {
-            long size = Math.abs(p1.getX() - p2.getX())+1;
-            size *= Math.abs(p1.getY() - p2.getY())+1;
-            size *= getHeight().getMax() - getHeight().getMin() + 1;
+            double xdiff = p1.getX() - p2.getX();
+            double ydiff = p1.getY() - p2.getY();
+            
+            long size = (long) ((xdiff * xdiff + ydiff * ydiff) + 1);
+            size *= Math.PI;
+            size *= (getHeight().getMax() - getHeight().getMin() + 1);
             return size;
         } else {
             return -1;
@@ -71,7 +75,7 @@ public class CuboidSelection extends Selection {
 
     @Override
     public Class<? extends ZoneForm> getType() {
-        return ZoneCuboid.class;
+        return ZoneCylinder.class;
     }
 
     public void setPoint1(ZoneVertice p1) {
@@ -95,17 +99,20 @@ public class CuboidSelection extends Selection {
         } catch (IncompleteRegionException e) {
             return false;
         }
+        if(region.getArea() < 1) {
+            return false;
+        }
         
-        if(!(region instanceof com.sk89q.worldedit.regions.CuboidRegion)) {
+        if(!(region instanceof CylinderRegion)) {
            // getPlayer().sendMessage(ChatColor.RED + "Your worldedit selection is invalid type.");
             return false;
         }
         
-        com.sk89q.worldedit.regions.CuboidRegion cuboidregion = (com.sk89q.worldedit.regions.CuboidRegion) region;
+        CylinderRegion cyl = (CylinderRegion) region;
         
-        setPoint1(new ZoneVertice(cuboidregion.getMinimumPoint().getBlockX(), cuboidregion.getMinimumPoint().getBlockZ()));
-        setPoint2(new ZoneVertice(cuboidregion.getMaximumPoint().getBlockX(), cuboidregion.getMaximumPoint().getBlockZ()));
-        setHeight(new ZoneVertice(cuboidregion.getMinimumPoint().getBlockY(), cuboidregion.getMaximumPoint().getBlockY()), true);
+        setPoint1(new ZoneVertice(cyl.getCenter().getBlockX(), cyl.getCenter().getBlockZ()));
+        setPoint2(new ZoneVertice(cyl.getRadius().getBlockX() + cyl.getCenter().getBlockX(), cyl.getRadius().getBlockZ() + cyl.getCenter().getBlockZ()));
+        setHeight(new ZoneVertice(cyl.getMinimumY(), cyl.getMaximumY()), true);
         
         return true;
     }
