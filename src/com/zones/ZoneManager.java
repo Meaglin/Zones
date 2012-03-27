@@ -2,7 +2,9 @@ package com.zones;
 
 import com.zones.model.ZoneBase;
 import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneCylinder;
 import com.zones.model.forms.ZoneNPoly;
+import com.zones.model.forms.ZoneSphere;
 import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
 import com.zones.selection.ZoneSelection;
@@ -93,6 +95,20 @@ public class ZoneManager {
                     temp.setForm(new ZoneNPoly(vertices, zone.getMinz() , zone.getMaxz()));
                 } else {
                     log.warning("[Zones] Bad data for zone: " + zone.getId());
+                    return null;
+                }
+            } else if(zone.getFormtype().equalsIgnoreCase("ZoneCylinder")) {
+                if (vertices.size() == 2) {
+                    temp.setForm(new ZoneCylinder(vertices, zone.getMinz(), zone.getMaxz()));
+                } else {
+                    log.info("[Zones] Missing zone vertex for Cylinder zone id: " + zone.getId());
+                    return null;
+                }
+            } else if(zone.getFormtype().equalsIgnoreCase("ZoneSphere")) {
+                if (vertices.size() == 1) {
+                    temp.setForm(new ZoneSphere(vertices, zone.getMinz(), zone.getMaxz()));
+                } else {
+                    log.info("[Zones] Missing zone vertex for Sphere zone id: " + zone.getId());
                     return null;
                 }
             }
