@@ -23,8 +23,15 @@ public class EventUtil {
         WorldManager wm = plugin.getWorldManager(player);
         if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
             ZoneBase zone = wm.getActiveZone(block);
+            
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+                player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
+                event.setCancelled(true);
+                return;
+            }
+            
             if(zone == null){
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
                     player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
                     event.setCancelled(true);
                 } else {
@@ -55,8 +62,23 @@ public class EventUtil {
     public static final void onModify(Zones plugin, Cancellable event, Player player, Block block, int blockType) {
         WorldManager wm = plugin.getWorldManager(player);
         ZoneBase zone = wm.getActiveZone(block);
+        
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")) {
+            if (blockType == Material.CHEST.getId())
+                player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
+            else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
+                player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
+            else if (blockType == Material.DISPENSER.getId())
+                player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
+            else if (blockType == Material.NOTE_BLOCK.getId())
+                player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
+            
+            event.setCancelled(true);
+            return;
+        }
+        
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")) {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.inheritbuild")) {
                 if (blockType == Material.CHEST.getId())
                     player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
                 else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
@@ -89,9 +111,17 @@ public class EventUtil {
                     return;
                 }
             }
+           
+           if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")){
+               player.sendMessage(ZonesConfig.PLAYER_CANT_DESTROY_WORLD);
+               event.setCancelled(true);
+               return;
+           }
+           
+           
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null) {
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.inheritbuild")){
                     player.sendMessage(ZonesConfig.PLAYER_CANT_DESTROY_WORLD);
                     event.setCancelled(true);
                 } else {

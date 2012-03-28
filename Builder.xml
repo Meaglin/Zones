@@ -56,7 +56,7 @@
 				<exclude name="META-INF/*" />
 			</zipfileset> -->
 		</jar>
-		<zip destfile="../Zones-2.2.1.zip" >
+		<zip destfile="../Zones-2.3.zip" >
 		  <fileset dir=".." includes="Zones.jar" />
 		  <fileset dir="./" includes="db.sql" />
 		</zip>

@@ -56,10 +56,13 @@ public class ZoneUtil {
         if(wm.getConfig().isProtectedPlaceBlock(player, typeId, false))
             return false;
         
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.build")){
+            return false;
+        }
         
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null){
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.build")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.inheritbuild")){
                 return false;
             }
         } else  {
@@ -79,7 +82,7 @@ public class ZoneUtil {
         WorldManager wm = plugin.getWorldManager(player);
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.build")) {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.inheritbuild")) {
                 return false;
             }
         } else {
@@ -95,10 +98,14 @@ public class ZoneUtil {
         int typeId = block.getTypeId();
         if(wm.getConfig().isProtectedBreakBlock(player, block, false))
             return false;
+
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.build")){
+            return false;
+        }
         
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.build")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.inheritbuild")){
                 return false;
             }
         } else {
@@ -116,8 +123,13 @@ public class ZoneUtil {
     public boolean canHit(Player player, Block block) {
         WorldManager wm = plugin.getWorldManager(player.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
+        
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.build")){
+            return false;
+        }
+        
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.build")) {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.inheritbuild")) {
                 return false;
             }
         } else {
