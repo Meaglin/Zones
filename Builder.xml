@@ -14,6 +14,7 @@
 			<include name="WorldEdit.jar" />
 			<include name="Permissions.jar" />
 			<include name="PermissionsEx.jar" />
+			<include name="EasyBind.jar" />
 			<!-- <include name="trove-3.0.0.jar" /> -->
 		</fileset>
 	</path>

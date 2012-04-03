@@ -3,7 +3,6 @@ package com.zones.listeners;
 import java.util.Arrays;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -238,17 +237,16 @@ public class ZonesPlayerListener implements Listener {
             Material.TNT.getId(),
             Material.REDSTONE_TORCH_ON.getId(),
             Material.PUMPKIN.getId()
-            );
+        );
     
     private static final List<Integer> destroyItems = Arrays.asList(
             Material.BUCKET.getId()
-            );
+        );
     
     private static final List<Integer> placeBlocks = Arrays.asList(
             Material.DIODE_BLOCK_OFF.getId(),
-            Material.DIODE_BLOCK_ON.getId(),
-            Material.DIRT.getId()
-            );
+            Material.DIODE_BLOCK_ON.getId()
+        );
     
     private static final List<Integer> hitBlocks = Arrays.asList(
             Material.CAKE_BLOCK.getId(),
@@ -259,7 +257,7 @@ public class ZonesPlayerListener implements Listener {
             Material.WOODEN_DOOR.getId(),
             Material.TRAP_DOOR.getId(),
             Material.FENCE_GATE.getId()
-            );
+        );
     
     private static final List<Integer> modifyBlocks = Arrays.asList(
             Material.NOTE_BLOCK.getId(),
@@ -268,7 +266,7 @@ public class ZonesPlayerListener implements Listener {
             Material.BURNING_FURNACE.getId(),
             Material.CHEST.getId(),
             Material.DISPENSER.getId()
-            );
+        );
     
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -328,24 +326,6 @@ public class ZonesPlayerListener implements Listener {
                             event.setCancelled(true);
                             return;
                         }
-                    } else {
-                        if(event.getClickedBlock() != null) {
-                            Block block = event.getClickedBlock();
-                            WorldManager wm = plugin.getWorldManager(player.getWorld());
-                            List<ZoneBase> zones = wm.getActiveZones(block.getX(), block.getZ(), block.getY());
-                            if(zones.size() > 0) {
-                                player.sendMessage(ChatColor.DARK_GREEN + "Permission:" + wm.getActiveZone(block).getAccess(player).toColorCode() + ", zones found:");
-                                String str = "";
-                                for(ZoneBase zone : zones) {
-                                    str += "," + zone.getName() + "[" + zone.getId() + "]";
-                                }
-                                player.sendMessage(ChatColor.AQUA + str.substring(1));
-                            } else {
-                                player.sendMessage(ChatColor.GREEN + "No zones found.");
-                            }
-                            event.setCancelled(true);
-                            return;
-                        }
                     }
                 }
                 
@@ -358,6 +338,10 @@ public class ZonesPlayerListener implements Listener {
                     EventUtil.onPlace(plugin, event, player, event.getClickedBlock(), blockType);
                 else if(destroyItems.contains(toolType)) 
                     EventUtil.onBreak(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()));
+                else if((blockType == 2 || blockType == 3) && toolType > 289 && toolType < 295) {
+                    EventUtil.onPlace(plugin, event, player, event.getClickedBlock(), blockType);
+                }
+                
                 
                 break;
         }
