@@ -59,6 +59,8 @@ public class Zones extends JavaPlugin implements CommandExecutor {
      */
     private void registerEvents() {
         PluginManager pm = getServer().getPluginManager();
+        Plugin easybind = pm.getPlugin("EasyBind");
+        if(easybind != null) pm.registerEvents(new ZonesEasyBindListener(this), this);
         pm.registerEvents(blockListener, this);
         pm.registerEvents(entityListener, this);
         pm.registerEvents(playerListener, this);
