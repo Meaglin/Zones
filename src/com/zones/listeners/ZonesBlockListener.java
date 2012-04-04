@@ -25,6 +25,7 @@ import com.zones.accessresolver.interfaces.BlockResolver;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
 import com.zones.selection.ZoneSelection;
+import org.bukkit.event.EventPriority;
 
 /**
  * 
@@ -39,11 +40,10 @@ public class ZonesBlockListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockDamage(BlockDamageEvent event) {
         Player player = event.getPlayer();
         Block block = event.getBlock();
-
         if (player.getItemInHand().getTypeId() == ZonesConfig.CREATION_TOOL_TYPE) {
             ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
             if (selection != null) {
@@ -54,7 +54,7 @@ public class ZonesBlockListener implements Listener {
 
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true,priority = EventPriority.LOWEST)
     public void onBlockFromTo(BlockFromToEvent event) {
         Block blockFrom = event.getBlock();
         Block blockTo = event.getToBlock();
@@ -82,7 +82,7 @@ public class ZonesBlockListener implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockPlaced();
@@ -90,13 +90,13 @@ public class ZonesBlockListener implements Listener {
         EventUtil.onPlace(plugin, event, player, blockPlaced);
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockBurn(BlockBurnEvent event) {
         if(onFire(null, event.getBlock(), IgniteCause.SPREAD))
             event.setCancelled(true);
     }
     
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockIgnite(BlockIgniteEvent event) { 
         if(onFire(event.getPlayer(),event.getBlock(),event.getCause()))
             event.setCancelled(true);
@@ -118,7 +118,7 @@ public class ZonesBlockListener implements Listener {
         return false;
     }
     
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockPhysics(BlockPhysicsEvent event) {
         if(event.getChangedTypeId() == -1337) {
             WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
@@ -153,7 +153,7 @@ public class ZonesBlockListener implements Listener {
         }
     }
     
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onLeavesDecay(LeavesDecayEvent event) {
         WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
         ZoneBase zone = wm.getActiveZone(event.getBlock());
@@ -168,15 +168,14 @@ public class ZonesBlockListener implements Listener {
 
 
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
-
         EventUtil.onBreak(plugin, event, player, block);
     }
     
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockForm(org.bukkit.event.block.BlockFormEvent event) {
         BlockState blockstate = event.getNewState();
         if(blockstate.getTypeId() != 78 && blockstate.getTypeId() != 79)
@@ -199,7 +198,7 @@ public class ZonesBlockListener implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockFade(BlockFadeEvent event) {
         Block block = event.getBlock();
         int typeId = block.getTypeId();
@@ -227,7 +226,7 @@ public class ZonesBlockListener implements Listener {
         }
     }
     
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockSpread(org.bukkit.event.block.BlockSpreadEvent event) {
         Block block = event.getBlock();
 
@@ -242,7 +241,7 @@ public class ZonesBlockListener implements Listener {
         }
     }
     
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onSignChange(org.bukkit.event.block.SignChangeEvent event) {
         EventUtil.onPlace(plugin, event, event.getPlayer(), event.getBlock());
     }
