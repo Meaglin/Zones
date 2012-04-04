@@ -49,6 +49,7 @@ public class Region {
         for(ZoneBase b : _zones) {
             if(b instanceof ZoneInherit) {
                 ((ZoneInherit)b).removeInherited(zone);
+                ((ZoneInherit)b).removeSub(zone);
             }
         }
     }
