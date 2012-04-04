@@ -11,6 +11,7 @@ import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.CylinderRegionSelector;
 import com.sk89q.worldedit.regions.Polygonal2DRegionSelector;
@@ -178,8 +179,10 @@ public class WorldeditCommands extends CommandsBase {
             ZoneCylinder cyl = (ZoneCylinder) form; 
             
             CylinderRegionSelector cylinder = new CylinderRegionSelector(localWorld);
-            cylinder.selectPrimary(new Vector(cyl.getCenterX(), cyl.getCenterY(), cyl.getLowZ()));
-            cylinder.selectSecondary(new Vector(cyl.getCenterX() + cyl.getRadius(), cyl.getCenterY() + cyl.getRadius(), cyl.getHighZ()));
+            cylinder.getIncompleteRegion().setCenter(new Vector(cyl.getCenterX(), cyl.getHighZ(), cyl.getCenterY()));
+            cylinder.getIncompleteRegion().setRadius(new Vector2D(cyl.getRadius(), cyl.getRadius()));
+            cylinder.getIncompleteRegion().setMinimumY(cyl.getLowZ());
+            cylinder.getIncompleteRegion().setMaximumY(cyl.getHighZ());
             
             local.setRegionSelector(localWorld, cylinder);
             local.dispatchCUISelection(localPlayer);
@@ -188,8 +191,8 @@ public class WorldeditCommands extends CommandsBase {
             ZoneSphere sphere = (ZoneSphere) form; 
             
             SphereRegionSelector spheresel = new SphereRegionSelector(localWorld);
-            spheresel.selectPrimary(new Vector(sphere.getCenterX(), sphere.getCenterY(), sphere.getCenterZ()));
-            spheresel.selectSecondary(new Vector(sphere.getCenterX() + sphere.getRadius(), sphere.getCenterY() + sphere.getRadius(), sphere.getCenterZ() + sphere.getRadius()));
+            spheresel.selectPrimary(new Vector(sphere.getCenterX(), sphere.getCenterZ(), sphere.getCenterY()));
+            spheresel.selectSecondary(new Vector(sphere.getCenterX() + sphere.getRadius(), sphere.getCenterZ() + sphere.getRadius(), sphere.getCenterY() + sphere.getRadius()));
             
             local.setRegionSelector(localWorld, spheresel);
             local.dispatchCUISelection(localPlayer);

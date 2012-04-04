@@ -139,6 +139,10 @@ public class CreateCommands extends CommandsBase {
             getZoneSelection(player).setForm(params[0]);
         else if(params[0].equalsIgnoreCase("NPoly"))
             getZoneSelection(player).setForm(params[0]);
+        else if(params[0].equalsIgnoreCase("Cylinder"))
+            getZoneSelection(player).setForm(params[0]);
+        else if(params[0].equalsIgnoreCase("Sphere"))
+            getZoneSelection(player).setForm(params[0]);
         else
             player.sendMessage(ChatColor.YELLOW + "Usage: /zsettype Cuboid|NPoly - changes zone type.");
     }
