@@ -342,6 +342,11 @@ public class ZoneNormal extends ZoneBase{
             this.sendMarkupMessage(ZonesConfig.PLAYER_CAN_DIE_IN_ZONE, player);
         }
         
+        if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
+            String texturepack = (String) this.getSetting(ZoneVar.TEXTURE_PACK);
+            getPlugin().newTexture(player, texturepack);
+        }
+        
         if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
             for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(insidePlayer)) {

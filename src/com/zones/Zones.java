@@ -6,6 +6,7 @@ import com.zones.listeners.*;
 import com.zones.permissions.Permissions;
 import com.zones.permissions.PermissionsResolver;
 import com.zones.persistence.Database;
+import com.zones.textiel.TextielManager;
 import com.zones.util.FileUtil;
 import com.zones.util.ZoneUtil;
 
@@ -42,6 +43,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     private CommandMap                      commandMap;
     
     private WorldEditPlugin                 worldedit;
+    private TextielManager                  textiel;
     private Permissions                     permissionsManager;
 
     private final HashMap<Long, WorldManager> worlds        = new HashMap<Long, WorldManager>(2);
@@ -102,6 +104,10 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         registerEvents();
         if(ZonesConfig.WORLDEDIT_ENABLED) {
             registerWorldEdit();
+        }
+        if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
+            textiel = new TextielManager(this);
+            textiel.load();
         }
         log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorlEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + " Permissions:" + getPermissions().getName() + ".");
         
@@ -201,6 +207,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return true;
     }
 
+    public void newTexture(Player player, String texturepack) {
+        if(textiel == null) return;
+        if(texturepack == null) textiel.sendReset(player);
+        else textiel.sendNew(player, texturepack);
+    }
+    
     public Database getMysqlDatabase() {
         return database;
     }
