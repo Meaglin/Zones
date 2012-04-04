@@ -60,6 +60,7 @@ public class SettingsCommands extends CommandsBase {
         vars.put("entermessage", ZoneVar.ENTER_MESSAGE);
         vars.put("leavemessage", ZoneVar.LEAVE_MESSAGE);
         vars.put("spawnlocation",  ZoneVar.SPAWN_LOCATION);
+        vars.put("texturepack",  ZoneVar.TEXTURE_PACK);
         vars.putAll(lists);
     }
 
@@ -93,7 +94,7 @@ public class SettingsCommands extends CommandsBase {
         }
         
         ZoneBase zone = getSelectedZone(player);
-        if(params[0].trim().equalsIgnoreCase("reset")) {
+        if(params.length > 1 && params[1].trim().equalsIgnoreCase("reset")) {
             zone.getSettings().set(v, null);
             zone.saveSettings();
             player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " has now been reset to default.");
@@ -227,7 +228,7 @@ public class SettingsCommands extends CommandsBase {
                 player.sendMessage(ChatColor.RED + "Value " + params[1] + " does not exist within " + params[0] + "!");
                 return;
             }
-            toset.remove(m.getId());
+            toset.remove((Object)m.getId());
             zone.getSettings().set(v, toset);
         } else if (v.getListType().equals(EntityType.class)) {
             List<EntityType> toset = (List<EntityType>) list;

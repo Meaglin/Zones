@@ -19,6 +19,7 @@ public class ZonesConfig {
     private static Logger      log                         = Logger.getLogger(ZonesConfig.class.getName());
 
     public static boolean      WORLDEDIT_ENABLED;
+    public static boolean      TEXTURE_MANAGER_ENABLED;
     
     public static boolean      RESTORE_MISSING_PROPERTIES;
     
@@ -73,6 +74,7 @@ public class ZonesConfig {
             ExtendedProperties zp = new ExtendedProperties(f);
             zp.load();
             WORLDEDIT_ENABLED = zp.getBool("EnableWorldEdit", false);
+            TEXTURE_MANAGER_ENABLED = zp.getBool("EnableTextureManager", false);
             
             RESTORE_MISSING_PROPERTIES = zp.getBool("RestoreMissingProperties", true);
             

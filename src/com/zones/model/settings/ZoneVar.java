@@ -152,6 +152,15 @@ public enum ZoneVar {
             }
         },
         
+        TEXTURE_PACK("TexturePack", Serializer.STRING) {
+
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return null;
+            }
+            
+        },
+        
         ENTER_MESSAGE("EnterMessage", Serializer.STRING) {
             @Override
             public Object getDefault(ZoneBase zone) {
@@ -164,6 +173,7 @@ public enum ZoneVar {
                 return ZonesConfig.DEFAULT_LEAVE_MESSAGE;
             }
         },
+        
         SPAWN_LOCATION("SpawnLocation", Serializer.LOCATION) {
             @Override
             public Object getDefault(ZoneBase zone) {return null; }
