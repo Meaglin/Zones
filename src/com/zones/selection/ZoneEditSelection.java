@@ -10,7 +10,9 @@ import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.ZoneVertice;
 import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneCylinder;
 import com.zones.model.forms.ZoneNPoly;
+import com.zones.model.forms.ZoneSphere;
 import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
 import com.zones.util.Log;
@@ -37,6 +39,19 @@ public class ZoneEditSelection extends ZoneSelection {
                 selection.addPoint(new ZoneVertice(points[0][i], points[1][i]));
             }
             selection.setHeight(new ZoneVertice(form.getLowZ(), form.getHighZ()), true);
+            setSelection(selection);
+        } else if(form instanceof ZoneCylinder) {
+            ZoneCylinder cyl = (ZoneCylinder) form;
+            CylinderSelection selection = new CylinderSelection(this);
+            selection.setPoint1(new ZoneVertice(cyl.getCenterX(), cyl.getCenterY()));
+            selection.setPoint2(new ZoneVertice(cyl.getCenterX() + cyl.getRadius(), cyl.getCenterY() + cyl.getRadius()));
+            selection.setHeight(new ZoneVertice(cyl.getLowZ(), cyl.getHighZ()), true);
+            setSelection(selection);
+        } else if(form instanceof ZoneSphere) {
+            ZoneSphere sphere = (ZoneSphere) form;
+            SphereSelection selection = new SphereSelection(this);
+            selection.setPoint1(new ZoneVertice(sphere.getCenterX(), sphere.getCenterY()));
+            selection.setHeight(new ZoneVertice(sphere.getCenterZ(), sphere.getCenterZ() + sphere.getRadius()), true);
             setSelection(selection);
         }
         setClass(getSelectedZone().getClass());
