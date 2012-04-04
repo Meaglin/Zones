@@ -119,6 +119,7 @@ public class WorldConfig {
     public boolean PLAYER_CONTACT_DAMAGE_ENABLED;
     
     public boolean WEATHER_RAIN_ENABLED;
+    public int     WEATHER_RAIN_DIVIDER;
     public boolean WEATHER_THUNDER_ENABLED;
     
     public boolean SPONGE_EMULATION;
@@ -285,6 +286,7 @@ public class WorldConfig {
             PLAYER_CONTACT_DAMAGE_ENABLED = p.getBool("PlayerContactDamageEnabled", true);
             
             WEATHER_RAIN_ENABLED = p.getBool("RainEnabled", true);
+            WEATHER_RAIN_DIVIDER = p.getInt("RainDivider", 1);
             WEATHER_THUNDER_ENABLED = p.getBool("LightningEnabled", true);
             
             SPONGE_EMULATION          = p.getBool("EmulateSponges", false);

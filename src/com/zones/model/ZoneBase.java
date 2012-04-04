@@ -287,7 +287,10 @@ public abstract class ZoneBase {
     public final boolean getFlag(ZoneVar name) {
         if(!name.getType().equals(Boolean.class))
             return false;
-        return getSettings().getBool(name, (Boolean)name.getDefault(this));
+        Object obj = getSettings().get(name);
+        if(obj == null) obj = name.getDefault(this);
+        
+        return (Boolean) obj;
     }
     
     public final boolean setSetting(ZoneVar name, boolean b) {
