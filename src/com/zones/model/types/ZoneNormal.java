@@ -233,7 +233,7 @@ public class ZoneNormal extends ZoneBase{
     }
 
     public void sendAccess(Player player) {
-        player.sendMessage("AccesList of " + getName() + ":");
+        player.sendMessage("AccessList of " + getName() + ":");
         player.sendMessage("   Users: " + mapToString(users) + ".");
         player.sendMessage("   Groups: " + mapToString(groups) + ".");
         player.sendMessage("   Admins: " + adminsToString() + ".");
@@ -343,7 +343,7 @@ public class ZoneNormal extends ZoneBase{
         }
         
         if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
-            String texturepack = (String) this.getSetting(ZoneVar.TEXTURE_PACK);
+            String texturepack = (String) zone.getSetting(ZoneVar.TEXTURE_PACK);
             getPlugin().newTexture(player, texturepack);
         }
         
@@ -367,6 +367,14 @@ public class ZoneNormal extends ZoneBase{
                     this.sendMarkupMessage(ZonesConfig.PLAYER_LEFT_ZONE, player, insidePlayer);
                 }
             }
+        }
+        if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
+            ZoneBase zone = zones.getWorldManager(player).getActiveZone(player);
+            if (zone == null || zone.getForm().getSize() > getForm().getSize())
+                zone = this;
+            
+            String texturepack = (String) zone.getSetting(ZoneVar.TEXTURE_PACK);
+            getPlugin().newTexture(player, texturepack);
         }
     }
     

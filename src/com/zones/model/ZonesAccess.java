@@ -176,4 +176,17 @@ public class ZonesAccess {
 
         return rt;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(!(o instanceof ZonesAccess)) return false;
+        
+        return ((ZonesAccess) o).getRights() == getRights();
+    }
+    
+    @Override
+    public int hashCode() {
+        return getRights();
+    }
 }

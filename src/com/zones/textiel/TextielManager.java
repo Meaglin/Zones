@@ -23,9 +23,13 @@ public class TextielManager implements PluginMessageListener {
     }
 
     public void load() {
-        textures.load();
+        reload();
         plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, TexturePackManager.getTag(), this);
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, TexturePackManager.getTag());
+    }
+    
+    public void reload() {
+        textures.load();
     }
     
     public void sendNew(Player player, String texturepack) {

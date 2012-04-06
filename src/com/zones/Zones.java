@@ -176,7 +176,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     public boolean reload() {
-        return reloadZonesConfig() && reloadZones();
+        return reloadZonesConfig() && reloadZones() && reloadTextiel();
     }
     
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -207,6 +207,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return true;
     }
 
+    public boolean reloadTextiel() {
+        if(!ZonesConfig.TEXTURE_MANAGER_ENABLED) return true;
+        textiel.reload();
+        return true;
+    }
+    
     public void newTexture(Player player, String texturepack) {
         if(textiel == null) return;
         if(texturepack == null) textiel.sendReset(player);

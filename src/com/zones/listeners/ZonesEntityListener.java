@@ -1,5 +1,6 @@
 package com.zones.listeners;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
@@ -187,6 +188,15 @@ public class ZonesEntityListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onExplosionPrime(ExplosionPrimeEvent event) {
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
+        Location loc = event.getEntity().getLocation();
+        ZoneBase zone = wm.getActiveZone(loc);
+
+        if(zone!=null) {
+            if (!((BlockResolver)zone.getResolver(AccessResolver.DYNAMITE)).isAllowed(zone, loc.getBlock())) {
+                event.setCancelled(true);
+                return;
+            }
+        }
         if(event.getEntity() instanceof Creeper) {
             event.setRadius(wm.getConfig().CREEPER_EXPLOSION_RANGE);
         } else {

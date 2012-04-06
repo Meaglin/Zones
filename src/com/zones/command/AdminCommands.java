@@ -125,8 +125,15 @@ public class AdminCommands extends CommandsBase {
         // This is fine since it finds the closest match.
         Player p = getPlugin().getServer().getPlayer(username);
 
-        if(p != null)
+        if(p != null) {
             username = p.getName();
+            if(zone.isInsideZone(p)) {
+                ZonesAccess acc = zone.getAccess(p);
+                if(!acc.equals(z)) {
+                    p.sendMessage("Your access in " + zone.getName() + " has been changed from [" + acc.toColorCode() + "] to [" + z.toColorCode() + "].");
+                }
+            }
+        }
         zone.addUser(username,z);
 
         owner.sendMessage(ChatColor.GREEN + "Succesfully changed access of user " + username + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");

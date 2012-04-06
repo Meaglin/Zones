@@ -29,7 +29,7 @@ public class ZoneSettings {
     }
     
     public void set(ZoneVar name, String value) {
-        set(name , escape(value));
+        set(name , (Object) escape(value));
     }
     
     public void set(ZoneVar name, Object value) {

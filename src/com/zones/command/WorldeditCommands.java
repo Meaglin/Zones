@@ -136,7 +136,7 @@ public class WorldeditCommands extends CommandsBase {
     
     @Command(
             name = "zexport", 
-            aliases = { "zex", "zx" }, 
+            aliases = { "zx", "zex", "zexp" }, 
             description = "Export your current selected zone to your worldedit selection.", 
             requiresPlayer = true,
             requiresSelected = true

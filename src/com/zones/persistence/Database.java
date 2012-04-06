@@ -70,16 +70,16 @@ public class Database {
             while(rs.next()) {
                 Zone z = new Zone();
                 z.setId(        rs.getInt(1));
-                z.setName(      rs.getString(2));
-                z.setZonetype(  rs.getString(3));
-                z.setFormtype(  rs.getString(4));
-                z.setWorld(     rs.getString(5));
-                z.setAdmins(    rs.getString(6));
-                z.setUsers(     rs.getString(7));
-                z.setSettings(  rs.getString(8));
-                z.setMinz(      rs.getInt(9));
-                z.setMaxz(      rs.getInt(10));
-                z.setSize(      rs.getInt(11));
+                z.setName(      rs.getString("name"));
+                z.setZonetype(  rs.getString("zonetype"));
+                z.setFormtype(  rs.getString("formtype"));
+                z.setWorld(     rs.getString("world"));
+                z.setAdmins(    rs.getString("admins"));
+                z.setUsers(     rs.getString("users"));
+                z.setSettings(  rs.getString("settings"));
+                z.setMinz(      rs.getInt("minz"));
+                z.setMaxz(      rs.getInt("maxz"));
+                z.setSize(      rs.getInt("size"));
                 z.setVertices(get(z));
                 zones.add(z);
             }
@@ -139,16 +139,16 @@ public class Database {
             if(rs.next()) {
                 Zone z = new Zone();
                 z.setId(        rs.getInt(1));
-                z.setName(      rs.getString(2));
-                z.setZonetype(  rs.getString(3));
-                z.setFormtype(  rs.getString(4));
-                z.setWorld(     rs.getString(5));
-                z.setAdmins(    rs.getString(6));
-                z.setUsers(     rs.getString(7));
-                z.setSettings(  rs.getString(8));
-                z.setMinz(      rs.getInt(9));
-                z.setMaxz(      rs.getInt(10));
-                z.setSize(      rs.getInt(11));
+                z.setName(      rs.getString("name"));
+                z.setZonetype(  rs.getString("zonetype"));
+                z.setFormtype(  rs.getString("formtype"));
+                z.setWorld(     rs.getString("world"));
+                z.setAdmins(    rs.getString("admins"));
+                z.setUsers(     rs.getString("users"));
+                z.setSettings(  rs.getString("settings"));
+                z.setMinz(      rs.getInt("minz"));
+                z.setMaxz(      rs.getInt("maxz"));
+                z.setSize(      rs.getInt("size"));
                 z.setVertices(get(z));
                 return z;
             }

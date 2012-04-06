@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.model.WorldConfig;
 import com.zones.model.ZoneBase;
 
@@ -52,9 +53,10 @@ public class MiscCommands extends CommandsBase {
             name = "zreload",
             aliases = { "" },
             description = "Reloads specified part of the plugin\nWhen using 'zone' the zone with id <zone id> will \nbe reloaded from db.",
-            usage = "/<command> [config|zones|all|zone] <zone id>",
-            min = 1,
-            requiredPermission = "zones.admin"
+            usage = "/<command> [config|zones|all|zone|textiel] <zone id>",
+            requiredPermission = "zones.admin",
+            requiresPlayer = false,
+            min = 1
     )
     public void reload(CommandSender sender, String[] params) {
         String type = params[0];
@@ -91,6 +93,14 @@ public class MiscCommands extends CommandsBase {
             }
             getPlugin().getZoneManager().reloadZone(id);
             sender.sendMessage(ChatColor.GREEN + "Zone " + getPlugin().getZoneManager().getZone(id).getName() + " reloaded.");
+        } else if (type.equalsIgnoreCase("textiel")) {
+            if(!ZonesConfig.TEXTURE_MANAGER_ENABLED) {
+                sender.sendMessage(ChatColor.RED + "Textiel not enabled.");
+                return;
+            }
+            
+            getPlugin().reloadTextiel();
+            sender.sendMessage(ChatColor.GREEN + "Textiel reloaded.");
         }
     }
     /*
