@@ -66,7 +66,7 @@ public class ZonesVehicleListener implements Listener {
             if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(bZone, player, from, to)) {
                 ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).sendDeniedMessage(bZone, player);
                 /*
-                 * In principle this should only occur when someone's access to a zone gets revoked when still inside the zone.
+                 * In principle this should only occur when someones access to a zone gets revoked when still inside the zone.
                  * This prevents players getting stuck ;).
                  */
                 if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {

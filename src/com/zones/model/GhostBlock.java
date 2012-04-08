@@ -36,6 +36,7 @@ public class GhostBlock {
     
     public Block getBlock() { return block; }
     
+    @Override
     public boolean equals(Object o) {
         if(o instanceof GhostBlock) {
             GhostBlock rb = (GhostBlock) o;
@@ -43,5 +44,10 @@ public class GhostBlock {
                 return true;
         }
         return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return block.hashCode();
     }
 }

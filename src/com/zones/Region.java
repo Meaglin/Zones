@@ -144,6 +144,7 @@ public class Region {
         return form.intersectsRectangle(ax, bx, ay, by);
     }
     
+    @Override
     public boolean equals(Object object) {
         if(!(object instanceof Region))
             return false;
@@ -153,4 +154,8 @@ public class Region {
         return (r.getX() == getX() && r.getY() == getY());
     }
 
+    @Override
+    public int hashCode() {
+        return getX() ^ getY();
+    }
 }

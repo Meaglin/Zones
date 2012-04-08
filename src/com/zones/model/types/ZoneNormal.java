@@ -152,6 +152,7 @@ public class ZoneNormal extends ZoneBase{
         return canAdministrate(player);
     }
 
+    @Override
     public ZonesAccess getAccess(String group) {
         ZonesAccess z = new ZonesAccess("-");
         for (Entry<String, ZonesAccess> e : groups.entrySet()) {
@@ -161,6 +162,7 @@ public class ZoneNormal extends ZoneBase{
         return z;
     }
 
+    @Override
     public ZonesAccess getAccess(Player player) {
 
         // admins can do anything ;).
@@ -183,6 +185,7 @@ public class ZoneNormal extends ZoneBase{
         return base;
     }
 
+    @Override
     public boolean canAdministrate(Player player) {
         return isAdmin(player);
     }

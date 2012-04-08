@@ -72,6 +72,7 @@ public class TrieMap<V> implements Map<String, V>{
     public TrieMap() {
     }
 
+    @Override
     public boolean isEmpty() {
         if(mPrefixVal != null) {
             return false;

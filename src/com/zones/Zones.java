@@ -91,7 +91,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             if(FileUtil.copyFile(Zones.class.getResourceAsStream("/com/zones/config/Zones.properties"), configFile)) {
                 log.info("[Zones] Missing configuration file restored.");                
             } else {
-                log.info("[Zones] Error while restorting configuration file.");
+                log.info("[Zones] Error while restoring configuration file.");
             }       
         }
         ZonesConfig.load(configFile);
@@ -109,7 +109,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             textiel = new TextielManager(this);
             textiel.load();
         }
-        log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorlEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + " Permissions:" + getPermissions().getName() + ".");
+        log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorldEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + " Permissions:" + getPermissions().getName() + ".");
         
     }
     
@@ -179,6 +179,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return reloadZonesConfig() && reloadZones() && reloadTextiel();
     }
     
+    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         return commandMap.run(sender, command, label, args);
     }

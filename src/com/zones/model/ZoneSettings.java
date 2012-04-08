@@ -122,6 +122,7 @@ public class ZoneSettings {
         return toString();
     }
     
+    @Override
     public String toString() {
         String rt = "";
         for(Entry<ZoneVar, Object> e : settings.entrySet()) {
@@ -135,10 +136,6 @@ public class ZoneSettings {
         
         return rt;
     }
-    
-
-    
-    
     
     public static final String unEscape(String str) {
         if(str ==  null) return "";

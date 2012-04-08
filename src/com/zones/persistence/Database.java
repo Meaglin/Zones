@@ -45,7 +45,7 @@ public class Database {
         try {
             Class.forName(db.getDataSourceConfig().getDriver());
         } catch(Exception e) {
-            Zones.log.warning("[Zones]Warning JDBC not availeble.");
+            Zones.log.warning("[Zones]Warning JDBC not available.");
         }
         
         this.url = db.getDataSourceConfig().getUrl();

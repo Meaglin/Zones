@@ -79,7 +79,7 @@ public class SettingsCommands extends CommandsBase {
             "and ^ - colors, Can be used to make the message dynamic.\n" +
             "Disable enter/leave messages by settings them to \"NONE\".\n" +
             "spawnlocation - change the respawn location within the zone.\n" +
-            "[L]List variables requires comma seperated input: <val1>,<val2>",
+            "[L]List variables requires comma separated input: <val1>,<val2>",
             usage = "/<command> [variable name] [value]",
             min = 1,
             requiresPlayer = true,
@@ -313,7 +313,7 @@ public class SettingsCommands extends CommandsBase {
         else if(name.length() > 40)
             player.sendMessage(ChatColor.RED + "Too long zone name.");
         else if(getSelectedZone(player).setName(name))
-            player.sendMessage(ChatColor.GREEN + "Succesfully changed zone name to " + name + ".");
+            player.sendMessage(ChatColor.GREEN + "Successfully changed zone name to " + name + ".");
         else
             player.sendMessage(ChatColor.RED + "Unable to change zone name, please contact a admin.");
     }

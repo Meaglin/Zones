@@ -19,7 +19,7 @@ public class AdminCommands extends CommandsBase {
     @Command(
         name = "zaddadmin", 
         aliases = { "zaa" }, 
-        description = "Adds at least 1 admin to your selected zone.\nAn admin can adjust all settings of your zone and has\n full access to everything inside.", 
+        description = "Adds at least 1 admin to your selected zone.\nAn admin can adjust all of the settings in your zone and has\nfull access to everything inside.", 
         usage = "/zaddadmin [admin1] <admin2> ...",
         min = 1,
         requiresPlayer = true,
@@ -43,7 +43,7 @@ public class AdminCommands extends CommandsBase {
             username = p.getName();
         
         zone.addAdmin(username);
-        owner.sendMessage(ChatColor.GREEN + "Succesfully added player " + username + " as an admin of zone "  + zone.getName() +  " .");
+        owner.sendMessage(ChatColor.GREEN + "Successfully added player " + username + " as an admin of zone "  + zone.getName() +  " .");
     }
     
     
@@ -60,10 +60,10 @@ public class AdminCommands extends CommandsBase {
     public void removeAdmin(Player player, String[] params) {
         ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
         if(zone instanceof ZoneInherit && !((ZoneInherit)zone).isInheritAdmin(player) ) {
-            player.sendMessage(ChatColor.RED + "You're not allowed to remove admin's in this zone.");
+            player.sendMessage(ChatColor.RED + "You're not allowed to remove admins in this zone.");
             return;
         } else if(!canUseCommand(player,"zones.admin")) {
-            player.sendMessage(ChatColor.RED + "You're not allowed to remove admin's from zones.");
+            player.sendMessage(ChatColor.RED + "You're not allowed to remove admins from zones.");
             return;
         }
         for(int i = 0;i < params.length;i++) {
@@ -81,7 +81,7 @@ public class AdminCommands extends CommandsBase {
             username = p.getName();
         
         zone.removeAdmin(username);
-        owner.sendMessage(ChatColor.GREEN + "Succesfully removed player " + username + " as an admin of zone "  + zone.getName() +  " .");
+        owner.sendMessage(ChatColor.GREEN + "Successfully removed player " + username + " as an admin of zone "  + zone.getName() +  " .");
     }
     
     
@@ -136,7 +136,7 @@ public class AdminCommands extends CommandsBase {
         }
         zone.addUser(username,z);
 
-        owner.sendMessage(ChatColor.GREEN + "Succesfully changed access of user " + username + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
+        owner.sendMessage(ChatColor.GREEN + "Successfully changed access of user " + username + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
     }
     
     
@@ -187,7 +187,7 @@ public class AdminCommands extends CommandsBase {
         
         ZonesAccess z = new ZonesAccess(access);
         zone.addGroup(groupname,z);
-        owner.sendMessage(ChatColor.GREEN + "Succesfully changed access of group '" + groupname + "' of zone '" + zone.getName() + "' to access " + z.textual() + ".");
+        owner.sendMessage(ChatColor.GREEN + "Successfully changed access of group '" + groupname + "' of zone '" + zone.getName() + "' to access " + z.textual() + ".");
     }
     
     @Command(
@@ -205,7 +205,7 @@ public class AdminCommands extends CommandsBase {
     @Command(
             name = "zdelete",
             aliases = { "" },
-            description = "Deletes your selected zones.\nWARNING: this is NOT revertable!\nNote: only superowning entities can use this commands\nBeing serveradmins or inherited zone admins.",
+            description = "Deletes your selected zones.\nWARNING: this is NOT revertible!\nNote: only superowning entities can use this commands\nBeing serveradmins or inherited zone admins.",
             requiresPlayer = true,
             requiresSelected = true
     )
@@ -221,7 +221,7 @@ public class AdminCommands extends CommandsBase {
             return;
         }
         if(getPlugin().getZoneManager().delete(toDelete)) {
-            player.sendMessage(ChatColor.GREEN + "Succesfully deleted zone " + toDelete.getName() + ".");
+            player.sendMessage(ChatColor.GREEN + "Successfully deleted zone " + toDelete.getName() + ".");
             Log.info(player.getName() + " delete zone " + toDelete.getName() + "[" + toDelete.getId() + "].");
         } else
             player.sendMessage(ChatColor.RED + "Problems while deleting zone, please contact admin.");

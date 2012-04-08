@@ -98,7 +98,7 @@ public class CommandMap {
             Object owner = owners.get(method);
             Command ann = method.getAnnotation(Command.class);
             if(ann == null || owner == null) {
-                Zones.log.info("[Zones] command " + command.getName() + " is mssing annotation or owner!");
+                Zones.log.info("[Zones] command " + command.getName() + " is missing annotation or owner!");
                 return false;
             }
             

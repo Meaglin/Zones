@@ -103,7 +103,7 @@ public abstract class ZoneSelection {
                 return;
             }
             type = (Class<? extends ZoneBase>) newtype;
-            getPlayer().sendMessage(ChatColor.GREEN + "Zone Type succesfully changed to " + type.getName() + ".");
+            getPlayer().sendMessage(ChatColor.GREEN + "Zone Type successfully changed to " + type.getName() + ".");
         } else {
             getPlayer().sendMessage(ChatColor.RED + "Error changing zone type.");
         }

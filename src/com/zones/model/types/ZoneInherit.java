@@ -61,6 +61,7 @@ public class ZoneInherit extends ZoneNormal {
         return isInheritAdmin(player);
     }
     
+    @Override
     public boolean isAdmin(Player player) {
         return super.isAdmin(player);
     }

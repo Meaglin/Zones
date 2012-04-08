@@ -127,7 +127,7 @@ public class CreateCommands extends CommandsBase {
             description = "Changes the type of your selection.\n" +
             		"Possible types:\n" +
             		"  Cuboid - The default form.\n" +
-            		"  NPoly - Allows polygonical zones.",
+            		"  NPoly - Allows polygonal zones.",
             usage = "/<command> [Cuboid|NPoly]",
             min = 1,
             max = 1,
@@ -150,7 +150,7 @@ public class CreateCommands extends CommandsBase {
     @Command(
             name = "zsave",
             aliases = { "" },
-            description = "Saves your current selection.\nAutomaticly selects the resulting zone.",
+            description = "Saves your current selection.\nAutomatically selects the resulting zone.",
             requiresPlayer = true,
             requiresSelection = true
     )

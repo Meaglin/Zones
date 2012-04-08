@@ -171,7 +171,7 @@ public class WorldConfig {
             p.load();
             BORDER_ENABLED = p.getBool("BorderEnabled", false);
             BORDER_RANGE = p.getInt("BorderRange", 1000);
-            BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAIR") ? 2 : 1);
+            BORDER_TYPE = (p.getProperty("BorderShape", "CUBOID").equalsIgnoreCase("CIRCULAR") ? 2 : 1);
             BORDER_USE_SPAWN = p.getBool("BorderUseSpawn", true);
             if(!BORDER_USE_SPAWN) {
                 try {
@@ -279,8 +279,8 @@ public class WorldConfig {
             PLAYER_SUFFOCATION_DAMAGE_ENABLED = p.getBool("PlayerSuffocationDamageEnabled", true);
             PLAYER_FIRE_DAMAGE_ENABLED = p.getBool("PlayerFireDamageEnabled", true);
             PLAYER_BURN_DAMAGE_ENABLED = p.getBool("PlayerBurnDamageEnabled", true);
-            PLAYER_DROWNING_DAMAGE_ENABLED = p.getBool("PlayerDrowningDamagaEnabled", true);
-            PLAYER_TNT_DAMAGE_ENABLED = p.getBool("PlayerTntDamagaEnabled", true);
+            PLAYER_DROWNING_DAMAGE_ENABLED = p.getBool("PlayerDrowningDamageEnabled", true);
+            PLAYER_TNT_DAMAGE_ENABLED = p.getBool("PlayerTntDamageEnabled", true);
             PLAYER_CREEPER_DAMAGE_ENABLED = p.getBool("PlayerCreeperDamageEnabled", true);
             PLAYER_VOID_DAMAGE_ENABLED = p.getBool("PlayerVoidDamageEnabled", true);
             PLAYER_CONTACT_DAMAGE_ENABLED = p.getBool("PlayerContactDamageEnabled", true);

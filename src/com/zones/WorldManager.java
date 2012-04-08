@@ -196,13 +196,19 @@ public class WorldManager {
         return ((((long)x) << 32) | ((long)y & 0xFFFFFFFFL));
     }
     
+    @Override
     public boolean equals(Object o) {
         if(!(o instanceof WorldManager)) 
             return false;
         return ((WorldManager)o).getWorld().getName().equals(getWorld().getName());
     }
+    
+    @Override
+    public int hashCode() {
+        return getWorldName().hashCode();
+    }
 
-    public void revalidatOutZones(Player player, Location from) {
+    public void revalidateOutZones(Player player, Location from) {
         getRegion(from).revalidateOutZones(player, from);
     }
 }

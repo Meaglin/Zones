@@ -40,6 +40,7 @@ public class TextielManager implements PluginMessageListener {
         textures.sendReset(player);
     }
     
+    @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] data) {
         if(data.length == 0) return;
         String message = null;

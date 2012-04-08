@@ -101,7 +101,7 @@ public class ZonesPlayerListener implements Listener {
             if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(bZone, player, from, to)) {
                 ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).sendDeniedMessage(bZone, player);
                 /*
-                 * In principle this should only occur when someone's access to a zone gets revoked when still inside the zone.
+                 * In principle this should only occur when someones access to a zone gets revoked when still inside the zone.
                  * This prevents players getting stuck ;).
                  */
                 if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
@@ -159,6 +159,7 @@ public class ZonesPlayerListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerPortal(PlayerPortalEvent event) {
         if(event.getTo() == null) return;
+        if(event.getTo().getWorld() == null) return;
         onPlayerTeleport(event);
     }
     
@@ -202,7 +203,7 @@ public class ZonesPlayerListener implements Listener {
         }
 
         if(from.getWorld() != to.getWorld())
-            wmfrom.revalidatOutZones(player, from);
+            wmfrom.revalidateOutZones(player, from);
         wmto.revalidateZones(player, from, to);
             
     }

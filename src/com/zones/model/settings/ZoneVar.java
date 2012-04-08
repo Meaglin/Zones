@@ -35,6 +35,7 @@ public enum ZoneVar {
             public Object getDefault(ZoneBase zone) {return true;}
         },
         FOOD("FoodEnabled", Serializer.BOOLEAN) {
+            @Override
             public Object getDefault(ZoneBase zone) {
                 return zone.getWorldConfig().PLAYER_FOOD_ENABLED;
             }
