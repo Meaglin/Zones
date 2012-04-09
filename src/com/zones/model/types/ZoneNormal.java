@@ -360,7 +360,7 @@ public class ZoneNormal extends ZoneBase{
     }
 
     @Override
-    public void onExit(Player player) {
+    public void onExit(Player player, Location to) {
         String message = getSettings().getString(ZoneVar.LEAVE_MESSAGE, (String)ZoneVar.LEAVE_MESSAGE.getDefault(this));
         sendMarkupMessage(message, player);
         
@@ -372,11 +372,9 @@ public class ZoneNormal extends ZoneBase{
             }
         }
         if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
-            ZoneBase zone = zones.getWorldManager(player).getActiveZone(player);
-            if (zone == null || zone.getForm().getSize() > getForm().getSize())
-                zone = this;
+            ZoneBase zone = zones.getWorldManager(to).getActiveZone(to);
             
-            String texturepack = (String) zone.getSetting(ZoneVar.TEXTURE_PACK);
+            String texturepack = zone == null ? null : (String) zone.getSetting(ZoneVar.TEXTURE_PACK);
             getPlugin().newTexture(player, texturepack);
         }
     }

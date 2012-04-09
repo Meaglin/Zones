@@ -191,7 +191,7 @@ public abstract class ZoneBase {
     public final void removePlayer(Player player, boolean silent) {
         if (playerList.containsKey(player.getEntityId())) {
             playerList.remove(player.getEntityId());
-            if(!silent)onExit(player);
+            if(!silent) onExit(player, player.getLocation());
         }
     }
 
@@ -208,7 +208,7 @@ public abstract class ZoneBase {
     public abstract Resolver getResolver(AccessResolver access);
 
     protected abstract void onEnter(Player player);
-    protected abstract void onExit(Player player);
+    protected abstract void onExit(Player player, Location to);
     
     public abstract Location getSpawnLocation(Player player);
     
@@ -269,7 +269,7 @@ public abstract class ZoneBase {
         } else {
             if (playerList.containsKey(player.getEntityId())) {
                 playerList.remove(player.getEntityId());
-                onExit(player);
+                onExit(player, loc);
             }
         }
     }
