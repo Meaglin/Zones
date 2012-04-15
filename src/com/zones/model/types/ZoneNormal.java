@@ -328,11 +328,9 @@ public class ZoneNormal extends ZoneBase{
     }
     
     @Override
-    public void onEnter(Player player) {
-        ZoneBase zone = zones.getWorldManager(player).getActiveZone(player);
-        if (zone == null || zone.getForm().getSize() > getForm().getSize())
-            zone = this;
-
+    public void onEnter(Player player, Location to) {
+        ZoneBase zone = zones.getWorldManager(to).getActiveZone(to);
+        if(zone == null) zone = this;
         /*
          * Possible codes:
          * {zname} - Zone name.

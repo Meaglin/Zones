@@ -7,6 +7,7 @@ import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -199,7 +200,7 @@ public class ZonesEntityListener implements Listener {
         }
         if(event.getEntity() instanceof Creeper) {
             event.setRadius(wm.getConfig().CREEPER_EXPLOSION_RANGE);
-        } else {
+        } else if (event.getEntity() instanceof TNTPrimed ) {
             event.setRadius(wm.getConfig().TNT_RANGE);            
         }
     }

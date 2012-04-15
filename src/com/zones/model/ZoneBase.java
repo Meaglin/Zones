@@ -207,7 +207,7 @@ public abstract class ZoneBase {
     
     public abstract Resolver getResolver(AccessResolver access);
 
-    protected abstract void onEnter(Player player);
+    protected abstract void onEnter(Player player, Location to);
     protected abstract void onExit(Player player, Location to);
     
     public abstract Location getSpawnLocation(Player player);
@@ -264,7 +264,7 @@ public abstract class ZoneBase {
         if (isInsideZone(loc)) {
             if (!playerList.containsKey(player.getEntityId())) {
                 playerList.put(player.getEntityId(), player);
-                onEnter(player);
+                onEnter(player, loc);
             }
         } else {
             if (playerList.containsKey(player.getEntityId())) {
