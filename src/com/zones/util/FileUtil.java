@@ -67,6 +67,7 @@ public class FileUtil {
     }
     
     public static String readFile(InputStream input) {
+        if(input == null) return "";
         BufferedInputStream reader = null;
         String rt = null;
         try {

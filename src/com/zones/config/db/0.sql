@@ -1,6 +1,3 @@
---
--- Table structure for table `zones`
---
 
 CREATE TABLE IF NOT EXISTS `zones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -16,10 +13,6 @@ CREATE TABLE IF NOT EXISTS `zones` (
   `size` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
-
---
--- Table structure for table `zones_vertices`
---
 
 CREATE TABLE IF NOT EXISTS `zones_vertices` (
   `id` int(11) NOT NULL,

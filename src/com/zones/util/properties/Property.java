@@ -13,7 +13,7 @@ public class Property implements Comparable<Property> {
 	
 	public Property(int index, String key, String value, String[] comments) {
 		this.index = index;
-		this.key = key;
+		this.key = key == null ? key : key.trim();
 		this.value = value;
 		setComments(comments);
 	}
@@ -45,10 +45,10 @@ public class Property implements Comparable<Property> {
 	}
 	
 	public void setValue(String newvalue) 	{ value = newvalue.trim();	}
-	public void setValue(int newvalue) 		{ setValue(newvalue); }
-	public void setValue(double newvalue) 	{ setValue(newvalue); }
-	public void setValue(float newvalue) 	{ setValue(newvalue); }
-	public void setValue(long newvalue) 	{ setValue(newvalue); }
+	public void setValue(int newvalue) 		{ setValue(Integer.toString(newvalue)); }
+	public void setValue(double newvalue) 	{ setValue(Double.toString(newvalue)); }
+	public void setValue(float newvalue) 	{ setValue(Float.toString(newvalue)); }
+	public void setValue(long newvalue) 	{ setValue(Long.toString(newvalue)); }
 	
 	public List<String> getComments() {
 		return comments;

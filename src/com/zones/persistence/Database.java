@@ -1,20 +1,27 @@
 package com.zones.persistence;
 
+import java.io.File;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.avaje.ebean.config.ServerConfig;
-import com.mysql.jdbc.Statement;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
+import com.zones.util.FileUtil;
 public class Database {
     
     private final String url,username,password;
-    //private Zones plugin;
+    private Zones plugin;
+    
+    public static final int VERSION = 2;
+    
     public static final String SAVE_ZONE = "INSERT INTO `zones` (name, zonetype, formtype, world, admins, users, settings, minz, maxz, size) VALUES (?,?,?,?,?,?,?,?,?,?)";
     public static final String SAVE_VERTICE = "INSERT INTO `zones_vertices` (id, vertexorder, x, y) values (?,?,?,?)";
     
@@ -51,6 +58,39 @@ public class Database {
         this.url = db.getDataSourceConfig().getUrl();
         this.username = db.getDataSourceConfig().getUsername();
         this.password = db.getDataSourceConfig().getPassword();
+    
+        this.plugin = plugin;
+        checkVersion();
+    }
+    
+    private void checkVersion() {
+        for(int i = ZonesConfig.DATABASE_VERSION; i < VERSION; i++) {
+            InputStream stream = plugin.getClass().getResourceAsStream("/com/zones/config/db/" + i + ".sql");
+            if(stream == null) {
+                plugin.getLogger().info("[Zones] Cannot find " + i + ".sql");
+                continue;
+            }
+            String[] lines = FileUtil.readFile(stream).split(";");
+            Connection conn = null;
+            Statement st = null;
+            try {
+                conn = getConnection();
+                st = conn.createStatement();
+                for(String line : lines) {
+                    if(line != null && !line.trim().isEmpty()) st.execute(line);
+                }
+            } catch(Exception e) {
+                Zones.log.warning("[Zones]Error updating zones database.");
+                e.printStackTrace();
+            } finally {
+                try{
+                    if(conn != null) conn.close();
+                    if(st != null) st.close();
+                } catch(Exception e) {}
+            }
+            plugin.getLogger().info("[Zones] Updated db to version " + (i + 1));
+        }
+        ZonesConfig.setDatabaseVersion(new File(plugin.getDataFolder(), ZonesConfig.ZONES_CONFIG_FILE), VERSION);
     }
     
     private Connection getConnection() throws SQLException {

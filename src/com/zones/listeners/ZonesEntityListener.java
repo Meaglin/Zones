@@ -119,7 +119,7 @@ public class ZonesEntityListener implements Listener {
                     event.setCancelled(true);
                 }
             } else {
-                if(!wm.getConfig().ALLOW_TNT_TRIGGER) {
+                if(!wm.getConfig().DYNAMITE_ENABLED) {
                     event.setCancelled(true);
                 }
             }
@@ -258,10 +258,10 @@ public class ZonesEntityListener implements Listener {
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
         ZoneBase zone = wm.getActiveZone(event.getBlock());
         if(zone == null) {
-            if(!wm.getConfig().ALLOW_ENDER_GRIEF)
+            if(!wm.getConfig().ENDER_GRIEFING_ENABLED)
                 event.setCancelled(true);
         } else {
-            if(!zone.getFlag(ZoneVar.ALLOW_ENDER_GRIEF))
+            if(!zone.getFlag(ZoneVar.ENDER_GRIEFING))
                 event.setCancelled(true);
         }
     }
@@ -273,10 +273,10 @@ public class ZonesEntityListener implements Listener {
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
         ZoneBase zone = wm.getActiveZone(event.getBlock());
         if(zone == null) {
-            if(wm.getConfig().CROPS_PROTECTED)
+            if(wm.getConfig().CROP_PROTECTION_ENABLED)
                 event.setCancelled(true);
         } else {
-            if(zone.getFlag(ZoneVar.CROPS_PROTECTED))
+            if(zone.getFlag(ZoneVar.CROP_PROTECTION))
                 event.setCancelled(true);
         }
     }

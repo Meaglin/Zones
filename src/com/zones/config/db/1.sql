@@ -1,0 +1,12 @@
+update `zones` set `settings` = replace(`settings`, 'VinesSpread', 'VinesGrowth');
+update `zones` set `settings` = replace(`settings`, 'MushroomSpread', 'MushroomGrowth');
+update `zones` set `settings` = replace(`settings`, 'SnowFall', 'SnowForm');
+update `zones` set `settings` = replace(`settings`, 'AllowFire', 'FireEnabled');
+update `zones` set `settings` = replace(`settings`, 'AllowLighter', 'LighterEnabled');
+update `zones` set `settings` = replace(`settings`, 'AllowTeleport', 'TeleportEnabled');
+update `zones` set `settings` = replace(`settings`, 'Notify', 'NotifyEnabled');
+update `zones` set `settings` = replace(`settings`, 'SpawnMobs', 'MobsEnabled');
+update `zones` set `settings` = replace(`settings`, 'SpawnAnimals', 'AnimalsEnabled');
+update `zones` set `settings` = replace(`settings`, 'AllowEnderGrief', 'EnderGriefingEnabled');
+update `zones` set `settings` = replace(`settings`, 'LeafDecay', 'LeafDecayEnabled');
+update `zones` set `settings` = replace(`settings`, 'CropsProtected', 'CropProtectionEnabled');

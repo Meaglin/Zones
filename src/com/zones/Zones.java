@@ -32,7 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 138;
+    public static final int                 Rev             = 158;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -85,16 +85,16 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     @Override
     public void onEnable() {
-        File configFile = new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE);
+        File configFile = new File(getDataFolder(), ZonesConfig.ZONES_CONFIG_FILE);
         if(!configFile.exists()) {
             getDataFolder().mkdirs();
-            if(FileUtil.copyFile(Zones.class.getResourceAsStream("/com/zones/config/Zones.properties"), configFile)) {
+            if(FileUtil.copyFile(getResource("/com/zones/config/Zones.properties"), configFile)) {
                 log.info("[Zones] Missing configuration file restored.");                
             } else {
                 log.info("[Zones] Error while restoring configuration file.");
             }       
         }
-        ZonesConfig.load(configFile);
+        ZonesConfig.load(this, configFile);
         commandMap = new CommandMap(this);  
         database = new Database(this);
         
@@ -198,7 +198,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     public boolean reloadZonesConfig() {
         try {
-            ZonesConfig.load(new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE));
+            ZonesConfig.load(this, new File(getDataFolder().getPath()+"/"+ZonesConfig.ZONES_CONFIG_FILE));
             for(WorldManager w : worlds.values())
                 w.loadConfig();
         } catch(Throwable t) {

@@ -23,7 +23,6 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
 
 import com.zones.WorldManager;
-import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.permissions.Permissions;
 import com.zones.util.FileUtil;
@@ -46,7 +45,7 @@ public class WorldConfig {
     public boolean BORDER_ENFORCE;
     public boolean BORDER_OVERRIDE_ENABLED;
     
-    public boolean ALLOW_TNT_TRIGGER;
+    public boolean DYNAMITE_ENABLED;
     public int TNT_RANGE;
     public boolean EXPLOSION_DAMAGE_ENTITIES;
     
@@ -67,10 +66,13 @@ public class WorldConfig {
     public List<Integer> WATER_PROTECTED_BLOCKS;
     
     public boolean LEAF_DECAY_ENABLED;
-    public boolean SNOW_FALL_ENABLED;
+    public boolean SNOW_FORM_ENABLED;
     public boolean ICE_FORM_ENABLED;
-    public boolean MUSHROOM_SPREAD_ENABLED;
-    public boolean VINES_SPREAD_ENABLED;
+    public boolean MUSHROOM_GROWTH_ENABLED;
+    public boolean VINES_GROWTH_ENABLED;
+    public boolean GRASS_GROWTH_ENABLED;
+    public boolean TREE_GROWTH_ENABLED;
+
     public boolean PHYSICS_ENABLED;
 
     public boolean ICE_MELT_ENABLED;
@@ -80,8 +82,8 @@ public class WorldConfig {
     public List<Integer> PROTECTED_BLOCKS_PLACE;
     public List<Integer> PROTECTED_BLOCKS_BREAK;
     
-    public boolean CROPS_PROTECTED;
-    public boolean ALLOW_ENDER_GRIEF;
+    public boolean CROP_PROTECTION_ENABLED;
+    public boolean ENDER_GRIEFING_ENABLED;
     
     public boolean LOGGED_BLOCKS_ENABLED;
     public List<Integer> LOGGED_BLOCKS_PLACE;
@@ -130,14 +132,18 @@ public class WorldConfig {
     public int SPONGE_LAVA_RADIUS;
     public boolean SPONGE_LAVA_OVERRIDE_NEEDED;
     
-    private static final Properties defaultproperties = new Properties(Zones.class.getResourceAsStream("/com/zones/config/world.properties"));
+    private final Properties defaultproperties;
     
     public WorldConfig(WorldManager manager,String filename) {
-        this.filename = filename;
+        defaultproperties = new Properties(manager.getPlugin().getClass().getResourceAsStream("/com/zones/config/world.properties"));
+        
         this.manager = manager;
+        this.filename = filename;
+
+        
         File worldConfigFile = new File(filename);
         if(!worldConfigFile.exists()) {
-            if(FileUtil.writeFile(worldConfigFile, FileUtil.readFile(Zones.class.getResourceAsStream("/com/zones/config/world.properties")).replace("{$worldname}", manager.getWorldName()))) {                
+            if(FileUtil.writeFile(worldConfigFile, FileUtil.readFile(manager.getPlugin().getResource("/com/zones/config/world.properties")).replace("{$worldname}", manager.getWorldName()))) {                
                 log.info("[Zones]Restored configuration file of world '" + manager.getWorldName() + "'.");
             } else {
                 log.info("[Zones]Error while restoring configuration file of world '" + manager.getWorldName() + "'!");            
@@ -186,7 +192,7 @@ public class WorldConfig {
             BORDER_ENFORCE = p.getBool("EnforceBorder", false);
             BORDER_OVERRIDE_ENABLED = p.getBool("BorderOverrideEnabled", true);
             
-            ALLOW_TNT_TRIGGER = p.getBool("AllowTntTrigger", true);
+            DYNAMITE_ENABLED = p.getBool("AllowTntTrigger", true);
             TNT_RANGE = p.getInt("TntRange", 4);
             
             ALLOW_CREEPER_TRIGGER = p.getBool("AllowCreeperTrigger", true);
@@ -208,10 +214,13 @@ public class WorldConfig {
             WATER_PROTECTED_BLOCKS = p.getIntList("WaterProtectedBlock", "");
             
             LEAF_DECAY_ENABLED = p.getBool("LeafDecayEnabled", true);
-            SNOW_FALL_ENABLED = p.getBool("SnowFallEnabled", true);
+            SNOW_FORM_ENABLED = p.getBool("SnowFallEnabled", true);
             ICE_FORM_ENABLED = p.getBool("IceFormEnabled", true);
-            MUSHROOM_SPREAD_ENABLED = p.getBool("MushroomSpreadEnabled", true);
-            VINES_SPREAD_ENABLED = p.getBool("VinesSpreadEnabled", true);
+            MUSHROOM_GROWTH_ENABLED = p.getBool("MushroomSpreadEnabled", true);
+            VINES_GROWTH_ENABLED = p.getBool("VinesSpreadEnabled", true);
+            GRASS_GROWTH_ENABLED = p.getBool("GrassGrowthEnabled", true);
+            TREE_GROWTH_ENABLED = p.getBool("TreeGrowthEnabled", true);
+            
             PHYSICS_ENABLED             = p.getBool("PhysicsEnabled", true);
 
             ICE_MELT_ENABLED = p.getBool("IceMeltEnabled", true);
@@ -223,8 +232,8 @@ public class WorldConfig {
                 PROTECTED_BLOCKS_BREAK = p.getIntList("ProtectedBlocksBreak", "");
             }
             
-            CROPS_PROTECTED = p.getBool("ProtectCrops", false);
-            ALLOW_ENDER_GRIEF = p.getBool("AllowEnderGrief", true);
+            CROP_PROTECTION_ENABLED = p.getBool("ProtectCrops", false);
+            ENDER_GRIEFING_ENABLED = p.getBool("AllowEnderGrief", true);
             
             LOGGED_BLOCKS_ENABLED = p.getBool("LoggedBlocksEnabled", true);
             if(LOGGED_BLOCKS_ENABLED){

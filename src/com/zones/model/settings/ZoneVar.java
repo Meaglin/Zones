@@ -10,17 +10,17 @@ import com.zones.model.ZoneBase;
 public enum ZoneVar {
     
     
-        TELEPORT("AllowTeleport", Serializer.BOOLEAN) {
+        TELEPORT("TeleportEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {return true;}
         },
-        LIGHTER("AllowLighter", Serializer.BOOLEAN) {
+        LIGHTER("LighterEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
                 return zone.getWorldConfig().LIGHTER_ALLOWED;
             }
         },
-        FIRE("AllowFire", Serializer.BOOLEAN) {
+        FIRE("FireEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
                 return zone.getWorldConfig().FIRE_ENABLED;
@@ -49,49 +49,7 @@ public enum ZoneVar {
         DYNAMITE("DynamiteEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().ALLOW_TNT_TRIGGER;
-            }
-        },
-        SPAWN_MOBS("SpawnMobs", Serializer.BOOLEAN) {
-            @Override
-            public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().MOB_SPAWNING_ENABLED;
-            }
-        },
-        SPAWN_ANIMALS("SpawnAnimals", Serializer.BOOLEAN) {
-            @Override
-            public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().ANIMAL_SPAWNING_ENABLED;
-            }
-        },
-        LEAF_DECAY("LeafDecay", Serializer.BOOLEAN) {
-            @Override
-            public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().LEAF_DECAY_ENABLED;
-            }
-        },
-        SNOW_FALL("SnowFall", Serializer.BOOLEAN) {
-            @Override
-            public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().SNOW_FALL_ENABLED;
-            }
-        },
-        ICE_FORM("IceForm", Serializer.BOOLEAN) {
-            @Override
-            public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().ICE_FORM_ENABLED;
-            }
-        },
-        MUSHROOM_SPREAD("MushroomSpread", Serializer.BOOLEAN) {
-            @Override
-            public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().MUSHROOM_SPREAD_ENABLED;
-            }
-        },
-        VINES_SPREAD("VinesSpread", Serializer.BOOLEAN) {
-            @Override
-            public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().VINES_SPREAD_ENABLED;
+                return zone.getWorldConfig().DYNAMITE_ENABLED;
             }
         },
         PHYSICS("PhysicsEnabled", Serializer.BOOLEAN) {
@@ -100,10 +58,47 @@ public enum ZoneVar {
                 return zone.getWorldConfig().PHYSICS_ENABLED;
             }
         },
-        ICE_MELT("IceMelt", Serializer.BOOLEAN) {
+        NOTIFY("NotifyEnabled", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return false;}
+        },
+        MOBS("MobsEnabled", Serializer.BOOLEAN) {
             @Override
             public Object getDefault(ZoneBase zone) {
-                return zone.getWorldConfig().ICE_MELT_ENABLED;
+                return zone.getWorldConfig().MOB_SPAWNING_ENABLED;
+            }
+        },
+        ANIMALS("AnimalsEnabled", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().ANIMAL_SPAWNING_ENABLED;
+            }
+        },
+        CROP_PROTECTION("CropProtectionEnabled", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return zone.getWorldConfig().CROP_PROTECTION_ENABLED;}
+        },
+        
+        ENDER_GRIEFING("EnderGriefingEnabled", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return zone.getWorldConfig().ENDER_GRIEFING_ENABLED;}
+        },
+        LEAF_DECAY("LeafDecayEnabled", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().LEAF_DECAY_ENABLED;
+            }
+        },
+        SNOW_FALL("SnowForm", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().SNOW_FORM_ENABLED;
+            }
+        },
+        ICE_FORM("IceForm", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().ICE_FORM_ENABLED;
             }
         },
         SNOW_MELT("SnowMelt", Serializer.BOOLEAN) {
@@ -112,19 +107,35 @@ public enum ZoneVar {
                 return zone.getWorldConfig().SNOW_MELT_ENABLED;
             }
         },
-        NOTIFY("Notify", Serializer.BOOLEAN) {
+        ICE_MELT("IceMelt", Serializer.BOOLEAN) {
             @Override
-            public Object getDefault(ZoneBase zone) {return false;}
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().ICE_MELT_ENABLED;
+            }
         },
-        
-        CROPS_PROTECTED("CropsProtected", Serializer.BOOLEAN) {
+        MUSHROOM_SPREAD("MushroomGrowth", Serializer.BOOLEAN) {
             @Override
-            public Object getDefault(ZoneBase zone) {return zone.getWorldConfig().CROPS_PROTECTED;}
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().MUSHROOM_GROWTH_ENABLED;
+            }
         },
-        
-        ALLOW_ENDER_GRIEF("AllowEnderGrief", Serializer.BOOLEAN) {
+        VINES_GROWTH("VinesGrowth", Serializer.BOOLEAN) {
             @Override
-            public Object getDefault(ZoneBase zone) {return zone.getWorldConfig().ALLOW_ENDER_GRIEF;}
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().VINES_GROWTH_ENABLED;
+            }
+        },
+        GRASS_GROWTH("GrassGrowth", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().GRASS_GROWTH_ENABLED;
+            }
+        },
+        TREE_GROWTH("TreeGrowth", Serializer.BOOLEAN) {
+            @Override
+            public Object getDefault(ZoneBase zone) {
+                return zone.getWorldConfig().TREE_GROWTH_ENABLED;
+            }
         },
         
         PLACE_BLOCKS("ProtectedPlaceBlocks", Serializer.INTEGERLIST) {
@@ -136,7 +147,7 @@ public enum ZoneVar {
             public Object getDefault(ZoneBase zone) {return null;}
         },
         
-        MOBS("AllowedMobs", Serializer.ENTITYLIST) {
+        ALLOWED_MOBS("AllowedMobs", Serializer.ENTITYLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {
                 if(zone.getWorldConfig().ALLOWED_MOBS_ENABLED)
@@ -144,7 +155,7 @@ public enum ZoneVar {
                 return null;
             }
         },
-        ANIMALS("AllowedAnimals", Serializer.ENTITYLIST) {
+        ALLOWED_ANIMALS("AllowedAnimals", Serializer.ENTITYLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {
                 if(zone.getWorldConfig().ALLOWED_ANIMALS_ENABLED)
@@ -154,12 +165,10 @@ public enum ZoneVar {
         },
         
         TEXTURE_PACK("TexturePack", Serializer.STRING) {
-
             @Override
             public Object getDefault(ZoneBase zone) {
                 return null;
             }
-            
         },
         
         ENTER_MESSAGE("EnterMessage", Serializer.STRING) {

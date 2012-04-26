@@ -52,11 +52,22 @@ public class ZoneNPoly extends ZoneForm {
     public boolean isInsideZone(int x, int y) {
         boolean inside = false;
         for (int i = 0, j = _x.length - 1; i < _x.length; j = i++) {
+            if(_y[i] == _y[j] && _y[i] == y && x <= max(_x[i], _x[j]) && x >= min(_x[i], _x[j])) return true;
+            if(_x[i] == _x[j] && _x[i] == x && y <= max(_y[i], _y[j]) && y >= min(_y[i], _y[j])) return true;
+
             if ((((_y[i] <= y) && (y < _y[j])) || ((_y[j] <= y) && (y < _y[i]))) && (x < (_x[j] - _x[i]) * (y - _y[i]) / (_y[j] - _y[i]) + _x[i])) {
                 inside = !inside;
             }
         }
         return inside;
+    }
+
+    private static final int min(int a, int b) {
+        return a > b ? b : a;
+    }
+    
+    private static final int max(int a, int b) {
+        return a > b ? a : b;
     }
     
     @Override

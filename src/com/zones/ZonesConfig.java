@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 
 import com.zones.util.properties.ExtendedProperties;
 import com.zones.util.properties.Properties;
+import com.zones.util.properties.Property;
 
 /**
  * 
@@ -29,7 +30,8 @@ public class ZonesConfig {
     public static int          CREATION_TOOL_TYPE;
     public static int          CREATION_PILON_TYPE;
     public static int          CREATION_PILON_HEIGHT;
-
+    
+    public static int          DATABASE_VERSION;
     
     public static final String PLAYER_CANT_BUILD_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot place blocks in zone '{zname}' !";
     public static final String PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot change blocks in zone '{zname}' !";
@@ -67,10 +69,11 @@ public class ZonesConfig {
     public static final String PLAYER_ENTERED_ZONE = ChatColor.YELLOW + "Player {pname}" + ChatColor.YELLOW + " has entered zone {zname}.";
     public static final String PLAYER_LEFT_ZONE = ChatColor.YELLOW + "Player {pname}" + ChatColor.YELLOW + " has left zone {zname}.";
     
-    private static final Properties defaultproperties = new Properties(Zones.class.getResourceAsStream("/com/zones/config/Zones.properties"));
+    private static Properties defaultproperties;
     
-    public static void load(File f) {
+    public static void load(Zones plugin, File f) {
         try {
+            defaultproperties = new Properties(plugin.getClass().getResourceAsStream("/com/zones/config/Zones.properties"));
             ExtendedProperties zp = new ExtendedProperties(f);
             zp.load();
             WORLDEDIT_ENABLED = zp.getBool("EnableWorldEdit", false);
@@ -84,6 +87,8 @@ public class ZonesConfig {
             CREATION_TOOL_TYPE      = zp.getInt("CreationToolType", 280);
             CREATION_PILON_TYPE     = zp.getInt("CreationPilonType", 3);
             CREATION_PILON_HEIGHT   = zp.getInt("CreationPilonHeight", 4);
+            
+            DATABASE_VERSION        = zp.getInt("DatabaseVersion", 0);
             if(zp.isMissingProperties() && RESTORE_MISSING_PROPERTIES) {
                 int count = zp.restore(defaultproperties);
                 zp.save(true);
@@ -91,6 +96,26 @@ public class ZonesConfig {
             }
         } catch (Exception e) {
             log.warning("[Zones]Error loading configurations.");
+            e.printStackTrace();
+        }
+    }
+    
+    public static void setDatabaseVersion(File f, int version) {
+        try {
+            ExtendedProperties zp = new ExtendedProperties(f);
+            zp.load();
+            
+            Property p = zp.getProperty("DatabaseVersion");
+            if(p == null) {
+                zp.restore(defaultproperties);
+                p = zp.getProperty("DatabaseVersion");
+            }
+            p.setValue(version);
+            zp.save(true);
+            
+            DATABASE_VERSION = version;
+        } catch (Exception e) {
+            log.warning("[Zones]Error update db version.");
             e.printStackTrace();
         }
     }

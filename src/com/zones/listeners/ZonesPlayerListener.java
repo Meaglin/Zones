@@ -351,10 +351,10 @@ public class ZonesPlayerListener implements Listener {
             WorldManager wm = plugin.getWorldManager(player.getWorld());
             ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
             if(zone == null) {
-                if(wm.getConfig().CROPS_PROTECTED)
+                if(wm.getConfig().CROP_PROTECTION_ENABLED)
                     event.setCancelled(true);
             } else {
-                if(zone.getFlag(ZoneVar.CROPS_PROTECTED))
+                if(zone.getFlag(ZoneVar.CROP_PROTECTION))
                     event.setCancelled(true);
             }
         }

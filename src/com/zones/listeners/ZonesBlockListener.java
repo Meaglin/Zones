@@ -1,9 +1,11 @@
 package com.zones.listeners;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -15,6 +17,7 @@ import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.world.StructureGrowEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -24,8 +27,8 @@ import com.zones.accessresolver.interfaces.BlockFromToResolver;
 import com.zones.accessresolver.interfaces.BlockResolver;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
+import com.zones.model.settings.ZoneVar;
 import com.zones.selection.ZoneSelection;
-import org.bukkit.event.EventPriority;
 
 /**
  * 
@@ -186,7 +189,7 @@ public class ZonesBlockListener implements Listener {
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(blockstate.getTypeId() == 78 && !wm.getConfig().SNOW_FALL_ENABLED)
+            if(blockstate.getTypeId() == 78 && !wm.getConfig().SNOW_FORM_ENABLED)
                 event.setCancelled(true);
             else if(blockstate.getTypeId() == 79 && !wm.getConfig().ICE_FORM_ENABLED)
                 event.setCancelled(true);
@@ -202,8 +205,11 @@ public class ZonesBlockListener implements Listener {
     public void onBlockFade(BlockFadeEvent event) {
         Block block = event.getBlock();
         int typeId = block.getTypeId();
-        if(typeId != 78 && typeId != 79)
-            return;
+        
+        switch(typeId) {
+            case 78: case 79: break;
+            default: return;
+        }
         
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
@@ -228,17 +234,49 @@ public class ZonesBlockListener implements Listener {
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockSpread(org.bukkit.event.block.BlockSpreadEvent event) {
+        switch(event.getNewState().getTypeId()) {
+            case 2: case 39: case 40: break;
+            default: return;
+        }
         Block block = event.getBlock();
 
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
+        
         if(zone == null) {
-            if(!wm.getConfig().MUSHROOM_SPREAD_ENABLED)
-                event.setCancelled(true);
-        } else {
-            if(!isAllowed(zone,AccessResolver.MUSHROOM_SPREAD, event.getBlock()))
-                event.setCancelled(true);
+            switch(event.getNewState().getTypeId()) {
+                case 2:
+                    if(!wm.getConfig().GRASS_GROWTH_ENABLED) event.setCancelled(true);
+                    break;
+                case 39: case 40:
+                    if(!wm.getConfig().MUSHROOM_GROWTH_ENABLED) event.setCancelled(true);
+                    break;
+            }
+            return;
+        } 
+        
+        switch(event.getNewState().getTypeId()) {
+            case 2:
+                if(!zone.getFlag(ZoneVar.GRASS_GROWTH)) event.setCancelled(true);
+                break;
+            case 39: case 40:
+                if(!isAllowed(zone,AccessResolver.MUSHROOM_SPREAD, event.getBlock())) event.setCancelled(true);
+                break;
         }
+    }
+    
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onTree(StructureGrowEvent event) {
+        Location loc = event.getLocation();
+        
+        WorldManager wm = plugin.getWorldManager(loc.getWorld());
+        ZoneBase zone = wm.getActiveZone(loc);
+        if(zone == null) {
+            if(!wm.getConfig().TREE_GROWTH_ENABLED) event.setCancelled(true);
+            return;
+        }
+        
+        if(!zone.getFlag(ZoneVar.TREE_GROWTH)) event.setCancelled(true);
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
