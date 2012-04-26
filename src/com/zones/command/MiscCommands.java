@@ -1,5 +1,7 @@
 package com.zones.command;
 
+import java.io.File;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,11 +18,10 @@ public class MiscCommands extends CommandsBase {
     }
     
     @Command(
-            name = "god",
-            aliases = { "" },
-            description = "Toggles you're godmode.",
-            requiresPlayer = true,
-            requiredPermission = "zones.god"
+        name = "god",
+        description = "Toggles you're godmode.",
+        requiresPlayer = true,
+        requiredPermission = "zones.god"
     )
     public void god(Player player, String[] params) {
         WorldConfig config = getPlugin().getWorldManager(player).getConfig();
@@ -33,11 +34,10 @@ public class MiscCommands extends CommandsBase {
     }
     
     @Command(
-            name = "ungod",
-            aliases = { "" },
-            description = "Disables you're godmode.",
-            requiresPlayer = true,
-            requiredPermission = "zones.god"
+        name = "ungod",
+        description = "Disables you're godmode.",
+        requiresPlayer = true,
+        requiredPermission = "zones.god"
     )
     public void ungod(Player player, String[] params) {
         WorldConfig config = getPlugin().getWorldManager(player).getConfig();
@@ -50,13 +50,12 @@ public class MiscCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zreload",
-            aliases = { "" },
-            description = "Reloads specified part of the plugin\nWhen using 'zone' the zone with id <zone id> will \nbe reloaded from db.",
-            usage = "/<command> [config|zones|all|zone|textiel] <zone id>",
-            requiredPermission = "zones.admin",
-            requiresPlayer = false,
-            min = 1
+        name = "zreload",
+        description = "Reloads specified part of the plugin\nWhen using 'zone' the zone with id <zone id> will \nbe reloaded from db.",
+        usage = "/<command> [config|zones|all|zone|textiel] <zone id>",
+        requiredPermission = "zones.admin",
+        requiresPlayer = false,
+        min = 1
     )
     public void reload(CommandSender sender, String[] params) {
         String type = params[0];
@@ -103,29 +102,30 @@ public class MiscCommands extends CommandsBase {
             sender.sendMessage(ChatColor.GREEN + "Textiel reloaded.");
         }
     }
-    /*
-     * @Command(
-                name = "",
-                aliases = { "" },
-                description = "",
-                usage = "",
-                requiresPlayer = true
-        )
-        public void (Player player, String[] params) {
-            
-        }
-     */
     
     @Command(
-            name = "zrefresh",
-            aliases = { "" },
-            description = "Refreshes the currently selected zone.",
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zrefresh",
+        description = "Refreshes the currently selected zone.",
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void refresh(Player player, String[] params) {
         ZoneBase zone = getSelectedZone(player);
         getPlugin().getZoneManager().reloadZone(zone.getId());
         player.sendMessage(ChatColor.GREEN + "Zone reloaded.");
+    }
+    
+    
+    @Command(
+       name = "ztest",
+       description = "The command where i test stuff.",
+       requiresPlayer = true,
+       requiredPermission = "zones.admin.test",
+       min = 1
+    )
+    public void test(Player player, String[] params) {
+//        String file = FileUtil.readFile(getPlugin().getClass().getResourceAsStream(params[0]));
+//        player.sendMessage(file.substring(0, file.length() > 100 ? 100 : file.length()));
+        ZonesConfig.setDatabaseVersion(new File(getPlugin().getDataFolder(), ZonesConfig.ZONES_CONFIG_FILE), Integer.parseInt(params[0]));
     }
 }

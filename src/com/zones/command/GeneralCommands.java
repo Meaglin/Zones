@@ -26,11 +26,10 @@ public class GeneralCommands extends CommandsBase {
     }
 
     @Command(
-            name = "zinfo",
-            aliases = { "" },
-            description = "Show the type,size,etc... of your selected zone.",
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zinfo",
+        description = "Show the type,size,etc... of your selected zone.",
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void info(Player player, String[] params) {
         ZoneBase b = getSelectedZone(player);
@@ -99,11 +98,11 @@ public class GeneralCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zselect",
-            aliases = { "zs", "zsel" },
-            description = "Select a zone to modify.\nReset your selected zone with 'reset'.",
-            usage = "/<command> <zone id|zone name|reset>",
-            requiresPlayer = true
+        name = "zselect",
+        aliases = { "zs", "zsel" },
+        description = "Select a zone to modify.\nReset your selected zone with 'reset'.",
+        usage = "/<command> <zone id|zone name|reset>",
+        requiresPlayer = true
     )
     public void select(Player player, String[] params) {
         if(params.length == 1){
@@ -159,10 +158,9 @@ public class GeneralCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zwho",
-            aliases = { "" },
-            description = "Shows all the players in the zone you're standing in.\nShows all players in selected zone when you have\n a zone selected.",
-            requiresPlayer = true
+        name = "zwho",
+        description = "Shows all the players in the zone you're standing in.\nShows all players in selected zone when you have\n a zone selected.",
+        requiresPlayer = true
     )
     public void who(Player player, String[] params) {
         if(hasSelected(player)) {
@@ -210,10 +208,9 @@ public class GeneralCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zregioninfo",
-            aliases = { "" },
-            description = "Shows region info, mostly for debug purposes.",
-            requiresPlayer = true
+        name = "zregioninfo",
+        description = "Shows region info, mostly for debug purposes.",
+        requiresPlayer = true
     )
     public void regioninfo(Player player, String[] params) {
         Region r = getPlugin().getWorldManager(player).getRegion(player);
@@ -222,9 +219,8 @@ public class GeneralCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zaccess",
-            aliases = { "" },
-            description = "Displays info about all the access 'tags'(BCDEH)"
+        name = "zaccess",
+        description = "Displays info about all the access 'tags'(BCDEH)"
     )
     public void access(CommandSender sender, String[] params) {
         sender.sendMessage(ChatColor.GREEN + "Zone Access tags explained:");
@@ -236,10 +232,9 @@ public class GeneralCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zhelp",
-            aliases = { "" },
-            description = "Shows help about the specified <page|command|category> ",
-            usage = "/<command> <page|command|category> "
+        name = "zhelp",
+        description = "Shows help about the specified <page|command|category> ",
+        usage = "/<command> <page|command|category> "
     )
     public void help(CommandSender sender, String[] params) {
         CommandMap cmds = getPlugin().getCommandMap();
@@ -321,9 +316,8 @@ public class GeneralCommands extends CommandsBase {
     }
 
     @Command(
-            name = "zabout",
-            aliases = { "" },
-            description = "Shows current zone version and total count of zones."
+        name = "zabout",
+        description = "Shows current zone version and total count of zones."
     )
     public void about(CommandSender sender, String[] params) {
         sender.sendMessage(ChatColor.GOLD + "Zones Area Protection plugin by Meaglin.");

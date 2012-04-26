@@ -38,12 +38,12 @@ public class WorldeditCommands extends CommandsBase {
     }
 
     @Command(
-            name = "zdefine", 
-            aliases = { "zd" }, 
-            description = "Creates a zone with [name] based on your current worldedit selection.", 
-            usage = "/<command> [name]",
-            min = 1,
-            requiresPlayer = true
+        name = "zdefine", 
+        aliases = { "zd" }, 
+        description = "Creates a zone with [name] based on your current worldedit selection.", 
+        usage = "/<command> [name]",
+        min = 1,
+        requiresPlayer = true
     )
     public void define(Player player, String[] params) {
         ZoneBase inheritedZone = null;
@@ -102,11 +102,11 @@ public class WorldeditCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zredefine", 
-            aliases = { "zrd" }, 
-            description = "Changes your current selected zone to the form \nof your current worldedit selection.", 
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zredefine", 
+        aliases = { "zrd" }, 
+        description = "Changes your current selected zone to the form \nof your current worldedit selection.", 
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void redefine(Player player, String[] params) {
         if(!ZonesConfig.WORLDEDIT_ENABLED || getPlugin().getWorldEdit() == null) {
@@ -135,11 +135,11 @@ public class WorldeditCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zexport", 
-            aliases = { "zx", "zex", "zexp" }, 
-            description = "Export your current selected zone to your worldedit selection.", 
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zexport", 
+        aliases = { "zx", "zex", "zexp" }, 
+        description = "Export your current selected zone to your worldedit selection.", 
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void exportWE(Player player, String[] params) {
         if(!ZonesConfig.WORLDEDIT_ENABLED || getPlugin().getWorldEdit() == null) {
@@ -203,11 +203,11 @@ public class WorldeditCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zimport", 
-            aliases = { "zi" , "zimp", "zim" }, 
-            description = "Import your worldedit selection into your current \n zone selection.", 
-            requiresPlayer = true,
-            requiresSelection = true
+        name = "zimport", 
+        aliases = { "zi" , "zimp", "zim" }, 
+        description = "Import your worldedit selection into your current \n zone selection.", 
+        requiresPlayer = true,
+        requiresSelection = true
     )
     public void importWE(Player player, String[] params) {
         if(!ZonesConfig.WORLDEDIT_ENABLED) {

@@ -30,32 +30,34 @@ public class SettingsCommands extends CommandsBase {
         toggles.put("health",           new Object[] { "zones.toggle.health", "Health", ZoneVar.HEALTH } );
         toggles.put("lava" ,            new Object[] { "zones.toggle.lava", "Lava Flow", ZoneVar.LAVA } );
         toggles.put("water" ,           new Object[] { "zones.toggle.water", "Water Flow", ZoneVar.WATER } );
-        toggles.put("mobs" ,            new Object[] { "zones.toggle.mobs", "Mobs Spawning", ZoneVar.SPAWN_MOBS } );
-        toggles.put("animals" ,         new Object[] { "zones.toggle.animals", "Animals Spawning", ZoneVar.SPAWN_ANIMALS } );
+        toggles.put("mobs" ,            new Object[] { "zones.toggle.mobs", "Mobs Spawning", ZoneVar.MOBS } );
+        toggles.put("animals" ,         new Object[] { "zones.toggle.animals", "Animals Spawning", ZoneVar.ANIMALS } );
         toggles.put("leafdecay",        new Object[] { "zones.toggle.leafdecay", "Leaf Decay", ZoneVar.LEAF_DECAY });
         toggles.put("teleport",         new Object[] { "zones.toggle.teleport", "Teleporting", ZoneVar.TELEPORT });
         toggles.put("lighter",          new Object[] { "zones.toggle.lighter", "Flint & Steel", ZoneVar.LIGHTER });
         toggles.put("fire",             new Object[] { "zones.toggle.fire", "Fire", ZoneVar.FIRE });
-        toggles.put("snowfall",         new Object[] { "zones.toggle.snowfall", "SnowFall", ZoneVar.SNOW_FALL });
         toggles.put("iceform",          new Object[] { "zones.toggle.iceform", "IceForm", ZoneVar.ICE_FORM });
         toggles.put("icemelt",          new Object[] { "zones.toggle.icemelt", "IceMelt", ZoneVar.ICE_MELT });
+        toggles.put("snowfall",         new Object[] { "zones.toggle.snowfall", "SnowForm", ZoneVar.SNOW_FALL });
         toggles.put("snowmelt",         new Object[] { "zones.toggle.snowmelt", "SnowMelt", ZoneVar.SNOW_MELT });
-        toggles.put("mushroomspread",   new Object[] { "zones.toggle.mushroomspread", "MushroomSpread", ZoneVar.MUSHROOM_SPREAD});
-        toggles.put("vinespread",       new Object[] { "zones.toggle.vinespread", "VineSpread", ZoneVar.VINES_SPREAD});
+        toggles.put("mushroomspread",   new Object[] { "zones.toggle.mushroomspread", "MushroomGrowth", ZoneVar.MUSHROOM_SPREAD});
+        toggles.put("vinespread",       new Object[] { "zones.toggle.vinespread", "VineGrowth", ZoneVar.VINES_GROWTH});
+        toggles.put("treegrowth",       new Object[] { "zones.toggle.treegrowth", "TreeGrowth", ZoneVar.TREE_GROWTH});
+        toggles.put("grassgrowth",      new Object[] { "zones.toggle.grassgrowth", "GrasGrowth", ZoneVar.GRASS_GROWTH});
         toggles.put("physics",          new Object[] { "zones.toggle.physics", "Physics", ZoneVar.PHYSICS });
         toggles.put("notify",           new Object[] { "zones.toggle.notify", "Enters/Leaves Notify's", ZoneVar.NOTIFY });
-        toggles.put("crop",             new Object[] { "zones.toggle.crop", "Crop protection", ZoneVar.CROPS_PROTECTED });
-        toggles.put("enderman",         new Object[] { "zones.toggle.enderman", "Enderman Grief", ZoneVar.ALLOW_ENDER_GRIEF });
+        toggles.put("crop",             new Object[] { "zones.toggle.crop", "Crop protection", ZoneVar.CROP_PROTECTION });
+        toggles.put("enderman",         new Object[] { "zones.toggle.enderman", "Enderman Griefing", ZoneVar.ENDER_GRIEFING });
         toggles.put("inheritgroups",    new Object[] { "zones.toggle.inheritgroup", "Inherit Group", ZoneVar.INHERIT_GROUP });
         
         lists.put("place", ZoneVar.PLACE_BLOCKS);
         lists.put("protectedplace", ZoneVar.PLACE_BLOCKS);
         lists.put("break", ZoneVar.BREAK_BLOCKS);
         lists.put("protectedbreak", ZoneVar.BREAK_BLOCKS);
-        lists.put("allowedanimals", ZoneVar.ANIMALS);
-        lists.put("animals", ZoneVar.ANIMALS);
-        lists.put("mobs", ZoneVar.MOBS);
-        lists.put("allowedmobs" , ZoneVar.MOBS);
+        lists.put("allowedanimals", ZoneVar.ALLOWED_ANIMALS);
+        lists.put("animals", ZoneVar.ALLOWED_ANIMALS);
+        lists.put("mobs", ZoneVar.ALLOWED_MOBS);
+        lists.put("allowedmobs" , ZoneVar.ALLOWED_MOBS);
         
         vars.put("entermessage", ZoneVar.ENTER_MESSAGE);
         vars.put("leavemessage", ZoneVar.LEAVE_MESSAGE);
@@ -65,25 +67,24 @@ public class SettingsCommands extends CommandsBase {
     }
 
     @Command(
-            name = "zset",
-            aliases = { "" },
-            description = 
-            "Defines [variables name]'s value as [value]. Variables:\n" +
-            "place - [L] blocks which cannot be placed.\n" +
-            "break - [L] blocks which cannot be destroyed.\n" +
-            "animals - [L] list of animals that can spawn.\n" +
-            "mobs - [L] list of mobs that can spawn.\n" +
-            "entermessage - The message you see when you enter a zone.\n" +
-            "leavemessage - The message you see when you leave a zone.\n" +
-            "{zname} - zone name,{pname} - playername,{access} - access\n" +
-            "and ^ - colors, Can be used to make the message dynamic.\n" +
-            "Disable enter/leave messages by settings them to \"NONE\".\n" +
-            "spawnlocation - change the respawn location within the zone.\n" +
-            "[L]List variables requires comma separated input: <val1>,<val2>",
-            usage = "/<command> [variable name] [value]",
-            min = 1,
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zset",
+        description = 
+        "Defines [variables name]'s value as [value]. Variables:\n" +
+        "place - [L] blocks which cannot be placed.\n" +
+        "break - [L] blocks which cannot be destroyed.\n" +
+        "animals - [L] list of animals that can spawn.\n" +
+        "mobs - [L] list of mobs that can spawn.\n" +
+        "entermessage - The message you see when you enter a zone.\n" +
+        "leavemessage - The message you see when you leave a zone.\n" +
+        "{zname} - zone name,{pname} - playername,{access} - access\n" +
+        "and ^ - colors, Can be used to make the message dynamic.\n" +
+        "Disable enter/leave messages by settings them to \"NONE\".\n" +
+        "spawnlocation - change the respawn location within the zone.\n" +
+        "[L]List variables requires comma separated input: <val1>,<val2>",
+        usage = "/<command> [variable name] [value]",
+        min = 1,
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void set(Player player, String[] params) {
         ZoneVar v = vars.get(params[0].toLowerCase());
@@ -129,19 +130,19 @@ public class SettingsCommands extends CommandsBase {
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Command(
-            name = "zadd",
-            aliases = { "za" },
-            description = 
-            "Adds the [value] to the list [variable name] \n." +
-            "List of variables :\n" +
-            "place - blocks which cannot be placed.\n" +
-            "break - blocks which cannot be destroyed.\n" +
-            "animals - list of animals that can spawn.\n" +
-            "mobs - list of mobs that can spawn.",
-            usage = "/<command> [variable name] [value]",
-            min = 1,
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zadd",
+        aliases = { "za" },
+        description = 
+        "Adds the [value] to the list [variable name] \n." +
+        "List of variables :\n" +
+        "place - blocks which cannot be placed.\n" +
+        "break - blocks which cannot be destroyed.\n" +
+        "animals - list of animals that can spawn.\n" +
+        "mobs - list of mobs that can spawn.",
+        usage = "/<command> [variable name] [value]",
+        min = 1,
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void add(Player player, String[] params) {
         ZoneVar v = lists.get(params[0].toLowerCase());
@@ -186,19 +187,19 @@ public class SettingsCommands extends CommandsBase {
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Command(
-            name = "zremove",
-            aliases = { "zr" },
-            description = 
-            "Removes the [value] from the list [variable name] \n." +
-            "List of variables :\n" +
-            "place - blocks which cannot be placed.\n" +
-            "break - blocks which cannot be destroyed.\n" +
-            "animals - list of animals that can spawn.\n" +
-            "mobs - list of mobs that can spawn.",
-            usage = "/<command> [variable name] [value]",
-            min = 2,
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zremove",
+        aliases = { "zr" },
+        description = 
+        "Removes the [value] from the list [variable name] \n." +
+        "List of variables :\n" +
+        "place - blocks which cannot be placed.\n" +
+        "break - blocks which cannot be destroyed.\n" +
+        "animals - list of animals that can spawn.\n" +
+        "mobs - list of mobs that can spawn.",
+        usage = "/<command> [variable name] [value]",
+        min = 2,
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void remove(Player player, String[] params) {
         ZoneVar v = lists.get(params[0].toLowerCase());
@@ -250,26 +251,26 @@ public class SettingsCommands extends CommandsBase {
     }
     
     @Command(
-            name = "ztoggle",
-            aliases = { "zt" },
-            description = 
-                "toggles [variable name], options: \n" +
-                "lava|water - Toggles lava/water flow into the zone. \n" +
-                "mobs|animals - Toggles mobs/animal spawning in the zone.\n" +
-                "health - Enables/Disables Health in the zone.\n" +
-                "tnt - Enables/Disables tnt explosions in the zone.\n" +
-                "leafdecay - Enables/Disables leave decay in the zone.\n" +
-                "teleport - Enables/Disables teleporting in/out of the zone.\n" +
-                "fire - Enables/Disables fire in the zone.\n" +
-                "snowfall|iceform - Enables/Disables snowfall|iceform.\n" +
-                "physics - Enables/Disables physics in the zone.\n"  +
-                "notify - Toggles enter/leave notifications in the zone.\n" +
-                "crop - Toggles Crop Protection.",
-            usage = "/<command> [variable name]",
-            min = 1,
-            max = 1,
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "ztoggle",
+        aliases = { "zt" },
+        description = 
+            "toggles [variable name], options: \n" +
+            "lava|water - Toggles lava/water flow into the zone. \n" +
+            "mobs|animals - Toggles mobs/animal spawning in the zone.\n" +
+            "health - Enables/Disables Health in the zone.\n" +
+            "tnt - Enables/Disables tnt explosions in the zone.\n" +
+            "leafdecay - Enables/Disables leave decay in the zone.\n" +
+            "teleport - Enables/Disables teleporting in/out of the zone.\n" +
+            "fire - Enables/Disables fire in the zone.\n" +
+            "snowfall|iceform - Enables/Disables snowfall|iceform.\n" +
+            "physics - Enables/Disables physics in the zone.\n"  +
+            "notify - Toggles enter/leave notifications in the zone.\n" +
+            "crop - Toggles Crop Protection.",
+        usage = "/<command> [variable name]",
+        min = 1,
+        max = 1,
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void toggle(Player player, String[] params) {
         if(!toggles.containsKey(params[0].toLowerCase())) {
@@ -293,13 +294,13 @@ public class SettingsCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zsetname",
-            aliases = { "zsn" },
-            description = "Changes to name of the currently selected zone.\nZone name needs to be between 4 and 40 characters long.",
-            usage = "/<command> [zone name]",
-            min = 1,
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zsetname",
+        aliases = { "zsn" },
+        description = "Changes to name of the currently selected zone.\nZone name needs to be between 4 and 40 characters long.",
+        usage = "/<command> [zone name]",
+        min = 1,
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void setName(Player player, String[] params) {
         String name = "";

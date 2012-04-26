@@ -21,16 +21,16 @@ public class CreateCommands extends CommandsBase {
     }
 
     @Command(
-            name = "zcreate", 
-            aliases = { "zc" }, 
-            description = 
-                "Starts zone creation mode\n" +
-        		"Use /zimport,/zsetz,/zsetclass,/zsettype and the tool\n" +
-        		"to define your zone.\n" +
-        		"Use /zsave to save your work or /zstop to RageQuit.", 
-            usage = "/<command> [zone name]",
-            min = 1,
-            requiresPlayer = true
+        name = "zcreate", 
+        aliases = { "zc" }, 
+        description = 
+            "Starts zone creation mode\n" +
+    		"Use /zimport,/zsetz,/zsetclass,/zsettype and the tool\n" +
+    		"to define your zone.\n" +
+    		"Use /zsave to save your work or /zstop to RageQuit.", 
+        usage = "/<command> [zone name]",
+        min = 1,
+        requiresPlayer = true
     )
     public void create(Player player, String[] params) {
         ZoneBase inheritedZone = null;
@@ -68,15 +68,14 @@ public class CreateCommands extends CommandsBase {
     
     
     @Command(
-            name = "zedit", 
-            aliases = { "" }, 
-            description = 
-            "Loads your selected zone into your edit selection.\n" +
-            "Use /zimport,/zsetz,/zsetclass,/zsettype and the tool\n" +
-            "to change the zone.\n" +
-            "Use /zsave to save your work or /zstop to RageQuit.", 
-            requiresPlayer = true,
-            requiresSelected = true
+        name = "zedit", 
+        description = 
+        "Loads your selected zone into your edit selection.\n" +
+        "Use /zimport,/zsetz,/zsetclass,/zsettype and the tool\n" +
+        "to change the zone.\n" +
+        "Use /zsave to save your work or /zstop to RageQuit.", 
+        requiresPlayer = true,
+        requiresSelected = true
     )
     public void edit(Player player, String[] params) {
         ZoneBase z = getSelectedZone(player);
@@ -103,36 +102,34 @@ public class CreateCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zsetclass",
-            aliases = { "" },
-            description = 
-            "Changes the [class] of your selection.\n" +
-    		"Possible classes:\n" +
-    		"  ZoneNormal - The basic type.\n" +
-    		"  ZoneInherit - Allows subzoning and inheritence.\n" +
-    		"  ZonePlot - A claimable, subzonable zone.",
-            usage = "/<command> [class]",
-            min = 1,
-            max = 1,
-            requiresPlayer = true,
-            requiresSelection = true
+        name = "zsetclass",
+        description = 
+        "Changes the [class] of your selection.\n" +
+		"Possible classes:\n" +
+		"  ZoneNormal - The basic type.\n" +
+		"  ZoneInherit - Allows subzoning and inheritence.\n" +
+		"  ZonePlot - A claimable, subzonable zone.",
+        usage = "/<command> [class]",
+        min = 1,
+        max = 1,
+        requiresPlayer = true,
+        requiresSelection = true
     )
     public void setClass(Player player, String[] params) {
         getZoneSelection(player).setClass(params[0]);
     }
     
     @Command(
-            name = "zsettype",
-            aliases = { "" },
-            description = "Changes the type of your selection.\n" +
-            		"Possible types:\n" +
-            		"  Cuboid - The default form.\n" +
-            		"  NPoly - Allows polygonal zones.",
-            usage = "/<command> [Cuboid|NPoly]",
-            min = 1,
-            max = 1,
-            requiresPlayer = true,
-            requiresSelection = true
+        name = "zsettype",
+        description = "Changes the type of your selection.\n" +
+        		"Possible types:\n" +
+        		"  Cuboid - The default form.\n" +
+        		"  NPoly - Allows polygonal zones.",
+        usage = "/<command> [Cuboid|NPoly]",
+        min = 1,
+        max = 1,
+        requiresPlayer = true,
+        requiresSelection = true
     )
     public void setType(Player player, String[] params) {
         if(params[0].equalsIgnoreCase("Cuboid"))
@@ -148,11 +145,10 @@ public class CreateCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zsave",
-            aliases = { "" },
-            description = "Saves your current selection.\nAutomatically selects the resulting zone.",
-            requiresPlayer = true,
-            requiresSelection = true
+        name = "zsave",
+        description = "Saves your current selection.\nAutomatically selects the resulting zone.",
+        requiresPlayer = true,
+        requiresSelection = true
     )
     public void save(Player player, String[] params) {
         ZoneSelection selection = getZoneSelection(player);
@@ -168,11 +164,10 @@ public class CreateCommands extends CommandsBase {
     }
     
     @Command(
-            name = "zstop",
-            aliases = { "" },
-            description = "Deletes your current selection and reverts all modifications.",
-            requiresPlayer = true,
-            requiresSelection = true
+        name = "zstop",
+        description = "Deletes your current selection and reverts all modifications.",
+        requiresPlayer = true,
+        requiresSelection = true
     )
     public void stop(Player player, String[] params) {
         getZoneSelection(player).setConfirm(Confirm.STOP);
