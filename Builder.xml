@@ -43,23 +43,31 @@
 			<zipfileset dir="${src}/com/zones/config/" prefix="com/zones/config/" >
 				<include name="*.properties" />
 			</zipfileset >
+			<zipfileset dir="${src}/com/zones/config/db/" prefix="com/zones/config/db/" >
+                <include name="*.sql" />
+            </zipfileset >
 			<zipfileset dir="" prefix="" >
 				<include name="plugin.yml" />
 			</zipfileset >
 			<zipfileset dir="${src}" prefix="src" >
 				<include name="**" />
 			</zipfileset>
-			<zipfileset dir="" prefix="" >
+			<!-- <zipfileset dir="" prefix="" >
 				<include name="db.sql" />
 			</zipfileset>
-			<!-- <zipfileset src="libs/trove-3.0.0.jar" prefix="" >
+			 <zipfileset src="libs/trove-3.0.0.jar" prefix="" >
 				<include name="**" />
 				<exclude name="META-INF/*" />
 			</zipfileset> -->
 		</jar>
-		<zip destfile="../Zones-2.3.zip" >
+		<zip destfile="../Zones-2.4.zip" >
 		  <fileset dir=".." includes="Zones.jar" />
-		  <fileset dir="./" includes="db.sql" />
+		  <zipfileset dir="${src}/com/zones/config/" >
+                <include name="*.properties" />
+            </zipfileset >
+		  <zipfileset dir="${src}/com/zones/config/db/" >
+                <include name="*.sql" />
+            </zipfileset >
 		</zip>
 	</target>
 	
