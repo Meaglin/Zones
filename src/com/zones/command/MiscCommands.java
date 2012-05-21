@@ -10,6 +10,7 @@ import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.model.WorldConfig;
 import com.zones.model.ZoneBase;
+import com.zones.model.types.ZonePlot;
 
 public class MiscCommands extends CommandsBase {
 
@@ -127,5 +128,20 @@ public class MiscCommands extends CommandsBase {
 //        String file = FileUtil.readFile(getPlugin().getClass().getResourceAsStream(params[0]));
 //        player.sendMessage(file.substring(0, file.length() > 100 ? 100 : file.length()));
         ZonesConfig.setDatabaseVersion(new File(getPlugin().getDataFolder(), ZonesConfig.ZONES_CONFIG_FILE), Integer.parseInt(params[0]));
+    }
+    
+    @Command(
+        name = "zclaim",
+        description = "Claim the zone you're currently standing in.",
+        requiresPlayer = true,
+        requiredPermission = "zones.claim"
+    )
+    public void run(Player player, String[] vars) {
+        ZoneBase zone = getPlugin().getWorldManager(player).getActiveZone(player);
+        if(!(zone instanceof ZonePlot)) {
+            zone.sendMarkupMessage(ChatColor.RED + "You cannot claim {zname} since it's not a claimable zone.", player);
+            return;
+        }
+        ((ZonePlot)zone).claim(player);
     }
 }

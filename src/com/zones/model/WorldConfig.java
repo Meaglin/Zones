@@ -46,8 +46,11 @@ public class WorldConfig {
     public boolean BORDER_OVERRIDE_ENABLED;
     
     public boolean DYNAMITE_ENABLED;
-    public int TNT_RANGE;
+    public int DYNAMITE_RANGE;
     public boolean EXPLOSION_DAMAGE_ENTITIES;
+    public boolean EXPLOSION_PROTECTED_BLOCKS_ENABLED;
+    public List<Integer> EXPLOSION_PROTECTED_BLOCKS;
+    
     
     public boolean ALLOW_CREEPER_TRIGGER;
     public int CREEPER_EXPLOSION_RANGE;
@@ -193,12 +196,15 @@ public class WorldConfig {
             BORDER_OVERRIDE_ENABLED = p.getBool("BorderOverrideEnabled", true);
             
             DYNAMITE_ENABLED = p.getBool("AllowTntTrigger", true);
-            TNT_RANGE = p.getInt("TntRange", 4);
+            DYNAMITE_RANGE = p.getInt("TntRange", 4);
             
             ALLOW_CREEPER_TRIGGER = p.getBool("AllowCreeperTrigger", true);
             CREEPER_EXPLOSION_RANGE = p.getInt("CreeperExplosionRange", 3);
             
             EXPLOSION_DAMAGE_ENTITIES = p.getBool("ExplosionDamageEntities", true);
+            
+            EXPLOSION_PROTECTED_BLOCKS_ENABLED = p.getBool("ExplosionProtectedBlocksEnabled", false);
+            EXPLOSION_PROTECTED_BLOCKS = p.getIntList("ExplosionProtectedBlocks", "");
             
             LIGHTER_ALLOWED = p.getBool("LighterAllowed", true);
             FIRE_ENABLED = p.getBool("FireEnabled", true);

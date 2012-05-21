@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -33,7 +34,9 @@ import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
 import com.zones.accessresolver.interfaces.PlayerLocationResolver;
 import com.zones.model.ZoneBase;
+import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.settings.ZoneVar;
+import com.zones.model.types.ZoneNormal;
 import com.zones.selection.ZoneSelection;
 import com.zones.selection.ZoneSelection.Confirm;
 
@@ -417,6 +420,13 @@ public class ZonesPlayerListener implements Listener {
             ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
             if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, target, -1)){
                 zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_SHEAR_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
+            }
+        } else if (target instanceof StorageMinecart) {
+            ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+            if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
                 event.setCancelled(true);
                 return;
             }

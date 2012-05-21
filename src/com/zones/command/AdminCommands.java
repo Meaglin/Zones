@@ -59,9 +59,11 @@ public class AdminCommands extends CommandsBase {
     )
     public void removeAdmin(Player player, String[] params) {
         ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
-        if(zone instanceof ZoneInherit && !((ZoneInherit)zone).isInheritAdmin(player) ) {
-            player.sendMessage(ChatColor.RED + "You're not allowed to remove admins in this zone.");
-            return;
+        if(zone instanceof ZoneInherit) {
+            if(!((ZoneInherit)zone).isInheritAdmin(player)) {
+                player.sendMessage(ChatColor.RED + "You're not allowed to remove admins in this zone.");
+                return;
+            }
         } else if(!canUseCommand(player,"zones.admin")) {
             player.sendMessage(ChatColor.RED + "You're not allowed to remove admins from zones.");
             return;

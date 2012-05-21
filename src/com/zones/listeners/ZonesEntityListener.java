@@ -1,5 +1,7 @@
 package com.zones.listeners;
 
+import java.util.Iterator;
+
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
@@ -117,17 +119,29 @@ public class ZonesEntityListener implements Listener {
             if(event.getEntity() instanceof Creeper) {
                 if(!wm.getConfig().ALLOW_CREEPER_TRIGGER) {
                     event.setCancelled(true);
+                    return;
                 }
             } else {
                 if(!wm.getConfig().DYNAMITE_ENABLED) {
                     event.setCancelled(true);
+                    return;
                 }
             }
         } else {
-            if (!((BlockResolver)zone.getResolver(AccessResolver.DYNAMITE)).isAllowed(zone, event.getLocation().getBlock()))
+            if (!((BlockResolver)zone.getResolver(AccessResolver.DYNAMITE)).isAllowed(zone, event.getLocation().getBlock())) {
                 event.setCancelled(true);
+                return;
+            }
         }
-
+        if(wm.getConfig().EXPLOSION_PROTECTED_BLOCKS_ENABLED && wm.getConfig().EXPLOSION_PROTECTED_BLOCKS.size() != 0) {
+            Iterator<Block> it = event.blockList().iterator();
+            while(it.hasNext()) {
+                Block b = it.next();
+                if(wm.getConfig().EXPLOSION_PROTECTED_BLOCKS.contains(b.getTypeId())) {
+                    it.remove();
+                }
+            }
+         }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -201,7 +215,7 @@ public class ZonesEntityListener implements Listener {
         if(event.getEntity() instanceof Creeper) {
             event.setRadius(wm.getConfig().CREEPER_EXPLOSION_RANGE);
         } else if (event.getEntity() instanceof TNTPrimed ) {
-            event.setRadius(wm.getConfig().TNT_RANGE);            
+            event.setRadius(wm.getConfig().DYNAMITE_RANGE);            
         }
     }
 
