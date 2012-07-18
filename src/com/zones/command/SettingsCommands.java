@@ -80,6 +80,7 @@ public class SettingsCommands extends CommandsBase {
         "and ^ - colors, Can be used to make the message dynamic.\n" +
         "Disable enter/leave messages by settings them to \"NONE\".\n" +
         "spawnlocation - change the respawn location within the zone.\n" +
+        "texturepack - change the texture pack within the zone.\n" +
         "[L]List variables requires comma separated input: <val1>,<val2>",
         usage = "/<command> [variable name] [value]",
         min = 1,
@@ -255,17 +256,24 @@ public class SettingsCommands extends CommandsBase {
         aliases = { "zt" },
         description = 
             "toggles [variable name], options: \n" +
+            "tnt - Enables/Disables tnt explosions in the zone.\n" +
+            "food - Enables/Disables player food level decay.\n" +
+            "health - Enables/Disables Health in the zone.\n" +
             "lava|water - Toggles lava/water flow into the zone. \n" +
             "mobs|animals - Toggles mobs/animal spawning in the zone.\n" +
-            "health - Enables/Disables Health in the zone.\n" +
-            "tnt - Enables/Disables tnt explosions in the zone.\n" +
             "leafdecay - Enables/Disables leave decay in the zone.\n" +
             "teleport - Enables/Disables teleporting in/out of the zone.\n" +
             "fire - Enables/Disables fire in the zone.\n" +
             "snowfall|iceform - Enables/Disables snowfall|iceform.\n" +
+            "snowmelt|icemelt - Enables/Disables snow|ice melt.\n" +
+            "mushroomspread - Enables/Disables mushroomspread.\n" +
+            "treegrowth - Enables/Disables treegrowth.\n" +
+            "grassgrowth - Enables/Disables grassgrowth.\n" +
             "physics - Enables/Disables physics in the zone.\n"  +
             "notify - Toggles enter/leave notifications in the zone.\n" +
-            "crop - Toggles Crop Protection.",
+            "crop - Toggles Crop Protection.\n" +
+            "enderman - Enable/Disable enderman griefing.\n" +
+            "inheritgroups - Groups inherit group rights",
         usage = "/<command> [variable name]",
         min = 1,
         max = 1,
@@ -275,7 +283,7 @@ public class SettingsCommands extends CommandsBase {
     public void toggle(Player player, String[] params) {
         if(!toggles.containsKey(params[0].toLowerCase())) {
             player.sendMessage(ChatColor.RED + "Invalid variable name.");
-            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|lighter|teleport|snowfall|iceform|mushroomspread|icemelt|snowmelt|notify] ");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /ztoggle [tnt|health|lava|water|mobs|animals|leafdecay|fire|lighter|teleport|snowfall|iceform|mushroomspread|icemelt|snowmelt|notify|enderman|inheritgroups] ");
             return;
         }
         Object[] variable = toggles.get(params[0].toLowerCase());
