@@ -38,6 +38,7 @@ public class ZonesConfig {
     public static final String PLAYER_CANT_DESTROY_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot destroy blocks in zone '{zname}' !";
     public static final String PLAYER_CANT_HIT_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot trigger blocks in zone '{zname}' !";
     public static final String PLAYER_CANT_HIT_ENTITYS_IN_ZONE = ChatColor.RED + "You cannot hit entities in zone '{zname}' !";
+    public static final String PLAYER_CANT_ATTACK_ENTITYS_IN_ZONE = ChatColor.RED + "You cannot attack entities in zone '{zname}' !";
     public static final String PLAYER_CANT_PICKUP_ITEMS_IN_ZONE = ChatColor.RED + "You're not allowed to drop items in zone '{zname}'!";
     public static final String PLAYER_CANT_DROP_ITEMS_IN_ZONE = ChatColor.RED + "You're not allowed to pickup items in '{zname}'!";
     public static final String PLAYER_CANT_SHEAR_IN_ZONE = ChatColor.RED + "You're not allowed to shear sheep in '{zname}'!";

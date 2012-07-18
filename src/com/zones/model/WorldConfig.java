@@ -326,7 +326,7 @@ public class WorldConfig {
     
     public boolean isProtectedPlaceBlock(Player player, int type, boolean message) { 
         if(PROTECTED_BLOCKS_ENABLED) {
-            if(this.PROTECTED_BLOCKS_BREAK.contains(type) && !getPermissions().canUse(player, player.getWorld().getName(), "zones.override.place")) {
+            if(this.PROTECTED_BLOCKS_PLACE.contains(type) && !getPermissions().canUse(player, player.getWorld().getName(), "zones.override.place")) {
                 if(message)player.sendMessage(ChatColor.RED + "This blocktype is blacklisted!");
                 return true;
             }

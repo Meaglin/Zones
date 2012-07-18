@@ -21,7 +21,7 @@ public class ZoneSettings {
     }
     
     public void set(ZoneVar name, boolean value) {
-        set(name, new Boolean(value));
+        set(name, Boolean.valueOf(value));
     }
     
     public void set(ZoneVar name, int value) {

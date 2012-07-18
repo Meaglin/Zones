@@ -80,11 +80,11 @@ public class TexturePackManager {
                 bos.write(251);
                 bos.write(pack.getBytes("UTF-8"));
                 bos.write((byte) 0);
-                bos.write((new Integer(texPack.length).toString()).getBytes("UTF-8"));
+                bos.write((Integer.toString(texPack.length)).getBytes("UTF-8"));
                 bos.write((byte) 0);
                 bos.write(texturePacks_checkSum.get(pack).toString().getBytes("UTF-8"));
                 bos.write((byte) 0);
-                bos.write((new Integer(amount).toString()).getBytes("UTF-8"));
+                bos.write((Integer.toString(amount)).getBytes("UTF-8"));
                 packets.add(bos.toByteArray());
             }
 
