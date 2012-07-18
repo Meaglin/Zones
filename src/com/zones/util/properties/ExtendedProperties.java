@@ -1,6 +1,7 @@
 package com.zones.util.properties;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +10,10 @@ public class ExtendedProperties extends Properties {
 	
     public ExtendedProperties(File file) {
         super(file);
+    }
+
+    public ExtendedProperties(InputStream resourceAsStream) {
+        super(resourceAsStream);
     }
     
     public boolean getBool(String key, boolean defaultvalue) {

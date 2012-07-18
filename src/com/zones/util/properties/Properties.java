@@ -6,14 +6,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.zones.util.FileUtil;
-import com.zones.util.Log;
 
 public class Properties {
 	private TrieMap<Property> properties = new TrieMap<Property>();
 	private File file;
 	private boolean isMissingProperties;
+	
+    private static Logger     log              = Logger.getLogger(Properties.class.getName());
 	
 	public Properties() { }
 	public Properties(File file) { this(file, false); }
@@ -95,6 +97,7 @@ public class Properties {
 		Collections.sort(properties);
 		Property last = null;
 		int count = 0;
+		System.out.println(original.properties.values());
 		for(Property p : properties) {
 			Property current = this.properties.get(p.getKey());
 			if(current == null) {
@@ -117,7 +120,7 @@ public class Properties {
 	    Property property = properties.get(name);
 	    if(property == null) {
 	        isMissingProperties = true;
-	        Log.info("Missing property " + name + " in " + getFile().getName() + "!");
+	        log.info("Missing property " + name + " in " + getFile().getName() + "!");
 	    }
 		return property;
 	}

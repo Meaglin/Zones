@@ -20,7 +20,7 @@ public class Database {
     private final String url,username,password;
     private Zones plugin;
     
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
     
     public static final String SAVE_ZONE = "INSERT INTO `zones` (name, zonetype, formtype, world, admins, users, settings, minz, maxz, size) VALUES (?,?,?,?,?,?,?,?,?,?)";
     public static final String SAVE_VERTICE = "INSERT INTO `zones_vertices` (id, vertexorder, x, y) values (?,?,?,?)";

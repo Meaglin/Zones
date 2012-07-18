@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 
 import com.zones.util.properties.ExtendedProperties;
-import com.zones.util.properties.Properties;
 import com.zones.util.properties.Property;
 
 /**
@@ -70,11 +69,11 @@ public class ZonesConfig {
     public static final String PLAYER_ENTERED_ZONE = ChatColor.YELLOW + "Player {pname}" + ChatColor.YELLOW + " has entered zone {zname}.";
     public static final String PLAYER_LEFT_ZONE = ChatColor.YELLOW + "Player {pname}" + ChatColor.YELLOW + " has left zone {zname}.";
     
-    private static Properties defaultproperties;
+    private static ExtendedProperties defaultproperties;
     
     public static void load(Zones plugin, File f) {
         try {
-            defaultproperties = new Properties(plugin.getClass().getResourceAsStream("/com/zones/config/Zones.properties"));
+            defaultproperties = new ExtendedProperties(plugin.getClass().getResourceAsStream("/com/zones/config/Zones.properties"));
             ExtendedProperties zp = new ExtendedProperties(f);
             zp.load();
             WORLDEDIT_ENABLED = zp.getBool("EnableWorldEdit", false);
