@@ -28,8 +28,18 @@ public class ZonePlot extends ZoneInherit {
             }
         }
         
+        doClaim(player);
+        return true;
+    }
+    
+    protected void doClaim(Player player) {
         addAdmin(player.getName());
         sendMarkupMessage(ZonesConfig.PLAYER_CLAIMES_ZONES, player);
-        return true;
+    }
+
+    public void unclaim(Player player) {
+        this.adminusers.clear();
+        this.updateRights();
+        sendMarkupMessage("Zone {zname} unclaimed.", player);
     }
 }

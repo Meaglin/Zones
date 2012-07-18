@@ -1,6 +1,8 @@
 package com.zones.command;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -10,6 +12,7 @@ import com.zones.Zones;
 import com.zones.ZonesConfig;
 import com.zones.model.WorldConfig;
 import com.zones.model.ZoneBase;
+import com.zones.model.types.ZoneNormal;
 import com.zones.model.types.ZonePlot;
 
 public class MiscCommands extends CommandsBase {
@@ -127,8 +130,40 @@ public class MiscCommands extends CommandsBase {
     public void test(Player player, String[] params) {
 //        String file = FileUtil.readFile(getPlugin().getClass().getResourceAsStream(params[0]));
 //        player.sendMessage(file.substring(0, file.length() > 100 ? 100 : file.length()));
-        ZonesConfig.setDatabaseVersion(new File(getPlugin().getDataFolder(), ZonesConfig.ZONES_CONFIG_FILE), Integer.parseInt(params[0]));
+//        ZonesConfig.setDatabaseVersion(new File(getPlugin().getDataFolder(), ZonesConfig.ZONES_CONFIG_FILE), Integer.parseInt(params[0]));
     }
+    
+    @Command(
+        name = "zgetzones",
+        usage = "/<command> [target]",
+        aliases = { "zgz" },
+        description = "Displays all the zones where that player is admin in.",
+        requiredPermission = "zones.admin",
+        min = 1
+    )
+    public void getzones(CommandSender sender, String[] params) {
+        String name = params[0].toLowerCase();
+        Player player = getPlugin().getServer().getPlayer(name);
+        if(player != null) {
+            name = player.getName().toLowerCase();
+        }
+        Collection<ZoneBase> zones = getPlugin().getZoneManager().getAllZones();
+        List<ZoneBase> list = new ArrayList<ZoneBase>();
+        for(ZoneBase zone : zones) {
+            if(!(zone instanceof ZoneNormal)) continue;
+            if(((ZoneNormal)zone).isAdminUser(name)) list.add(zone);
+        }
+        sender.sendMessage(ChatColor.BLUE + name + ChatColor.WHITE + " has " + list.size() + " zones:");
+        String message = "";
+        for(ZoneBase zone : list) {
+            message += ChatColor.BLUE + zone.getName() + ChatColor.WHITE + "[" + ChatColor.AQUA + zone.getId() + ChatColor.WHITE + "], ";
+        }
+        if(message.length() >= 2) {
+            message = message.substring(0, message.length() - 2);
+            sender.sendMessage(message);
+        }
+    }
+    
     
     @Command(
         name = "zclaim",
@@ -136,12 +171,28 @@ public class MiscCommands extends CommandsBase {
         requiresPlayer = true,
         requiredPermission = "zones.claim"
     )
-    public void run(Player player, String[] vars) {
+    public void claim(Player player, String[] vars) {
         ZoneBase zone = getPlugin().getWorldManager(player).getActiveZone(player);
         if(!(zone instanceof ZonePlot)) {
             zone.sendMarkupMessage(ChatColor.RED + "You cannot claim {zname} since it's not a claimable zone.", player);
             return;
         }
         ((ZonePlot)zone).claim(player);
+    }
+    
+    @Command(
+        name = "zunclaim",
+        aliases = { "zuc" },
+        description = "UnClaim the zone you're currently standing in.",
+        requiresPlayer = true,
+        requiredPermission = "zones.admin"
+    )
+    public void unclaim(Player player, String[] vars) {
+        ZoneBase zone = getPlugin().getWorldManager(player).getActiveZone(player);
+        if(!(zone instanceof ZonePlot)) {
+            zone.sendMarkupMessage(ChatColor.RED + "You cannot unclaim {zname} since it's not a claimable zone.", player);
+            return;
+        }
+        ((ZonePlot)zone).unclaim(player);
     }
 }
