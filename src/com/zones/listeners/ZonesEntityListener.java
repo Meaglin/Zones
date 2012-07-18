@@ -101,8 +101,8 @@ public class ZonesEntityListener implements Listener {
             }
             if(attacker != null && attacker instanceof Player) {
                 Player att = (Player)attacker;
-                if(!((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, att, defender, event.getDamage())) {
-                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, att);
+                if(!((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_ATTACK)).isAllowed(zone, att, defender, event.getDamage())) {
+                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_ATTACK_ENTITYS_IN_ZONE, att);
                     event.setCancelled(true);
                     return;
                 }

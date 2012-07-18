@@ -56,6 +56,7 @@ public class ZoneNormal extends ZoneBase{
         resolvers[AccessResolver.PLAYER_BLOCK_DESTROY.ordinal()]    = new NormalPlayerBlockDestroyResolver();
         resolvers[AccessResolver.PLAYER_BLOCK_HIT.ordinal()]        = new NormalPlayerBlockHitResolver();
         resolvers[AccessResolver.PLAYER_ENTITY_HIT.ordinal()]       = new NormalPlayerHitEntityResolver();
+        resolvers[AccessResolver.PLAYER_ENTITY_ATTACK.ordinal()]       = new NormalPlayerAttackEntityResolver();
         resolvers[AccessResolver.PLAYER_ENTER.ordinal()]            = new NormalPlayerEnterResolver();
         resolvers[AccessResolver.PLAYER_TELEPORT.ordinal()]         = new NormalPlayerTeleportResolver();
         resolvers[AccessResolver.PLAYER_RECEIVE_DAMAGE.ordinal()]   = new NormalPlayerDamageResolver();
@@ -201,7 +202,11 @@ public class ZoneNormal extends ZoneBase{
     }
     
     protected boolean isAdminUser(Player player) {
-        if (adminusers.contains(player.getName().toLowerCase()))
+        return isAdminUser(player.getName().toLowerCase());
+    }
+    
+    public boolean isAdminUser(String name) {
+        if (adminusers.contains(name))
             return true;
         
         return false;
@@ -285,7 +290,7 @@ public class ZoneNormal extends ZoneBase{
 
     }
     
-    private void updateRights() {
+    protected void updateRights() {
         String admins = "";
         String users = "";
         for (Entry<String, ZonesAccess> e : this.users.entrySet()) {

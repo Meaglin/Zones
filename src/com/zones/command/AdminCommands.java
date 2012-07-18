@@ -49,7 +49,7 @@ public class AdminCommands extends CommandsBase {
     
     @Command(
         name = "zremoveadmin", 
-        aliases = { "zra" }, 
+        aliases = { "zra", "zdeleteadmin", "zdeladmin" }, 
         description = "Removes an admin from the zone.\nNote: only superowning entities can use this commands\nBeing serveradmins or inherited zone admins.", 
         usage = "/<command> [admin1] <admin2> ...",
         min = 1,
@@ -92,11 +92,12 @@ public class AdminCommands extends CommandsBase {
         aliases = { "zsu" }, 
         description = 
         "Sets the access of usernames to what is specified\n " +
+        "a = Attack(Attacking entity's)," +
         "b = Build(placing blocks),\n" +
         "c = Chest Access(accessing chest/furnaces/note blocks),\n " +
         "d = Destroy(destroying blocks),\n" +
         "e = Enter(entering your zone),\n" +
-        "h = Hit(killing mobs,minecarts or boats/modify redstone),\n" +
+        "h = Hit(modify/trigger redstone, pickup items),\n" +
         "* = full access(all of the above) " +
         "- = remove all access. \n" +
         "Example: /zsetuser Meaglin bde this will give meaglin access \n" +
@@ -147,11 +148,12 @@ public class AdminCommands extends CommandsBase {
         aliases = { "zsg" }, 
         description = 
         "Sets the access of groupnames to what is specified \n " +
+        "a = Attack(Attacking entity's)," +
         "b = Build(placing blocks),\n" +
         "c = Chest Access(accessing chest/furnaces/note blocks),\n " +
         "d = Destroy(destroying blocks),\n" +
         "e = Enter(entering your zone),\n" +
-        "h = Hit(killing mobs,minecarts or boats/modify redstone),\n" +
+        "h = Hit(modify/trigger redstone, pickup items),\n" +
         "* = full access(all of the above) " +
         "- = remove all access. \n" +
         "Example: /zsetuser default bde this will give all users\n" +

@@ -21,6 +21,7 @@ public enum AccessResolver {
     PLAYER_BLOCK_DESTROY(PlayerBlockResolver.class),
     PLAYER_BLOCK_HIT(PlayerBlockResolver.class),
     PLAYER_ENTITY_HIT(PlayerHitEntityResolver.class),
+    PLAYER_ENTITY_ATTACK(PlayerAttackEntityResolver.class),
     PLAYER_ENTER(PlayerLocationResolver.class),
     PLAYER_TELEPORT(PlayerLocationResolver.class),
     PLAYER_RECEIVE_DAMAGE(PlayerDamageResolver.class);

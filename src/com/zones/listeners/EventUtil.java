@@ -19,9 +19,10 @@ public class EventUtil {
     public static final void onPlace(Zones plugin, Cancellable event, Player player, Block block) {
         onPlace(plugin, event, player, block, -1);
     }
+    
     public static final void onPlace(Zones plugin, Cancellable event, Player player, Block block, int typeId) {
         WorldManager wm = plugin.getWorldManager(player);
-        if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
+        if(!wm.getConfig().isProtectedPlaceBlock(player, typeId, true)) {
             ZoneBase zone = wm.getActiveZone(block);
             
             if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
@@ -53,6 +54,22 @@ public class EventUtil {
                 }
                 
                 wm.getConfig().logBlockPlace(player, block);
+            }
+        } else {
+            event.setCancelled(true);
+        }
+    }
+    
+    public static final void onHitPlace(Zones plugin, Cancellable event, Player player, Block block, int typeId) {
+        WorldManager wm = plugin.getWorldManager(player);
+        if(!wm.getConfig().isProtectedPlaceBlock(player, typeId, true)) {
+            ZoneBase zone = wm.getActiveZone(block);
+            if(zone != null) {
+                if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, block, typeId)) {
+                    ((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).sendDeniedMessage(zone, player);
+                    event.setCancelled(true);
+                    return;
+                }
             }
         } else {
             event.setCancelled(true);

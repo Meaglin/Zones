@@ -224,11 +224,12 @@ public class GeneralCommands extends CommandsBase {
     )
     public void access(CommandSender sender, String[] params) {
         sender.sendMessage(ChatColor.GREEN + "Zone Access tags explained:");
+        sender.sendMessage(ChatColor.GREEN + "a = Attack(Attacking entity's),");
         sender.sendMessage(ChatColor.GREEN + "b = Build(placing blocks),");
         sender.sendMessage(ChatColor.GREEN + "c = Chest Access(accessing chest/furnaces/note blocks),");
         sender.sendMessage(ChatColor.GREEN + "d = Destroy(destroying blocks),");
         sender.sendMessage(ChatColor.GREEN + "e = Enter(entering zone), ");
-        sender.sendMessage(ChatColor.GREEN + "h = Hit(killing mobs,minecarts or boats/modify redstone).");
+        sender.sendMessage(ChatColor.GREEN + "h = Hit(modify/trigger redstone, pickup items).");
     }
     
     @Command(

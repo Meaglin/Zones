@@ -9,12 +9,13 @@ import org.bukkit.ChatColor;
  */
 public class ZonesAccess {
     public enum Rights {
+        ATTACK(32, "a", "Attack Entity's"),//
         BUILD(1, "b", "Build blocks"),//
         DESTROY(2, "d", "Destroy blocks"),//
         MODIFY(4, "c", "Chest access"),//
         ENTER(8, "e", "Enter zone"),//
         HIT(16, "h", "Hit Entity's"),//
-        ALL(31, "*", "Anything & everything");
+        ALL(63, "*", "Anything & everything");
 
         private int    flag;
         private String code;
@@ -89,6 +90,10 @@ public class ZonesAccess {
     public boolean canHit() {
         return canDo(Rights.HIT);
     }
+    
+    public boolean canAttack() {
+        return canDo(Rights.ATTACK);
+    }
 
     public boolean canAll() {
         return canDo(Rights.ALL);
@@ -142,6 +147,12 @@ public class ZonesAccess {
     public String toColorCode() {
         String rt = "";
 
+        if (canAttack())
+            rt += ChatColor.GREEN.toString();
+        else
+            rt += ChatColor.RED.toString();
+        rt += "A";
+        
         if (canBuild())
             rt += ChatColor.GREEN.toString();
         else
@@ -176,7 +187,7 @@ public class ZonesAccess {
 
         return rt;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
