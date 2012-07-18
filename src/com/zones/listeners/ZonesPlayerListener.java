@@ -227,10 +227,6 @@ public class ZonesPlayerListener implements Listener {
             Material.FLINT_AND_STEEL.getId(),
             Material.LAVA_BUCKET.getId(),
             Material.WATER_BUCKET.getId(),
-            Material.MINECART.getId(),
-            Material.STORAGE_MINECART.getId(),
-            Material.POWERED_MINECART.getId(),
-            Material.BOAT.getId(),
             Material.SEEDS.getId(),
             Material.SIGN.getId(),
             Material.REDSTONE.getId(),
@@ -241,6 +237,13 @@ public class ZonesPlayerListener implements Listener {
             Material.TNT.getId(),
             Material.REDSTONE_TORCH_ON.getId(),
             Material.PUMPKIN.getId()
+        );
+    
+    private static final List<Integer> placeHitItems = Arrays.asList(
+            Material.MINECART.getId(),
+            Material.STORAGE_MINECART.getId(),
+            Material.BOAT.getId(),
+            Material.POWERED_MINECART.getId()
         );
     
     private static final List<Integer> destroyItems = Arrays.asList(
@@ -338,6 +341,8 @@ public class ZonesPlayerListener implements Listener {
                     EventUtil.onModify(plugin, event, player, event.getClickedBlock(), blockType);
                 else if(placeItems.contains(toolType)) 
                     EventUtil.onPlace(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()), toolType);
+                else if(placeHitItems.contains(toolType)) 
+                    EventUtil.onHitPlace(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()), toolType);
                 else if(placeBlocks.contains(blockType)) 
                     EventUtil.onPlace(plugin, event, player, event.getClickedBlock(), blockType);
                 else if(destroyItems.contains(toolType)) 
@@ -378,20 +383,28 @@ public class ZonesPlayerListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         ZoneBase zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
-        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItemDrop(), -1)) {
+        if(zone != null && !((ZoneNormal)zone).canModify(event.getPlayer(), Rights.HIT)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PICKUP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
+//        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItemDrop(), -1)) {
+//            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PICKUP_ITEMS_IN_ZONE, event.getPlayer());
+//            event.setCancelled(true);
+//        }
     }
 
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
         if(event.isCancelled()) return;
         ZoneBase zone = plugin.getWorldManager(event.getItem().getWorld()).getActiveZone(event.getItem().getLocation());
-        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItem(), -1)) {
+        if(zone != null && !((ZoneNormal)zone).canModify(event.getPlayer(), Rights.HIT)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DROP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
+//        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItem(), -1)) {
+//            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DROP_ITEMS_IN_ZONE, event.getPlayer());
+//            event.setCancelled(true);
+//        }
     }
 
     @EventHandler
