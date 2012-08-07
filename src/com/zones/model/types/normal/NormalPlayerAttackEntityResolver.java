@@ -4,13 +4,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.zones.ZonesConfig;
-import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
+import com.zones.accessresolver.interfaces.PlayerAttackEntityResolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.types.ZoneNormal;
 import com.zones.util.Log;
 
-public class NormalPlayerAttackEntityResolver implements PlayerHitEntityResolver{
+public class NormalPlayerAttackEntityResolver implements PlayerAttackEntityResolver{
 
     @Override
     public void sendDeniedMessage(ZoneBase zone, Player player) {

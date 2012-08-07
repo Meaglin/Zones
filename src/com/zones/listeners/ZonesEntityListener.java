@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -32,12 +33,11 @@ import com.zones.ZonesConfig;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.BlockResolver;
 import com.zones.accessresolver.interfaces.EntitySpawnResolver;
+import com.zones.accessresolver.interfaces.PlayerAttackEntityResolver;
 import com.zones.accessresolver.interfaces.PlayerDamageResolver;
 import com.zones.accessresolver.interfaces.PlayerFoodResolver;
-import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.settings.ZoneVar;
-import org.bukkit.event.EventPriority;
 
 
 /**
@@ -101,7 +101,7 @@ public class ZonesEntityListener implements Listener {
             }
             if(attacker != null && attacker instanceof Player) {
                 Player att = (Player)attacker;
-                if(!((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_ATTACK)).isAllowed(zone, att, defender, event.getDamage())) {
+                if(!((PlayerAttackEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_ATTACK)).isAllowed(zone, att, defender, event.getDamage())) {
                     zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_ATTACK_ENTITYS_IN_ZONE, att);
                     event.setCancelled(true);
                     return;

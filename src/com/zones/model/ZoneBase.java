@@ -319,6 +319,7 @@ public abstract class ZoneBase {
     public final int hashCode() {
         return getId();
     }
+    
     public void sendMarkupMessage(String message, Player player) {
         sendMarkupMessage(message, player, player);
     }

@@ -290,6 +290,11 @@ public class ZonesPlayerListener implements Listener {
         int blockType = (event.getClickedBlock() != null ? event.getClickedBlock().getTypeId() : 0);
         int toolType = (event.getItem() != null ? event.getItem().getTypeId() : 0);
         
+        if(blockType == 130) {
+            event.setCancelled(true);
+            return;
+        }
+        
         /*
          * Using a huge ass if(...) would have been possible too however this seems more elegant and prolly is a little bit faster
          * (however this speed difference would be very hard to determine :P )

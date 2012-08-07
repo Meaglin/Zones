@@ -27,7 +27,6 @@ import com.zones.ZonesConfig;
 import com.zones.permissions.Permissions;
 import com.zones.util.FileUtil;
 import com.zones.util.properties.ExtendedProperties;
-import com.zones.util.properties.Properties;
 
 public class WorldConfig {
     
@@ -135,10 +134,10 @@ public class WorldConfig {
     public int SPONGE_LAVA_RADIUS;
     public boolean SPONGE_LAVA_OVERRIDE_NEEDED;
     
-    private final Properties defaultproperties;
+    private final ExtendedProperties defaultproperties;
     
     public WorldConfig(WorldManager manager,String filename) {
-        defaultproperties = new Properties(manager.getPlugin().getClass().getResourceAsStream("/com/zones/config/world.properties"));
+        defaultproperties = new ExtendedProperties(manager.getPlugin().getClass().getResourceAsStream("/com/zones/config/world.properties"));
         
         this.manager = manager;
         this.filename = filename;

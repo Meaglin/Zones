@@ -97,7 +97,6 @@ public class Properties {
 		Collections.sort(properties);
 		Property last = null;
 		int count = 0;
-		System.out.println(original.properties.values());
 		for(Property p : properties) {
 			Property current = this.properties.get(p.getKey());
 			if(current == null) {
