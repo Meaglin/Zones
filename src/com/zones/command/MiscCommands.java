@@ -156,7 +156,7 @@ public class MiscCommands extends CommandsBase {
         sender.sendMessage(ChatColor.BLUE + name + ChatColor.WHITE + " has " + list.size() + " zones:");
         String message = "";
         for(ZoneBase zone : list) {
-            message += ChatColor.BLUE + zone.getName() + ChatColor.WHITE + "[" + ChatColor.AQUA + zone.getId() + ChatColor.WHITE + "], ";
+            message += ChatColor.BLUE + zone.getName() + ChatColor.WHITE + "[" + ChatColor.AQUA + zone.getId() + ChatColor.WHITE + "]("+GeneralCommands.getClassName(zone.getClass())+"), ";
         }
         if(message.length() >= 2) {
             message = message.substring(0, message.length() - 2);
