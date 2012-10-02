@@ -1,6 +1,6 @@
 name: Zones
 main: com.zones.Zones
-version: 2.4
+version: 2.5
 authors: [ 'Meaglin', 'Mysteryman', 'GunterDW' ]
 softdepend: [ 'EasyBind' ] 
 website: https://github.com/Meaglin/0xFFFF
