@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.PoweredMinecart;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.StorageMinecart;
 import org.bukkit.event.EventHandler;
@@ -290,10 +291,11 @@ public class ZonesPlayerListener implements Listener {
         int blockType = (event.getClickedBlock() != null ? event.getClickedBlock().getTypeId() : 0);
         int toolType = (event.getItem() != null ? event.getItem().getTypeId() : 0);
         
-        if(blockType == 130) {
-            event.setCancelled(true);
-            return;
-        }
+//        Temp hack to disable ender chest until proper api came availeble.
+//        if(blockType == 130) {
+//            event.setCancelled(true);
+//            return;
+//        }
         
         /*
          * Using a huge ass if(...) would have been possible too however this seems more elegant and prolly is a little bit faster
@@ -445,6 +447,13 @@ public class ZonesPlayerListener implements Listener {
             ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
             if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
                 zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
+            }
+        } else if (target instanceof PoweredMinecart && player.getItemInHand() != null && player.getItemInHand().getTypeId() == 263) {
+            ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+            if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.HIT)){
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
                 event.setCancelled(true);
                 return;
             }
