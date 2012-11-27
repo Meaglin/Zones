@@ -60,7 +60,7 @@
 				<exclude name="META-INF/*" />
 			</zipfileset> -->
 		</jar>
-		<zip destfile="../Zones-2.5.zip" >
+		<zip destfile="../Zones-2.5.3.zip" >
 		  <fileset dir=".." includes="Zones.jar" />
 		  <zipfileset dir="${src}/com/zones/config/" >
                 <include name="*.properties" />
