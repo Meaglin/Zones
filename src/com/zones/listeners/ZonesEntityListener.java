@@ -23,9 +23,8 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.painting.PaintingBreakByEntityEvent;
-import org.bukkit.event.painting.PaintingBreakEvent;
-import org.bukkit.event.painting.PaintingPlaceEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 
 import com.zones.WorldManager;
 import com.zones.Zones;
@@ -220,7 +219,7 @@ public class ZonesEntityListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPaintingPlace(PaintingPlaceEvent event) {
+    public void onPaintingPlace(HangingPlaceEvent event) {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlock().getRelative(event.getBlockFace());
 
@@ -229,13 +228,13 @@ public class ZonesEntityListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPaintingBreak(PaintingBreakEvent event) {
-        if(!(event instanceof PaintingBreakByEntityEvent)) return;
-        Entity entity = ((PaintingBreakByEntityEvent)event).getRemover();
+    public void onPaintingBreak(HangingBreakByEntityEvent event) {
+        if(!(event instanceof HangingBreakByEntityEvent)) return;
+        Entity entity = ((HangingBreakByEntityEvent)event).getRemover();
         if(entity == null) return;
         if(!(entity instanceof Player)) return;
         
-        Block block = event.getPainting().getLocation().getBlock();
+        Block block = event.getEntity().getLocation().getBlock();
         Player player = ((Player)entity);
 
         EventUtil.onBreak(plugin, event, player, block);
