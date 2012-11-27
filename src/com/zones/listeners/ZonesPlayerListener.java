@@ -237,7 +237,8 @@ public class ZonesPlayerListener implements Listener {
             Material.IRON_DOOR.getId(),
             Material.TNT.getId(),
             Material.REDSTONE_TORCH_ON.getId(),
-            Material.PUMPKIN.getId()
+            Material.PUMPKIN.getId(),
+            Material.ITEM_FRAME.getId()
         );
     
     private static final List<Integer> placeHitItems = Arrays.asList(
@@ -264,7 +265,10 @@ public class ZonesPlayerListener implements Listener {
             Material.STONE_BUTTON.getId(),
             Material.WOODEN_DOOR.getId(),
             Material.TRAP_DOOR.getId(),
-            Material.FENCE_GATE.getId()
+            Material.FENCE_GATE.getId(),
+            Material.TRIPWIRE.getId(),
+            Material.TRIPWIRE_HOOK.getId(),
+            Material.WOOD_BUTTON.getId()
         );
     
     private static final List<Integer> modifyBlocks = Arrays.asList(
@@ -273,7 +277,11 @@ public class ZonesPlayerListener implements Listener {
             Material.FURNACE.getId(),
             Material.BURNING_FURNACE.getId(),
             Material.CHEST.getId(),
-            Material.DISPENSER.getId()
+            Material.DISPENSER.getId(),
+            Material.BREWING_STAND.getId(),
+            Material.BEACON.getId(),
+            Material.COMMAND.getId(),
+            Material.ANVIL.getId()
         );
     
     @EventHandler(ignoreCancelled = true)
