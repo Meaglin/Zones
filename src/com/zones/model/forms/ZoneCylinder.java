@@ -24,7 +24,7 @@ public class ZoneCylinder extends ZoneForm {
         double ydiff = y1 - y2;
         
         radius = (int) Math.sqrt(xdiff * xdiff + ydiff * ydiff);
-        radiusSqr = radius * radius;
+        radiusSqr = radius * radius + 1;
         
         _z1 = z1;
         _z2 = z2;
@@ -41,7 +41,7 @@ public class ZoneCylinder extends ZoneForm {
     
     @Override
     public boolean isInsideZone(int x, int y) {
-        if ((Math.pow(_x - x, 2) + Math.pow(_y - y, 2)) > radiusSqr)
+        if ((((_x - x)*(_x - x)) + ((_y - y)*(_y - y))) > radiusSqr)
             return false;
         return true;
     }
