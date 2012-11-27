@@ -48,6 +48,7 @@ public class TexturePackManager {
                 FileInputStream bis = new FileInputStream(inputFile);
                 byte[] fileData = new byte[(int) bytes];
                 bis.read(fileData);
+                bis.close();
                 Checksum checksum = new CRC32();
                 checksum.update(fileData, 0, fileData.length);
                 long texpackCRC32 = checksum.getValue();
