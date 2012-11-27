@@ -235,7 +235,7 @@ public class ZonesBlockListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockSpread(org.bukkit.event.block.BlockSpreadEvent event) {
         switch(event.getNewState().getTypeId()) {
-            case 2: case 39: case 40: break;
+            case 2: case 39: case 40: case 106: break;
             default: return;
         }
         Block block = event.getBlock();
@@ -251,6 +251,8 @@ public class ZonesBlockListener implements Listener {
                 case 39: case 40:
                     if(!wm.getConfig().MUSHROOM_GROWTH_ENABLED) event.setCancelled(true);
                     break;
+                case 106:
+                    if(!wm.getConfig().VINES_GROWTH_ENABLED) event.setCancelled(true);
             }
             return;
         } 
@@ -262,6 +264,8 @@ public class ZonesBlockListener implements Listener {
             case 39: case 40:
                 if(!isAllowed(zone,AccessResolver.MUSHROOM_SPREAD, event.getBlock())) event.setCancelled(true);
                 break;
+            case 106:
+                if(!zone.getFlag(ZoneVar.VINES_GROWTH)) event.setCancelled(true);
         }
     }
     
