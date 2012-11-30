@@ -2,6 +2,7 @@ package com.zones.model.types.normal;
 
 import java.util.List;
 
+import org.bukkit.entity.Ambient;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -17,7 +18,7 @@ public class NormalEntitySpawnResolver implements EntitySpawnResolver {
 
     @Override
     public boolean isAllowed(ZoneBase zone, Entity entity, EntityType type) {
-        if(entity instanceof Animals) {
+        if(entity instanceof Animals || entity instanceof Ambient) {
             if(zone.getFlag(ZoneVar.ANIMALS)) {
                 Object obj = zone.getSetting(ZoneVar.ALLOWED_ANIMALS);
                 if(obj != null) {

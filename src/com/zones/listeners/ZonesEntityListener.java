@@ -230,7 +230,7 @@ public class ZonesEntityListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPaintingBreak(HangingBreakByEntityEvent event) {
         if(!(event instanceof HangingBreakByEntityEvent)) return;
-        Entity entity = ((HangingBreakByEntityEvent)event).getRemover();
+        Entity entity = event.getRemover();
         if(entity == null) return;
         if(!(entity instanceof Player)) return;
         
