@@ -81,7 +81,7 @@ public class EventUtil {
         ZoneBase zone = wm.getActiveZone(block);
         
         if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")) {
-            if (blockType == Material.CHEST.getId())
+            if (blockType == Material.CHEST.getId() || blockType == Material.TRAPPED_CHEST.getId())
                 player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
             else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
                 player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
@@ -96,7 +96,7 @@ public class EventUtil {
         
         if(zone == null) {
             if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.inheritbuild")) {
-                if (blockType == Material.CHEST.getId())
+                if (blockType == Material.CHEST.getId() || blockType == Material.TRAPPED_CHEST.getId())
                     player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
                 else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
                     player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");

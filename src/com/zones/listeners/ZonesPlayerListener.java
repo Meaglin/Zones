@@ -281,7 +281,8 @@ public class ZonesPlayerListener implements Listener {
             Material.BREWING_STAND.getId(),
             Material.BEACON.getId(),
             Material.COMMAND.getId(),
-            Material.ANVIL.getId()
+            Material.ANVIL.getId(),
+            Material.TRAPPED_CHEST.getId()
         );
     
     @EventHandler(ignoreCancelled = true)
@@ -298,12 +299,6 @@ public class ZonesPlayerListener implements Listener {
         Player player = event.getPlayer();
         int blockType = (event.getClickedBlock() != null ? event.getClickedBlock().getTypeId() : 0);
         int toolType = (event.getItem() != null ? event.getItem().getTypeId() : 0);
-        
-//        Temp hack to disable ender chest until proper api came availeble.
-//        if(blockType == 130) {
-//            event.setCancelled(true);
-//            return;
-//        }
         
         /*
          * Using a huge ass if(...) would have been possible too however this seems more elegant and prolly is a little bit faster
