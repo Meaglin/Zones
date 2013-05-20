@@ -282,7 +282,8 @@ public class ZonesPlayerListener implements Listener {
             Material.BEACON.getId(),
             Material.COMMAND.getId(),
             Material.ANVIL.getId(),
-            Material.TRAPPED_CHEST.getId()
+            Material.TRAPPED_CHEST.getId(),
+            Material.DROPPER.getId()
         );
     
     @EventHandler(ignoreCancelled = true)

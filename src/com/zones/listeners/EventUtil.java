@@ -87,6 +87,8 @@ public class EventUtil {
                 player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
             else if (blockType == Material.DISPENSER.getId())
                 player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
+            else if (blockType == Material.DROPPER.getId())
+                player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
             else if (blockType == Material.NOTE_BLOCK.getId())
                 player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
             
@@ -102,6 +104,8 @@ public class EventUtil {
                     player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
                 else if (blockType == Material.DISPENSER.getId())
                     player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
+                else if (blockType == Material.DROPPER.getId())
+                    player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
                 else if (blockType == Material.NOTE_BLOCK.getId())
                     player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
                 
