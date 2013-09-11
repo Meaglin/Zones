@@ -90,7 +90,7 @@ public class ZonesEntityListener implements Listener {
                 return;
             }
         } else {            
-            if (defender instanceof Player && (!((PlayerDamageResolver)zone.getResolver(AccessResolver.PLAYER_RECEIVE_DAMAGE)).isAllowed(zone, ((Player)defender), event.getCause(), event.getDamage()) 
+            if (defender instanceof Player && (!((PlayerDamageResolver)zone.getResolver(AccessResolver.PLAYER_RECEIVE_DAMAGE)).isAllowed(zone, ((Player)defender), event.getCause(), (int) event.getDamage()) 
                 || (
                         wm.getConfig().PLAYER_ENFORCE_SPECIFIC_DAMAGE 
                         && !wm.getConfig().canReceiveSpecificDamage(((Player)defender), event.getCause()))
@@ -100,7 +100,7 @@ public class ZonesEntityListener implements Listener {
             }
             if(attacker != null && attacker instanceof Player) {
                 Player att = (Player)attacker;
-                if(!((PlayerAttackEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_ATTACK)).isAllowed(zone, att, defender, event.getDamage())) {
+                if(!((PlayerAttackEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_ATTACK)).isAllowed(zone, att, defender, (int) event.getDamage())) {
                     zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_ATTACK_ENTITYS_IN_ZONE, att);
                     event.setCancelled(true);
                     return;

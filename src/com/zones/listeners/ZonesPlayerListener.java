@@ -8,9 +8,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.PoweredMinecart;
 import org.bukkit.entity.Sheep;
-import org.bukkit.entity.StorageMinecart;
+import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.entity.minecart.PoweredMinecart;
+import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -283,7 +284,8 @@ public class ZonesPlayerListener implements Listener {
             Material.COMMAND.getId(),
             Material.ANVIL.getId(),
             Material.TRAPPED_CHEST.getId(),
-            Material.DROPPER.getId()
+            Material.DROPPER.getId(),
+            Material.HOPPER.getId()
         );
     
     @EventHandler(ignoreCancelled = true)
@@ -438,7 +440,9 @@ public class ZonesPlayerListener implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity target = event.getRightClicked();
-        if(target == null) return;
+        if(target == null) {
+            return;
+        }
         
         if(target instanceof Sheep) {
             ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
@@ -447,7 +451,7 @@ public class ZonesPlayerListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
-        } else if (target instanceof StorageMinecart) {
+        } else if (target instanceof StorageMinecart || target instanceof HopperMinecart) {
             ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
             if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
                 zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
