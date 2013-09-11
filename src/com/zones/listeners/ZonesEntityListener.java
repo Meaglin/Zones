@@ -219,7 +219,7 @@ public class ZonesEntityListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPaintingPlace(HangingPlaceEvent event) {
+    public void onHangingPlace(HangingPlaceEvent event) {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlock().getRelative(event.getBlockFace());
 
@@ -228,7 +228,7 @@ public class ZonesEntityListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPaintingBreak(HangingBreakByEntityEvent event) {
+    public void onHangingBreak(HangingBreakByEntityEvent event) {
         if(!(event instanceof HangingBreakByEntityEvent)) return;
         Entity entity = event.getRemover();
         if(entity == null) return;
