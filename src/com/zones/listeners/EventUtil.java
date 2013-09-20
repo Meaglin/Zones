@@ -3,6 +3,7 @@ package com.zones.listeners;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 
@@ -12,6 +13,8 @@ import com.zones.ZonesConfig;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
+import com.zones.model.ZonesAccess.Rights;
+import com.zones.model.types.ZoneNormal;
 import com.zones.selection.ZoneSelection;
 
 public class EventUtil {
@@ -73,6 +76,58 @@ public class EventUtil {
             }
         } else {
             event.setCancelled(true);
+        }
+    }
+    
+    public static final void onEntityCreate(Zones plugin, Cancellable event, Player player, Entity entity) {
+        WorldManager wm = plugin.getWorldManager(entity.getWorld());
+        ZoneBase zone = wm.getActiveZone(entity.getLocation());
+        
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+            player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
+            event.setCancelled(true);
+            return;
+        }
+        
+        if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.BUILD)){
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_BUILD_BLOCKS_IN_ZONE, player);
+            event.setCancelled(true);
+            return;
+        } else {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
+                player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    public static final void onEntityHit(Zones plugin, Cancellable event, Player player, Entity entity) {
+        WorldManager wm = plugin.getWorldManager(entity.getWorld());
+        ZoneBase zone = wm.getActiveZone(entity.getLocation());
+        if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.HIT)){
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+            event.setCancelled(true);
+            return;
+        } else {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
+                player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    public static final void onEntityChange(Zones plugin, Cancellable event, Player player, Entity entity) {
+        WorldManager wm = plugin.getWorldManager(entity.getWorld());
+        ZoneBase zone = wm.getActiveZone(entity.getLocation());
+        if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
+            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
+            event.setCancelled(true);
+            return;
+        } else {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
+                player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
+                event.setCancelled(true);
+            }
         }
     }
     

@@ -51,6 +51,7 @@ public class ZonesConfig {
     public static final String TELEPORT_INTO_ZONE_DISABLED = ChatColor.RED + "You cannot warp into zone '{zname}' because it has teleporting disabled !";
     
     public static final String PLAYER_CANT_BUILD_WORLD = ChatColor.RED + "You cannot build blocks in this world !";
+    public static final String PLAYER_CANT_MODIFY_WORLD = ChatColor.RED + "You cannot modify this world !";
     public static final String PLAYER_CANT_CHANGE_WORLD = ChatColor.RED + "You cannot change blocks in this world !";
     public static final String PLAYER_CANT_DESTROY_WORLD = ChatColor.RED + "You cannot destroy blocks in this world !";
     
