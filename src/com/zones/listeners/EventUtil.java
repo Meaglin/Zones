@@ -81,52 +81,69 @@ public class EventUtil {
     
     public static final void onEntityCreate(Zones plugin, Cancellable event, Player player, Entity entity) {
         WorldManager wm = plugin.getWorldManager(entity.getWorld());
-        ZoneBase zone = wm.getActiveZone(entity.getLocation());
-        
         if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
             player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
             event.setCancelled(true);
             return;
         }
         
-        if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.BUILD)){
-            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_BUILD_BLOCKS_IN_ZONE, player);
-            event.setCancelled(true);
-            return;
-        } else {
+        ZoneBase zone = wm.getActiveZone(entity.getLocation());
+        if(zone == null) {
             if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
                 player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
                 event.setCancelled(true);
+            }
+        } else {
+            if(!((ZoneNormal)zone).canModify(player, Rights.BUILD)) {
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_BUILD_BLOCKS_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
             }
         }
     }
     
     public static final void onEntityHit(Zones plugin, Cancellable event, Player player, Entity entity) {
         WorldManager wm = plugin.getWorldManager(entity.getWorld());
-        ZoneBase zone = wm.getActiveZone(entity.getLocation());
-        if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.HIT)){
-            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+            player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
             event.setCancelled(true);
             return;
-        } else {
+        }
+        
+        ZoneBase zone = wm.getActiveZone(entity.getLocation());
+        if(zone == null) {
             if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
                 player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
                 event.setCancelled(true);
+            }
+        } else {
+            if(!((ZoneNormal)zone).canModify(player, Rights.HIT)) {
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
             }
         }
     }
 
     public static final void onEntityChange(Zones plugin, Cancellable event, Player player, Entity entity) {
         WorldManager wm = plugin.getWorldManager(entity.getWorld());
-        ZoneBase zone = wm.getActiveZone(entity.getLocation());
-        if(zone != null && zone instanceof ZoneNormal && !((ZoneNormal)zone).canModify(player, Rights.MODIFY)){
-            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+            player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
             event.setCancelled(true);
             return;
-        } else {
+        }
+        
+        ZoneBase zone = wm.getActiveZone(entity.getLocation());
+        if(zone == null) {
             if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
                 player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
                 event.setCancelled(true);
+            }
+        } else {
+            if(!((ZoneNormal)zone).canModify(player, Rights.MODIFY)) {
+                zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE, player);
+                event.setCancelled(true);
+                return;
             }
         }
     }
