@@ -12,8 +12,8 @@
 		<fileset dir="libs">
 			<include name="craftbukkit.jar" />
 			<include name="WorldEdit.jar" />
-			<include name="Permissions.jar" />
-			<include name="PermissionsEx.jar" />
+			<include name="Vault.jar" />
+			<!-- <include name="PermissionsEx.jar" /> -->
 			<include name="EasyBind.jar" />
 			<!-- <include name="trove-3.0.0.jar" /> -->
 		</fileset>
@@ -60,7 +60,7 @@
 				<exclude name="META-INF/*" />
 			</zipfileset> -->
 		</jar>
-		<zip destfile="../Zones-2.5.4.zip" >
+		<zip destfile="../Zones-3b1.zip" >
 		  <fileset dir=".." includes="Zones.jar" />
 		  <zipfileset dir="${src}/com/zones/config/" >
                 <include name="*.properties" />

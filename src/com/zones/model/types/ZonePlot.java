@@ -1,7 +1,10 @@
 package com.zones.model.types;
 
+import java.util.UUID;
+
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONObject;
 import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
 
@@ -13,7 +16,7 @@ import com.zones.model.ZoneBase;
 public class ZonePlot extends ZoneInherit {
     
     public boolean claim(Player player) {
-        if(adminusers.size() != 0) {
+        if(admins.size() != 0) {
             sendMarkupMessage(ZonesConfig.ZONE_ALREADY_CLAIMED, player);
             return false;
         }
@@ -33,12 +36,16 @@ public class ZonePlot extends ZoneInherit {
     }
     
     protected void doClaim(Player player) {
-        addAdmin(player.getName());
+        setAdmin(player, true);
         sendMarkupMessage(ZonesConfig.PLAYER_CLAIMES_ZONES, player);
     }
 
     public void unclaim(Player player) {
-        this.adminusers.clear();
+        JSONObject userlist = getConfig().getJSONObject("users");
+        for(UUID uuid : admins) {
+            userlist.remove(uuid.toString());
+        }
+        this.admins.clear();
         this.updateRights();
         sendMarkupMessage("Zone {zname} unclaimed.", player);
     }

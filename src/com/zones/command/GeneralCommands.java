@@ -6,16 +6,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONObject;
 import com.zones.Region;
 import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
-import com.zones.model.settings.Serializer;
 import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.ZoneInherit;
 
@@ -40,27 +41,31 @@ public class GeneralCommands extends CommandsBase {
         player.sendMessage(ChatColor.AQUA + "Size: " + f.getSize() + " (X:" + Math.abs(f.getHighX()-f.getLowX()) + ", Y:" + Math.abs(f.getHighY()-f.getLowY()) + ", Z:" + Math.abs(f.getHighZ()-f.getLowZ()) + ")" );
         player.sendMessage(ChatColor.AQUA + "Location: (X:" + f.getLowX() + "," + f.getHighX() + "; Y:" + f.getLowY() + "," + f.getHighY() + "; Z:" + f.getLowZ() + "," + f.getHighZ() + ")");
         
+        JSONObject settings = b.getConfig().getJSONObject("settings");
+        
         String bools = "";
         for(ZoneVar v : ZoneVar.values()) {
             if(v.getType().equals(Boolean.class)) {
-                if(b.getSettings().get(v) != null) {
-                    bools += " " + (b.getSettings().getBool(v) ? ChatColor.GREEN : ChatColor.RED) + v.getName();
+                if(settings.has(v.getName())) {
+                    bools += " " + (settings.getBoolean(v.getName()) ? ChatColor.GREEN : ChatColor.RED) + v.getName();
                 }
             }
         }
-        if(!bools.equals(""))
+        if(!bools.equals("")) {
             player.sendMessage(ChatColor.AQUA + "Booleans:" + bools);
+        }
         
-        String settings = "";
+        String sets = "";
         for(ZoneVar v : ZoneVar.values()) {
             if(!v.getType().equals(Boolean.class)) {
-                if(b.getSettings().get(v) != null) {
-                    settings += " " + ChatColor.BLUE + v.getName() + ":" + ChatColor.WHITE + Serializer.unEscape(v.serialize(b.getSettings().get(v)));
+                if(settings.has(v.getName())) {
+                    sets += " " + ChatColor.BLUE + v.getName() + ":" + ChatColor.WHITE + settings.get(v.getName());
                 }
             }
         }
-        if(!settings.equals("")) 
+        if(!sets.equals("")) {
             player.sendMessage(ChatColor.AQUA + "Settings:" + settings);
+        }
         Region min = b.getWorldManager().getRegion(b.getForm().getLowX(),b.getForm().getLowZ());
         Region max = b.getWorldManager().getRegion(b.getForm().getHighX(),b.getForm().getHighZ());
         player.sendMessage(ChatColor.AQUA + "Region: " +  "(X:" + min.getX() + "," + max.getX() + "; Y:" + min.getY() + "," + max.getY() + ")" );

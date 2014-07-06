@@ -20,14 +20,14 @@ public class Database {
     private final String url,username,password;
     private Zones plugin;
     
-    public static final int VERSION = 3;
+    public static final int VERSION = 4;
     
-    public static final String SAVE_ZONE = "INSERT INTO `zones` (name, zonetype, formtype, world, admins, users, settings, minz, maxz, size) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    public static final String SAVE_ZONE = "INSERT INTO `zones` (name, zonetype, formtype, world, admins, users, settings, minz, maxz, size, config) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
     public static final String SAVE_VERTICE = "INSERT INTO `zones_vertices` (id, vertexorder, x, y) values (?,?,?,?)";
     
     public static final String UPDATE_ZONE = "UPDATE `zones` SET " +
     		"`name` = ?, `zonetype` = ?, `formtype` = ?, `world` = ?, `admins` = ?, " +
-    		"`users` = ?, `settings` = ?, `minz` = ?, `maxz` = ?, size = ? " +
+    		"`users` = ?, `settings` = ?, `minz` = ?, `maxz` = ?, size = ?, config = ? " +
     		"WHERE id = ? LIMIT 1";
     
     public static final String DELETE_ZONE =    "DELETE FROM `zones` WHERE id = ? LIMIT 1";
@@ -120,6 +120,7 @@ public class Database {
                 z.setMinz(      rs.getInt("minz"));
                 z.setMaxz(      rs.getInt("maxz"));
                 z.setSize(      rs.getInt("size"));
+                z.setConfig( rs.getString("config"));
                 z.setVertices(get(z));
                 zones.add(z);
             }
@@ -189,6 +190,7 @@ public class Database {
                 z.setMinz(      rs.getInt("minz"));
                 z.setMaxz(      rs.getInt("maxz"));
                 z.setSize(      rs.getInt("size"));
+                z.setConfig( rs.getString("config"));
                 z.setVertices(get(z));
                 return z;
             }
@@ -222,6 +224,7 @@ public class Database {
             st.setInt(8,    zone.getMinz());
             st.setInt(9,    zone.getMaxz());
             st.setInt(10,   zone.getSize());
+            st.setString(11, zone.getConfig().toString());
             st.execute();
             rs = st.getGeneratedKeys();
             if(rs.next()) {
@@ -289,7 +292,8 @@ public class Database {
             st.setInt(8, zone.getMinz());
             st.setInt(9, zone.getMaxz());
             st.setInt(10, zone.getSize());
-            st.setInt(11, zone.getId());
+            st.setString(11, zone.getConfig().toString());
+            st.setInt(12, zone.getId());
             st.executeUpdate();
         } catch(Exception e) {
             Zones.log.warning("[Zones]Error updating " + zone.getName() + "[" + zone.getId() + "] :");

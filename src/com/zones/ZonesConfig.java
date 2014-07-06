@@ -23,6 +23,8 @@ public class ZonesConfig {
     
     public static boolean      RESTORE_MISSING_PROPERTIES;
     
+    public static String       DEFAULT_GROUP;
+    
     public static String       DEFAULT_ENTER_MESSAGE;
     public static String       DEFAULT_LEAVE_MESSAGE;
     
@@ -81,6 +83,8 @@ public class ZonesConfig {
             TEXTURE_MANAGER_ENABLED = zp.getBool("EnableTextureManager", false);
             
             RESTORE_MISSING_PROPERTIES = zp.getBool("RestoreMissingProperties", true);
+            
+            DEFAULT_GROUP = zp.getProperty("DefaultGroup", "default");
             
             DEFAULT_ENTER_MESSAGE = zp.getProperty("DefaultEnterMessage", "You have just entered zone {zname}[{acces}].");
             DEFAULT_LEAVE_MESSAGE = zp.getProperty("DefaultLeaveMessage", "You have just exited zone {zname}.");

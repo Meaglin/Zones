@@ -20,6 +20,7 @@ public class CreateCommands extends CommandsBase {
         super(plugin);
     }
 
+    @SuppressWarnings("deprecation")
     @Command(
         name = "zcreate", 
         aliases = { "zc" }, 
@@ -61,6 +62,7 @@ public class CreateCommands extends CommandsBase {
         getPlugin().getZoneManager().addSelection(player.getEntityId(), selection);
         player.sendMessage(ChatColor.YELLOW + "Entering zone creation mode. Zone name: '" + name + "'");
         player.sendMessage(ChatColor.YELLOW + "You can start adding the zone points of this zone by");
+        // TODO: magic id number
         player.sendMessage(ChatColor.RED + "Right clicking blocks with " + Material.getMaterial(ZonesConfig.CREATION_TOOL_TYPE).name().toLowerCase() + "[" + ZonesConfig.CREATION_TOOL_TYPE + "].");
         if(ZonesConfig.WORLDEDIT_ENABLED) player.sendMessage("Or you can import a worldedit selection using /zimport");
     }

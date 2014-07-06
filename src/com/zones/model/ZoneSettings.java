@@ -146,4 +146,8 @@ public class ZoneSettings {
         if(str == null) return "";
         return str.replace(",", "$1").replace(";" , "$2");
     }
+    
+    public Map<ZoneVar, Object> getMap() {
+        return settings;
+    }
 }

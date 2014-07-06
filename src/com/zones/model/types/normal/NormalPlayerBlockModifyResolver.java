@@ -1,6 +1,7 @@
 package com.zones.model.types.normal;
 
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -19,8 +20,8 @@ public class NormalPlayerBlockModifyResolver implements PlayerBlockResolver {
     }
 
     @Override
-    public boolean isAllowed(ZoneBase zone, Player player, Block block, int typeId) {
-        Log.info(player, "trigger block modify '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + typeId);
+    public boolean isAllowed(ZoneBase zone, Player player, Block block, Material type) {
+        Log.info(player, "trigger block modify '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + type);
 
         return ((ZoneNormal)zone).canModify(player, Rights.MODIFY);
     }

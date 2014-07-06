@@ -244,7 +244,7 @@ public abstract class ZoneSelection {
 
     
     public boolean sellectionAllowed() {
-        if(getPlugin().getPermissions().canUse(getPlayer(), getWorld().getName(), "zones.create"))
+        if(getPlugin().getPermissions().has(getWorld().getName(), getPlayer().getName(), "zones.create"))
             return true;
         
         ZoneBase zone = getSelectedZone();

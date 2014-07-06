@@ -52,26 +52,25 @@ public class ZoneUtil {
     
     public boolean canBuild(Player player, Block block) {
         WorldManager wm = plugin.getWorldManager(player);
-        int typeId = block.getTypeId();
-        if(wm.getConfig().isProtectedPlaceBlock(player, typeId, false))
+        Material type = block.getType();
+        if(wm.getConfig().isProtectedPlaceBlock(player, type, false))
             return false;
         
-        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.build")){
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(), player.getName(),"zones.build")){
             return false;
         }
         
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null){
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.inheritbuild")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(), player.getName(),"zones.inheritbuild")){
                 return false;
             }
         } else  {
-            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_CREATE)).isAllowed(zone, player, block, typeId)) {
+            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_CREATE)).isAllowed(zone, player, block, type)) {
                 return false;
             }
-            
-            if((typeId == Material.FURNACE.getId() || typeId == Material.CHEST.getId() || typeId == Material.DISPENSER.getId()) &&
-                    !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, typeId)) {
+
+            if(BlockUtil.isContainer(type) && !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, type)) {
                 return false;
             }
         }
@@ -82,11 +81,11 @@ public class ZoneUtil {
         WorldManager wm = plugin.getWorldManager(player);
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.inheritbuild")) {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(), player.getName(), "zones.inheritbuild")) {
                 return false;
             }
         } else {
-            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, -1)) {
+            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, null)) {
                 return false;
             }
         }
@@ -95,25 +94,24 @@ public class ZoneUtil {
     
     public boolean canDestroy(Player player, Block block) {
         WorldManager wm = plugin.getWorldManager(block.getWorld());
-        int typeId = block.getTypeId();
+        Material type = block.getType();
         if(wm.getConfig().isProtectedBreakBlock(player, block, false))
             return false;
 
-        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.build")){
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(), player.getName(),"zones.build")){
             return false;
         }
         
         ZoneBase zone = wm.getActiveZone(block);
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.inheritbuild")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(), player.getName(), "zones.inheritbuild")){
                 return false;
             }
         } else {
-            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).isAllowed(zone, player, block, -1)) {
+            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).isAllowed(zone, player, block, null)) {
                 return false;
             }
-            if((typeId == Material.FURNACE.getId() || typeId == Material.CHEST.getId() || typeId == Material.DISPENSER.getId()) &&
-                    !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, typeId)) {
+            if(BlockUtil.isContainer(type) && !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, type)) {
                 return false;
             }
         }
@@ -124,16 +122,16 @@ public class ZoneUtil {
         WorldManager wm = plugin.getWorldManager(player.getWorld());
         ZoneBase zone = wm.getActiveZone(block);
         
-        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(),"zones.build")){
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(), player.getName(),"zones.build")){
             return false;
         }
         
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.inheritbuild")) {
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(), player.getName(), "zones.inheritbuild")) {
                 return false;
             }
         } else {
-            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, block, block.getTypeId())) {
+            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, block, block.getType())) {
                 return false;
             }
         }
@@ -177,13 +175,13 @@ public class ZoneUtil {
             if(!((PlayerLocationResolver)zone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(zone, player, player.getLocation(), loc)) {
                 return false;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
-                if(wm.getConfig().isOutsideBorder(loc) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
+                if(wm.getConfig().isOutsideBorder(loc) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(), player.getName(), "zones.override.border"))) {
                     return false;
                 }
             }
         } else {
             if(wm.getConfig().BORDER_ENABLED) {
-                if(wm.getConfig().isOutsideBorder(loc) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
+                if(wm.getConfig().isOutsideBorder(loc) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(), player.getName(), "zones.override.border"))) {
                     return false;
                 }
             }

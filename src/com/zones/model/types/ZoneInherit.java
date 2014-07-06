@@ -3,7 +3,7 @@ package com.zones.model.types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 import com.zones.model.ZoneBase;
 
@@ -54,20 +54,21 @@ public class ZoneInherit extends ZoneNormal {
     }
     
     @Override
-    public boolean canAdministrate(Player player) {
-        if(this.isAdmin(player))
+    public boolean canAdministrate(OfflinePlayer player) {
+        if(this.isAdmin(player)) {
             return true;
+        }
         
         return isInheritAdmin(player);
     }
     
     @Override
-    public boolean isAdmin(Player player) {
+    public boolean isAdmin(OfflinePlayer player) {
         return super.isAdmin(player);
     }
     
-    public boolean isInheritAdmin(Player player) {
-        if (getPermissions().canUse(player, getWorld().getName(), "zones.admin"))
+    public boolean isInheritAdmin(OfflinePlayer player) {
+        if (getPermissions().has(getWorld().getName(), player.getName(), "zones.admin"))
             return true;
         
         for(ZoneBase b : inheritedZones) {

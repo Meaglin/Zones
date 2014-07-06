@@ -3,6 +3,7 @@ package com.zones.listeners;
 import java.util.Iterator;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
@@ -52,6 +53,7 @@ public class ZonesEntityListener implements Listener {
         this.plugin = zones;
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityDamage(EntityDamageEvent event) {
         
@@ -69,8 +71,11 @@ public class ZonesEntityListener implements Listener {
         if(event instanceof EntityDamageByEntityEvent) {
             attacker = ((EntityDamageByEntityEvent)event).getDamager();
             if(attacker != null && attacker instanceof Projectile) {
+                // TODO: find alternative.
                 Entity ent = ((Projectile)attacker).getShooter();
-                if(ent != null) attacker = ent;
+                if(ent != null) {
+                    attacker = ent;
+                }
             }
         }
 
@@ -109,6 +114,7 @@ public class ZonesEntityListener implements Listener {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityExplode(EntityExplodeEvent event) {
         
@@ -136,6 +142,7 @@ public class ZonesEntityListener implements Listener {
             Iterator<Block> it = event.blockList().iterator();
             while(it.hasNext()) {
                 Block b = it.next();
+                // TODO: magic id number
                 if(wm.getConfig().EXPLOSION_PROTECTED_BLOCKS.contains(b.getTypeId())) {
                     it.remove();
                 }
@@ -269,28 +276,20 @@ public class ZonesEntityListener implements Listener {
     public void onEndermanPlace(EntityChangeBlockEvent event) {
         if(!(event.getEntity() instanceof Enderman)) return;
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
-        ZoneBase zone = wm.getActiveZone(event.getBlock());
-        if(zone == null) {
-            if(!wm.getConfig().ENDER_GRIEFING_ENABLED)
-                event.setCancelled(true);
-        } else {
-            if(!zone.getFlag(ZoneVar.ENDER_GRIEFING))
-                event.setCancelled(true);
+        if(!wm.testFlag(event.getBlock(), wm.getConfig().ENDER_GRIEFING_ENABLED, ZoneVar.ENDER_GRIEFING)) {
+            event.setCancelled(true);
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityInteract(EntityInteractEvent event) {
         if(event.getBlock() == null) return;
-        if(event.getBlock().getTypeId() != 60) return;
+        if(event.getBlock().getType() != Material.SOIL) {
+            return;
+        }
         WorldManager wm = plugin.getWorldManager(event.getEntity().getWorld());
-        ZoneBase zone = wm.getActiveZone(event.getBlock());
-        if(zone == null) {
-            if(wm.getConfig().CROP_PROTECTION_ENABLED)
-                event.setCancelled(true);
-        } else {
-            if(zone.getFlag(ZoneVar.CROP_PROTECTION))
-                event.setCancelled(true);
+        if(!wm.testFlag(event.getBlock(), wm.getConfig().CROP_PROTECTION_ENABLED, ZoneVar.CROP_PROTECTION)) {
+            event.setCancelled(true);
         }
     }
 }

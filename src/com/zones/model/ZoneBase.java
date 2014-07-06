@@ -2,19 +2,27 @@ package com.zones.model;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONArray;
+import com.meaglin.json.JSONObject;
 import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.Resolver;
 import com.zones.model.settings.ZoneVar;
 import com.zones.persistence.Zone;
+import com.zones.util.Point;
 
 /**
  * Abstract base class for any zone type Handles basic operations
@@ -23,18 +31,18 @@ import com.zones.persistence.Zone;
  */
 public abstract class ZoneBase {
     protected static final Logger     log = Logger.getLogger(ZoneBase.class.getName());
-
+    private static final int CONFIG_VERSION = 3;
+    
     private int                 id;
     protected ZoneForm                form;
     protected HashMap<Integer, Player> playerList;
 
     private String                    name;
-    private ZoneSettings              settings = new ZoneSettings();
 
     protected Zones                   zones;
     protected WorldManager            worldManager;
     
-    private Zone                      persistence;
+    protected Zone                      persistence;
     
     private boolean                   initialized;
     
@@ -56,15 +64,121 @@ public abstract class ZoneBase {
     
     protected void onLoad(Zone persistence) {
         name = persistence.getName();
+        JSONObject cfg = getConfig();
+        checkVersion(cfg);
+    }
+    
+    private void checkVersion(JSONObject cfg) {
+        if(cfg.getInt("version") == CONFIG_VERSION) {
+            return;
+        }
+        int ver = cfg.getInt("version");
+        if(ver < 1) {
+            upgradeFrom0To1(cfg); 
+        }
+        if(ver < 2) {
+            upgradeFrom1To2(cfg); 
+        }
+        if(ver < 3) {
+            upgradeFrom2To3(cfg);
+        }
+        cfg.put("version", CONFIG_VERSION);
+        saveSettings();
+    }
+    
+    protected void upgradeFrom2To3(JSONObject cfg) {
+        persistence.setAdmins(null);
+        persistence.setUsers(null);
+        persistence.setSettings(null);
+    }
+
+    protected void upgradeFrom0To1(JSONObject cfg) {
+        ZoneSettings settings;
         if(persistence.getSettings() != null && !persistence.getSettings().trim().equals("")) {
             try {
                 settings = ZoneSettings.unserialize(persistence.getSettings());
             } catch(Exception e) {
                 log.warning("[Zones]Error loading settings of " + name + "[" + id + "]");
                 e.printStackTrace();
+                return;
+            }
+            JSONObject set = getConfig().getJSONObject("settings");
+            for(Entry<ZoneVar, Object> obj : settings.getMap().entrySet()) {
+                if(obj.getValue() == null) {
+                    continue;
+                }
+                switch(obj.getKey().getSerializer()) {
+                    case ZONEVERTICE:
+                        ZoneVertice vert = (ZoneVertice) obj.getValue();
+                        set.put(obj.getKey().getName(), ((new JSONObject()).put("x", vert.getX()).put("y", vert.getY())));
+                        break;
+                    case INTEGERLIST:
+                        @SuppressWarnings("unchecked")
+                        List<Integer> list = (List<Integer>) obj.getValue();
+                        JSONArray arr = new JSONArray();
+                        for(int type : list) {
+                            arr.add(type);
+                        }
+                        set.put(obj.getKey().getName(), arr);
+                        break;
+                    case ENTITYLIST:
+                        @SuppressWarnings("unchecked")
+                        List<EntityType> elist = (List<EntityType>) obj.getValue();
+                        JSONArray earr = new JSONArray();
+                        for(EntityType type : elist) {
+                            earr.add(type.name());
+                        }
+                        set.put(obj.getKey().getName(), earr);
+                        break;
+                    case LOCATION:
+                        Point pnt = (Point) obj.getValue();
+                        set.put(obj.getKey().getName(), ((new JSONObject())
+                                .put("x", pnt.getX())
+                                .put("y", pnt.getY())
+                                .put("z", pnt.getZ())
+                                .put("yaw", 0)
+                                .put("pitch", 0)
+                            ));
+                        break;
+                    default:
+                        set.put(obj.getKey().getName(), obj.getValue());
+                        break;
+                }
             }
         }
     }
+    
+    @SuppressWarnings("deprecation")
+    protected void upgradeFrom1To2(JSONObject cfg) {
+        JSONObject set = getConfig().getJSONObject("settings");
+        if(set.has("ProtectedPlaceBlocks")) {
+            JSONArray arr = set.getJSONArray("ProtectedPlaceBlocks");
+            JSONArray mats = new JSONArray();
+            for(Object o : arr) {
+                mats.add(Material.getMaterial((int) o).name());
+            }
+            set.remove("ProtectedPlaceBlocks");
+            set.put("ProtectedPlaceMaterials", mats);
+        }
+        if(set.has("ProtectedBreakBlocks")) {
+            JSONArray arr = set.getJSONArray("ProtectedBreakBlocks");
+            JSONArray mats = new JSONArray();
+            for(Object o : arr) {
+                mats.add(Material.getMaterial((int) o).name());
+            }
+            set.remove("ProtectedBreakBlocks");
+            set.put("ProtectedBreakMaterials", mats);
+        }
+    }
+    
+    public JSONObject getConfig() {
+        return persistence.getConfig();
+    }
+    
+    public JSONObject getSettings() {
+        return getConfig().getJSONObject("settings");
+    }
+    
     /*
      * This check is necessary to make sure the zone won't crash the server.
      */
@@ -212,10 +326,10 @@ public abstract class ZoneBase {
     
     public abstract Location getSpawnLocation(Player player);
     
-    public abstract ZonesAccess getAccess(Player player);
+    public abstract ZonesAccess getAccess(OfflinePlayer player);
     public abstract ZonesAccess getAccess(String group);
     
-    public abstract boolean canAdministrate(Player player);
+    public abstract boolean canAdministrate(OfflinePlayer player);
    
     
     public final HashMap<Integer, Player> getPlayersInsideMap() {
@@ -246,7 +360,7 @@ public abstract class ZoneBase {
     
     public final boolean saveSettings() {
         try {
-            getPersistence().setSettings(getSettings().serialize());
+            getPersistence().saveConfig();
             zones.getMysqlDatabase().update(getPersistence());
             //zones.getDatabase().update(getPersistence());      
         } catch(Exception e) {
@@ -273,11 +387,7 @@ public abstract class ZoneBase {
             }
         }
     }
-    
-    public final ZoneSettings getSettings() {
-        return settings;
-    }
-    
+
     /**
      * Easy function to get boolean flags.
      * 
@@ -285,23 +395,27 @@ public abstract class ZoneBase {
      * @return the value or default if null.
      */
     public final boolean getFlag(ZoneVar name) {
-        if(!name.getType().equals(Boolean.class))
+        if(!name.getType().equals(Boolean.class)) {
             return false;
-        Object obj = getSettings().get(name);
-        if(obj == null) obj = name.getDefault(this);
+        }
+        Object obj = getConfig().getJSONObject("settings").get(name.getName());
+        if(obj == null) {
+            obj = name.getDefault(this);
+        }
         
         return (Boolean) obj;
     }
     
-    public final boolean setSetting(ZoneVar name, boolean b) {
-        getSettings().set(name, b);
-        return saveSettings();
-    }
-    
-    public final Object getSetting(ZoneVar name) {
-        Object obj = getSettings().get(name);
-        if(obj == null) return name.getDefault(this);
-        else return obj;
+    public final String getString(ZoneVar name) {
+        if(!name.getType().equals(String.class)) {
+            return "";
+        }
+        Object obj = getConfig().getJSONObject("settings").get(name.getName());
+        if(obj == null) {
+            obj = name.getDefault(this);
+        }
+        
+        return (String) obj;
     }
     
     @Override
@@ -309,8 +423,9 @@ public abstract class ZoneBase {
         if(super.equals(o))
             return true;
         
-        if(!(o instanceof ZoneBase))
+        if(!(o instanceof ZoneBase)) {
             return false;
+        }
         
         return (getId() == ((ZoneBase)o).getId());
     }

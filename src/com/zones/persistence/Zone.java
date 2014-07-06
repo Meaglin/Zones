@@ -11,6 +11,7 @@ import javax.persistence.OrderBy;
 
 import com.avaje.ebean.validation.Length;
 import com.avaje.ebean.validation.NotEmpty;
+import com.meaglin.json.JSONObject;
 import com.zones.Zones;
 /*
 @Entity()
@@ -46,6 +47,10 @@ public class Zone {
     
     @Column(columnDefinition= "LONGTEXT")
     private String settings;
+    
+    @Column(columnDefinition= "LONGTEXT")
+    private String config;
+    private JSONObject json;
     
     private int minz;
     
@@ -157,6 +162,37 @@ public class Zone {
         this.vertices = vertices;
     }
     
+    /**
+     * @return the config
+     */
+    public String getRawConfig() {
+        return config;
+    }
+    
+    public void saveConfig() {
+        this.setConfig(getConfig().toString());
+    }
+    
+    public JSONObject getConfig() {
+        if(json == null) {
+            json = new JSONObject(getRawConfig());
+            json.defaults("{"
+                    + "version: 0,"
+                    + "users: {},"
+                    + "groups: {},"
+                    + "settings: {}"
+                    + "}");
+        }
+        return json;
+    }
+
+    /**
+     * @param config the config to set
+     */
+    public void setConfig(String config) {
+        this.config = config;
+    }
+
     public void addVertice(Vertice vertice) {
         this.vertices.add(vertice);
     }

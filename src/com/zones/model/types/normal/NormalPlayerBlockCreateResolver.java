@@ -1,10 +1,10 @@
 package com.zones.model.types.normal;
 
-import java.util.List;
-
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONObject;
 import com.zones.ZonesConfig;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
@@ -20,23 +20,23 @@ public class NormalPlayerBlockCreateResolver implements PlayerBlockResolver {
     }
 
     @Override
-    public boolean isAllowed(ZoneBase zone, Player player, Block block, int typeId) {
-        Log.info(player, "trigger block create '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + typeId);
+    public boolean isAllowed(ZoneBase zone, Player player, Block block, Material type) {
+        Log.info(player, "trigger block create '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + type);
         
         if(!((ZoneNormal)zone).canModify(player, Rights.BUILD)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_BUILD_BLOCKS_IN_ZONE, player);
             return false;
         } else {
-            List<?> list = zone.getSettings().getList(ZoneVar.PLACE_BLOCKS);
-            if(list != null && !((ZoneNormal)zone).canAdministrate(player)) {
-                typeId = (typeId == -1  ? block.getTypeId() : typeId);
-                
-                if(list.contains(typeId) ) {
-                    zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_PROTECTED, player);
-                    return false;
-                }
-            }            
-                return true;
+            JSONObject settings = zone.getConfig().getJSONObject("settings");
+            type = type == null ? block.getType() : type;
+            
+            if(settings.has(ZoneVar.PLACE_BLOCKS.getName())
+                    && !((ZoneNormal)zone).canAdministrate(player)
+                    && settings.getJSONArray(ZoneVar.PLACE_BLOCKS.getName()).contains(type.name())) {
+                zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_PROTECTED, player);
+                return false;
+            }
+            return true;
         }
     }
 

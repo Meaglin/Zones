@@ -80,7 +80,7 @@ public class ZonesVehicleListener implements Listener {
                 event.getVehicle().teleport(from);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
-                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
+                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                         //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
@@ -95,7 +95,7 @@ public class ZonesVehicleListener implements Listener {
                 }
             }
         } else if(wm.getConfig().BORDER_ENABLED) {
-            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
+            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
                     player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);

@@ -117,16 +117,16 @@ public enum Serializer {
             return Integer.class;
         }
     },
-    ENTITYLIST {
+    STRINGLIST {
         @Override
         public String serialize(Object data) {
             if(data != null && data instanceof List<?>) {
                 
                 List<?> list =  ( List<?> ) data;
-                if(!list.isEmpty() && list.get(0) instanceof EntityType) {
+                if(!list.isEmpty() && list.get(0) instanceof String) {
                     String rt = "";
                     for(Object i : list)
-                        rt += ((EntityType)i).getName() + ",";
+                        rt += i + ",";
                     
                     rt = rt.substring(0, rt.length()-1);
                     
@@ -141,8 +141,54 @@ public enum Serializer {
 
         @Override
         public Object unSerialize(String serializedData) {
-            List<EntityType> list = new ArrayList<EntityType>();
+            List<String> list = new ArrayList<>();
             for(String i : unEscape(serializedData).split(",")) {
+                list.add(i);
+            }
+            if(list.isEmpty()) return null;
+            return list;
+        }
+        
+        @Override
+        public Class<? extends Object> getType() {
+            return List.class;
+        }
+        
+        @Override
+        public Class<? extends Object> getListType() {
+            return String.class;
+        }
+    },
+    ENTITYLIST {
+        @SuppressWarnings("deprecation")
+        @Override
+        public String serialize(Object data) {
+            if(data != null && data instanceof List<?>) {
+                
+                List<?> list =  ( List<?> ) data;
+                if(!list.isEmpty() && list.get(0) instanceof EntityType) {
+                    String rt = "";
+                    for(Object i : list)
+                        // TODO: magic id number
+                        rt += ((EntityType)i).getName() + ",";
+                    
+                    rt = rt.substring(0, rt.length()-1);
+                    
+                    return escape(rt);
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        
+        @SuppressWarnings("deprecation")
+        @Override
+        public Object unSerialize(String serializedData) {
+            List<EntityType> list = new ArrayList<>();
+            for(String i : unEscape(serializedData).split(",")) {
+                // TODO: magic id number
                 EntityType t = EntityType.fromName(i); 
                 if(t != null)list.add(t);
             }

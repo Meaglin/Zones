@@ -1,5 +1,8 @@
 package com.zones.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.ChatColor;
 
 /**
@@ -8,20 +11,38 @@ import org.bukkit.ChatColor;
  *
  */
 public class ZonesAccess {
+    
+    private static final ZonesAccess[] all;
+    private static Map<Character, Integer> charToAccess;
+    private static final int size = 64;
+    
+    static {
+        all = new ZonesAccess[size];
+        for(int i = 0; i < size; i += 1) {
+            all[i] = new ZonesAccess(i);
+        }
+        charToAccess = new HashMap<>();
+        for(Rights r : Rights.values()) {
+            charToAccess.put(r.getCode(), r.getFlag());
+        }
+    }
+    
+    public static final ZonesAccess ALL = ZonesAccess.factory(size - 1);
+
     public enum Rights {
-        ATTACK(32, "a", "Attack Entity's"),//
-        BUILD(1, "b", "Build blocks"),//
-        DESTROY(2, "d", "Destroy blocks"),//
-        MODIFY(4, "c", "Chest access"),//
-        ENTER(8, "e", "Enter zone"),//
-        HIT(16, "h", "Hit Entity's"),//
-        ALL(63, "*", "Anything & everything");
+        ATTACK(32, 'a', "Attack Entity's"),//
+        BUILD(1, 'b', "Build blocks"),//
+        DESTROY(2, 'd', "Destroy blocks"),//
+        MODIFY(4, 'c', "Chest access"),//
+        ENTER(8, 'e', "Enter zone"),//
+        HIT(16, 'h', "Hit Entity's"),//
+        ALL(63, '*', "Anything & everything");
 
         private int    flag;
-        private String code;
+        private char code;
         private String textual;
 
-        private Rights(int flag, String code, String textual) {
+        private Rights(int flag, char code, String textual) {
             this.flag = flag;
             this.code = code;
             this.textual = textual;
@@ -31,7 +52,7 @@ public class ZonesAccess {
             return flag;
         }
 
-        public String getCode() {
+        public char getCode() {
             return code;
         }
 
@@ -46,21 +67,31 @@ public class ZonesAccess {
 
     private int rights = 0;
 
-    public ZonesAccess(int right) {
+    private ZonesAccess(int right) {
         rights = right;
     }
 
-    public ZonesAccess(String rightsString) {
-        for (Rights right : Rights.values())
-            if (rightsString.toLowerCase().contains(right.getCode()))
-                rights |= right.getFlag();
-        
-        if(rightsString.contains("m"))
-            rights |= Rights.MODIFY.getFlag();
+    public static ZonesAccess factory(String access) {
+        int r = 0;
+        for(int i = 0; i < access.length(); i += 1) {
+            Integer a = charToAccess.get(access.charAt(i));
+            if(a == null) {
+                continue;
+            }
+            r = r | a;
+        }
+        return all[r];
+    }
+    
+    public static ZonesAccess factory(int rights) {
+        if(rights < 0 || rights >= size) {
+            return all[0];
+        }
+        return all[rights];
     }
 
     public ZonesAccess merge(ZonesAccess acs) {
-        return new ZonesAccess(rights | acs.getRights());
+        return all[rights | acs.getRights()];
     }
 
     public int getRights() {
@@ -106,8 +137,9 @@ public class ZonesAccess {
     @Override
     public String toString() {
         // Short circuit on 'all'
-        if (canDo(Rights.ALL))
-            return Rights.ALL.getCode();
+        if (canDo(Rights.ALL)) {
+            return Rights.ALL.getCode() + "";
+        }
         if (canNothing())
             return "-";
         // Build list of access codes.
@@ -190,8 +222,12 @@ public class ZonesAccess {
 
     @Override
     public boolean equals(Object o) {
-        if(this == o) return true;
-        if(!(o instanceof ZonesAccess)) return false;
+        if(this == o) {
+            return true;
+        }
+        if(!(o instanceof ZonesAccess)) {
+            return false;
+        }
         
         return ((ZonesAccess) o).getRights() == getRights();
     }

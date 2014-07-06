@@ -128,7 +128,7 @@ public class ZonesPlayerListener implements Listener {
                 event.setCancelled(false);
                 return;
             } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
-                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
+                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
                     if(wm.getConfig().isOutsideBorder(from)) {
                         player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                         player.teleport(from.getWorld().getSpawnLocation());
@@ -144,7 +144,7 @@ public class ZonesPlayerListener implements Listener {
                 }
             }
         } else if(wm.getConfig().BORDER_ENABLED) {
-            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.override.border"))) {
+            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
                 if(wm.getConfig().isOutsideBorder(from) && 
                         (
                              wm.getConfig().BORDER_ENFORCE || 
@@ -201,14 +201,14 @@ public class ZonesPlayerListener implements Listener {
                 event.setCancelled(true);
                 return;
             } else if (wmto.getConfig().BORDER_ENABLED && wmto.getConfig().BORDER_ENFORCE) {
-                if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wmto.getWorldName(), "zones.override.border"))) {
+                if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wmto.getWorldName(),player.getName(), "zones.override.border"))) {
                     player.sendMessage(ZonesConfig.PLAYER_CANT_WARP_OUTSIDE_BORDER);
                     event.setCancelled(true);
                     return;
                 }
             }
         } else if(wmto.getConfig().BORDER_ENABLED) {
-            if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().canUse(player, wmto.getWorldName(), "zones.override.border"))) {
+            if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wmto.getWorldName(),player.getName(), "zones.override.border"))) {
                 player.sendMessage(ZonesConfig.PLAYER_CANT_WARP_OUTSIDE_BORDER);
                 event.setCancelled(true);
                 return;
@@ -233,69 +233,70 @@ public class ZonesPlayerListener implements Listener {
      * (this happens when it gets called for the first time) and after that its
      * just a list of Integers in the memory.
      */
-    private static final List<Integer> placeItems = Arrays.asList(
-            Material.FLINT_AND_STEEL.getId(),
-            Material.LAVA_BUCKET.getId(),
-            Material.WATER_BUCKET.getId(),
-            Material.SEEDS.getId(),
-            Material.SIGN.getId(),
-            Material.REDSTONE.getId(),
-            Material.INK_SACK.getId(),
-            Material.PAINTING.getId(),
-            Material.WOOD_DOOR.getId(),
-            Material.IRON_DOOR.getId(),
-            Material.TNT.getId(),
-            Material.REDSTONE_TORCH_ON.getId(),
-            Material.PUMPKIN.getId(),
-            Material.ITEM_FRAME.getId()
+    private static final List<Material> placeItems = Arrays.asList(
+            Material.FLINT_AND_STEEL,
+            Material.LAVA_BUCKET,
+            Material.WATER_BUCKET,
+            Material.SEEDS,
+            Material.SIGN,
+            Material.REDSTONE,
+            Material.INK_SACK,
+            Material.PAINTING,
+            Material.WOOD_DOOR,
+            Material.IRON_DOOR,
+            Material.TNT,
+            Material.REDSTONE_TORCH_ON,
+            Material.PUMPKIN,
+            Material.ITEM_FRAME
+        );
+
+    private static final List<Material> placeHitItems = Arrays.asList(
+            Material.MINECART,
+            Material.STORAGE_MINECART,
+            Material.BOAT,
+            Material.POWERED_MINECART
+        );
+
+    private static final List<Material> destroyItems = Arrays.asList(
+            Material.BUCKET
+        );
+
+    private static final List<Material> placeBlocks = Arrays.asList(
+            Material.DIODE_BLOCK_OFF,
+            Material.DIODE_BLOCK_ON
+        );
+
+    private static final List<Material> hitBlocks = Arrays.asList(
+            Material.CAKE_BLOCK,
+            Material.LEVER,
+            Material.STONE_PLATE,
+            Material.WOOD_PLATE,
+            Material.STONE_BUTTON,
+            Material.WOODEN_DOOR,
+            Material.TRAP_DOOR,
+            Material.FENCE_GATE,
+            Material.TRIPWIRE,
+            Material.TRIPWIRE_HOOK,
+            Material.WOOD_BUTTON
+        );
+
+    private static final List<Material> modifyBlocks = Arrays.asList(
+            Material.NOTE_BLOCK,
+            Material.JUKEBOX,
+            Material.FURNACE,
+            Material.BURNING_FURNACE,
+            Material.CHEST,
+            Material.DISPENSER,
+            Material.BREWING_STAND,
+            Material.BEACON,
+            Material.COMMAND,
+            Material.ANVIL,
+            Material.TRAPPED_CHEST,
+            Material.DROPPER,
+            Material.HOPPER
         );
     
-    private static final List<Integer> placeHitItems = Arrays.asList(
-            Material.MINECART.getId(),
-            Material.STORAGE_MINECART.getId(),
-            Material.BOAT.getId(),
-            Material.POWERED_MINECART.getId()
-        );
-    
-    private static final List<Integer> destroyItems = Arrays.asList(
-            Material.BUCKET.getId()
-        );
-    
-    private static final List<Integer> placeBlocks = Arrays.asList(
-            Material.DIODE_BLOCK_OFF.getId(),
-            Material.DIODE_BLOCK_ON.getId()
-        );
-    
-    private static final List<Integer> hitBlocks = Arrays.asList(
-            Material.CAKE_BLOCK.getId(),
-            Material.LEVER.getId(),
-            Material.STONE_PLATE.getId(),
-            Material.WOOD_PLATE.getId(),
-            Material.STONE_BUTTON.getId(),
-            Material.WOODEN_DOOR.getId(),
-            Material.TRAP_DOOR.getId(),
-            Material.FENCE_GATE.getId(),
-            Material.TRIPWIRE.getId(),
-            Material.TRIPWIRE_HOOK.getId(),
-            Material.WOOD_BUTTON.getId()
-        );
-    
-    private static final List<Integer> modifyBlocks = Arrays.asList(
-            Material.NOTE_BLOCK.getId(),
-            Material.JUKEBOX.getId(),
-            Material.FURNACE.getId(),
-            Material.BURNING_FURNACE.getId(),
-            Material.CHEST.getId(),
-            Material.DISPENSER.getId(),
-            Material.BREWING_STAND.getId(),
-            Material.BEACON.getId(),
-            Material.COMMAND.getId(),
-            Material.ANVIL.getId(),
-            Material.TRAPPED_CHEST.getId(),
-            Material.DROPPER.getId(),
-            Material.HOPPER.getId()
-        );
-    
+    @SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         
@@ -308,8 +309,8 @@ public class ZonesPlayerListener implements Listener {
         
 
         Player player = event.getPlayer();
-        int blockType = (event.getClickedBlock() != null ? event.getClickedBlock().getTypeId() : 0);
-        int toolType = (event.getItem() != null ? event.getItem().getTypeId() : 0);
+        Material blockType = (event.getClickedBlock() != null ? event.getClickedBlock().getType() : null);
+        Material toolType = (event.getItem() != null ? event.getItem().getType() : null);
         
         /*
          * Using a huge ass if(...) would have been possible too however this seems more elegant and prolly is a little bit faster
@@ -326,7 +327,7 @@ public class ZonesPlayerListener implements Listener {
                     WorldManager wm = plugin.getWorldManager(player.getWorld());
                     ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
                     if(zone == null) {
-                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player, wm.getWorldName(), "zones.build")) {
+                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.build")) {
                             player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
                             event.setCancelled(true);
                             return;
@@ -345,7 +346,7 @@ public class ZonesPlayerListener implements Listener {
         switch(event.getAction()) {
             case RIGHT_CLICK_BLOCK:
                 
-                if (toolType == ZonesConfig.CREATION_TOOL_TYPE) {
+                if (toolType.getId() == ZonesConfig.CREATION_TOOL_TYPE) {
                     ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
                     if (selection != null) {
                         if(event.getClickedBlock() != null) {
@@ -368,7 +369,13 @@ public class ZonesPlayerListener implements Listener {
                     EventUtil.onPlace(plugin, event, player, event.getClickedBlock(), blockType);
                 else if(destroyItems.contains(toolType)) 
                     EventUtil.onBreak(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()));
-                else if((blockType == 2 || blockType == 3) && toolType > 289 && toolType < 295) {
+                else if((blockType == Material.DIRT || blockType == Material.GRASS) && (
+                        toolType == Material.WOOD_HOE ||
+                        toolType == Material.STONE_HOE ||
+                        toolType == Material.IRON_HOE ||
+                        toolType == Material.GOLD_HOE ||
+                        toolType == Material.DIAMOND_HOE
+                )) {
                     EventUtil.onPlace(plugin, event, player, event.getClickedBlock(), blockType);
                 }
                 
@@ -376,15 +383,10 @@ public class ZonesPlayerListener implements Listener {
                 break;
         }
         if(!event.isCancelled() && event.getAction() == Action.PHYSICAL &&
-                event.getClickedBlock() != null && event.getClickedBlock().getTypeId() == 60) {
+                event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.SOIL) {
             WorldManager wm = plugin.getWorldManager(player.getWorld());
-            ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
-            if(zone == null) {
-                if(wm.getConfig().CROP_PROTECTION_ENABLED)
-                    event.setCancelled(true);
-            } else {
-                if(zone.getFlag(ZoneVar.CROP_PROTECTION))
-                    event.setCancelled(true);
+            if(wm.testFlag(event.getClickedBlock(), wm.getConfig().CROP_PROTECTION_ENABLED, ZoneVar.CROP_PROTECTION)) {
+                event.setCancelled(true);
             }
         }
     }
@@ -408,10 +410,6 @@ public class ZonesPlayerListener implements Listener {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PICKUP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
-//        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItemDrop(), -1)) {
-//            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PICKUP_ITEMS_IN_ZONE, event.getPlayer());
-//            event.setCancelled(true);
-//        }
     }
 
     @EventHandler
@@ -422,10 +420,6 @@ public class ZonesPlayerListener implements Listener {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DROP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
-//        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, event.getPlayer(), event.getItem(), -1)) {
-//            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DROP_ITEMS_IN_ZONE, event.getPlayer());
-//            event.setCancelled(true);
-//        }
     }
 
     @EventHandler
@@ -441,7 +435,7 @@ public class ZonesPlayerListener implements Listener {
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
         Player player = event.getPlayer();
         Block blockPlaced = event.getBlockClicked().getRelative(event.getBlockFace());
-        EventUtil.onPlace(plugin, event, player, blockPlaced, event.getItemStack().getTypeId());
+        EventUtil.onPlace(plugin, event, player, blockPlaced, event.getItemStack().getType());
     }
     
     @EventHandler(ignoreCancelled = true)
@@ -454,7 +448,7 @@ public class ZonesPlayerListener implements Listener {
         
         // Don't allow leashing without hit rights.
         if(player.getItemInHand() != null && 
-                player.getItemInHand().getTypeId() == Material.LEASH.getId() &&
+                player.getItemInHand().getType() == Material.LEASH &&
                 target instanceof Animals) {
             EventUtil.onEntityHit(plugin, event, player, target);
         }
@@ -476,7 +470,7 @@ public class ZonesPlayerListener implements Listener {
             }
         } else if (target instanceof LeashHitch) {
             EventUtil.onEntityHit(plugin, event, player, target);
-        } else if (target instanceof PoweredMinecart && player.getItemInHand() != null && player.getItemInHand().getTypeId() == 263) {
+        } else if (target instanceof PoweredMinecart && player.getItemInHand() != null && player.getItemInHand().getType() == Material.COAL) {
             EventUtil.onEntityHit(plugin, event, player, target);
         }
     }
@@ -494,7 +488,7 @@ public class ZonesPlayerListener implements Listener {
             EventUtil.onEntityChange(plugin, event, player, entity);
         } else if (holder instanceof BlockState) {
             BlockState state = (BlockState) holder;
-            EventUtil.onModify(plugin, event, player, state.getBlock(), state.getTypeId());
+            EventUtil.onModify(plugin, event, player, state.getBlock(), state.getType());
         }
         
     }

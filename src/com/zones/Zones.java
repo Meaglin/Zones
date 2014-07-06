@@ -1,21 +1,15 @@
 package com.zones;
 
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.zones.command.CommandMap;
-import com.zones.listeners.*;
-import com.zones.permissions.Permissions;
-import com.zones.permissions.PermissionsResolver;
-import com.zones.persistence.Database;
-import com.zones.textiel.TextielManager;
-import com.zones.util.FileUtil;
-import com.zones.util.ZoneUtil;
-
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import net.milkbowl.vault.permission.Permission;
+
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,7 +17,20 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.zones.command.CommandMap;
+import com.zones.listeners.ZonesBlockListener;
+import com.zones.listeners.ZonesEntityListener;
+import com.zones.listeners.ZonesPlayerListener;
+import com.zones.listeners.ZonesVehicleListener;
+import com.zones.listeners.ZonesWeatherListener;
+import com.zones.persistence.Database;
+import com.zones.textiel.TextielManager;
+import com.zones.util.FileUtil;
+import com.zones.util.ZoneUtil;
 
 /**
  * 
@@ -32,7 +39,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Zones extends JavaPlugin implements CommandExecutor {
 
-    public static final int                 Rev             = 175;
+    public static final int                 Rev             = 180;
     public static final Logger              log             = Logger.getLogger("Minecraft");
     private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
     private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
@@ -44,7 +51,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     private WorldEditPlugin                 worldedit;
     private TextielManager                  textiel;
-    private Permissions                     permissionsManager;
+    private Permission                     permissionsManager;
 
     private final HashMap<Long, WorldManager> worlds        = new HashMap<Long, WorldManager>(2);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
@@ -61,8 +68,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
      */
     private void registerEvents() {
         PluginManager pm = getServer().getPluginManager();
-        Plugin easybind = pm.getPlugin("EasyBind");
-        if(easybind != null) pm.registerEvents(new ZonesEasyBindListener(this), this);
         pm.registerEvents(blockListener, this);
         pm.registerEvents(entityListener, this);
         pm.registerEvents(playerListener, this);
@@ -73,8 +78,9 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public void registerWorldEdit() {
         if(worldedit == null) {
             Plugin plugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
-            if(plugin != null)
+            if(plugin != null) {
                 worldedit = (WorldEditPlugin) plugin;
+            }
         }
     }
 
@@ -109,12 +115,13 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             textiel = new TextielManager(this);
             textiel.load();
         }
-        log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorldEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + " Permissions:" + getPermissions().getName() + ".");
+        log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorldEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + ".");
         
     }
     
     private void resolvePermissions() {
-        permissionsManager = PermissionsResolver.resolve(this);
+        RegisteredServiceProvider<net.milkbowl.vault.permission.Permission> rsp = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+        permissionsManager = rsp.getProvider();
     }
     
     private void loadWorlds() {
@@ -129,7 +136,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     
-    public Permissions getPermissions() {
+    public Permission getPermissions() {
         return permissionsManager;
     }
 
@@ -234,6 +241,37 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     public CommandMap getCommandMap() {
         return commandMap;
+    }
+    
+    public OfflinePlayer matchPlayer(String name) {
+        name = name.toLowerCase();
+        for(Player player : getServer().getOnlinePlayers()) {
+            if(player.getName().equalsIgnoreCase(name)) {
+                return player;
+            }
+        }
+        return getOfflinePlayer(name);
+    }
+
+//    private Map<String, Set<String>> parentGroupCache;
+//    private static final long groupCacheTimeout = 60 * 1000;
+//    private long lastGroupUpdate;
+//    public Set<String> getParentGroups(String group) {
+//        if(parentGroupCache == null || (lastGroupUpdate < (System.currentTimeMillis() - groupCacheTimeout))) {
+//            parentGroupCache = new HashMap<>();
+//            permissionsManager.getGroups();
+//        }
+//    }
+    
+    private Map<String, OfflinePlayer> nameToPlayerCache;
+    public OfflinePlayer getOfflinePlayer(String playerName) {
+        if(nameToPlayerCache == null) {
+            nameToPlayerCache = new HashMap<>();
+            for(OfflinePlayer p : getServer().getOfflinePlayers()) {
+                nameToPlayerCache.put(p.getName().toLowerCase(), p);
+            }
+        }
+        return nameToPlayerCache.get(playerName.toLowerCase());
     }
     
 }

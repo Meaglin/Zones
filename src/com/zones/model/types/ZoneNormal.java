@@ -2,22 +2,40 @@ package com.zones.model.types;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+
+import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONObject;
 import com.zones.ZonesConfig;
 import com.zones.accessresolver.AccessResolver;
 import com.zones.accessresolver.interfaces.Resolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess;
 import com.zones.model.settings.ZoneVar;
-import com.zones.model.types.normal.*;
-import com.zones.permissions.Permissions;
+import com.zones.model.types.normal.NormalBlockFireResolver;
+import com.zones.model.types.normal.NormalBlockFromToResolver;
+import com.zones.model.types.normal.NormalBlockResolver;
+import com.zones.model.types.normal.NormalEntitySpawnResolver;
+import com.zones.model.types.normal.NormalPlayerAttackEntityResolver;
+import com.zones.model.types.normal.NormalPlayerBlockCreateResolver;
+import com.zones.model.types.normal.NormalPlayerBlockDestroyResolver;
+import com.zones.model.types.normal.NormalPlayerBlockHitResolver;
+import com.zones.model.types.normal.NormalPlayerBlockModifyResolver;
+import com.zones.model.types.normal.NormalPlayerDamageResolver;
+import com.zones.model.types.normal.NormalPlayerEnterResolver;
+import com.zones.model.types.normal.NormalPlayerFoodResolver;
+import com.zones.model.types.normal.NormalPlayerHitEntityResolver;
+import com.zones.model.types.normal.NormalPlayerTeleportResolver;
 import com.zones.persistence.Zone;
-import com.zones.util.Point;
 
 /**
  * 
@@ -25,10 +43,9 @@ import com.zones.util.Point;
  *
  */
 public class ZoneNormal extends ZoneBase{
-    protected List<String>                 adminusers;
-
+    protected Set<UUID>                 admins;
     protected HashMap<String, ZonesAccess> groups;
-    protected HashMap<String, ZonesAccess> users;
+    protected HashMap<UUID, ZonesAccess> users;
     
     private static final Resolver[] resolvers;
     
@@ -64,55 +81,58 @@ public class ZoneNormal extends ZoneBase{
     
     public ZoneNormal() {
         super();
-        adminusers = new ArrayList<String>();
+        admins = new HashSet<>();
 
-        groups = new HashMap<String, ZonesAccess>();
-        users = new HashMap<String, ZonesAccess>();
+        groups = new HashMap<>();
+        users = new HashMap<>();
     }
 
-    public Permissions getPermissions() {
+    public Permission getPermissions() {
         return getPlugin().getPermissions();
     }
     
     @Override
-    protected void onLoad(Zone persistence) {
-        super.onLoad(persistence);
-        if(persistence.getAdmins() != null && !persistence.getAdmins().trim().equals("")) {
-            String[] list = persistence.getAdmins().split(";");
-            for (int i = 0; i < list.length; i++) {
-                String[] item = list[i].split(",");
-
-                switch (Integer.parseInt(item[0])) {
-                    case 1:
-                        adminusers.add(item[1].toLowerCase());
-                        break;
-                    default:
-                        log.info("Unknown admin grouptype in zone id: " + getId());
-                        break;
-                }
-            }
-        }
+    protected void upgradeFrom0To1(JSONObject cfg) {
+        super.upgradeFrom0To1(cfg);
         if(persistence.getUsers() != null && !persistence.getUsers().trim().equals("")) {
+            JSONObject users = getConfig().getJSONObject("users");
+            JSONObject groups = getConfig().getJSONObject("groups");
             String[] list = persistence.getUsers().split(";");
             for (int i = 0; i < list.length; i++) {
                 String[] item = list[i].split(",");
                 int type = Integer.parseInt(item[0]);
 
                 String itemname = item[1];
-                String itemrights = "";
-                // compatibility with old system.
-                if (item.length < 3)
-                    itemrights = "*";
-                else
-                    itemrights = item[2];
+                String itemrights = item[2];
 
                 switch (type) {
                     case 1:
-                        users.put(itemname.toLowerCase(), new ZonesAccess(itemrights));
+                        OfflinePlayer p = getPlugin().getOfflinePlayer(itemname);
+                        if(p == null) {
+                            log.info("Unknown user: " + list[i] + " in zone " + getId());
+                            continue;
+                        }
+                        JSONObject user = new JSONObject();
+                        user.put("admin", false);
+                        user.put("access", itemrights);
+                        user.put("name", p.getName());
+                        user.put("uuid", p.getUniqueId().toString());
+                        users.put(p.getUniqueId().toString(), user);
                         break;
                     case 2:
-                        if (getPermissions().isValid(getWorld().getName(),itemname))
-                            groups.put(itemname, new ZonesAccess(itemrights));
+                        boolean valid = false;
+                        for(String group : getPlugin().getPermissions().getGroups()) {
+                            if(group.equalsIgnoreCase(itemname)) {
+                                valid = true;
+                                break;
+                            }
+                        }
+                        if (valid) {
+                            JSONObject group = new JSONObject();
+                            group.put("access", itemrights);
+                            group.put("name", itemname);
+                            groups.put(itemname, group);
+                        }
                         else
                             log.info("Invalid grouptype in zone id: " + getId());
                         break;
@@ -122,6 +142,50 @@ public class ZoneNormal extends ZoneBase{
                 }
             }
         }
+        if(persistence.getAdmins() != null && !persistence.getAdmins().trim().equals("")) {
+            JSONObject users = getConfig().getJSONObject("users");
+            String[] list = persistence.getAdmins().split(";");
+            for (int i = 0; i < list.length; i++) {
+                String[] item = list[i].split(",");
+                switch (Integer.parseInt(item[0])) {
+                    case 1:
+                        OfflinePlayer p = getPlugin().getOfflinePlayer(item[1]);
+                        if(p == null) {
+                            log.info("Unknown user: " + list[i] + " in zone " + getId());
+                            continue;
+                        }
+                        
+                        JSONObject user = new JSONObject();
+                        user.put("admin", true);
+                        user.put("access", "*");
+                        user.put("name", p.getName());
+                        user.put("uuid", p.getUniqueId().toString());
+                        users.put(p.getUniqueId().toString(), user);
+                        break;
+                    default:
+                        log.info("Unknown admin grouptype in zone id: " + getId());
+                        break;
+                }
+            }
+        }
+    }
+    @Override
+    protected void onLoad(Zone persistence) {
+        super.onLoad(persistence);
+        JSONObject usersobject = getConfig().getJSONObject("users");
+        for(String uuid : usersobject.keySet()) {
+            JSONObject user = usersobject.getJSONObject(uuid);
+            if(user.getBoolean("admin")) {
+                admins.add(UUID.fromString(user.getString("uuid")));
+            } else {
+                users.put(UUID.fromString(user.getString("uuid")), ZonesAccess.factory(user.getString("access")));
+            }
+        }
+        JSONObject groupsobject = getConfig().getJSONObject("groups");
+        for(String groupname : groupsobject.keySet()) {
+            JSONObject group = groupsobject.getJSONObject(groupname);
+            groups.put(groupname, ZonesAccess.factory(group.getString("access")));
+        }
     }
     
     public boolean canModify(Player player, ZonesAccess.Rights right) {
@@ -130,23 +194,25 @@ public class ZoneNormal extends ZoneBase{
         if (z != null && z.canDo(right))
             return true;
 
-        if(this.getFlag(ZoneVar.INHERIT_GROUP)) {
-            List<String> pgroups = getPermissions().getGroups(player, getWorld().getName());
+        if(getFlag(ZoneVar.INHERIT_GROUP)) {
+            String[] pgroups = getPermissions().getPlayerGroups(getWorld().getName(), player.getName()); 
             
             for (Entry<String, ZonesAccess> e : groups.entrySet())
                 if (e.getValue().canDo(right)) {
-                    if(e.getKey().equals("default"))
+                    if(e.getKey().equalsIgnoreCase(ZonesConfig.DEFAULT_GROUP))
                         return true;
                     //if(getPermissions().inGroup(player, e.getKey().toLowerCase()));
-                    if (pgroups!= null && pgroups.contains(e.getKey().toLowerCase())) { 
+                    if (pgroups!= null && contains(pgroups, e.getKey())) { 
                         return true;
                     }
                 }
         } else {
-            String group = getPermissions().getGroup(player);
+            String group = getPermissions().getPrimaryGroup(player);
             if(group != null) {
                 ZonesAccess a = groups.get(group);
-                if(a != null && a.canDo(right)) return true;
+                if(a != null && a.canDo(right)) {
+                    return true;
+                }
             }
         }
 
@@ -155,7 +221,7 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public ZonesAccess getAccess(String group) {
-        ZonesAccess z = new ZonesAccess("-");
+        ZonesAccess z = ZonesAccess.factory(0);
         for (Entry<String, ZonesAccess> e : groups.entrySet()) {
             if (e.getKey().equalsIgnoreCase(group))
                 z = z.merge(e.getValue());
@@ -164,22 +230,24 @@ public class ZoneNormal extends ZoneBase{
     }
 
     @Override
-    public ZonesAccess getAccess(Player player) {
+    public ZonesAccess getAccess(OfflinePlayer player) {
 
         // admins can do anything ;).
-        if (canAdministrate(player))
-            return new ZonesAccess("*");
+        if (canAdministrate(player)) {
+            return ZonesAccess.ALL;
+        }
 
         // default access with 0 access.
-        ZonesAccess base = new ZonesAccess("-");
-        String name = player.getName().toLowerCase();
+        ZonesAccess base = ZonesAccess.factory(0);
 
-        if (users.containsKey(name))
-            base = base.merge(users.get(name));
-
-        List<String> pgroups = getPermissions().getGroups(player, getWorld().getName());
+        ZonesAccess user = users.get(player.getUniqueId());
+        if(user != null) {
+            base = base.merge(user);
+        }
+        
+        String[] pgroups = getPermissions().getPlayerGroups(getWorld().getName(), player.getName()); 
         for (Entry<String, ZonesAccess> e : groups.entrySet())
-            if (e.getKey().equals("default") || (pgroups!= null && pgroups.contains(e.getKey()))) {
+            if (e.getKey().equalsIgnoreCase(ZonesConfig.DEFAULT_GROUP) || (pgroups!= null && contains(pgroups, e.getKey()))) {
                 base = base.merge(e.getValue());
             }
 
@@ -187,50 +255,72 @@ public class ZoneNormal extends ZoneBase{
     }
 
     @Override
-    public boolean canAdministrate(Player player) {
+    public boolean canAdministrate(OfflinePlayer player) {
         return isAdmin(player);
     }
 
-    protected boolean isAdmin(Player player) {
-        if (getPermissions().canUse(player, getWorld().getName(), "zones.admin"))
+    protected boolean isAdmin(OfflinePlayer player) {
+        if (getPermissions().has(getWorld().getName(), player.getName(), "zones.admin")) {
             return true;
+        }
 
-        if (adminusers.contains(player.getName().toLowerCase()))
+        if (admins.contains(player.getUniqueId())) {
             return true;
+        }
 
         return false;
     }
     
-    protected boolean isAdminUser(Player player) {
-        return isAdminUser(player.getName().toLowerCase());
+    public boolean isAdminUser(OfflinePlayer player) {
+        return admins.contains(player.getUniqueId());
     }
     
-    public boolean isAdminUser(String name) {
-        if (adminusers.contains(name))
-            return true;
-        
-        return false;
-    }
     
     private String mapToString(HashMap<String, ZonesAccess> map) {
         String rt = "";
 
-        for (Entry<String, ZonesAccess> e : map.entrySet())
+        for (Entry<String, ZonesAccess> e : map.entrySet()) {
             rt += e.getKey() + "[" + e.getValue().toColorCode() + "], ";
+        }
 
-        if (rt.equals(""))
+        if (rt.equals("")) {
             return "";
+        }
+        rt = rt.substring(0, rt.length() - 2);
+        return rt;
+    }
+
+    private String usersToString() {
+        String rt = "";
+
+        JSONObject users = getConfig().getJSONObject("users");
+        for(String userid : users.keySet()) {
+            JSONObject user = users.getJSONObject(userid);
+            if(!user.getBoolean("admin")) {
+                rt += user.getString("name") + "[" + (ZonesAccess.factory(user.getString("access")).toColorCode()) + "], ";
+            }
+            rt += user.getString("name") + ", ";
+        }
+
+        if (rt.equals("")) {
+            return "";
+        }
 
         rt = rt.substring(0, rt.length() - 2);
 
         return rt;
     }
-
+    
     private String adminsToString() {
         String rt = "";
 
-        for (String t : adminusers)
-            rt += t + ", ";
+        JSONObject users = getConfig().getJSONObject("users");
+        for(String userid : users.keySet()) {
+            JSONObject user = users.getJSONObject(userid);
+            if(user.getBoolean("admin")) {
+                rt += user.getString("name") + ", ";
+            }
+        }
 
         if (rt.equals(""))
             return "";
@@ -242,94 +332,13 @@ public class ZoneNormal extends ZoneBase{
 
     public void sendAccess(Player player) {
         player.sendMessage("AccessList of " + getName() + ":");
-        player.sendMessage("   Users: " + mapToString(users) + ".");
+        player.sendMessage("   Users: " + usersToString() + ".");
         player.sendMessage("   Groups: " + mapToString(groups) + ".");
         player.sendMessage("   Admins: " + adminsToString() + ".");
     }
-
-    public void addUser(String user, ZonesAccess a) {
-        user = user.toLowerCase();
-
-        if (users.containsKey(user)) {
-            users.remove(user);
-        }
-
-        if (!a.canNothing())
-            users.put(user, a);
-
-        updateRights();
-    }
-
-    public void addGroup(String group, ZonesAccess a) {
-        group = group.toLowerCase();
-
-        if (groups.containsKey(group)) {
-            groups.remove(group);
-        }
-
-        if (!a.canNothing())
-            groups.put(group, a);
-
-        updateRights();
-    }
-
-    public void addAdmin(String admin) {
-        if (adminusers.contains(admin.toLowerCase()))
-            return;
-
-        adminusers.add(admin.toLowerCase());
-        updateRights();
-    }
-
-    public void removeAdmin(String admin) {
-        if (adminusers.contains(admin.toLowerCase())) {
-            adminusers.remove(admin.toLowerCase());
-            updateRights();
-        } else
-            return;
-
-    }
     
     protected void updateRights() {
-        String admins = "";
-        String users = "";
-        for (Entry<String, ZonesAccess> e : this.users.entrySet()) {
-            users += "1," + e.getKey() + "," + e.getValue().toString() + ";";
-        }
-        for (Entry<String, ZonesAccess> e : groups.entrySet()) {
-            users += "2," + e.getKey() + "," + e.getValue().toString() + ";";
-        }
-
-        if (users.length() > 0)
-            users = users.substring(0, users.length() - 1);
-
-        for (String user : adminusers) {
-            admins += "1," + user + ";";
-        }
-
-        if (admins.length() > 0)
-            admins = admins.substring(0, admins.length() - 1);
-
-        getPersistence().setUsers(users);
-        getPersistence().setAdmins(admins);
         zones.getMysqlDatabase().update(getPersistence());
-        //zones.getDatabase().update(getPersistence());
-    }
-
-    public void addUser(String username) {
-        addUser(username, new ZonesAccess("*"));
-    }
-
-    public void addUser(String username, String access) {
-        addUser(username, new ZonesAccess(access));
-    }
-
-    public void addGroup(String groupname) {
-        addGroup(groupname, new ZonesAccess("*"));
-    }
-
-    public void addGroup(String groupname, String access) {
-        addGroup(groupname, new ZonesAccess(access));
     }
     
     @Override
@@ -342,18 +351,18 @@ public class ZoneNormal extends ZoneBase{
          * {access} - BCDEH
          * {pname} - Player name.
          */
-        String message = getSettings().getString(ZoneVar.ENTER_MESSAGE, (String)ZoneVar.ENTER_MESSAGE.getDefault(this));
+        String message = getString(ZoneVar.ENTER_MESSAGE);
         sendMarkupMessage(message, player);
         if (getFlag(ZoneVar.HEALTH)) {
             this.sendMarkupMessage(ZonesConfig.PLAYER_CAN_DIE_IN_ZONE, player);
         }
         
         if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
-            String texturepack = (String) zone.getSetting(ZoneVar.TEXTURE_PACK);
+            String texturepack = zone.getString(ZoneVar.TEXTURE_PACK);
             getPlugin().newTexture(player, texturepack);
         }
         
-        if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
+        if(getFlag(ZoneVar.NOTIFY)) {
             for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(insidePlayer)) {
                     this.sendMarkupMessage(ZonesConfig.PLAYER_ENTERED_ZONE, player, insidePlayer);
@@ -364,10 +373,10 @@ public class ZoneNormal extends ZoneBase{
 
     @Override
     public void onExit(Player player, Location to) {
-        String message = getSettings().getString(ZoneVar.LEAVE_MESSAGE, (String)ZoneVar.LEAVE_MESSAGE.getDefault(this));
+        String message = getString(ZoneVar.LEAVE_MESSAGE);
         sendMarkupMessage(message, player);
         
-        if(getSettings().getBool(ZoneVar.NOTIFY, false)) {
+        if(getFlag(ZoneVar.NOTIFY)) {
             for(Player insidePlayer : getPlayersInside()) {
                 if(!insidePlayer.equals(player) && canAdministrate(insidePlayer)) {
                     this.sendMarkupMessage(ZonesConfig.PLAYER_LEFT_ZONE, player, insidePlayer);
@@ -377,20 +386,125 @@ public class ZoneNormal extends ZoneBase{
         if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
             ZoneBase zone = zones.getWorldManager(to).getActiveZone(to);
             
-            String texturepack = zone == null ? null : (String) zone.getSetting(ZoneVar.TEXTURE_PACK);
+            String texturepack = zone == null ? null : zone.getString(ZoneVar.TEXTURE_PACK);
             getPlugin().newTexture(player, texturepack);
         }
     }
     
     @Override
     public Location getSpawnLocation(Player player) {
-        Object o = getSettings().get(ZoneVar.SPAWN_LOCATION);
-        if(o == null) { 
-            return null;
-        } else {
-            Point p = (Point)o;
-            return new Location(getWorld(),p.getX(), p.getY(), p.getZ());
+        if(getSettings().has(ZoneVar.SPAWN_LOCATION.getName())) {
+            JSONObject loc = getSettings().getJSONObject(ZoneVar.SPAWN_LOCATION.getName());
+            return new Location(getWorld(), 
+                    loc.getDouble("x"),
+                    loc.getDouble("y"),
+                    loc.getDouble("z"),
+                    loc.getFloat("yaw"),
+                    loc.getFloat("pitch")
+                );
         }
+        return null;
+    }
+    
+    public void setAdmin(OfflinePlayer player, boolean isAdmin) {
+        String uuid = player.getUniqueId().toString();
+        JSONObject userlist = getConfig().getJSONObject("users");
+        if(userlist.has(uuid)) {
+            JSONObject user = userlist.getJSONObject(uuid);
+            if(isAdmin && !user.getBoolean("admin")) {
+                users.remove(player.getUniqueId());
+                admins.add(player.getUniqueId());
+                user.put("admin", true);
+            } else if(!isAdmin && user.getBoolean("admin")) {
+                userlist.remove(uuid);
+                users.remove(player.getUniqueId());
+                admins.remove(player.getUniqueId());
+            }
+        } else {
+            if(isAdmin) {
+                JSONObject user = new JSONObject();
+                user.put("admin", true);
+                user.put("access", "*");
+                user.put("name", player.getName());
+                user.put("uuid", player.getUniqueId().toString());
+                userlist.put(uuid, user);
+                admins.add(player.getUniqueId());
+            }
+        }
+    }
+    
+    public ZonesAccess setUser(OfflinePlayer player, String access) {
+        ZonesAccess a = ZonesAccess.factory(access);
+        String uuid = player.getUniqueId().toString();
+        JSONObject userlist = getConfig().getJSONObject("users");
+        if(a.canNothing()) {
+            userlist.remove(uuid);
+            users.remove(player.getUniqueId());
+            return a;
+        }
+        if(userlist.has(uuid)) {
+            JSONObject user = userlist.getJSONObject(uuid);
+            if(user.getBoolean("admin")) {
+                return a;
+            }
+            user.put("access", a.toString());
+        } else {
+            JSONObject user = new JSONObject();
+            user.put("admin", false);
+            user.put("access", a.toString());
+            user.put("name", player.getName());
+            user.put("uuid", player.getUniqueId().toString());
+            userlist.put(uuid, user);
+        }
+        users.put(player.getUniqueId(), a);
+        return a;
+    }
+    
+    public ZonesAccess setGroup(String group, String access) {
+        group = group.toLowerCase();
+        ZonesAccess a = ZonesAccess.factory(access);
+        JSONObject grouplist = getConfig().getJSONObject("groups");
+        if(a.canNothing()) {
+            grouplist.remove(group);
+            groups.remove(group);
+            return a;
+        }
+        if(grouplist.has(group)) {
+            JSONObject g = grouplist.getJSONObject(group);
+            g.put("access", a.toString());
+        } else {
+            JSONObject g = new JSONObject();
+            g.put("access", a.toString());
+            g.put("name", group);
+            grouplist.put(group, g);
+        }
+        groups.put(group, a);
+        return a;
+    }
+    
+    public void removeAdmin(JSONObject admin) {
+        admins.remove(UUID.fromString(admin.getString("uuid")));
+        getConfig().getJSONObject("users").remove(admin.getString("uuid"));
+    }
+    
+    public JSONObject matchUser(String name) {
+        JSONObject userlist = getConfig().getJSONObject("users");
+        for(String uuid : userlist.keySet()) {
+            JSONObject user = userlist.getJSONObject(uuid);
+            if(user.getString("name").equalsIgnoreCase(name)) {
+                return user;
+            }
+        }
+        return null;
+    }
+    
+    private boolean contains(String[] values, String test) {
+        for(String t : values) {
+            if(t.equalsIgnoreCase(test)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

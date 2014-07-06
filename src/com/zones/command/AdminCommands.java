@@ -1,9 +1,12 @@
 package com.zones.command;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONObject;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess;
 import com.zones.model.types.ZoneInherit;
@@ -28,24 +31,28 @@ public class AdminCommands extends CommandsBase {
     )
     public void addAdmin(Player player, String[] params) {
         ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
+        boolean changed = false;
         for(int i = 0;i < params.length;i++) {
-            addAdmin(player, zone, params[i]);
+            changed |= addAdmin(player, zone, params[i]);
+        }
+        if(changed) {
+            zone.saveSettings();
         }
     }
-    private void addAdmin(Player owner, ZoneNormal zone, String username) {
-        if(username == null || username.trim().equals(""))
-            return;
+    private boolean addAdmin(Player owner, ZoneNormal zone, String username) {
+        if(username == null || username.trim().equals("")) {
+            return false;
+        }
         
-        // This is fine since it finds the closest match.
-        Player p = getPlugin().getServer().getPlayer(username);
-
-        if(p != null)
-            username = p.getName();
-        
-        zone.addAdmin(username);
-        owner.sendMessage(ChatColor.GREEN + "Successfully added player " + username + " as an admin of zone "  + zone.getName() +  " .");
+        OfflinePlayer player = getPlugin().matchPlayer(username);
+        if(player == null) {
+            owner.sendMessage(ChatColor.YELLOW + "Cannot find player " + username);
+            return false;
+        }
+        zone.setAdmin(player, true);
+        owner.sendMessage(ChatColor.GREEN + "Successfully added player " + player.getName() + " as an admin of zone "  + zone.getName() +  " .");
+        return true;
     }
-    
     
     @Command(
         name = "zremoveadmin", 
@@ -68,22 +75,28 @@ public class AdminCommands extends CommandsBase {
             player.sendMessage(ChatColor.RED + "You're not allowed to remove admins from zones.");
             return;
         }
+        boolean changed = false;
         for(int i = 0;i < params.length;i++) {
-            removeAdmin(player, zone, params[i]);
+            changed |= removeAdmin(player, zone, params[i]);
+        }
+        if(changed) {
+            zone.saveSettings();
         }
     }
-    private void removeAdmin(Player owner, ZoneNormal zone, String username) {
-        if(username == null || username.trim().equals(""))
-            return;
-        
-        // This is fine since it finds the closest match.
-        Player p = getPlugin().getServer().getPlayer(username);
+    private boolean removeAdmin(Player owner, ZoneNormal zone, String username) {
+        if(username == null || username.trim().equals("")) {
+            return false;
+        }
 
-        if(p != null)
-            username = p.getName();
+        JSONObject user = zone.matchUser(username);
+        if(user == null || !user.getBoolean("admin")) {
+            owner.sendMessage(ChatColor.YELLOW + "Cannot find existing admin with name " + username);
+            return false;
+        }
         
-        zone.removeAdmin(username);
-        owner.sendMessage(ChatColor.GREEN + "Successfully removed player " + username + " as an admin of zone "  + zone.getName() +  " .");
+        zone.removeAdmin(user);
+        owner.sendMessage(ChatColor.GREEN + "Successfully removed player " + user.getString("name") + " as an admin of zone "  + zone.getName() +  " .");
+        return true;
     }
     
     
@@ -111,35 +124,41 @@ public class AdminCommands extends CommandsBase {
     )
     public void setUser(Player player, String[] params) {
         ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
+        boolean changed = false;
         for(int i = 0;i <= floor(params.length/2);i++) {
             try {
-                setUser(player, zone, params[i*2], params[i*2 + 1]);
+                changed |= setUser(player, zone, params[i*2], params[i*2 + 1]);
             } catch(IndexOutOfBoundsException e) {
                 break;
             }
         }
+        if(changed) {
+            zone.saveSettings();
+        }
     }
     private int floor(double d) { int rt = (int) d; return rt > d ? rt-1 : rt; }
-    private void setUser(Player owner, ZoneNormal zone, String username, String access) {
-        if(username == null || username.trim().equals("") || access == null || access.trim().equals(""))
-            return;
+    private boolean setUser(Player owner, ZoneNormal zone, String username, String access) {
+        if (username == null 
+                || username.trim().equals("") 
+                || access == null 
+                || access.trim().equals("")) {
+            return false;
+        }
         
-        ZonesAccess z = new ZonesAccess(access);
-        // This is fine since it finds the closest match.
-        Player p = getPlugin().getServer().getPlayer(username);
-
-        if(p != null) {
-            username = p.getName();
-            if(zone.isInsideZone(p)) {
-                ZonesAccess acc = zone.getAccess(p);
-                if(!acc.equals(z)) {
-                    p.sendMessage("Your access in " + zone.getName() + " has been changed from [" + acc.toColorCode() + "] to [" + z.toColorCode() + "].");
-                }
+        OfflinePlayer player = getPlugin().matchPlayer(username);
+        if(player == null) {
+            owner.sendMessage(ChatColor.YELLOW + "Cannot find player " + username);
+            return false;
+        }
+        if(player instanceof Player && zone.isInsideZone((Player) player)) {
+            ZonesAccess acc = zone.getAccess(player);
+            if(!acc.equals(ZonesAccess.factory(access))) {
+                ((Player) player).sendMessage("Your access in " + zone.getName() + " has been changed from [" + acc.toColorCode() + "] to [" + ZonesAccess.factory(access).toColorCode() + "].");
             }
         }
-        zone.addUser(username,z);
-
+        ZonesAccess z = zone.setUser(player, access);
         owner.sendMessage(ChatColor.GREEN + "Successfully changed access of user " + username + " of zone '" + zone.getName() + "' to access " + z.textual() + " .");
+        return true;
     }
     
     
@@ -168,30 +187,46 @@ public class AdminCommands extends CommandsBase {
     )
     public void setGroup(Player player, String[] params) {
         ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
+        boolean changed = false;
         for(int i = 0;i < floor(params.length/2);i++) {
             try {
-                setGroup(player, zone, params[i*2], params[i*2 + 1]);
+                changed |= setGroup(player, zone, params[i*2], params[i*2 + 1]);
             } catch(IndexOutOfBoundsException e) {
                 break;
             }
         }
+        if(changed) {
+            zone.saveSettings();
+        }
     }
-    private void setGroup(Player owner, ZoneNormal zone, String groupname, String access) {
-        if(groupname == null || groupname.trim().equals("") || access == null || access.trim().equals(""))
-            return;
-        
-
-        if (!getPlugin().getPermissions().isValid(zone.getWorld().getName(), groupname)) {
-            owner.sendMessage(ChatColor.RED + "Invalid group " + groupname + "!");
-            return;
+    private boolean setGroup(Player owner, ZoneNormal zone, String groupname, String access) {
+        if(groupname == null 
+                || groupname.trim().equals("") 
+                || access == null 
+                || access.trim().equals("")) {
+            return false;
         }
         
-        if(groupname.equalsIgnoreCase("default") && !canUseCommand(owner,"zones.admin"))
-            access += "e";
+
+        boolean valid = false;
+        for(String group : getPlugin().getPermissions().getGroups()) {
+            if(group.equalsIgnoreCase(groupname)) {
+                valid = true;
+                break;
+            }
+        }
+        if (!valid) {
+            owner.sendMessage(ChatColor.RED + "Invalid group " + groupname + "!");
+            return false;
+        }
         
-        ZonesAccess z = new ZonesAccess(access);
-        zone.addGroup(groupname,z);
+        if(groupname.equalsIgnoreCase(ZonesConfig.DEFAULT_GROUP) && !canUseCommand(owner,"zones.admin")) {
+            access += "e";
+        }
+        
+        ZonesAccess z = zone.setGroup(groupname, access);
         owner.sendMessage(ChatColor.GREEN + "Successfully changed access of group '" + groupname + "' of zone '" + zone.getName() + "' to access " + z.textual() + ".");
+        return true;
     }
     
     @Command(

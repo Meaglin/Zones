@@ -5,7 +5,9 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONObject;
 import com.zones.Zones;
+import com.zones.ZonesConfig;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneVertice;
 import com.zones.persistence.Vertice;
@@ -30,9 +32,9 @@ public class ZoneCreateSelection extends ZoneSelection {
             pZ.setMaxz(getSelection().getHeight().getMax());
             pZ.setWorld(getWorld().getName());
             pZ.setSize(getSelection().getPointsSize());
-            pZ.setSettings("");
-            pZ.setAdmins("");
-            pZ.setUsers("2,default,e;2,user,ah");
+            pZ.getConfig().put("version", 1);
+            pZ.getConfig().getJSONObject("groups").put(ZonesConfig.DEFAULT_GROUP, new JSONObject("{ access: \"e\"}"));
+            pZ.getConfig().getJSONObject("groups").put("user", new JSONObject("{ access: \"ah\"}"));
             //getPlugin().getDatabase().save(pZ);
             List<ZoneVertice> points = getSelection().getPoints();
             for (int i = 0; i < getSelection().getPointsSize(); i++) {

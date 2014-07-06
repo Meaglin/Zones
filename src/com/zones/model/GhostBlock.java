@@ -14,21 +14,25 @@ public class GhostBlock {
         this.block = block;
     }
     
+    @SuppressWarnings("deprecation")
     public void show(Player player) {
         for(int i = 0; i < ZonesConfig.CREATION_PILON_HEIGHT;i++) {
             Location loc = getBlock().getLocation();
             loc.setY(loc.getY() + i + 1);
             if(loc.getY() < 128)
+                // TODO: magic id number
                 player.sendBlockChange(loc, ZonesConfig.CREATION_PILON_TYPE, (byte) 0);
         }
     }
     
+    @SuppressWarnings("deprecation")
     public void hide(Player player) {
         for(int i = 0; i < ZonesConfig.CREATION_PILON_HEIGHT;i++) {
             Location loc = getBlock().getLocation();
             loc.setY(loc.getY() + i + 1);
             if(loc.getY() < 128) {
                 Block b = getBlock().getWorld().getBlockAt(loc);
+                // TODO: magic id number
                 player.sendBlockChange(loc, b.getTypeId(), b.getData());
             }
         }

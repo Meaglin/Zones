@@ -1,10 +1,10 @@
 package com.zones.model.types.normal;
 
-import java.util.List;
-
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import com.meaglin.json.JSONObject;
 import com.zones.ZonesConfig;
 import com.zones.accessresolver.interfaces.PlayerBlockResolver;
 import com.zones.model.ZoneBase;
@@ -20,21 +20,20 @@ public class NormalPlayerBlockDestroyResolver implements PlayerBlockResolver {
     }
 
     @Override
-    public boolean isAllowed(ZoneBase zone, Player player, Block block, int typeId) {
-        Log.info(player, "trigger block destroy '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + typeId);
+    public boolean isAllowed(ZoneBase zone, Player player, Block block, Material type) {
+        Log.info(player, "trigger block destroy '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + type);
         if(!((ZoneNormal)zone).canModify(player, Rights.DESTROY)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DESTROY_BLOCKS_IN_ZONE, player);
             return false;
         } else {
-            Object list = zone.getSetting(ZoneVar.BREAK_BLOCKS);
-            if(list != null && !zone.canAdministrate(player)) {
-                if(typeId == -1) {
-                    typeId = block.getTypeId();
-                }
-                if(((List<?>)list).contains(typeId)) {
-                    zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_BLACKLISTED, player);
-                    return false;
-                }
+            JSONObject settings = zone.getConfig().getJSONObject("settings");
+            type = type == null ? block.getType() : type;
+            
+            if(settings.has(ZoneVar.BREAK_BLOCKS.getName())
+                    && !((ZoneNormal)zone).canAdministrate(player)
+                    && settings.getJSONArray(ZoneVar.BREAK_BLOCKS.getName()).contains(type.name())) {
+                zone.sendMarkupMessage(ZonesConfig.BLOCK_IS_BLACKLISTED, player);
+                return false;
             }
         }
         return true;

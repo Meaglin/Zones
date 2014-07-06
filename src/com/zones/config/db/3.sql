@@ -1,0 +1,1 @@
+ALTER TABLE `zones` ADD `config` LONGTEXT NOT NULL AFTER `settings` 

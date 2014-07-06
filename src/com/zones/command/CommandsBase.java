@@ -22,7 +22,7 @@ public abstract class CommandsBase {
     }
     
     protected boolean canUseCommand(Player player, String command) {
-        return getPlugin().getPermissions().canUse(player, command);
+        return getPlugin().getPermissions().has(player, command);
     }
     
     protected ZoneSelection getZoneSelection(Player p) {

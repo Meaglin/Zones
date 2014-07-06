@@ -60,7 +60,7 @@ public enum ZoneVar {
         },
         NOTIFY("NotifyEnabled", Serializer.BOOLEAN) {
             @Override
-            public Object getDefault(ZoneBase zone) {return false;}
+            public Object getDefault(ZoneBase zone) { return false; }
         },
         MOBS("MobsEnabled", Serializer.BOOLEAN) {
             @Override
@@ -138,11 +138,19 @@ public enum ZoneVar {
             }
         },
         
-        PLACE_BLOCKS("ProtectedPlaceBlocks", Serializer.INTEGERLIST) {
+        OLD_PLACE_BLOCKS("ProtectedPlaceBlocks", Serializer.INTEGERLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {return null;}
         },
-        BREAK_BLOCKS("ProtectedBreakBlocks", Serializer.INTEGERLIST) {
+        OLD_BREAK_BLOCKS("ProtectedBreakBlocks", Serializer.INTEGERLIST) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return null;}
+        },
+        PLACE_BLOCKS("ProtectedPlaceMaterials", Serializer.STRINGLIST) {
+            @Override
+            public Object getDefault(ZoneBase zone) {return null;}
+        },
+        BREAK_BLOCKS("ProtectedBreakMaterials", Serializer.STRINGLIST) {
             @Override
             public Object getDefault(ZoneBase zone) {return null;}
         },
@@ -202,6 +210,7 @@ public enum ZoneVar {
         }
         
         public String getName() { return name; }
+        public Serializer getSerializer() { return serializer; }
         public Class<? extends Object> getType() { return serializer.getType(); }
         public Class<? extends Object> getListType() { return serializer.getListType(); }
         public Object unSerialize(String serializedData) { return serializer.unSerialize(serializedData); }

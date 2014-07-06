@@ -16,26 +16,27 @@ import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.types.ZoneNormal;
 import com.zones.selection.ZoneSelection;
+import com.zones.util.BlockUtil;
 
 public class EventUtil {
 
     public static final void onPlace(Zones plugin, Cancellable event, Player player, Block block) {
-        onPlace(plugin, event, player, block, -1);
+        onPlace(plugin, event, player, block, null);
     }
     
-    public static final void onPlace(Zones plugin, Cancellable event, Player player, Block block, int typeId) {
+    public static final void onPlace(Zones plugin, Cancellable event, Player player, Block block, Material type) {
         WorldManager wm = plugin.getWorldManager(player);
-        if(!wm.getConfig().isProtectedPlaceBlock(player, typeId, true)) {
+        if(!wm.getConfig().isProtectedPlaceBlock(player, type, true)) {
             ZoneBase zone = wm.getActiveZone(block);
             
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.build")){
                 player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
                 event.setCancelled(true);
                 return;
             }
             
             if(zone == null){
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.inheritbuild")){
                     player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
                     event.setCancelled(true);
                 } else {
@@ -43,14 +44,13 @@ public class EventUtil {
                 }
             } else  {
                 
-                if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_CREATE)).isAllowed(zone, player, block, typeId)) {
+                if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_CREATE)).isAllowed(zone, player, block, type)) {
                     ((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_CREATE)).sendDeniedMessage(zone, player);
                     event.setCancelled(true);
                     return;
                 }
-                typeId = typeId == -1 ? block.getTypeId() : typeId;
-                if((typeId == Material.FURNACE.getId() || typeId == Material.CHEST.getId() || typeId == Material.DISPENSER.getId()) &&
-                        !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, typeId)) {
+                type = type == null ? block.getType() : type;
+                if(BlockUtil.isContainer(type) && !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, type)) {
                     zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PLACE_CHEST_IN_ZONE, player);
                     event.setCancelled(true);
                     return;
@@ -63,12 +63,12 @@ public class EventUtil {
         }
     }
     
-    public static final void onHitPlace(Zones plugin, Cancellable event, Player player, Block block, int typeId) {
+    public static final void onHitPlace(Zones plugin, Cancellable event, Player player, Block block, Material type) {
         WorldManager wm = plugin.getWorldManager(player);
-        if(!wm.getConfig().isProtectedPlaceBlock(player, typeId, true)) {
+        if(!wm.getConfig().isProtectedPlaceBlock(player, type, true)) {
             ZoneBase zone = wm.getActiveZone(block);
             if(zone != null) {
-                if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, block, typeId)) {
+                if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, block, type)) {
                     ((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).sendDeniedMessage(zone, player);
                     event.setCancelled(true);
                     return;
@@ -81,7 +81,7 @@ public class EventUtil {
     
     public static final void onEntityCreate(Zones plugin, Cancellable event, Player player, Entity entity) {
         WorldManager wm = plugin.getWorldManager(entity.getWorld());
-        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.build")){
             player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
             event.setCancelled(true);
             return;
@@ -89,7 +89,7 @@ public class EventUtil {
         
         ZoneBase zone = wm.getActiveZone(entity.getLocation());
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.inheritbuild")){
                 player.sendMessage(ZonesConfig.PLAYER_CANT_BUILD_WORLD);
                 event.setCancelled(true);
             }
@@ -104,7 +104,7 @@ public class EventUtil {
     
     public static final void onEntityHit(Zones plugin, Cancellable event, Player player, Entity entity) {
         WorldManager wm = plugin.getWorldManager(entity.getWorld());
-        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.build")){
             player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
             event.setCancelled(true);
             return;
@@ -112,7 +112,7 @@ public class EventUtil {
         
         ZoneBase zone = wm.getActiveZone(entity.getLocation());
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.inheritbuild")){
                 player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
                 event.setCancelled(true);
             }
@@ -127,7 +127,7 @@ public class EventUtil {
 
     public static final void onEntityChange(Zones plugin, Cancellable event, Player player, Entity entity) {
         WorldManager wm = plugin.getWorldManager(entity.getWorld());
-        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.build")){
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.build")){
             player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
             event.setCancelled(true);
             return;
@@ -135,7 +135,7 @@ public class EventUtil {
         
         ZoneBase zone = wm.getActiveZone(entity.getLocation());
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(),"zones.inheritbuild")){
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(),"zones.inheritbuild")){
                 player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
                 event.setCancelled(true);
             }
@@ -148,44 +148,56 @@ public class EventUtil {
         }
     }
     
-    public static final void onModify(Zones plugin, Cancellable event, Player player, Block block, int blockType) {
+    public static final void onModify(Zones plugin, Cancellable event, Player player, Block block, Material type) {
         WorldManager wm = plugin.getWorldManager(player);
         ZoneBase zone = wm.getActiveZone(block);
-        
-        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")) {
-            if (blockType == Material.CHEST.getId() || blockType == Material.TRAPPED_CHEST.getId())
-                player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
-            else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
-                player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
-            else if (blockType == Material.DISPENSER.getId())
-                player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
-            else if (blockType == Material.DROPPER.getId())
-                player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
-            else if (blockType == Material.NOTE_BLOCK.getId())
-                player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
-            
+
+        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.build")) {
+            switch(type) {
+                case CHEST: case TRAPPED_CHEST:
+                    player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
+                    break;
+                case FURNACE: case BURNING_FURNACE:
+                    player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
+                    break;
+                case DISPENSER:
+                    player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
+                    break;
+                case DROPPER:
+                    player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
+                    break;
+                case NOTE_BLOCK:
+                    player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
+                    break;
+            }
             event.setCancelled(true);
             return;
         }
-        
+
         if(zone == null) {
-            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.inheritbuild")) {
-                if (blockType == Material.CHEST.getId() || blockType == Material.TRAPPED_CHEST.getId())
-                    player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
-                else if (blockType == Material.FURNACE.getId() || blockType == Material.BURNING_FURNACE.getId())
-                    player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
-                else if (blockType == Material.DISPENSER.getId())
-                    player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
-                else if (blockType == Material.DROPPER.getId())
-                    player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
-                else if (blockType == Material.NOTE_BLOCK.getId())
-                    player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
-                
+            if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.inheritbuild")) {
+                switch(type) {
+                    case CHEST: case TRAPPED_CHEST:
+                        player.sendMessage(ChatColor.RED + "You cannot change chests in this world!");
+                        break;
+                    case FURNACE: case BURNING_FURNACE:
+                        player.sendMessage(ChatColor.RED + "You cannot change furnaces in this world!");
+                        break;
+                    case DISPENSER:
+                        player.sendMessage(ChatColor.RED + "You cannot change dispensers in this world!");
+                        break;
+                    case DROPPER:
+                        player.sendMessage(ChatColor.RED + "You cannot change droppers in this world!");
+                        break;
+                    case NOTE_BLOCK:
+                        player.sendMessage(ChatColor.RED + "You cannot change note blocks in this world!");
+                        break;
+                }
                 event.setCancelled(true);
                 return;
             }
         } else {
-            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, -1)) {
+            if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, null)) {
                 ((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).sendDeniedMessage(zone, player);
                 event.setCancelled(true);
                 return;
@@ -193,9 +205,11 @@ public class EventUtil {
         }
     }
     
+    @SuppressWarnings("deprecation")
     public static final void onBreak(Zones plugin, Cancellable event, Player player, Block block) {
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         if(!wm.getConfig().isProtectedBreakBlock(player, block)) {
+            // TODO: magic id number
            if (player.getItemInHand().getTypeId() == ZonesConfig.CREATION_TOOL_TYPE) {
                 ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
                 if (selection != null) {
@@ -205,7 +219,7 @@ public class EventUtil {
                 }
             }
            
-           if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.build")){
+           if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.build")){
                player.sendMessage(ZonesConfig.PLAYER_CANT_DESTROY_WORLD);
                event.setCancelled(true);
                return;
@@ -214,22 +228,21 @@ public class EventUtil {
            
             ZoneBase zone = wm.getActiveZone(block);
             if(zone == null) {
-                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().canUse(player,wm.getWorldName(), "zones.inheritbuild")){
+                if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.inheritbuild")){
                     player.sendMessage(ZonesConfig.PLAYER_CANT_DESTROY_WORLD);
                     event.setCancelled(true);
                 } else {
                     wm.getConfig().logBlockBreak(player, block);
                 }
             } else {
-                if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).isAllowed(zone, player, block, -1)) {
+                if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).isAllowed(zone, player, block, null)) {
                     ((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_DESTROY)).sendDeniedMessage(zone, player);
                     event.setCancelled(true);
                     return;
                 }
-                int typeId = block.getTypeId();
-                if((typeId == Material.FURNACE.getId() || typeId == Material.CHEST.getId() || typeId == Material.DISPENSER.getId()) &&
-                        !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, typeId)) {
-                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DESTROY_CHEST_IN_ZONE, player);
+                Material type = block.getType();
+                if(BlockUtil.isContainer(type) && !((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_MODIFY)).isAllowed(zone, player, block, type)) {
+                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PLACE_CHEST_IN_ZONE, player);
                     event.setCancelled(true);
                     return;
                 }

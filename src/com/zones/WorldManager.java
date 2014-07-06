@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import com.zones.model.WorldConfig;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
+import com.zones.model.settings.ZoneVar;
 
 /**
  * 
@@ -99,6 +100,22 @@ public class WorldManager {
     public boolean regionChange(Location from,Location to)                      {return !getRegion(from).equals(getRegion(to)); }
     
     public void revalidateZones(Player player) {getRegion(player).revalidateZones(player);}
+    
+    public boolean testFlag(Location loc, boolean worldFlag, ZoneVar zoneFlag) {
+        ZoneBase zone = this.getActiveZone(loc);
+        if(zone == null) {
+            return worldFlag;
+        } 
+        return zone.getFlag(zoneFlag);
+    }
+    
+    public boolean testFlag(Block loc, boolean worldFlag, ZoneVar zoneFlag) {
+        ZoneBase zone = this.getActiveZone(loc);
+        if(zone == null) {
+            return worldFlag;
+        } 
+        return zone.getFlag(zoneFlag);
+    }
     
     public Region getRegion(int x, int y) {
         // debug only ;) .

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -143,15 +144,20 @@ public class MiscCommands extends CommandsBase {
     )
     public void getzones(CommandSender sender, String[] params) {
         String name = params[0].toLowerCase();
-        Player player = getPlugin().getServer().getPlayer(name);
-        if(player != null) {
-            name = player.getName().toLowerCase();
+        OfflinePlayer player = getPlugin().matchPlayer(name);
+        if(player == null) {
+            sender.sendMessage(ChatColor.YELLOW + "Cannot find player " + name);
+            return;
         }
         Collection<ZoneBase> zones = getPlugin().getZoneManager().getAllZones();
         List<ZoneBase> list = new ArrayList<ZoneBase>();
         for(ZoneBase zone : zones) {
-            if(!(zone instanceof ZoneNormal)) continue;
-            if(((ZoneNormal)zone).isAdminUser(name)) list.add(zone);
+            if(!(zone instanceof ZoneNormal)) {
+                continue;
+            }
+            if(((ZoneNormal)zone).isAdminUser(player)) {
+                list.add(zone);
+            }
         }
         sender.sendMessage(ChatColor.BLUE + name + ChatColor.WHITE + " has " + list.size() + " zones:");
         String message = "";

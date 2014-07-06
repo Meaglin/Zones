@@ -1,5 +1,6 @@
 package com.zones.model.types.normal;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -12,8 +13,8 @@ import com.zones.util.Log;
 public class NormalBlockFireResolver implements PlayerBlockResolver {
 
     @Override
-    public boolean isAllowed(ZoneBase zone,Player player, Block block, int typeId) {
-        Log.info(player, "trigger fire '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + typeId);
+    public boolean isAllowed(ZoneBase zone,Player player, Block block, Material type) {
+        Log.info(player, "trigger fire '" + zone.getName() + "'[" + zone.getId() + "] (" + block.getX() + "," + block.getY() + "," + block.getZ() + ") " + type);
         if(player == null)
             return zone.getFlag(ZoneVar.FIRE);
         else

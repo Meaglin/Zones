@@ -116,7 +116,7 @@ public class CommandMap {
                     sender.sendMessage(ChatColor.RED + "Please create a selection first with /zcreate or /zedit !");
                     return true;
                 }
-                if(!ann.requiredPermission().equals("") && !plugin.getPermissions().canUse(player, ann.requiredPermission())) {
+                if(!ann.requiredPermission().equals("") && !plugin.getPermissions().has(player, ann.requiredPermission())) {
                     sender.sendMessage(ChatColor.RED + "You're not allowed to use this command.");
                     return true;
                 }

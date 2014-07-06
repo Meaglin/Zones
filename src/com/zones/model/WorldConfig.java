@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.milkbowl.vault.permission.Permission;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,7 +27,6 @@ import org.bukkit.inventory.ItemStack;
 
 import com.zones.WorldManager;
 import com.zones.ZonesConfig;
-import com.zones.permissions.Permissions;
 import com.zones.util.FileUtil;
 import com.zones.util.properties.ExtendedProperties;
 
@@ -87,10 +88,6 @@ public class WorldConfig {
     
     public boolean CROP_PROTECTION_ENABLED;
     public boolean ENDER_GRIEFING_ENABLED;
-    
-    public boolean LOGGED_BLOCKS_ENABLED;
-    public List<Integer> LOGGED_BLOCKS_PLACE;
-    public List<Integer> LOGGED_BLOCKS_BREAK;
     
     public boolean MOB_SPAWNING_ENABLED;
     public boolean ALLOWED_MOBS_ENABLED;
@@ -170,10 +167,11 @@ public class WorldConfig {
         }
     }
     
-    public Permissions getPermissions() {
+    public Permission getPermissions() {
         return manager.getPlugin().getPermissions();
     }
     
+    @SuppressWarnings("deprecation")
     public void load() {
         try {
             ExtendedProperties p = new ExtendedProperties(new File(filename));
@@ -241,18 +239,13 @@ public class WorldConfig {
             CROP_PROTECTION_ENABLED = p.getBool("ProtectCrops", false);
             ENDER_GRIEFING_ENABLED = p.getBool("AllowEnderGrief", true);
             
-            LOGGED_BLOCKS_ENABLED = p.getBool("LoggedBlocksEnabled", true);
-            if(LOGGED_BLOCKS_ENABLED){
-                LOGGED_BLOCKS_PLACE = p.getIntList("LoggedBlocksPlace", "");
-                LOGGED_BLOCKS_BREAK = p.getIntList("LoggedBlocksBreak", "");
-            }
-            
             MOB_SPAWNING_ENABLED = p.getBool("MobSpawningEnabled", true);
             ALLOWED_MOBS_ENABLED = p.getBool("EnableAllowedMobs", false);
             if(ALLOWED_MOBS_ENABLED) {
                 ALLOWED_MOBS = new ArrayList<EntityType>();
                 EntityType t = null;
                 for(String m : p.getProperty("AllowedMobs", "Creeper,Ghast,PigZombie,Skeleton,Spider,Zombie").split(",")) {
+                    // TODO: magic id number
                     t = EntityType.fromName(m);
                     if(t != null && !ALLOWED_MOBS.contains(t)) {
                         ALLOWED_MOBS.add(t);
@@ -267,6 +260,7 @@ public class WorldConfig {
                 ALLOWED_ANIMALS = new ArrayList<EntityType>();
                 EntityType t = null;
                 for(String a : p.getProperty("AllowedAnimals", "Chicken,Cow,Pig,Sheep,Squid").split(",")) {
+                    // TODO: magic id number
                     t = EntityType.fromName(a);
                     if(t != null && !ALLOWED_ANIMALS.contains(t))
                         ALLOWED_ANIMALS.add(t);
@@ -324,28 +318,32 @@ public class WorldConfig {
         }
     }
     
-    public boolean isProtectedPlaceBlock(Player player, int type, boolean message) { 
+    @SuppressWarnings("deprecation")
+    public boolean isProtectedPlaceBlock(Player player, Material type, boolean message) { 
         if(PROTECTED_BLOCKS_ENABLED) {
-            if(this.PROTECTED_BLOCKS_PLACE.contains(type) && !getPermissions().canUse(player, player.getWorld().getName(), "zones.override.place")) {
+            // TODO: magic id number
+            if(this.PROTECTED_BLOCKS_PLACE.contains(type.getId()) && !getPermissions().has(player, "zones.override.place")) {
                 if(message)player.sendMessage(ChatColor.RED + "This blocktype is blacklisted!");
                 return true;
             }
         }
         return false;
     }
-    public boolean isProtectedPlaceBlock(Player player, Block b, boolean message) {        
-        return isProtectedPlaceBlock(player,b.getTypeId(), message);
+    public boolean isProtectedPlaceBlock(Player player, Block b, boolean message) {      
+        return isProtectedPlaceBlock(player, b.getType(), message);
     }
     public boolean isProtectedPlaceBlock(Player player, Block b) {
-        return isProtectedPlaceBlock(player,b.getTypeId(), true);
+        return isProtectedPlaceBlock(player, b.getType(), true);
     } 
     public boolean isProtectedBreakBlock(Player player, Block b) {
         return isProtectedBreakBlock(player,b,true);
     }
     
+    @SuppressWarnings("deprecation")
     public boolean isProtectedBreakBlock(Player player, Block b, boolean message) {
         if(PROTECTED_BLOCKS_ENABLED) {
-            if(this.PROTECTED_BLOCKS_BREAK.contains(b.getTypeId()) && !getPermissions().canUse(player, player.getWorld().getName(), "zones.override.break")) {
+            // TODO: magic id number
+            if(this.PROTECTED_BLOCKS_BREAK.contains(b.getTypeId()) && !getPermissions().has(player, "zones.override.break")) {
                 if(message)player.sendMessage(ChatColor.RED + "This blocktype is protected!");
                 return true;
             }
@@ -356,17 +354,10 @@ public class WorldConfig {
     /*
      * TODO: extend logging to allow logging to database.
      */
+    @SuppressWarnings("deprecation")
     public void logBlockBreak(Player player, Block block) {
-        if(LOGGED_BLOCKS_ENABLED) {
-            if(this.LOGGED_BLOCKS_BREAK.contains(block.getTypeId())){
-                for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
-                    if(getPermissions().canUse(p, p.getWorld().getName(), "zones.log.break")) {
-                        p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has broken " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
-                    }
-                log.info("Player " + player.getName() + " has broken " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
-            }
-        }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
+        // TODO: magic id number
         if(block.getTypeId() == Material.SPONGE.getId()) {
             triggerSpongePhysics(block);
         }
@@ -402,7 +393,9 @@ public class WorldConfig {
         }
     }
     
+    @SuppressWarnings("deprecation")
     private static void triggerPhysics(Block b) {
+        // TODO: magic id number
         int type = b.getTypeId();
         switch(type) {
             case 8: case 9: case 10: case 11:
@@ -415,20 +408,14 @@ public class WorldConfig {
     /*
      * TODO: extend logging to allow logging to database.
      */
+    @SuppressWarnings("deprecation")
     public void logBlockPlace(Player player, Block block) {
-        if(LOGGED_BLOCKS_ENABLED) {
-            if(this.LOGGED_BLOCKS_PLACE.contains(block.getTypeId())){
-                for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
-                    if(getPermissions().canUse(p, p.getWorld().getName(), "zones.log.place")) {
-                        p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
-                    }
-                log.info("Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
-            }
-        }
+
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
-        if(block.getTypeId() == Material.SPONGE.getId()) {
+        // TODO: magic id number
+        if(block.getType() == Material.SPONGE) {
             boolean affected = false;
-            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().has(player, "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_RADIUS ; z <= block.getZ() + SPONGE_RADIUS;z++) {
@@ -442,7 +429,7 @@ public class WorldConfig {
                     }
                 }
             }
-            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().has(player, "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_LAVA_RADIUS ; x <= block.getX() + SPONGE_LAVA_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_LAVA_RADIUS ; z <= block.getZ() + SPONGE_LAVA_RADIUS;z++) {
@@ -464,20 +451,13 @@ public class WorldConfig {
     /*
      * TODO: extend logging to allow logging to database.
      */
+    @SuppressWarnings("deprecation")
     public void logBlockPlace(Player player, Block block, ItemStack item) {
-        if(LOGGED_BLOCKS_ENABLED) {
-            if(this.LOGGED_BLOCKS_PLACE.contains(block.getTypeId())){
-                for(Player p : manager.getPlugin().getServer().getOnlinePlayers())
-                    if(getPermissions().canUse(p, p.getWorld().getName(), "zones.log.place")) {
-                        p.sendMessage(ChatColor.RED + "Player " + player.getName() + " has placed " + item.getType().name() + "[" + item.getTypeId() + "] at " + block.getLocation().toString() + "!");
-                    }
-                log.info("Player " + player.getName() + " has placed " + block.getType().name() + "[" + block.getTypeId() + "] at " + block.getLocation().toString() + "!");
-            }
-        }
         // Using getType().equals(Material.SPONGE) is actually less efficient because it makes more underlying calls (getType() calls to a hashmap.get() for example ;))
+        // TODO: magic id number
         if(block.getTypeId() == Material.SPONGE.getId()) {
             boolean affected = false;
-            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_EMULATION && ((this.SPONGE_OVERRIDE_NEEDED && getPermissions().has(player, "zones.override.sponge") || !this.SPONGE_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_RADIUS ; x <= block.getX() + SPONGE_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_RADIUS ; z <= block.getZ() + SPONGE_RADIUS;z++) {
@@ -492,7 +472,7 @@ public class WorldConfig {
                     }
                 }
             }
-            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().canUse(player, player.getWorld().getName(), "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
+            if(this.SPONGE_LAVA_EMULATION && ((this.SPONGE_LAVA_OVERRIDE_NEEDED && getPermissions().has(player, "zones.override.lavasponge") || !this.SPONGE_LAVA_OVERRIDE_NEEDED))) {
                 int type = 0;
                 for(int x = block.getX() - SPONGE_LAVA_RADIUS ; x <= block.getX() + SPONGE_LAVA_RADIUS;x++) {
                     for(int z = block.getZ() - SPONGE_LAVA_RADIUS ; z <= block.getZ() + SPONGE_LAVA_RADIUS;z++) {
@@ -561,23 +541,24 @@ public class WorldConfig {
     }
     
     public boolean canFlow(Block from, Block to) {
-        int type = from.getTypeId();
-        if (type == 8 || type == 9) {
-            if(this.WATER_FLOW_ENABLED && !isFlowProtectedBlock(from,to))
-                return true;
-            return false;
+        Material type = from.getType();
+        switch(type) {
+            case WATER:
+            case STATIONARY_WATER:
+                if(this.WATER_FLOW_ENABLED && !isFlowProtectedBlock(from, to))
+                    return true;
+                return false;
+            case LAVA:
+            case STATIONARY_LAVA:
+                if(this.LAVA_FLOW_ENABLED && !isFlowProtectedBlock(from,to))
+                    return true;
+                return false;
         }
-
-        if (type == 10 || type == 11) {
-            if(this.LAVA_FLOW_ENABLED && !isFlowProtectedBlock(from,to))
-                return true;
-            return false;
-        }
-        
         return true;
-        
     }
+    @SuppressWarnings("deprecation")
     public boolean isNearSponge(Block b, int radius) {
+        // TODO: magic id number
         for(int x = b.getX() - radius ; x <= b.getX() + radius;x++) {
             for(int z = b.getZ() - radius ; z <= b.getZ() + radius;z++) {
                 for(int y = b.getY() - radius ; y <= b.getY() + radius;y++) {
@@ -589,7 +570,9 @@ public class WorldConfig {
         return false;
     }
     
+    @SuppressWarnings("deprecation")
     public boolean isFlowProtectedBlock(Block from,Block to) {
+        // TODO: magic id number
         int type = from.getTypeId();
         if (type == 8 || type == 9 || type == 0) {
             if(!WATER_PROTECTED_BLOCKS.isEmpty() && this.WATER_PROTECTED_BLOCKS.contains(to.getTypeId()))
@@ -612,7 +595,7 @@ public class WorldConfig {
     public boolean canBurn(Player player, Block block, IgniteCause cause) {
         switch(cause) {
             case FLINT_AND_STEEL:
-                return this.LIGHTER_ALLOWED || getPermissions().canUse(player, player.getWorld().getName(), "zones.override.lighter");
+                return this.LIGHTER_ALLOWED || getPermissions().has(player, "zones.override.lighter");
             case LAVA:
                 return this.FIRE_ENABLED && this.LAVA_FIRE_ENABLED && canBurnBlock(block);
             default:
@@ -620,7 +603,9 @@ public class WorldConfig {
         }
     }
     
+    @SuppressWarnings("deprecation")
     public boolean canBurnBlock(Block b) {
+        // TODO: magic id number
         return !this.FIRE_PROTECTED_BLOCKS.contains(b.getTypeId());
     }
     
