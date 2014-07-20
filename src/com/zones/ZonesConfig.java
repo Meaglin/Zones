@@ -19,7 +19,6 @@ public class ZonesConfig {
     private static Logger      log                         = Logger.getLogger(ZonesConfig.class.getName());
 
     public static boolean      WORLDEDIT_ENABLED;
-    public static boolean      TEXTURE_MANAGER_ENABLED;
     
     public static boolean      RESTORE_MISSING_PROPERTIES;
     
@@ -33,6 +32,21 @@ public class ZonesConfig {
     public static int          CREATION_PILON_HEIGHT;
     
     public static int          DATABASE_VERSION;
+    
+    
+    public static final String DUMMY = "";
+
+    public static final String PROTECTED_ZONE_DELETED = ChatColor.GREEN + "Zone {zname} deleted.";
+    public static final String PROTECTED_AREA_CONFLICTS = ChatColor.RED + "Cannot create a zone here, too close to {zname}!";
+    
+    public static final String PROTECTED_CANNOT_REMOVE = ChatColor.RED + "You cannot delete the zone defined by this stone.";
+    public static final String PROTECTED_CANNOT_DEGRADE = ChatColor.RED + "You cannot remove this upgrade from the zone.";
+    
+    public static final String PROTECTED_ZONE_UPGRADED = ChatColor.GREEN + "Zone {zname} upgraded.";
+    public static final String PROTECTED_CANNOT_UPGRADE = ChatColor.RED + "You cannot upgrade this zone.";
+    
+    public static final String PLAYER_CANT_USE_COMMAND_IN_ZONE = ChatColor.RED + "You cannot use this command in zone '{zname}' !";
+    public static final String PLAYER_CANT_USE_COMMAND_IN_WORLD = ChatColor.RED + "You cannot use this command in this world!";
     
     public static final String PLAYER_CANT_BUILD_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot place blocks in zone '{zname}' !";
     public static final String PLAYER_CANT_MODIFY_BLOCKS_IN_ZONE = ChatColor.RED + "You cannot change blocks in zone '{zname}' !";
@@ -61,8 +75,10 @@ public class ZonesConfig {
     public static final String PLAYER_CANT_WARP_OUTSIDE_BORDER = ChatColor.RED + "You cannot warp outside the border.";
     public static final String PLAYER_ILLIGAL_POSITION = ChatColor.RED + "You were moved to spawn because you were in an illegal position!";
     
-    public static final String BLOCK_IS_BLACKLISTED = ChatColor.RED + "This block type is protected in zone '{zname}' !";
-    public static final String BLOCK_IS_PROTECTED = ChatColor.RED + "This block type is blacklisted in zone '{zname}' !";
+    public static final String BLOCK_IS_PROTECTED = ChatColor.RED + "This block type is protected!";
+    public static final String BLOCK_IS_PROTECTED_IN_ZONE = ChatColor.RED + "This block type is protected in zone '{zname}' !";
+    public static final String BLOCK_IS_BLACKLISTED = ChatColor.RED + "This block type is blacklisted!";
+    public static final String BLOCK_IS_BLACKLISTED_IN_ZONE = ChatColor.RED + "This block type is blacklisted in zone '{zname}' !";
 
     public static final String ZONE_ALREADY_CLAIMED = ChatColor.RED + "Zone {zname} is already claimed.";
     public static final String PLAYER_CLAIMES_ZONES = ChatColor.GREEN + "You are now the proud owner of zone {zname}!";
@@ -80,7 +96,6 @@ public class ZonesConfig {
             ExtendedProperties zp = new ExtendedProperties(f);
             zp.load();
             WORLDEDIT_ENABLED = zp.getBool("EnableWorldEdit", false);
-            TEXTURE_MANAGER_ENABLED = zp.getBool("EnableTextureManager", false);
             
             RESTORE_MISSING_PROPERTIES = zp.getBool("RestoreMissingProperties", true);
             

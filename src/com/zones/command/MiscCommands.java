@@ -4,54 +4,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.ZonesConfig;
-import com.zones.model.WorldConfig;
-import com.zones.model.ZoneBase;
+import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.ZoneNormal;
 import com.zones.model.types.ZonePlot;
+import com.zones.test.TestManager;
 
 public class MiscCommands extends CommandsBase {
 
     public MiscCommands(Zones plugin) {
         super(plugin);
-    }
-    
-    @Command(
-        name = "god",
-        description = "Toggles you're godmode.",
-        requiresPlayer = true,
-        requiredPermission = "zones.god"
-    )
-    public void god(Player player, String[] params) {
-        WorldConfig config = getPlugin().getWorldManager(player).getConfig();
-        if(!config.GOD_MODE_ENABLED) {
-            player.sendMessage(ChatColor.RED + "Godmode is not available here.");
-            return;
-        }
-        config.setGodMode(player, !config.hasGodMode(player));
-        player.sendMessage(ChatColor.GREEN + "Godmode is now " + (config.hasGodMode(player) ? "enabled" : "disabled") + ".");
-    }
-    
-    @Command(
-        name = "ungod",
-        description = "Disables you're godmode.",
-        requiresPlayer = true,
-        requiredPermission = "zones.god"
-    )
-    public void ungod(Player player, String[] params) {
-        WorldConfig config = getPlugin().getWorldManager(player).getConfig();
-        if(!config.GOD_MODE_ENABLED) {
-            player.sendMessage(ChatColor.RED + "Godmode is not available here.");
-            return;
-        }
-        config.setGodMode(player, false);
-        player.sendMessage(ChatColor.GREEN + "Godmode is now disabled.");
     }
     
     @Command(
@@ -90,21 +59,13 @@ public class MiscCommands extends CommandsBase {
                 sender.sendMessage(ChatColor.RED + "'" + params[1] + "' is not a valid zone id.");
                 return;
             }
-            ZoneBase base = getPlugin().getZoneManager().getZone(id);
+            ZoneNormal base = getPlugin().getZoneManager().getZone(id);
             if(base == null) {
                 sender.sendMessage(ChatColor.RED + "No zone found with id " + id + ".");
                 return;
             }
             getPlugin().getZoneManager().reloadZone(id);
             sender.sendMessage(ChatColor.GREEN + "Zone " + getPlugin().getZoneManager().getZone(id).getName() + " reloaded.");
-        } else if (type.equalsIgnoreCase("textiel")) {
-            if(!ZonesConfig.TEXTURE_MANAGER_ENABLED) {
-                sender.sendMessage(ChatColor.RED + "Textiel not enabled.");
-                return;
-            }
-            
-            getPlugin().reloadTextiel();
-            sender.sendMessage(ChatColor.GREEN + "Textiel reloaded.");
         }
     }
     
@@ -115,7 +76,7 @@ public class MiscCommands extends CommandsBase {
         requiresSelected = true
     )
     public void refresh(Player player, String[] params) {
-        ZoneBase zone = getSelectedZone(player);
+        ZoneNormal zone = getSelectedZone(player);
         getPlugin().getZoneManager().reloadZone(zone.getId());
         player.sendMessage(ChatColor.GREEN + "Zone reloaded.");
     }
@@ -124,11 +85,12 @@ public class MiscCommands extends CommandsBase {
     @Command(
        name = "ztest",
        description = "The command where i test stuff.",
-       requiresPlayer = true,
-       requiredPermission = "zones.admin.test",
-       min = 1
+       requiredPermission = "zones.admin.test"
     )
-    public void test(Player player, String[] params) {
+    public void test(CommandSender sender, String[] params) throws Exception {
+        
+        TestManager test = new TestManager(getPlugin(), sender);
+        test.run();
 //        String file = FileUtil.readFile(getPlugin().getClass().getResourceAsStream(params[0]));
 //        player.sendMessage(file.substring(0, file.length() > 100 ? 100 : file.length()));
 //        ZonesConfig.setDatabaseVersion(new File(getPlugin().getDataFolder(), ZonesConfig.ZONES_CONFIG_FILE), Integer.parseInt(params[0]));
@@ -149,19 +111,19 @@ public class MiscCommands extends CommandsBase {
             sender.sendMessage(ChatColor.YELLOW + "Cannot find player " + name);
             return;
         }
-        Collection<ZoneBase> zones = getPlugin().getZoneManager().getAllZones();
-        List<ZoneBase> list = new ArrayList<ZoneBase>();
-        for(ZoneBase zone : zones) {
+        Collection<ZoneNormal> zones = getPlugin().getZoneManager().getAllZones();
+        List<ZoneNormal> list = new ArrayList<ZoneNormal>();
+        for(ZoneNormal zone : zones) {
             if(!(zone instanceof ZoneNormal)) {
                 continue;
             }
-            if(((ZoneNormal)zone).isAdminUser(player)) {
+            if(zone.isAdminUser(player)) {
                 list.add(zone);
             }
         }
         sender.sendMessage(ChatColor.BLUE + name + ChatColor.WHITE + " has " + list.size() + " zones:");
         String message = "";
-        for(ZoneBase zone : list) {
+        for(ZoneNormal zone : list) {
             message += ChatColor.BLUE + zone.getName() + ChatColor.WHITE + "[" + ChatColor.AQUA + zone.getId() + ChatColor.WHITE + "]("+GeneralCommands.getClassName(zone.getClass())+"), ";
         }
         if(message.length() >= 2) {
@@ -178,7 +140,7 @@ public class MiscCommands extends CommandsBase {
         requiredPermission = "zones.claim"
     )
     public void claim(Player player, String[] vars) {
-        ZoneBase zone = getPlugin().getWorldManager(player).getActiveZone(player);
+        ZoneNormal zone = getPlugin().getWorldManager(player).getActiveZone(player);
         if(!(zone instanceof ZonePlot)) {
             zone.sendMarkupMessage(ChatColor.RED + "You cannot claim {zname} since it's not a claimable zone.", player);
             return;
@@ -194,11 +156,37 @@ public class MiscCommands extends CommandsBase {
         requiredPermission = "zones.admin"
     )
     public void unclaim(Player player, String[] vars) {
-        ZoneBase zone = getPlugin().getWorldManager(player).getActiveZone(player);
+        ZoneNormal zone = getPlugin().getWorldManager(player).getActiveZone(player);
         if(!(zone instanceof ZonePlot)) {
             zone.sendMarkupMessage(ChatColor.RED + "You cannot unclaim {zname} since it's not a claimable zone.", player);
             return;
         }
         ((ZonePlot)zone).unclaim(player);
+    }
+    
+    @Command(
+        name = "zbuy",
+        aliases = { "" },
+        description = "Buy the zone you're currently standing in.",
+        requiresPlayer = true,
+        requiredPermission = "zones.buy"
+    )
+    public void buy(Player player, String[] vars) {
+        ZoneNormal zone = getPlugin().getWorldManager(player).getActiveZone(player);
+        if(!zone.getFlag(ZoneVar.BUY_ALLOWED)) {
+            zone.sendMarkupMessage(ChatColor.RED + "You {zname} is not buyable.", player);
+            return;
+        }
+        Economy eco = getPlugin().getEconomy();
+        if(eco == null) {
+            player.sendMessage(ChatColor.RED + "Economy not enabled");
+            return;
+        }
+        if(!eco.has(player, zone.getSettings().getDouble(ZoneVar.BUY_PRICE.getName()))) {
+            zone.sendMarkupMessage(ChatColor.RED + "You need " + zone.getSettings().getDouble(ZoneVar.BUY_PRICE.getName()) + " to buy {zname}.", player);
+            return;
+        }
+        eco.withdrawPlayer(player, zone.getSettings().getDouble(ZoneVar.BUY_PRICE.getName()));
+        zone.setAdmin(player, true);
     }
 }

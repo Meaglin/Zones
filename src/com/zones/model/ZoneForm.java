@@ -11,11 +11,17 @@ import com.zones.selection.Selection;
  */
 public abstract class ZoneForm {
     public boolean isInsideZone(int x, int y, int z) {
-        if(z > getHighZ() || z < getLowZ())
+        if(!isInY(y)) {
             return false;
+        }
         
-        return isInsideZone(x,y);
+        return isInsideZone(x, z);
     }
+    
+    public boolean isInY(int y) {
+        return y >= getLowY() && y <= getHighY();
+    }
+    
     public abstract boolean isInsideZone(int x, int y);
 
     public abstract boolean intersectsRectangle(int x1, int x2, int y1, int y2);
@@ -79,14 +85,14 @@ public abstract class ZoneForm {
         if(s.getSize() > getSize())
             return false;
         
-        if(s.getHeight().getMin() < getLowZ())
+        if(s.getHeight().getMin() < getLowY())
             return false;
-        if(s.getHeight().getMax() > getHighZ())
+        if(s.getHeight().getMax() > getHighY())
             return false;
         
         List<ZoneVertice> points = s.getPoints();
         for(ZoneVertice v : points) {
-            if(!isInsideZone(v.getX(), v.getY()))
+            if(!isInsideZone(v.getX(), v.getZ()))
                 return false;
         }
         

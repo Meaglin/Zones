@@ -22,6 +22,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -36,19 +37,15 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
-import com.zones.WorldManager;
+import com.meaglin.json.JSONArray;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.accessresolver.AccessResolver;
-import com.zones.accessresolver.interfaces.PlayerBlockResolver;
-import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
-import com.zones.accessresolver.interfaces.PlayerLocationResolver;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess.Rights;
 import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.ZoneNormal;
 import com.zones.selection.ZoneSelection;
 import com.zones.selection.ZoneSelection.Confirm;
+import com.zones.world.WorldManager;
 
 
 /**
@@ -64,29 +61,114 @@ public class ZonesPlayerListener implements Listener {
         this.plugin = plugin;
     }
 
+    @EventHandler(ignoreCancelled=true)
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        WorldManager wm  = plugin.getWorldManager(event.getPlayer());
+        ZoneNormal zone = wm.getActiveZone(event.getPlayer());
+        if(zone == null) {
+           if(wm.getConfig().isEnabled(ZoneVar.ALLOWED_COMMANDS)) {
+               JSONArray arr = wm.getConfig().getSetting(ZoneVar.ALLOWED_COMMANDS).getJSONArray("value");
+               boolean contains = false;
+               for(Object o : arr) {
+                   if(event.getMessage().toLowerCase().startsWith((String) o)) {
+                       contains = true;
+                       break;
+                   }
+               }
+               if(!contains
+                       && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
+                   event.getPlayer().sendMessage(ZonesConfig.PLAYER_CANT_USE_COMMAND_IN_WORLD);
+                   event.setCancelled(true);
+                   return;
+               }
+           }
+           if(wm.getConfig().isEnabled(ZoneVar.DENIED_COMMANDS)) {
+               JSONArray arr = wm.getConfig().getSetting(ZoneVar.DENIED_COMMANDS).getJSONArray("value");
+               for(Object o : arr) {
+                   if(event.getMessage().toLowerCase().startsWith((String) o)
+                           && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
+                       event.getPlayer().sendMessage(ZonesConfig.PLAYER_CANT_USE_COMMAND_IN_WORLD);
+                       event.setCancelled(true);
+                       return;
+                   }
+               }
+           }
+        } else {
+            if(wm.getConfig().isEnabled(ZoneVar.ALLOWED_COMMANDS) && wm.getConfig().isEnforced(ZoneVar.ALLOWED_COMMANDS)) {
+                JSONArray arr = wm.getConfig().getSetting(ZoneVar.ALLOWED_COMMANDS).getJSONArray("value");
+                boolean contains = false;
+                for(Object o : arr) {
+                    if(event.getMessage().toLowerCase().startsWith((String) o)) {
+                        contains = true;
+                        break;
+                    }
+                }
+                if(!contains
+                        && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
+                    event.getPlayer().sendMessage(ZonesConfig.PLAYER_CANT_USE_COMMAND_IN_WORLD);
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            if(wm.getConfig().isEnabled(ZoneVar.DENIED_COMMANDS) && wm.getConfig().isEnforced(ZoneVar.DENIED_COMMANDS)) {
+                JSONArray arr = wm.getConfig().getSetting(ZoneVar.DENIED_COMMANDS).getJSONArray("value");
+                for(Object o : arr) {
+                    if(event.getMessage().toLowerCase().startsWith((String) o)
+                            && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
+                        event.getPlayer().sendMessage(ZonesConfig.PLAYER_CANT_USE_COMMAND_IN_WORLD);
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+            if(zone.getFlag(ZoneVar.ALLOWED_COMMANDS)) {
+                JSONArray arr = zone.getSettings().getJSONArray(ZoneVar.ALLOWED_COMMANDS.getName());
+                boolean contains = false;
+                for(Object o : arr) {
+                    if(event.getMessage().toLowerCase().startsWith((String) o)) {
+                        contains = true;
+                        break;
+                    }
+                }
+                if(!contains
+                        && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
+                    zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_USE_COMMAND_IN_ZONE, event.getPlayer());
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            if(zone.getFlag(ZoneVar.DENIED_COMMANDS)) {
+                JSONArray arr = zone.getSettings().getJSONArray(ZoneVar.DENIED_COMMANDS.getName());
+                for(Object o : arr) {
+                    if(event.getMessage().toLowerCase().startsWith((String) o)
+                            && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
+                        zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_USE_COMMAND_IN_ZONE, event.getPlayer());
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        plugin.getWorldManager(event.getPlayer()).getRegion(event.getPlayer()).revalidateZones(event.getPlayer());
-        for(WorldManager wm : plugin.getWorlds())
-            if(wm.getConfig().GOD_MODE_ENABLED)
-                wm.getConfig().setGodMode(event.getPlayer(), wm.getConfig().GOD_MODE_AUTOMATIC);
+        plugin.getWorldManager(event.getPlayer()).revalidateZones(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        List<ZoneBase> zones = plugin.getWorldManager(player).getActiveZones(player);
-        for(ZoneBase z : zones)
+        List<ZoneNormal> zones = plugin.getWorldManager(player).getActiveZones(player);
+        for(ZoneNormal z : zones) {
             z.removePlayer(player,true);
+        }
         
         ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
         if (selection != null) {
             selection.setConfirm(Confirm.STOP);
             selection.confirm();
         }
-        for(WorldManager wm : plugin.getWorlds())
-            if(wm.getConfig().GOD_MODE_ENABLED)
-                wm.getConfig().setGodMode(event.getPlayer(), true); // remove from list.
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -107,56 +189,34 @@ public class ZonesPlayerListener implements Listener {
          * and always get teleported.
          */
         WorldManager wm = plugin.getWorldManager(from);
-        ZoneBase aZone = wm.getActiveZone(from);
-        ZoneBase bZone = wm.getActiveZone(to);
+        ZoneNormal aZone = wm.getActiveZone(from);
+        ZoneNormal bZone = wm.getActiveZone(to);
         
         if (bZone != null) {
-            if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(bZone, player, from, to)) {
-                ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).sendDeniedMessage(bZone, player);
+            if(!bZone.canModify(player, Rights.ENTER)) {
+                bZone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_ENTER_INTO_ZONE, player);
                 /*
                  * In principle this should only occur when someones access to a zone gets revoked when still inside the zone.
                  * This prevents players getting stuck ;).
                  */
-                if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
+                if (aZone != null && !aZone.canModify(player, Rights.ENTER)) {
                     player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     player.teleport(from.getWorld().getSpawnLocation());
                     event.setCancelled(false);
-                    //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                     return;
                 } 
                 player.teleport(from);
                 event.setCancelled(false);
                 return;
-            } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
-                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
-                    if(wm.getConfig().isOutsideBorder(from)) {
-                        player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
-                        player.teleport(from.getWorld().getSpawnLocation());
-                        event.setCancelled(false);
-                        //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
-                        return;
-                    }
-                    player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
-                    player.teleport(from);
-                    event.setCancelled(false);
-                    
-                    return;
-                }
-            }
-        } else if(wm.getConfig().BORDER_ENABLED) {
-            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
-                if(wm.getConfig().isOutsideBorder(from) && 
-                        (
-                             wm.getConfig().BORDER_ENFORCE || 
-                             aZone == null || 
-                             !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)
-                         )
-                            
-                   ) {
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION); 
+            } else if (wm.getFlag(ZoneVar.BORDER) 
+                    && wm.getConfig().isEnforced(ZoneVar.BORDER)
+                    && wm.getConfig().isOutsideBorder(to)
+                    && (!wm.getFlag(ZoneVar.BORDER_EXCEMPT_ADMIN) || plugin.hasPermission(player, "zones.override.border"))
+                ) {
+                if(wm.getConfig().isOutsideBorder(from)) {
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     player.teleport(from.getWorld().getSpawnLocation());
                     event.setCancelled(false);
-                    //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     return;
                 }
                 player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
@@ -164,59 +224,92 @@ public class ZonesPlayerListener implements Listener {
                 event.setCancelled(false);
                 return;
             }
+        } else if(wm.getFlag(ZoneVar.BORDER) 
+                && wm.getConfig().isOutsideBorder(to)
+                && (!wm.getFlag(ZoneVar.BORDER_EXCEMPT_ADMIN) || plugin.hasPermission(player, "zones.override.border"))
+            ) {
+            if(wm.getConfig().isOutsideBorder(from)
+                && (
+                        wm.getConfig().isEnforced(ZoneVar.BORDER) ||
+                        aZone == null ||
+                        aZone.canModify(player, Rights.ENTER)
+            )) {
+                player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                player.teleport(from.getWorld().getSpawnLocation());
+                event.setCancelled(false);
+                return;
+            }
+            player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
+            player.teleport(from);
+            event.setCancelled(false);
+            return;
         }
-
+        
         wm.revalidateZones(player, from, to);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerPortal(PlayerPortalEvent event) {
-        if(event.getTo() == null) return;
-        if(event.getTo().getWorld() == null) return;
+        if(event.getTo() == null) {
+            return;
+        }
+        if(event.getTo().getWorld() == null) {
+            return;
+        }
         onPlayerTeleport(event);
     }
     
     @EventHandler(ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
         WorldManager wmfrom = plugin.getWorldManager(from);
         WorldManager wmto = plugin.getWorldManager(to);
-        ZoneBase aZone = wmfrom.getActiveZone(from);
-        ZoneBase bZone = wmto.getActiveZone(to);
+        ZoneNormal aZone = wmfrom.getActiveZone(from);
+        ZoneNormal bZone = wmto.getActiveZone(to);
         
         if(aZone != null) {
-            // TODO: fix properly.
             if(!aZone.getFlag(ZoneVar.TELEPORT) && !aZone.canAdministrate(player)) {
                 aZone.sendMarkupMessage(ZonesConfig.TELEPORT_INTO_ZONE_DISABLED, player);
                 event.setCancelled(true);
                 return;
             }
         }
-        if(bZone != null){
-            if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_TELEPORT)).isAllowed(bZone, player, from, to)) {
-                ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_TELEPORT)).sendDeniedMessage(bZone, player);
+        if(bZone != null) {
+            if(!bZone.getFlag(ZoneVar.TELEPORT) && !bZone.canAdministrate(player)) {
+                bZone.sendMarkupMessage(ZonesConfig.TELEPORT_INTO_ZONE_DISABLED, player);
                 event.setCancelled(true);
                 return;
-            } else if (wmto.getConfig().BORDER_ENABLED && wmto.getConfig().BORDER_ENFORCE) {
-                if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wmto.getWorldName(),player.getName(), "zones.override.border"))) {
-                    player.sendMessage(ZonesConfig.PLAYER_CANT_WARP_OUTSIDE_BORDER);
-                    event.setCancelled(true);
-                    return;
-                }
             }
-        } else if(wmto.getConfig().BORDER_ENABLED) {
-            if(wmto.getConfig().isOutsideBorder(to) && (!wmto.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wmto.getWorldName(),player.getName(), "zones.override.border"))) {
+            if(!bZone.canModify(player, Rights.ENTER)) {
+                bZone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_ENTER_INTO_ZONE, player);
+                event.setCancelled(false);
+                return;
+            }
+            if (wmto.getFlag(ZoneVar.BORDER) 
+                    && wmto.getConfig().isEnforced(ZoneVar.BORDER)
+                    && wmto.getConfig().isOutsideBorder(to)
+                    && (!wmto.getFlag(ZoneVar.BORDER_EXCEMPT_ADMIN) || plugin.hasPermission(wmto.getWorldName(), player, "zones.override.border"))
+                ) {
                 player.sendMessage(ZonesConfig.PLAYER_CANT_WARP_OUTSIDE_BORDER);
-                event.setCancelled(true);
+                player.teleport(from);
+                event.setCancelled(false);
                 return;
             }
+        } else if (wmto.getFlag(ZoneVar.BORDER) 
+                && wmto.getConfig().isOutsideBorder(to)
+                && (!wmto.getFlag(ZoneVar.BORDER_EXCEMPT_ADMIN) || plugin.hasPermission(wmto.getWorldName(), player, "zones.override.border"))
+            ) {
+            player.sendMessage(ZonesConfig.PLAYER_CANT_WARP_OUTSIDE_BORDER);
+            player.teleport(from);
+            event.setCancelled(false);
+            return;
         }
 
-        if(from.getWorld() != to.getWorld())
+        if(from.getWorld() != to.getWorld()) {
             wmfrom.revalidateOutZones(player, from);
+        }
         wmto.revalidateZones(player, from, to);
             
     }
@@ -320,33 +413,22 @@ public class ZonesPlayerListener implements Listener {
             case RIGHT_CLICK_BLOCK:
             case LEFT_CLICK_BLOCK:
             case PHYSICAL:
-                if(hitBlocks.contains(blockType)) {
-                    // Allow people to play a note block, shouldn't be protected imho.
-                   // if(event.getAction() == Action.LEFT_CLICK_BLOCK && blockType == 25) break;
-                    
-                    WorldManager wm = plugin.getWorldManager(player.getWorld());
-                    ZoneBase zone = wm.getActiveZone(event.getClickedBlock());
-                    if(zone == null) {
-                        if(wm.getConfig().LIMIT_BUILD_BY_FLAG && !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.build")) {
-                            player.sendMessage(ZonesConfig.PLAYER_CANT_CHANGE_WORLD);
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if(!((PlayerBlockResolver)zone.getResolver(AccessResolver.PLAYER_BLOCK_HIT)).isAllowed(zone, player, event.getClickedBlock(), blockType)) {
-                            zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
+                if(!hitBlocks.contains(blockType)) {
+                    break;
                 }
-                break;
+                // Allow people to play a note block, shouldn't be protected imho.
+                // if(event.getAction() == Action.LEFT_CLICK_BLOCK && blockType == 25) break;
+
+                EventUtil.onHitPlace(plugin, event, player, event.getClickedBlock(), blockType);
+                if(event.isCancelled()) {
+                    return;
+                }
         }
         
         switch(event.getAction()) {
             case RIGHT_CLICK_BLOCK:
                 
-                if (toolType.getId() == ZonesConfig.CREATION_TOOL_TYPE) {
+                if (toolType != null && toolType.getId() == ZonesConfig.CREATION_TOOL_TYPE) {
                     ZoneSelection selection = plugin.getZoneManager().getSelection(player.getEntityId());
                     if (selection != null) {
                         if(event.getClickedBlock() != null) {
@@ -367,9 +449,10 @@ public class ZonesPlayerListener implements Listener {
                     EventUtil.onHitPlace(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()), toolType);
                 else if(placeBlocks.contains(blockType)) 
                     EventUtil.onPlace(plugin, event, player, event.getClickedBlock(), blockType);
-                else if(destroyItems.contains(toolType)) 
-                    EventUtil.onBreak(plugin, event, player, event.getClickedBlock().getRelative(event.getBlockFace()));
-                else if((blockType == Material.DIRT || blockType == Material.GRASS) && (
+                else if(destroyItems.contains(toolType)) {
+                    Block bl = event.getClickedBlock().getRelative(event.getBlockFace());
+                    EventUtil.onBreak(plugin, event, player, bl, bl.getType());
+                } else if((blockType == Material.DIRT || blockType == Material.GRASS) && (
                         toolType == Material.WOOD_HOE ||
                         toolType == Material.STONE_HOE ||
                         toolType == Material.IRON_HOE ||
@@ -385,7 +468,7 @@ public class ZonesPlayerListener implements Listener {
         if(!event.isCancelled() && event.getAction() == Action.PHYSICAL &&
                 event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.SOIL) {
             WorldManager wm = plugin.getWorldManager(player.getWorld());
-            if(wm.testFlag(event.getClickedBlock(), wm.getConfig().CROP_PROTECTION_ENABLED, ZoneVar.CROP_PROTECTION)) {
+            if(wm.testFlag(event.getClickedBlock(), ZoneVar.CROP_PROTECTION)) {
                 event.setCancelled(true);
             }
         }
@@ -393,7 +476,7 @@ public class ZonesPlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        ZoneBase z = plugin.getWorldManager(event.getPlayer()).getActiveZone(event.getPlayer());
+        ZoneNormal z = plugin.getWorldManager(event.getPlayer()).getActiveZone(event.getPlayer());
         if(z != null) {
             Location loc = z.getSpawnLocation(event.getPlayer());
             if(loc != null) {
@@ -405,8 +488,8 @@ public class ZonesPlayerListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        ZoneBase zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
-        if(zone != null && !((ZoneNormal)zone).canModify(event.getPlayer(), Rights.HIT)) {
+        ZoneNormal zone = plugin.getWorldManager(event.getItemDrop().getWorld()).getActiveZone(event.getItemDrop().getLocation());
+        if(zone != null && !zone.canModify(event.getPlayer(), Rights.HIT)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_PICKUP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
@@ -415,8 +498,8 @@ public class ZonesPlayerListener implements Listener {
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
         if(event.isCancelled()) return;
-        ZoneBase zone = plugin.getWorldManager(event.getItem().getWorld()).getActiveZone(event.getItem().getLocation());
-        if(zone != null && !((ZoneNormal)zone).canModify(event.getPlayer(), Rights.HIT)) {
+        ZoneNormal zone = plugin.getWorldManager(event.getItem().getWorld()).getActiveZone(event.getItem().getLocation());
+        if(zone != null && !zone.canModify(event.getPlayer(), Rights.HIT)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_DROP_ITEMS_IN_ZONE, event.getPlayer());
             event.setCancelled(true);
         }
@@ -424,11 +507,13 @@ public class ZonesPlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
-        if(event.isCancelled()) return;
+        if(event.isCancelled()) {
+            return;
+        }
         
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
         Player player = event.getPlayer();
-        EventUtil.onBreak(plugin, event, player, block);
+        EventUtil.onBreak(plugin, event, player, block, Material.WATER);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -498,8 +583,8 @@ public class ZonesPlayerListener implements Listener {
         Player player = event.getPlayer();
         Entity target = event.getEntity();
         
-        ZoneBase zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
-        if(zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, target, -1)){
+        ZoneNormal zone = plugin.getWorldManager(target.getWorld()).getActiveZone(target.getLocation());
+        if(zone != null && !zone.canModify(player, Rights.HIT)){
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_SHEAR_IN_ZONE, player);
             event.setCancelled(true);
             return;

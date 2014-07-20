@@ -6,9 +6,9 @@ import org.bukkit.entity.Player;
 
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZoneVertice;
 import com.zones.model.types.ZoneInherit;
+import com.zones.model.types.ZoneNormal;
 import com.zones.selection.ZoneCreateSelection;
 import com.zones.selection.ZoneEditSelection;
 import com.zones.selection.ZoneSelection;
@@ -34,7 +34,7 @@ public class CreateCommands extends CommandsBase {
         requiresPlayer = true
     )
     public void create(Player player, String[] params) {
-        ZoneBase inheritedZone = null;
+        ZoneNormal inheritedZone = null;
         if(!canUseCommand(player,"zones.create")) {
             if(hasSelected(player)) {
                 inheritedZone = getSelectedZone(player);
@@ -80,7 +80,7 @@ public class CreateCommands extends CommandsBase {
         requiresSelected = true
     )
     public void edit(Player player, String[] params) {
-        ZoneBase z = getSelectedZone(player);
+        ZoneNormal z = getSelectedZone(player);
         ZoneEditSelection selection = new ZoneEditSelection(getPlugin(),player,z.getName());
         getPlugin().getZoneManager().addSelection(player.getEntityId(), selection);
         player.sendMessage(ChatColor.GREEN + "Loaded zone " + z.getName() + " into your edit selection.");

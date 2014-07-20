@@ -25,7 +25,7 @@ public class SphereSelection extends Selection {
     @Override
     public void onRightClick(Block block) {
         if(p1 != null) {
-            getSelection().removeGhostBlock(p1.getX(), p1.getY());
+            getSelection().removeGhostBlock(p1.getX(), p1.getZ());
         }
         getSelection().addGhostBlock(block);
         p1 = new ZoneVertice(block.getX(),block.getZ());
@@ -35,7 +35,7 @@ public class SphereSelection extends Selection {
     @Override
     public void onLeftClick(Block block) {
         if(p1 != null) {
-            getSelection().removeGhostBlock(p1.getX(), p1.getY());
+            getSelection().removeGhostBlock(p1.getX(), p1.getZ());
         }
         getSelection().addGhostBlock(block);
         p1 = new ZoneVertice(block.getX(),block.getZ());

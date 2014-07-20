@@ -6,13 +6,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.zones.Zones;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.ZoneVertice;
 import com.zones.model.forms.ZoneCuboid;
 import com.zones.model.forms.ZoneCylinder;
 import com.zones.model.forms.ZoneNPoly;
 import com.zones.model.forms.ZoneSphere;
+import com.zones.model.types.ZoneNormal;
 import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
 import com.zones.util.Log;
@@ -38,14 +38,14 @@ public class ZoneEditSelection extends ZoneSelection {
             for(int i = 0; i < form.getPointsSize(); i++) {
                 selection.addPoint(new ZoneVertice(points[0][i], points[1][i]));
             }
-            selection.setHeight(new ZoneVertice(form.getLowZ(), form.getHighZ()), true);
+            selection.setHeight(new ZoneVertice(form.getLowY(), form.getHighY()), true);
             setSelection(selection);
         } else if(form instanceof ZoneCylinder) {
             ZoneCylinder cyl = (ZoneCylinder) form;
             CylinderSelection selection = new CylinderSelection(this);
-            selection.setPoint1(new ZoneVertice(cyl.getCenterX(), cyl.getCenterY()));
-            selection.setPoint2(new ZoneVertice(cyl.getCenterX() + cyl.getRadius(), cyl.getCenterY() + cyl.getRadius()));
-            selection.setHeight(new ZoneVertice(cyl.getLowZ(), cyl.getHighZ()), true);
+            selection.setPoint1(new ZoneVertice(cyl.getCenterX(), cyl.getCenterZ()));
+            selection.setPoint2(new ZoneVertice(cyl.getCenterX() + cyl.getRadius(), cyl.getCenterZ() + cyl.getRadius()));
+            selection.setHeight(new ZoneVertice(cyl.getLowY(), cyl.getHighY()), true);
             setSelection(selection);
         } else if(form instanceof ZoneSphere) {
             ZoneSphere sphere = (ZoneSphere) form;
@@ -59,8 +59,8 @@ public class ZoneEditSelection extends ZoneSelection {
     
 
     @Override
-    public ZoneBase save() {
-        ZoneBase z = getSelectedZone();
+    public ZoneNormal save() {
+        ZoneNormal z = getSelectedZone();
         if (z == null)
             return null;
         
@@ -70,8 +70,8 @@ public class ZoneEditSelection extends ZoneSelection {
             pZ.setFormtype(getClassName(getForm()));
             pZ.setZonetype(getClassName(getType()));
             pZ.setWorld(getWorld().getName());
-            pZ.setMinz(getSelection().getHeight().getMin());
-            pZ.setMaxz(getSelection().getHeight().getMax());
+            pZ.setMinY(getSelection().getHeight().getMin());
+            pZ.setMaxY(getSelection().getHeight().getMax());
             pZ.setSize(getSelection().getPointsSize());
             //getPlugin().getDatabase().delete(Vertice.class, pZ.getVertices());
             //getPlugin().getDatabase().execute(getPlugin().getDatabase().createCallableSql("DELETE FROM zones_vertices WHERE id = " + pZ.getId() + " "));
@@ -88,7 +88,7 @@ public class ZoneEditSelection extends ZoneSelection {
                 v.setId(z.getId());
                 v.setVertexorder(i);
                 v.setX(points.get(i).getX());
-                v.setY(points.get(i).getY());
+                v.setZ(points.get(i).getZ());
                 //v.setZone(pZ);
                 pZ.addVertice(v);
                 getPlugin().getMysqlDatabase().save(v);
@@ -103,8 +103,9 @@ public class ZoneEditSelection extends ZoneSelection {
         }
         getZoneManager().removeZone(z);
         revertGhostBlocks();
-        ZoneBase zone = getZoneManager().loadFromPersistentData(getWorldManager(), pZ);
+        ZoneNormal zone = getZoneManager().loadFromPersistentData(getWorldManager(), pZ);
         if(zone != null) {
+            getZoneManager().addZone(zone);
             getZoneManager().setSelected(getPlayer().getEntityId(), zone.getId());
             getPlayer().sendMessage(ChatColor.GREEN + "Selected zone '" + zone.getName() + "' .");
             Log.info(getPlayer().getName() + " resized zone " + zone.getName() + "[" + zone.getId() + "]");

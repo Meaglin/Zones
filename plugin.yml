@@ -1,9 +1,13 @@
 name: Zones
 main: com.zones.Zones
-version: 3.0b1
-authors: [ 'Meaglin', 'Mysteryman', 'GunterDW' ]
-softdepend: [ 'EasyBind' ] 
+version: 3.0b2
+author: 'Meaglin'
+authors: [ 'Mysteryman', 'GunterDW' ]
+depend: [ 'Vault' ]
+softdepend: [ 'WorldGuard', 'WorldEdit', 'VirtualPlayers' ] 
 website: https://github.com/Meaglin/Zones
-description: The Over optimized Area Protection tool with integrated Anti Grief options.
+description: >
+             Area protection plugin, including following features:
+              * Grief protection(block fire, lava, etc...)
+              * Easy of use(allow users to manage their own area)
 commands:
-     

@@ -41,73 +41,73 @@ public class ZoneCuboid extends ZoneForm {
     }
     
     public ZoneCuboid(List<Vertice> vertices, int minz, int maxz) {
-        this(vertices.get(0).getX(),vertices.get(1).getX(),vertices.get(0).getY(),vertices.get(1).getY(),minz,maxz);
+        this(vertices.get(0).getX(), vertices.get(1).getX(), minz, maxz, vertices.get(0).getZ(), vertices.get(1).getZ());
     }
     @Override
-    public boolean isInsideZone(int x, int y) {
-        if (x < _x1 || x > _x2 || y < _y1 || y > _y2)
+    public boolean isInsideZone(int x, int z) {
+        if (x < _x1 || x > _x2 || z < _z1 || z > _z2)
             return false;
         return true;
     }
 
     @Override
-    public boolean intersectsRectangle(int ax1, int ax2, int ay1, int ay2) {
+    public boolean intersectsRectangle(int ax1, int ax2, int az1, int az2) {
         // Check if any point inside this rectangle
-        if (isInsideZone(ax1, ay1, (_z2 - 1)))
+        if (isInsideZone(ax1, az1, (_z2 - 1)))
             return true;
-        if (isInsideZone(ax1, ay2, (_z2 - 1)))
+        if (isInsideZone(ax1, az2, (_z2 - 1)))
             return true;
-        if (isInsideZone(ax2, ay1, (_z2 - 1)))
+        if (isInsideZone(ax2, az1, (_z2 - 1)))
             return true;
-        if (isInsideZone(ax2, ay2, (_z2 - 1)))
+        if (isInsideZone(ax2, az2, (_z2 - 1)))
             return true;
 
         // Check if any point from this rectangle is inside the other one
-        if (_x1 > ax1 && _x1 < ax2 && _y1 > ay1 && _y1 < ay2)
+        if (_x1 > ax1 && _x1 < ax2 && _z1 > az1 && _z1 < az2)
             return true;
-        if (_x1 > ax1 && _x1 < ax2 && _y2 > ay1 && _y2 < ay2)
+        if (_x1 > ax1 && _x1 < ax2 && _z2 > az1 && _z2 < az2)
             return true;
-        if (_x2 > ax1 && _x2 < ax2 && _y1 > ay1 && _y1 < ay2)
+        if (_x2 > ax1 && _x2 < ax2 && _z1 > az1 && _z1 < az2)
             return true;
-        if (_x2 > ax1 && _x2 < ax2 && _y2 > ay1 && _y2 < ay2)
+        if (_x2 > ax1 && _x2 < ax2 && _z2 > az1 && _z2 < az2)
             return true;
 
         // Horizontal lines may intersect vertical lines
-        if (lineSegmentsIntersect(_x1, _y1, _x2, _y1, ax1, ay1, ax1, ay2))
+        if (lineSegmentsIntersect(_x1, _z1, _x2, _z1, ax1, az1, ax1, az2))
             return true;
-        if (lineSegmentsIntersect(_x1, _y1, _x2, _y1, ax2, ay1, ax2, ay2))
+        if (lineSegmentsIntersect(_x1, _z1, _x2, _z1, ax2, az1, ax2, az2))
             return true;
-        if (lineSegmentsIntersect(_x1, _y2, _x2, _y2, ax1, ay1, ax1, ay2))
+        if (lineSegmentsIntersect(_x1, _z2, _x2, _z2, ax1, az1, ax1, az2))
             return true;
-        if (lineSegmentsIntersect(_x1, _y2, _x2, _y2, ax2, ay1, ax2, ay2))
+        if (lineSegmentsIntersect(_x1, _z2, _x2, _z2, ax2, az1, ax2, az2))
             return true;
 
         // Vertical lines may intersect horizontal lines
-        if (lineSegmentsIntersect(_x1, _y1, _x1, _y2, ax1, ay1, ax2, ay1))
+        if (lineSegmentsIntersect(_x1, _z1, _x1, _z2, ax1, az1, ax2, az1))
             return true;
-        if (lineSegmentsIntersect(_x1, _y1, _x1, _y2, ax1, ay2, ax2, ay2))
+        if (lineSegmentsIntersect(_x1, _z1, _x1, _z2, ax1, az2, ax2, az2))
             return true;
-        if (lineSegmentsIntersect(_x2, _y1, _x2, _y2, ax1, ay1, ax2, ay1))
+        if (lineSegmentsIntersect(_x2, _z1, _x2, _z2, ax1, az1, ax2, az1))
             return true;
-        if (lineSegmentsIntersect(_x2, _y1, _x2, _y2, ax1, ay2, ax2, ay2))
+        if (lineSegmentsIntersect(_x2, _z1, _x2, _z2, ax1, az2, ax2, az2))
             return true;
 
         return false;
     }
 
     @Override
-    public double getDistanceToZone(int x, int y) {
-        double test, shortestDist = Math.pow(_x1 - x, 2) + Math.pow(_y1 - y, 2);
+    public double getDistanceToZone(int x, int z) {
+        double test, shortestDist = Math.pow(_x1 - x, 2) + Math.pow(_z1 - z, 2);
 
-        test = Math.pow(_x1 - x, 2) + Math.pow(_y2 - y, 2);
+        test = Math.pow(_x1 - x, 2) + Math.pow(_z2 - z, 2);
         if (test < shortestDist)
             shortestDist = test;
 
-        test = Math.pow(_x2 - x, 2) + Math.pow(_y1 - y, 2);
+        test = Math.pow(_x2 - x, 2) + Math.pow(_z1 - z, 2);
         if (test < shortestDist)
             shortestDist = test;
 
-        test = Math.pow(_x2 - x, 2) + Math.pow(_y2 - y, 2);
+        test = Math.pow(_x2 - x, 2) + Math.pow(_z2 - z, 2);
         if (test < shortestDist)
             shortestDist = test;
 
@@ -154,7 +154,7 @@ public class ZoneCuboid extends ZoneForm {
 
     @Override
     public int[][] getPoints() {
-        return new int[][] { new int[] { _x1 , _x2 } , new int[] { _y1 , _y2 }  };
+        return new int[][] { new int[] { _x1 , _x2 } , new int[] { _z1 , _z2 }  };
     }
 
     @Override

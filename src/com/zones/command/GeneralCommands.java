@@ -12,13 +12,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.meaglin.json.JSONObject;
-import com.zones.Region;
-import com.zones.WorldManager;
 import com.zones.Zones;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.settings.ZoneVar;
 import com.zones.model.types.ZoneInherit;
+import com.zones.model.types.ZoneNormal;
 
 public class GeneralCommands extends CommandsBase {
 
@@ -33,7 +31,7 @@ public class GeneralCommands extends CommandsBase {
         requiresSelected = true
     )
     public void info(Player player, String[] params) {
-        ZoneBase b = getSelectedZone(player);
+        ZoneNormal b = getSelectedZone(player);
         player.sendMessage(ChatColor.DARK_GREEN + "Zone: " + b.getName() + ChatColor.BLUE + "(" + b.getId() + ")" + ChatColor.WHITE + "[" + b.getAccess(player).toColorCode() + "]" );
         player.sendMessage(ChatColor.AQUA + "World: " + b.getWorld().getName());
         ZoneForm f = b.getForm();
@@ -41,7 +39,7 @@ public class GeneralCommands extends CommandsBase {
         player.sendMessage(ChatColor.AQUA + "Size: " + f.getSize() + " (X:" + Math.abs(f.getHighX()-f.getLowX()) + ", Y:" + Math.abs(f.getHighY()-f.getLowY()) + ", Z:" + Math.abs(f.getHighZ()-f.getLowZ()) + ")" );
         player.sendMessage(ChatColor.AQUA + "Location: (X:" + f.getLowX() + "," + f.getHighX() + "; Y:" + f.getLowY() + "," + f.getHighY() + "; Z:" + f.getLowZ() + "," + f.getHighZ() + ")");
         
-        JSONObject settings = b.getConfig().getJSONObject("settings");
+        JSONObject settings = b.getSettings();
         
         String bools = "";
         for(ZoneVar v : ZoneVar.values()) {
@@ -66,24 +64,21 @@ public class GeneralCommands extends CommandsBase {
         if(!sets.equals("")) {
             player.sendMessage(ChatColor.AQUA + "Settings:" + settings);
         }
-        Region min = b.getWorldManager().getRegion(b.getForm().getLowX(),b.getForm().getLowZ());
-        Region max = b.getWorldManager().getRegion(b.getForm().getHighX(),b.getForm().getHighZ());
-        player.sendMessage(ChatColor.AQUA + "Region: " +  "(X:" + min.getX() + "," + max.getX() + "; Y:" + min.getY() + "," + max.getY() + ")" );
         if(b instanceof ZoneInherit) {
-            List<ZoneBase> inherits = ((ZoneInherit)b).getInheritedZones();
+            List<ZoneNormal> inherits = ((ZoneInherit)b).getInheritedZones();
             if(inherits.size() > 0) {
                 String message = "";
-                for(ZoneBase zone : inherits) {
+                for(ZoneNormal zone : inherits) {
                     message += ", " + zone.getName() + "[" + zone.getId() + "]";
                 }
                 player.sendMessage(ChatColor.AQUA + "InheritedZones: " + message.substring(2));
             } else {
                 player.sendMessage(ChatColor.AQUA + "InheritedZones: None.");
             }
-            List<ZoneBase> subs = ((ZoneInherit)b).getSubZones();
+            List<ZoneNormal> subs = ((ZoneInherit)b).getSubZones();
             if(subs.size() > 0) {
                 String message = "";
-                for(ZoneBase zone : subs) {
+                for(ZoneNormal zone : subs) {
                     message += ", " + zone.getName() + "[" + zone.getId() + "]";
                 }
                 player.sendMessage(ChatColor.AQUA + "SubZones: " + message.substring(2));
@@ -116,7 +111,7 @@ public class GeneralCommands extends CommandsBase {
                 player.sendMessage(ChatColor.GREEN + "Zone deselected.");
                 return;
             }
-            List<ZoneBase> zoneslist = getPlugin().getZoneManager().matchZone(player, params[0]);
+            List<ZoneNormal> zoneslist = getPlugin().getZoneManager().matchZone(player, params[0]);
             if(zoneslist.size() < 1)
                 player.sendMessage(ChatColor.YELLOW + "No zones found with key '" + params[0] + "'(which you can modify).");
             else if(zoneslist.size() == 1){
@@ -126,8 +121,8 @@ public class GeneralCommands extends CommandsBase {
                 player.sendMessage(ChatColor.YELLOW +  "Too many zones found, please be more specific.");
                 String temp = "";
                 int delta = Integer.MAX_VALUE;
-                ZoneBase closest = null;
-                for (ZoneBase zone : zoneslist) {
+                ZoneNormal closest = null;
+                for (ZoneNormal zone : zoneslist) {
                     if(closest == null || Math.abs(closest.getName().length()-params[0].length()) < delta) {
                         closest = zone;
                         delta = Math.abs(closest.getName().length()-params[0].length());
@@ -139,7 +134,7 @@ public class GeneralCommands extends CommandsBase {
                 getPlugin().getZoneManager().setSelected(player.getEntityId(), closest.getId());
             }
         }else{
-            List<ZoneBase> zoneslist = getPlugin().getWorldManager(player).getAdminZones(player);
+            List<ZoneNormal> zoneslist = getPlugin().getWorldManager(player).getAdminZones(player);
             if(zoneslist.size() < 1) {
                 player.sendMessage(ChatColor.YELLOW + "No zones found in your current area (which you can modify).");
                 player.sendMessage(ChatColor.YELLOW + "Please select a zone by specifying a zone id.");
@@ -148,8 +143,8 @@ public class GeneralCommands extends CommandsBase {
                 player.sendMessage(ChatColor.GREEN + "Selected zone '" + zoneslist.get(0).getName() + "' .");
             } else {
                 String temp = "";
-                ZoneBase smallest = null;
-                for (ZoneBase zone : zoneslist) {
+                ZoneNormal smallest = null;
+                for (ZoneNormal zone : zoneslist) {
                     if(smallest == null || zone.getForm().getSize() < smallest.getForm().getSize())
                         smallest = zone;
                     temp += "," + zone.getName() + "[" + zone.getId() + "]";
@@ -171,9 +166,9 @@ public class GeneralCommands extends CommandsBase {
         if(hasSelected(player)) {
             sendZone(player,getSelectedZone(player), null);
         } else {      
-            Set<ZoneBase> sorted = new TreeSet<ZoneBase>(new Comparator<ZoneBase>() {
+            Set<ZoneNormal> sorted = new TreeSet<ZoneNormal>(new Comparator<ZoneNormal>() {
                 @Override
-                public int compare(ZoneBase o1, ZoneBase o2) {
+                public int compare(ZoneNormal o1, ZoneNormal o2) {
                     if(o1.getForm().getSize() > o2.getForm().getSize())
                         return 1;
                     else if(o2.getForm().getSize() > o1.getForm().getSize())
@@ -186,7 +181,7 @@ public class GeneralCommands extends CommandsBase {
             sorted.addAll(getPlugin().getWorldManager(player).getActiveZones(player));
             if(sorted.size() > 0) {
                 Set<String> usedNames = new HashSet<String>();
-                for(ZoneBase zone : sorted){
+                for(ZoneNormal zone : sorted){
                     sendZone(player, zone, usedNames);
                 }
             } else {
@@ -195,7 +190,7 @@ public class GeneralCommands extends CommandsBase {
         }
     }
     
-    private void sendZone(Player player, ZoneBase zone, Set<String> usedNames) {
+    private void sendZone(Player player, ZoneNormal zone, Set<String> usedNames) {
         String msg = "";
         for(Player insidePlayer : zone.getPlayersInside()) {
             if(player.getEntityId() != insidePlayer.getEntityId() && (usedNames == null || !usedNames.contains(insidePlayer.getName()))) {
@@ -212,16 +207,16 @@ public class GeneralCommands extends CommandsBase {
         }
     }
     
-    @Command(
-        name = "zregioninfo",
-        description = "Shows region info, mostly for debug purposes.",
-        requiresPlayer = true
-    )
-    public void regioninfo(Player player, String[] params) {
-        Region r = getPlugin().getWorldManager(player).getRegion(player);
-        player.sendMessage(ChatColor.GREEN + "Region[X: " + r.getX() + ", Y: " + r.getY() + "] Zone count: " + r.getZones().size() + ".");
-        player.sendMessage(ChatColor.GREEN + "Calculated region: [" + (WorldManager.toInt(player.getLocation().getX()) >> WorldManager.SHIFT_SIZE) + "," + (WorldManager.toInt(player.getLocation().getZ()) >> WorldManager.SHIFT_SIZE) +  "].");
-    }
+//    @Command(
+//        name = "zregioninfo",
+//        description = "Shows region info, mostly for debug purposes.",
+//        requiresPlayer = true
+//    )
+//    public void regioninfo(Player player, String[] params) {
+//        Region r = getPlugin().getWorldManager(player).getRegion(player);
+//        player.sendMessage(ChatColor.GREEN + "Region[X: " + r.getX() + ", Y: " + r.getZ() + "] Zone count: " + r.getZones().size() + ".");
+//        player.sendMessage(ChatColor.GREEN + "Calculated region: [" + (WorldManager.toInt(player.getLocation().getX()) >> WorldManager.SHIFT_SIZE) + "," + (WorldManager.toInt(player.getLocation().getZ()) >> WorldManager.SHIFT_SIZE) +  "].");
+//    }
     
     @Command(
         name = "zaccess",

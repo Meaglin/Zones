@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import com.meaglin.json.JSONArray;
@@ -61,7 +59,8 @@ public class SettingsCommands extends CommandsBase {
         vars.put("entermessage", ZoneVar.ENTER_MESSAGE);
         vars.put("leavemessage", ZoneVar.LEAVE_MESSAGE);
         vars.put("spawnlocation",  ZoneVar.SPAWN_LOCATION);
-        vars.put("texturepack",  ZoneVar.TEXTURE_PACK);
+        vars.put("texturepack",  ZoneVar.RESOURCE_PACK);
+        vars.put("resourcepack",  ZoneVar.RESOURCE_PACK);
         vars.putAll(lists);
     }
 
@@ -96,7 +95,7 @@ public class SettingsCommands extends CommandsBase {
         
         ZoneBase zone = getSelectedZone(player);
         if(params.length > 1 && params[1].trim().equalsIgnoreCase("reset")) {
-            zone.getConfig().getJSONObject("settings").remove(v.getName());
+            zone.getSettings().remove(v.getName());
             zone.saveSettings();
             player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " has now been reset to default.");
             return;
@@ -104,18 +103,12 @@ public class SettingsCommands extends CommandsBase {
         /**
          * Some variables require special treatment.
          */
-        switch(v) {
-            case SPAWN_LOCATION:
+        switch(v.getType()) {
+            case LOCATION:
                 Location loc = player.getLocation();
-                zone.getConfig().getJSONObject("settings").put(v.getName(), (new JSONObject())
-                        .put("x", loc.getX())
-                        .put("y", loc.getY())
-                        .put("z", loc.getZ())
-                        .put("yaw", loc.getYaw())
-                        .put("pitch", loc.getPitch())
-                );
+                zone.getConfig().getJSONObject("settings").put(v.getName(), v.getType().serialize(loc));
                 zone.saveSettings();
-                player.sendMessage(ChatColor.GREEN + "The respawn location of your zone is now changed to your current location");
+                player.sendMessage(ChatColor.GREEN + "The location " + params[0] + " is now changed to your current location");
                 break;
             default:
                 if(params.length < 2){
@@ -124,11 +117,19 @@ public class SettingsCommands extends CommandsBase {
                 }  
                 String name = "";
                 for (int i = 1; i < params.length; i++) {
-                    name += " " + params[i];
+                    if(v.getType().isList()) {
+                        name += "," + params[i];
+                    } else {
+                        name += " " + params[i];
+                    }
                 }
                 name = name.trim();
-                // TODO: this is buggy.
-                zone.getConfig().getJSONObject("settings").put(v.getName(), v.unSerialize(name));
+                try {
+                    zone.getConfig().getJSONObject("settings").put(v.getName(), v.getType().serialize(name));
+                } catch(Exception e) {
+                    player.sendMessage(ChatColor.RED + "Invalid format.");
+                    break;
+                }
                 zone.saveSettings();
                 player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " now changed to " + zone.getConfig().getJSONObject("settings").get(v.getName()));
                 break;
@@ -152,45 +153,51 @@ public class SettingsCommands extends CommandsBase {
     )
     public void add(Player player, String[] params) {
         ZoneVar v = lists.get(params[0].toLowerCase());
-        if(v == null) {
+        if(v == null || !v.getType().isList()) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + params[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
             return;
         }
         
         ZoneBase zone = getSelectedZone(player);
-        JSONObject settings = zone.getConfig().getJSONObject("settings");
+        JSONObject settings = zone.getSettings();
         JSONArray list = null;
         if(settings.has(v.getName())) {
             list = settings.getJSONArray(v.getName());
         } else {
             list = new JSONArray();
         }
-        switch(v) {
-            case PLACE_BLOCKS:
-            case BREAK_BLOCKS:
-                Material m = Material.matchMaterial(params[1]);
-                if(m == null) {
-                    player.sendMessage(ChatColor.RED + "Unknown block " + params[1] + "!");
-                    return;
-                }
-                list.add(m.name());
-                break;
-            default:
-                if(v.getListType().equals(Integer.class)) {
-                    list.add(Integer.parseInt(params[1]));
-                } else if(v.getListType().equals(String.class)) {
-                    list.add(params[1]);
-                } else if (v.getListType().equals(EntityType.class)) {
-                    try {
-                        EntityType t = EntityType.valueOf(params[1].toUpperCase());
-                        list.add(t.name());
-                    } catch(IllegalArgumentException e) {
-                        player.sendMessage(ChatColor.RED + "Unknown mob type " + params[1] + "!");
-                        return;
-                    }
-                }
+        try {
+            list.add(v.getType().getListType().serialize(params[1]));
+        } catch(Exception e) {
+            player.sendMessage(ChatColor.RED + "Invalid format.");
+            return;
         }
+//        switch(v) {
+//            case PLACE_BLOCKS:
+//            case BREAK_BLOCKS:
+//                Material m = Material.matchMaterial(params[1]);
+//                if(m == null) {
+//                    player.sendMessage(ChatColor.RED + "Unknown block " + params[1] + "!");
+//                    return;
+//                }
+//                list.add(m.name());
+//                break;
+//            default:
+//                if(v.getListType().equals(Integer.class)) {
+//                    list.add(Integer.parseInt(params[1]));
+//                } else if(v.getListType().equals(String.class)) {
+//                    list.add(params[1]);
+//                } else if (v.getListType().equals(EntityType.class)) {
+//                    try {
+//                        EntityType t = EntityType.valueOf(params[1].toUpperCase());
+//                        list.add(t.name());
+//                    } catch(IllegalArgumentException e) {
+//                        player.sendMessage(ChatColor.RED + "Unknown mob type " + params[1] + "!");
+//                        return;
+//                    }
+//                }
+//        }
         settings.put(v.name(), list);
         zone.saveSettings();
         player.sendMessage(ChatColor.GREEN + "Variable " + v.getName() + " now changed to " + list);
@@ -213,44 +220,25 @@ public class SettingsCommands extends CommandsBase {
     )
     public void remove(Player player, String[] params) {
         ZoneVar v = lists.get(params[0].toLowerCase());
-        if(v == null) {
+        if(v == null || !v.getType().isList()) {
             player.sendMessage(ChatColor.RED + "Unknown variable name " + params[0]);
             player.sendMessage(ChatColor.RED + "Usage: /zadd [variable name] [value]");
             return;
         }
         
         ZoneBase zone = getSelectedZone(player);
-        JSONObject settings = zone.getConfig().getJSONObject("settings");
+        JSONObject settings = zone.getSettings();
         JSONArray list = null;
         if(settings.has(v.getName())) {
             list = settings.getJSONArray(v.getName());
         } else {
             list = new JSONArray();
         }
-        switch(v) {
-            case PLACE_BLOCKS:
-            case BREAK_BLOCKS:
-                Material m = Material.matchMaterial(params[1]);
-                if(m == null) {
-                    player.sendMessage(ChatColor.RED + "Unknown block " + params[1] + "!");
-                    return;
-                }
-                list.remove(m.name());
-                break;
-            default:
-                if(v.getListType().equals(Integer.class)) {
-                    list.remove(Integer.parseInt(params[1]));
-                } else if(v.getListType().equals(String.class)) {
-                    list.remove(params[1]);
-                } else if (v.getListType().equals(EntityType.class)) {
-                    try {
-                        EntityType t = EntityType.valueOf(params[1].toUpperCase());
-                        list.remove(t.name());
-                    } catch(IllegalArgumentException e) {
-                        player.sendMessage(ChatColor.RED + "Unknown mob type " + params[1] + "!");
-                        return;
-                    }
-                }
+        try {
+            list.remove(v.getType().getListType().serialize(params[1]));
+        } catch(Exception e) {
+            player.sendMessage(ChatColor.RED + "Invalid format.");
+            return;
         }
         settings.put(v.getName(), list);
         zone.saveSettings();
@@ -297,9 +285,10 @@ public class SettingsCommands extends CommandsBase {
             player.sendMessage(ChatColor.RED + "You're not allowed to change this variable.");
         } else {
             ZoneBase zone = getSelectedZone(player);
-            JSONObject settings = zone.getConfig().getJSONObject("settings");
+            JSONObject settings = zone.getSettings();
             ZoneVar var = ((ZoneVar)variable[2]);
-            boolean current = (boolean) (settings.has(var.getName()) ? settings.getBoolean(var.getName()) : var.getDefault(zone));
+            // TODO: world config
+            boolean current = (settings.has(var.getName()) ? settings.getBoolean(var.getName()) : false);
             
             settings.put(var.getName(), !current);
             zone.saveSettings();

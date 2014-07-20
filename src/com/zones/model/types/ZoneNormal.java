@@ -16,26 +16,11 @@ import org.bukkit.entity.Player;
 
 import com.meaglin.json.JSONObject;
 import com.zones.ZonesConfig;
-import com.zones.accessresolver.AccessResolver;
-import com.zones.accessresolver.interfaces.Resolver;
 import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess;
 import com.zones.model.settings.ZoneVar;
-import com.zones.model.types.normal.NormalBlockFireResolver;
-import com.zones.model.types.normal.NormalBlockFromToResolver;
-import com.zones.model.types.normal.NormalBlockResolver;
-import com.zones.model.types.normal.NormalEntitySpawnResolver;
-import com.zones.model.types.normal.NormalPlayerAttackEntityResolver;
-import com.zones.model.types.normal.NormalPlayerBlockCreateResolver;
-import com.zones.model.types.normal.NormalPlayerBlockDestroyResolver;
-import com.zones.model.types.normal.NormalPlayerBlockHitResolver;
-import com.zones.model.types.normal.NormalPlayerBlockModifyResolver;
-import com.zones.model.types.normal.NormalPlayerDamageResolver;
-import com.zones.model.types.normal.NormalPlayerEnterResolver;
-import com.zones.model.types.normal.NormalPlayerFoodResolver;
-import com.zones.model.types.normal.NormalPlayerHitEntityResolver;
-import com.zones.model.types.normal.NormalPlayerTeleportResolver;
 import com.zones.persistence.Zone;
+import com.zones.util.JSONUtil;
 
 /**
  * 
@@ -47,37 +32,8 @@ public class ZoneNormal extends ZoneBase{
     protected HashMap<String, ZonesAccess> groups;
     protected HashMap<UUID, ZonesAccess> users;
     
-    private static final Resolver[] resolvers;
-    
     // We don't want to make a new list every time we need a default empty array.
     public static final List<Integer> emptyIntList = new ArrayList<Integer>();
-    
-    static {
-        resolvers = new Resolver[AccessResolver.size()];
-        resolvers[AccessResolver.DYNAMITE.ordinal()]        = new NormalBlockResolver(ZoneVar.DYNAMITE);
-        resolvers[AccessResolver.LEAF_DECAY.ordinal()]      = new NormalBlockResolver(ZoneVar.LEAF_DECAY);
-        resolvers[AccessResolver.SNOW_FALL.ordinal()]       = new NormalBlockResolver(ZoneVar.SNOW_FALL);
-        resolvers[AccessResolver.SNOW_MELT.ordinal()]       = new NormalBlockResolver(ZoneVar.SNOW_MELT);
-        resolvers[AccessResolver.ICE_FORM.ordinal()]        = new NormalBlockResolver(ZoneVar.ICE_FORM);
-        resolvers[AccessResolver.ICE_MELT.ordinal()]        = new NormalBlockResolver(ZoneVar.ICE_MELT);
-        resolvers[AccessResolver.MUSHROOM_SPREAD.ordinal()] = new NormalBlockResolver(ZoneVar.MUSHROOM_SPREAD);
-        resolvers[AccessResolver.PHYSICS.ordinal()]         = new NormalBlockResolver(ZoneVar.PHYSICS);
-        resolvers[AccessResolver.DYNAMITE.ordinal()]        = new NormalBlockResolver(ZoneVar.DYNAMITE);
-        resolvers[AccessResolver.LAVA_FLOW.ordinal()]       = new NormalBlockFromToResolver(ZoneVar.WATER);
-        resolvers[AccessResolver.WATER_FLOW.ordinal()]      = new NormalBlockFromToResolver(ZoneVar.LAVA);
-        resolvers[AccessResolver.FIRE.ordinal()]            = new NormalBlockFireResolver();
-        resolvers[AccessResolver.ENTITY_SPAWN.ordinal()]    = new NormalEntitySpawnResolver();
-        resolvers[AccessResolver.FOOD.ordinal()]            = new NormalPlayerFoodResolver();
-        resolvers[AccessResolver.PLAYER_BLOCK_CREATE.ordinal()]     = new NormalPlayerBlockCreateResolver();
-        resolvers[AccessResolver.PLAYER_BLOCK_MODIFY.ordinal()]     = new NormalPlayerBlockModifyResolver();
-        resolvers[AccessResolver.PLAYER_BLOCK_DESTROY.ordinal()]    = new NormalPlayerBlockDestroyResolver();
-        resolvers[AccessResolver.PLAYER_BLOCK_HIT.ordinal()]        = new NormalPlayerBlockHitResolver();
-        resolvers[AccessResolver.PLAYER_ENTITY_HIT.ordinal()]       = new NormalPlayerHitEntityResolver();
-        resolvers[AccessResolver.PLAYER_ENTITY_ATTACK.ordinal()]       = new NormalPlayerAttackEntityResolver();
-        resolvers[AccessResolver.PLAYER_ENTER.ordinal()]            = new NormalPlayerEnterResolver();
-        resolvers[AccessResolver.PLAYER_TELEPORT.ordinal()]         = new NormalPlayerTeleportResolver();
-        resolvers[AccessResolver.PLAYER_RECEIVE_DAMAGE.ordinal()]   = new NormalPlayerDamageResolver();
-    }
     
     public ZoneNormal() {
         super();
@@ -169,6 +125,7 @@ public class ZoneNormal extends ZoneBase{
             }
         }
     }
+    
     @Override
     protected void onLoad(Zone persistence) {
         super.onLoad(persistence);
@@ -190,12 +147,12 @@ public class ZoneNormal extends ZoneBase{
     
     public boolean canModify(Player player, ZonesAccess.Rights right) {
 
-        ZonesAccess z = users.get(player.getName().toLowerCase());
+        ZonesAccess z = users.get(player.getUniqueId());
         if (z != null && z.canDo(right))
             return true;
 
         if(getFlag(ZoneVar.INHERIT_GROUP)) {
-            String[] pgroups = getPermissions().getPlayerGroups(getWorld().getName(), player.getName()); 
+            String[] pgroups = getPlugin().getGroups(getWorld().getName(), player); 
             
             for (Entry<String, ZonesAccess> e : groups.entrySet())
                 if (e.getValue().canDo(right)) {
@@ -207,7 +164,7 @@ public class ZoneNormal extends ZoneBase{
                     }
                 }
         } else {
-            String group = getPermissions().getPrimaryGroup(player);
+            String group = getPlugin().getGroup(getWorld().getName(), player);
             if(group != null) {
                 ZonesAccess a = groups.get(group);
                 if(a != null && a.canDo(right)) {
@@ -245,7 +202,7 @@ public class ZoneNormal extends ZoneBase{
             base = base.merge(user);
         }
         
-        String[] pgroups = getPermissions().getPlayerGroups(getWorld().getName(), player.getName()); 
+        String[] pgroups = getPermissions().getPlayerGroups(getWorld().getName(), player); 
         for (Entry<String, ZonesAccess> e : groups.entrySet())
             if (e.getKey().equalsIgnoreCase(ZonesConfig.DEFAULT_GROUP) || (pgroups!= null && contains(pgroups, e.getKey()))) {
                 base = base.merge(e.getValue());
@@ -260,7 +217,7 @@ public class ZoneNormal extends ZoneBase{
     }
 
     protected boolean isAdmin(OfflinePlayer player) {
-        if (getPermissions().has(getWorld().getName(), player.getName(), "zones.admin")) {
+        if (getPlugin().hasPermission(getWorld().getName(), player, "zones.admin")) {
             return true;
         }
 
@@ -276,7 +233,7 @@ public class ZoneNormal extends ZoneBase{
     }
     
     
-    private String mapToString(HashMap<String, ZonesAccess> map) {
+    protected String mapToString(HashMap<String, ZonesAccess> map) {
         String rt = "";
 
         for (Entry<String, ZonesAccess> e : map.entrySet()) {
@@ -290,7 +247,7 @@ public class ZoneNormal extends ZoneBase{
         return rt;
     }
 
-    private String usersToString() {
+    protected String usersToString() {
         String rt = "";
 
         JSONObject users = getConfig().getJSONObject("users");
@@ -311,7 +268,7 @@ public class ZoneNormal extends ZoneBase{
         return rt;
     }
     
-    private String adminsToString() {
+    protected String adminsToString() {
         String rt = "";
 
         JSONObject users = getConfig().getJSONObject("users");
@@ -357,9 +314,9 @@ public class ZoneNormal extends ZoneBase{
             this.sendMarkupMessage(ZonesConfig.PLAYER_CAN_DIE_IN_ZONE, player);
         }
         
-        if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
-            String texturepack = zone.getString(ZoneVar.TEXTURE_PACK);
-            getPlugin().newTexture(player, texturepack);
+        if(zone.getFlag(ZoneVar.RESOURCE_PACK)) {
+            String resourcepack = zone.getString(ZoneVar.RESOURCE_PACK);
+            player.setResourcePack(resourcepack);
         }
         
         if(getFlag(ZoneVar.NOTIFY)) {
@@ -383,25 +340,20 @@ public class ZoneNormal extends ZoneBase{
                 }
             }
         }
-        if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
+        
+        if(getFlag(ZoneVar.RESOURCE_PACK)) {
             ZoneBase zone = zones.getWorldManager(to).getActiveZone(to);
-            
-            String texturepack = zone == null ? null : zone.getString(ZoneVar.TEXTURE_PACK);
-            getPlugin().newTexture(player, texturepack);
+            if(zone.getFlag(ZoneVar.RESOURCE_PACK)) {
+                String resourcepack = zone.getString(ZoneVar.RESOURCE_PACK);
+                player.setResourcePack(resourcepack);
+            }
         }
     }
     
     @Override
     public Location getSpawnLocation(Player player) {
-        if(getSettings().has(ZoneVar.SPAWN_LOCATION.getName())) {
-            JSONObject loc = getSettings().getJSONObject(ZoneVar.SPAWN_LOCATION.getName());
-            return new Location(getWorld(), 
-                    loc.getDouble("x"),
-                    loc.getDouble("y"),
-                    loc.getDouble("z"),
-                    loc.getFloat("yaw"),
-                    loc.getFloat("pitch")
-                );
+        if(getFlag(ZoneVar.SPAWN_LOCATION)) {
+            return JSONUtil.getLocation(this, ZoneVar.SPAWN_LOCATION);
         }
         return null;
     }
@@ -505,11 +457,6 @@ public class ZoneNormal extends ZoneBase{
             }
         }
         return false;
-    }
-
-    @Override
-    public Resolver getResolver(AccessResolver access) {
-        return resolvers[access.ordinal()];
     }
 
 }

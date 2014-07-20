@@ -78,7 +78,7 @@ public class ZonesAccess {
             if(a == null) {
                 continue;
             }
-            r = r | a;
+            r = r | a.intValue();
         }
         return all[r];
     }

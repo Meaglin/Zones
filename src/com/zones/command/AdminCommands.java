@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import com.meaglin.json.JSONObject;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZonesAccess;
 import com.zones.model.types.ZoneInherit;
 import com.zones.model.types.ZoneNormal;
@@ -30,7 +29,7 @@ public class AdminCommands extends CommandsBase {
         requiredType = ZoneNormal.class
     )
     public void addAdmin(Player player, String[] params) {
-        ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
+        ZoneNormal zone = getSelectedZone(player);
         boolean changed = false;
         for(int i = 0;i < params.length;i++) {
             changed |= addAdmin(player, zone, params[i]);
@@ -65,7 +64,7 @@ public class AdminCommands extends CommandsBase {
         requiredType = ZoneNormal.class
     )
     public void removeAdmin(Player player, String[] params) {
-        ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
+        ZoneNormal zone = getSelectedZone(player);
         if(zone instanceof ZoneInherit) {
             if(!((ZoneInherit)zone).isInheritAdmin(player)) {
                 player.sendMessage(ChatColor.RED + "You're not allowed to remove admins in this zone.");
@@ -123,7 +122,7 @@ public class AdminCommands extends CommandsBase {
         requiredType = ZoneNormal.class
     )
     public void setUser(Player player, String[] params) {
-        ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
+        ZoneNormal zone = getSelectedZone(player);
         boolean changed = false;
         for(int i = 0;i <= floor(params.length/2);i++) {
             try {
@@ -186,7 +185,7 @@ public class AdminCommands extends CommandsBase {
         requiredType = ZoneNormal.class
     )
     public void setGroup(Player player, String[] params) {
-        ZoneNormal zone = (ZoneNormal)getSelectedZone(player);
+        ZoneNormal zone = getSelectedZone(player);
         boolean changed = false;
         for(int i = 0;i < floor(params.length/2);i++) {
             try {
@@ -238,7 +237,7 @@ public class AdminCommands extends CommandsBase {
         requiredType = ZoneNormal.class
     )
     public void getAccess(Player player, String[] params) {
-        ((ZoneNormal)getSelectedZone(player)).sendAccess(player);
+        getSelectedZone(player).sendAccess(player);
     }
  
     @Command(
@@ -249,7 +248,7 @@ public class AdminCommands extends CommandsBase {
             requiresSelected = true
     )
     public void delete(Player player, String[] params) {
-        ZoneBase toDelete = getSelectedZone(player);
+        ZoneNormal toDelete = getSelectedZone(player);
         if(toDelete instanceof ZoneInherit) {
             if(!((ZoneInherit)toDelete).isInheritAdmin(player)) {
                 toDelete.sendMarkupMessage(ChatColor.RED + "You do not have the required permission to delete {zname}.", player);

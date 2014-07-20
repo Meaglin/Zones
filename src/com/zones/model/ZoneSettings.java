@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.zones.model.settings.*;
+import com.zones.backwardscompat.OldZoneVar;
 
 /**
  * 
@@ -14,25 +14,25 @@ import com.zones.model.settings.*;
  */
 public class ZoneSettings {
     
-    private Map<ZoneVar, Object> settings;
+    private Map<OldZoneVar, Object> settings;
     
     public ZoneSettings() {
-        settings = new EnumMap<ZoneVar,Object>(ZoneVar.class);
+        settings = new EnumMap<OldZoneVar,Object>(OldZoneVar.class);
     }
     
-    public void set(ZoneVar name, boolean value) {
+    public void set(OldZoneVar name, boolean value) {
         set(name, Boolean.valueOf(value));
     }
     
-    public void set(ZoneVar name, int value) {
+    public void set(OldZoneVar name, int value) {
         set(name , new Integer(value));
     }
     
-    public void set(ZoneVar name, String value) {
+    public void set(OldZoneVar name, String value) {
         set(name , (Object) escape(value));
     }
     
-    public void set(ZoneVar name, Object value) {
+    public void set(OldZoneVar name, Object value) {
         if(value == null) {
             settings.remove(name);
             return;
@@ -40,11 +40,11 @@ public class ZoneSettings {
         settings.put(name, value);
     }
     
-    public boolean getBool(ZoneVar name) {
+    public boolean getBool(OldZoneVar name) {
         return getBool(name, false);
     }
     
-    public boolean getBool(ZoneVar name, boolean def) {
+    public boolean getBool(OldZoneVar name, boolean def) {
         Object o = get(name);
         if(o != null && o instanceof Boolean)
             return ((Boolean)o).booleanValue();
@@ -53,11 +53,11 @@ public class ZoneSettings {
         }
     }
     
-    public int getInt(ZoneVar name) {
+    public int getInt(OldZoneVar name) {
         return getInt(name,0);
     }
     
-    public int getInt(ZoneVar name, int def) {
+    public int getInt(OldZoneVar name, int def) {
         Object o = get(name);
         if(o != null && o instanceof Integer)
             return ((Integer)o).intValue();
@@ -66,10 +66,10 @@ public class ZoneSettings {
         }
     }
     
-    public String getString(ZoneVar name) {
+    public String getString(OldZoneVar name) {
         return getString(name,null);
     }
-    public String getString(ZoneVar name,String def) {
+    public String getString(OldZoneVar name,String def) {
         Object o = get(name);
         if(o != null && o instanceof String)
             return unEscape(((String)o));
@@ -77,11 +77,11 @@ public class ZoneSettings {
             return def;
         }
     }
-    public List<?> getList(ZoneVar name) {
+    public List<?> getList(OldZoneVar name) {
         return getList(name,null);
     }
     
-    public List<?> getList(ZoneVar name,List<?> def) {
+    public List<?> getList(OldZoneVar name,List<?> def) {
         Object o = get(name);
         if(o != null && o instanceof List && !((List<?>)o).isEmpty()) {
             return (List<?>)o;
@@ -90,7 +90,7 @@ public class ZoneSettings {
         }
     }
     
-    public Object get(ZoneVar name) {
+    public Object get(OldZoneVar name) {
         return settings.get(name);
     }
     
@@ -99,13 +99,13 @@ public class ZoneSettings {
         ZoneSettings rt = new ZoneSettings();
         try {
             String[] split = new String[2];
-            ZoneVar type = null;
+            OldZoneVar type = null;
             for(String part : serializedData.split(";")) {
                 if(part == null || part.trim().equals(""))continue;
                 
                 split = part.split(",");
                 if(split.length != 2) continue;
-                type = ZoneVar.fromName(split[0]);
+                type = OldZoneVar.fromName(split[0]);
                 if(type != null) {
                     rt.set(type, type.unSerialize(split[1]));
                 }
@@ -125,7 +125,7 @@ public class ZoneSettings {
     @Override
     public String toString() {
         String rt = "";
-        for(Entry<ZoneVar, Object> e : settings.entrySet()) {
+        for(Entry<OldZoneVar, Object> e : settings.entrySet()) {
             if(e.getValue() == null)continue;
 
             String data = e.getKey().serialize(e.getValue());
@@ -147,7 +147,7 @@ public class ZoneSettings {
         return str.replace(",", "$1").replace(";" , "$2");
     }
     
-    public Map<ZoneVar, Object> getMap() {
+    public Map<OldZoneVar, Object> getMap() {
         return settings;
     }
 }

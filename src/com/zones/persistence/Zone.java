@@ -52,9 +52,9 @@ public class Zone {
     private String config;
     private JSONObject json;
     
-    private int minz;
+    private int miny;
     
-    private int maxz;
+    private int maxy;
     
     private int size;
 
@@ -98,12 +98,12 @@ public class Zone {
         return settings;
     }
 
-    public int getMinz() {
-        return minz;
+    public int getMiny() {
+        return miny;
     }
 
-    public int getMaxz() {
-        return maxz;
+    public int getMaxy() {
+        return maxy;
     }
 
     public int getSize() {
@@ -146,12 +146,12 @@ public class Zone {
         this.settings = settings;
     }
 
-    public void setMinz(int minz) {
-        this.minz = minz;
+    public void setMinY(int minz) {
+        this.miny = minz;
     }
 
-    public void setMaxz(int maxz) {
-        this.maxz = maxz;
+    public void setMaxY(int maxz) {
+        this.maxy = maxz;
     }
 
     public void setSize(int size) {

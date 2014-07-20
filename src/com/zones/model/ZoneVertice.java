@@ -15,10 +15,10 @@ public final class ZoneVertice {
     public long getIndex() { return index; }
     
     public int getX() { return ((int) (index >> 32)); }
-    public int getY() { return ((int) (index & 0xFFFFFFFFL));  }
+    public int getZ() { return ((int) (index & 0xFFFFFFFFL));  }
     
-    public int getMin() { return getX() < getY() ? getX() : getY() ; }
-    public int getMax() { return getX() > getY() ? getX() : getY() ; }
+    public int getMin() { return getX() < getZ() ? getX() : getZ() ; }
+    public int getMax() { return getX() > getZ() ? getX() : getZ() ; }
     
     public ZoneVertice merge(ZoneVertice z) {
         int min = z.getMin() < getMin() ? z.getMin() : getMin();
@@ -28,7 +28,7 @@ public final class ZoneVertice {
     
     @Override
     public String toString() {
-        return "Zv: " + getIndex() + " X:" + getX() + " Y:" + getY() ;
+        return "Zv: " + getIndex() + " X:" + getX() + " Y:" + getZ() ;
     }
     
     @Override

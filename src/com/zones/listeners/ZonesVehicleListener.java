@@ -7,14 +7,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
+import org.bukkit.util.Vector;
 
-import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.accessresolver.AccessResolver;
-import com.zones.accessresolver.interfaces.PlayerHitEntityResolver;
-import com.zones.accessresolver.interfaces.PlayerLocationResolver;
-import com.zones.model.ZoneBase;
+import com.zones.model.ZonesAccess.Rights;
+import com.zones.model.settings.ZoneVar;
+import com.zones.model.types.ZoneNormal;
+import com.zones.world.WorldManager;
 
 
 /**
@@ -38,8 +38,8 @@ public class ZonesVehicleListener implements Listener {
         
         Player player = (Player)attacker;
 
-        ZoneBase zone = plugin.getWorldManager(player).getActiveZone(event.getVehicle().getLocation());
-        if (zone != null && !((PlayerHitEntityResolver)zone.getResolver(AccessResolver.PLAYER_ENTITY_HIT)).isAllowed(zone, player, event.getVehicle(), -1)) {
+        ZoneNormal zone = plugin.getWorldManager(player).getActiveZone(event.getVehicle().getLocation());
+        if (zone != null && zone.canModify(player, Rights.ATTACK)) {
             zone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_HIT_ENTITYS_IN_ZONE, player);
             event.setCancelled(true);
         }
@@ -59,19 +59,19 @@ public class ZonesVehicleListener implements Listener {
          * and always get teleported.
          */
         WorldManager wm = plugin.getWorldManager(from);
-        ZoneBase aZone = wm.getActiveZone(from);
-        ZoneBase bZone = wm.getActiveZone(to);
+        ZoneNormal aZone = wm.getActiveZone(from);
+        ZoneNormal bZone = wm.getActiveZone(to);
         
         if (bZone != null) {
-            if(!((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(bZone, player, from, to)) {
-                ((PlayerLocationResolver)bZone.getResolver(AccessResolver.PLAYER_ENTER)).sendDeniedMessage(bZone, player);
+            if(!bZone.canModify(player, Rights.ENTER)) {
+                bZone.sendMarkupMessage(ZonesConfig.PLAYER_CANT_ENTER_INTO_ZONE, player);
                 /*
                  * In principle this should only occur when someones access to a zone gets revoked when still inside the zone.
                  * This prevents players getting stuck ;).
                  */
-                if (aZone != null && !((PlayerLocationResolver)aZone.getResolver(AccessResolver.PLAYER_ENTER)).isAllowed(aZone, player, from, to)) {
+                event.getVehicle().setVelocity(new Vector(0,0,0));
+                if (aZone != null && !aZone.canModify(player, Rights.ENTER)) {
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                    //wm.revalidateZones(player, from, player.getWorld().getSpawnLocation());
                     event.getVehicle().eject();
                     player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     return;
@@ -79,35 +79,43 @@ public class ZonesVehicleListener implements Listener {
                 player.teleport(from);
                 event.getVehicle().teleport(from);
                 return;
-            } else if (wm.getConfig().BORDER_ENABLED && wm.getConfig().BORDER_ENFORCE) {
-                if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
-                    if(wm.getConfig().isOutsideBorder(from)) {
-                        event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                        //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
-                        event.getVehicle().eject();
-                        player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
-                        return;
-                    }
-                    player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
-                    player.teleport(from);
-                    event.getVehicle().teleport(from);
-                    return;
-                }
-            }
-        } else if(wm.getConfig().BORDER_ENABLED) {
-            if(wm.getConfig().isOutsideBorder(to) && (!wm.getConfig().BORDER_OVERRIDE_ENABLED || !plugin.getPermissions().has(wm.getWorldName(),player.getName(), "zones.override.border"))) {
+            } else if (wm.getFlag(ZoneVar.BORDER) 
+                    && wm.getConfig().isEnforced(ZoneVar.BORDER)
+                    && wm.getConfig().isOutsideBorder(to)
+                    && (!wm.getFlag(ZoneVar.BORDER_EXCEMPT_ADMIN) || plugin.hasPermission(player, "zones.override.border"))
+                ) {
                 if(wm.getConfig().isOutsideBorder(from)) {
+                    player.teleport(wm.getWorld().getSpawnLocation());
                     event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
-                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
-                    //wm.revalidateZones(player, from, wm.getWorld().getSpawnLocation());
                     event.getVehicle().eject();
+                    player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
                     return;
                 }
                 player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
                 player.teleport(from);
                 event.getVehicle().teleport(from);
                 return;
-            } 
+            }
+        } else if(wm.getFlag(ZoneVar.BORDER) 
+                && wm.getConfig().isOutsideBorder(to)
+                && (!wm.getFlag(ZoneVar.BORDER_EXCEMPT_ADMIN) || plugin.hasPermission(player, "zones.override.border"))
+            ) {
+            if(wm.getConfig().isOutsideBorder(from)
+                && (
+                        wm.getConfig().isEnforced(ZoneVar.BORDER) ||
+                        aZone == null ||
+                        aZone.canModify(player, Rights.ENTER)
+            )) {
+                player.sendMessage(ZonesConfig.PLAYER_ILLIGAL_POSITION);
+                player.teleport(wm.getWorld().getSpawnLocation());
+                event.getVehicle().teleport(wm.getWorld().getSpawnLocation());
+                event.getVehicle().eject();
+                return;
+            }
+            player.sendMessage(ZonesConfig.PLAYER_REACHED_BORDER);
+            player.teleport(from);
+            event.getVehicle().teleport(from);
+            return;
         }
 
         plugin.getWorldManager(to).revalidateZones(player, from, to);

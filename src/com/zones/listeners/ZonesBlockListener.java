@@ -20,14 +20,11 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 
-import com.zones.WorldManager;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.accessresolver.AccessResolver;
-import com.zones.accessresolver.interfaces.PlayerBlockResolver;
-import com.zones.model.ZoneBase;
 import com.zones.model.settings.ZoneVar;
 import com.zones.selection.ZoneSelection;
+import com.zones.world.WorldManager;
 
 /**
  * 
@@ -64,29 +61,22 @@ public class ZonesBlockListener implements Listener {
         Block blockTo = event.getToBlock();
 
         WorldManager wm = plugin.getWorldManager(blockFrom.getWorld());
-        ZoneBase toZone = wm.getActiveZone(blockTo);
-        if(toZone == null) {
-            if(!wm.getConfig().canFlow(blockFrom, blockTo))
-                event.setCancelled(true);
-        } else {
-            Material mat = blockFrom.getType();
-            switch(mat) {
-                case WATER:
-                case STATIONARY_WATER:
-                    if (!toZone.getFlag(ZoneVar.WATER) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                    break;
-                case LAVA:
-                case STATIONARY_LAVA:
-                    if (!toZone.getFlag(ZoneVar.LAVA) || wm.getConfig().isFlowProtectedBlock(blockFrom, blockTo)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                    break;
-                    
-            }
+        Material mat = blockFrom.getType();
+        switch(mat) {
+            case WATER:
+            case STATIONARY_WATER:
+                if(!wm.testFlag(blockTo, ZoneVar.WATER) || wm.isProtected(blockTo, ZoneVar.WATER_PROTECTED_BLOCKS, blockTo.getType())) {
+                    event.setCancelled(true);
+                    return;
+                }
+                break;
+            case LAVA:
+            case STATIONARY_LAVA:
+                if(!wm.testFlag(blockTo, ZoneVar.LAVA) || wm.isProtected(blockTo, ZoneVar.LAVA_PROTECTED_BLOCKS, blockTo.getType())) {
+                    event.setCancelled(true);
+                    return;
+                }
+                break;
         }
     }
 
@@ -100,26 +90,26 @@ public class ZonesBlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockBurn(BlockBurnEvent event) {
-        if(onFire(null, event.getBlock(), IgniteCause.SPREAD))
+        if(onFire(null, event.getBlock(), IgniteCause.SPREAD)) {
             event.setCancelled(true);
+        }
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockIgnite(BlockIgniteEvent event) { 
-        if(onFire(event.getPlayer(),event.getBlock(),event.getCause()))
+        if(onFire(event.getPlayer(),event.getBlock(),event.getCause())) {
             event.setCancelled(true);
+        }
     }
     
     public boolean onFire(Player player, Block block, IgniteCause cause) {
         WorldManager wm = plugin.getWorldManager(block.getWorld());
-        ZoneBase zone = wm.getActiveZone(block);
-        if(zone == null) {
-            if(!wm.getConfig().canBurn(player, block, cause))
+        if(player == null) {
+            if(!wm.testFlag(block, ZoneVar.FIRE) || wm.isProtected(block, ZoneVar.FIRE_PROTECTED_BLOCKS, block.getType())) {
                 return true;
+            }
         } else {
-            if(!(wm.getConfig().FIRE_ENFORCE_PROTECTED_BLOCKS && !wm.getConfig().canBurnBlock(block) || 
-                    zone.getFlag(ZoneVar.FIRE))) {
-                ((PlayerBlockResolver)zone.getResolver(AccessResolver.FIRE)).sendDeniedMessage(zone, player);
+            if(!wm.testFlag(block, ZoneVar.LIGHTER) || wm.isProtected(block, ZoneVar.FIRE_PROTECTED_BLOCKS, block.getType())) {
                 return true;
             }
         }
@@ -137,7 +127,7 @@ public class ZonesBlockListener implements Listener {
         }
         
         WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
-        if(!wm.testFlag(event.getBlock(), wm.getConfig().PHYSICS_ENABLED, ZoneVar.PHYSICS)) {
+        if(!wm.testFlag(event.getBlock(), ZoneVar.PHYSICS)) {
             event.setCancelled(true);
         }
     }
@@ -146,7 +136,7 @@ public class ZonesBlockListener implements Listener {
     public void onLeavesDecay(LeavesDecayEvent event) {
         WorldManager wm = plugin.getWorldManager(event.getBlock().getWorld());
         
-        if(!wm.testFlag(event.getBlock(), wm.getConfig().LEAF_DECAY_ENABLED, ZoneVar.LEAF_DECAY)) {
+        if(!wm.testFlag(event.getBlock(), ZoneVar.LEAF_DECAY)) {
             event.setCancelled(true);
         }
     }
@@ -157,7 +147,7 @@ public class ZonesBlockListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        EventUtil.onBreak(plugin, event, player, block);
+        EventUtil.onBreak(plugin, event, player, block, block.getType());
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -176,12 +166,12 @@ public class ZonesBlockListener implements Listener {
         
         switch(mat) {
             case SNOW:
-                if(!wm.testFlag(block, wm.getConfig().SNOW_FORM_ENABLED, ZoneVar.SNOW_FALL)) {
+                if(!wm.testFlag(event.getBlock(), ZoneVar.SNOW_FALL)) {
                     event.setCancelled(true);
                 }
                 break;
             case ICE:
-                if(!wm.testFlag(block, wm.getConfig().ICE_FORM_ENABLED, ZoneVar.ICE_FORM)) {
+                if(!wm.testFlag(event.getBlock(), ZoneVar.ICE_FORM)) {
                     event.setCancelled(true);
                 }
                 break;
@@ -202,12 +192,12 @@ public class ZonesBlockListener implements Listener {
         
         switch(mat) {
             case SNOW:
-                if(!wm.testFlag(block, wm.getConfig().SNOW_MELT_ENABLED, ZoneVar.SNOW_MELT)) {
+                if(!wm.testFlag(event.getBlock(), ZoneVar.SNOW_MELT)) {
                     event.setCancelled(true);
                 }
                 break;
             case ICE:
-                if(!wm.testFlag(block, wm.getConfig().ICE_MELT_ENABLED, ZoneVar.ICE_MELT)) {
+                if(!wm.testFlag(event.getBlock(), ZoneVar.ICE_MELT)) {
                     event.setCancelled(true);
                 }
                 break;
@@ -229,18 +219,18 @@ public class ZonesBlockListener implements Listener {
         WorldManager wm = plugin.getWorldManager(block.getWorld());
         switch(event.getNewState().getType()) {
             case GRASS:
-                if(!wm.testFlag(block, wm.getConfig().GRASS_GROWTH_ENABLED, ZoneVar.GRASS_GROWTH)) {
+                if(!wm.testFlag(event.getBlock(), ZoneVar.GRASS_GROWTH)) {
                     event.setCancelled(true);
                 }
                 break;
             case BROWN_MUSHROOM: 
             case RED_MUSHROOM:
-                if(!wm.testFlag(block, wm.getConfig().MUSHROOM_GROWTH_ENABLED, ZoneVar.MUSHROOM_SPREAD)) {
+                if(!wm.testFlag(event.getBlock(), ZoneVar.MUSHROOM_SPREAD)) {
                     event.setCancelled(true);
                 }
                 break;
             case VINE:
-                if(!wm.testFlag(block, wm.getConfig().VINES_GROWTH_ENABLED, ZoneVar.VINES_GROWTH)) {
+                if(!wm.testFlag(event.getBlock(), ZoneVar.VINES_GROWTH)) {
                     event.setCancelled(true);
                 }
                 break;
@@ -252,7 +242,7 @@ public class ZonesBlockListener implements Listener {
         Location loc = event.getLocation();
         
         WorldManager wm = plugin.getWorldManager(loc.getWorld());
-        if(!wm.testFlag(loc, wm.getConfig().TREE_GROWTH_ENABLED, ZoneVar.TREE_GROWTH)) {
+        if(!wm.testFlag(loc.getBlock(), ZoneVar.TREE_GROWTH)) {
             event.setCancelled(true);
         }
     }

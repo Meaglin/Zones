@@ -12,65 +12,65 @@ import com.zones.persistence.Vertice;
  * @author durgus, Meaglin
  */
 public class ZoneCylinder extends ZoneForm {
-    private int _x, _y, _z1, _z2;
+    private int _x, _z, _y1, _y2;
     private int radius;
     private int radiusSqr;
     
     public ZoneCylinder(int x1, int x2, int y1, int y2, int z1, int z2) {
         _x = x1;
-        _y = y1;
+        _z = z1;
         
         double xdiff = x1 - x2;
-        double ydiff = y1 - y2;
+        double zdiff = z1 - z2;
         
-        radius = (int) Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+        radius = (int) Math.sqrt(xdiff * xdiff + zdiff * zdiff);
         radiusSqr = radius * radius + 1;
         
-        _z1 = z1;
-        _z2 = z2;
-        if (_z1 > _z2) // switch them if alignment is wrong
+        _y1 = y1;
+        _y2 = y2;
+        if (_y1 > _y2) // switch them if alignment is wrong
         {
-            _z1 = z2;
-            _z2 = z1;
+            _y1 = z2;
+            _y2 = z1;
         }
     }
     
     public ZoneCylinder(List<Vertice> vertices, int minz, int maxz) {
-        this(vertices.get(0).getX(),vertices.get(1).getX(),vertices.get(0).getY(),vertices.get(1).getY(),minz,maxz);
+        this(vertices.get(0).getX(),vertices.get(1).getX(), minz, maxz, vertices.get(0).getZ(), vertices.get(1).getZ());
     }
     
     @Override
-    public boolean isInsideZone(int x, int y) {
-        if ((((_x - x)*(_x - x)) + ((_y - y)*(_y - y))) > radiusSqr)
+    public boolean isInsideZone(int x, int z) {
+        if ((((_x - x)*(_x - x)) + ((_z - z)*(_z - z))) > radiusSqr)
             return false;
         return true;
     }
 
     @Override
-    public boolean intersectsRectangle(int ax1, int ax2, int ay1, int ay2) {
+    public boolean intersectsRectangle(int ax1, int ax2, int az1, int az2) {
      // Circles point inside the rectangle?
-        if (_x > ax1 && _x < ax2 && _y > ay1 && _y < ay2)
+        if (_x > ax1 && _x < ax2 && _z > az1 && _z < az2)
             return true;
         
         // Any point of the rectangle intersecting the Circle?
-        if ((Math.pow(ax1 - _x, 2) + Math.pow(ay1 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax1 - _x, 2) + Math.pow(az1 - _z, 2)) < radiusSqr)
             return true;
-        if ((Math.pow(ax1 - _x, 2) + Math.pow(ay2 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax1 - _x, 2) + Math.pow(az2 - _z, 2)) < radiusSqr)
             return true;
-        if ((Math.pow(ax2 - _x, 2) + Math.pow(ay1 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax2 - _x, 2) + Math.pow(az1 - _z, 2)) < radiusSqr)
             return true;
-        if ((Math.pow(ax2 - _x, 2) + Math.pow(ay2 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax2 - _x, 2) + Math.pow(az2 - _z, 2)) < radiusSqr)
             return true;
         
         // Collision on any side of the rectangle?
         if (_x > ax1 && _x < ax2)
         {
-            if (Math.abs(_y - ay2) < radiusSqr)
+            if (Math.abs(_z - az2) < radiusSqr)
                 return true;
-            if (Math.abs(_y - ay1) < radiusSqr)
+            if (Math.abs(_z - az1) < radiusSqr)
                 return true;
         }
-        if (_y > ay1 && _y < ay2)
+        if (_z > az1 && _z < az2)
         {
             if (Math.abs(_x - ax2) < radiusSqr)
                 return true;
@@ -82,8 +82,8 @@ public class ZoneCylinder extends ZoneForm {
     }
 
     @Override
-    public double getDistanceToZone(int x, int y) {
-        return (Math.sqrt((Math.pow(_x - x, 2) + Math.pow(_y - y, 2))) - radius);
+    public double getDistanceToZone(int x, int z) {
+        return (Math.sqrt((Math.pow(_x - x, 2) + Math.pow(_z - z, 2))) - radius);
     }
 
     /*
@@ -94,19 +94,19 @@ public class ZoneCylinder extends ZoneForm {
      */
     @Override
     public int getLowZ() {
-        return _z1;
+        return _z - radius;
     }
 
     @Override
     public int getHighZ() {
-        return _z2;
+        return _z + radius;
     }
 
     @Override
     public long getSize() {
         long size = radiusSqr + 1;
         size *= Math.PI;
-        size *= (_z2 - _z1 + 1);
+        size *= (_y2 - _y1 + 1);
         return size;
     }
 
@@ -122,17 +122,17 @@ public class ZoneCylinder extends ZoneForm {
 
     @Override
     public int getLowY() {
-        return _y - radius;
+        return _y1;
     }
 
     @Override
     public int getHighY() {
-        return _y + radius;
+        return _y2;
     }
 
     @Override
     public int[][] getPoints() {
-        return new int[][] { new int[] { getLowX() , getHighX() } , new int[] { getLowY() , getHighY() }  };
+        return new int[][] { new int[] { getLowX() , getHighX() } , new int[] { getLowZ() , getHighZ() }  };
     }
 
     @Override
@@ -144,8 +144,8 @@ public class ZoneCylinder extends ZoneForm {
         return _x;
     }
 
-    public int getCenterY() {
-        return _y;
+    public int getCenterZ() {
+        return _z;
     }
     
     public int getRadius() {

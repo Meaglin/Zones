@@ -46,6 +46,7 @@ public class CommandMap {
         register(new GeneralCommands(plugin));
         register(new MiscCommands(plugin));
         register(new SettingsCommands(plugin));
+        register(new ImportCommands(plugin));
         
         if(ZonesConfig.WORLDEDIT_ENABLED) register(new WorldeditCommands(plugin));
     }
@@ -116,7 +117,7 @@ public class CommandMap {
                     sender.sendMessage(ChatColor.RED + "Please create a selection first with /zcreate or /zedit !");
                     return true;
                 }
-                if(!ann.requiredPermission().equals("") && !plugin.getPermissions().has(player, ann.requiredPermission())) {
+                if(!ann.requiredPermission().equals("") && !plugin.hasPermission(player, ann.requiredPermission())) {
                     sender.sendMessage(ChatColor.RED + "You're not allowed to use this command.");
                     return true;
                 }

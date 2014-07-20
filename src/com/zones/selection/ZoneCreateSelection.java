@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 import com.meaglin.json.JSONObject;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZoneVertice;
+import com.zones.model.types.ZoneNormal;
 import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
 import com.zones.util.Log;
@@ -21,15 +21,15 @@ public class ZoneCreateSelection extends ZoneSelection {
     }
 
     @Override
-    public ZoneBase save() {
+    public ZoneNormal save() {
 
         Zone pZ = new Zone();
         try {
             pZ.setName(getZoneName());
             pZ.setZonetype(getClassName(getType()));
             pZ.setFormtype(getClassName(getForm()));
-            pZ.setMinz(getSelection().getHeight().getMin());
-            pZ.setMaxz(getSelection().getHeight().getMax());
+            pZ.setMinY(getSelection().getHeight().getMin());
+            pZ.setMaxY(getSelection().getHeight().getMax());
             pZ.setWorld(getWorld().getName());
             pZ.setSize(getSelection().getPointsSize());
             pZ.getConfig().put("version", 1);
@@ -44,7 +44,7 @@ public class ZoneCreateSelection extends ZoneSelection {
                 //v.setId(pZ.getId());
                 v.setVertexorder(i);
                 v.setX(points.get(i).getX());
-                v.setY(points.get(i).getY());
+                v.setZ(points.get(i).getZ());
                 v.setZone(pZ);
                 pZ.addVertice(v);
             }
@@ -55,8 +55,9 @@ public class ZoneCreateSelection extends ZoneSelection {
             return null;
         }
         revertGhostBlocks();
-        ZoneBase zone = getZoneManager().loadFromPersistentData(getWorldManager(), pZ);
+        ZoneNormal zone = getZoneManager().loadFromPersistentData(getWorldManager(), pZ);
         if(zone != null) {
+            getZoneManager().addZone(zone);
             getZoneManager().setSelected(getPlayer().getEntityId(), zone.getId());
             getPlayer().sendMessage(ChatColor.GREEN + "Selected zone '" + zone.getName() + "' .");
             Log.info(getPlayer().getName() + " created zone " + zone.getName() + "[" + zone.getId() + "]");

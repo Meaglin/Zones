@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import mc.alk.virtualPlayer.VirtualPlayer;
+import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Location;
@@ -25,12 +27,14 @@ import com.zones.command.CommandMap;
 import com.zones.listeners.ZonesBlockListener;
 import com.zones.listeners.ZonesEntityListener;
 import com.zones.listeners.ZonesPlayerListener;
+import com.zones.listeners.ZonesStoneProtectListener;
 import com.zones.listeners.ZonesVehicleListener;
 import com.zones.listeners.ZonesWeatherListener;
 import com.zones.persistence.Database;
-import com.zones.textiel.TextielManager;
 import com.zones.util.FileUtil;
 import com.zones.util.ZoneUtil;
+import com.zones.world.RegionWorldManager;
+import com.zones.world.WorldManager;
 
 /**
  * 
@@ -41,17 +45,17 @@ public class Zones extends JavaPlugin implements CommandExecutor {
 
     public static final int                 Rev             = 180;
     public static final Logger              log             = Logger.getLogger("Minecraft");
-    private final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
-    private final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
-    private final ZonesEntityListener       entityListener  = new ZonesEntityListener(this);
-    private final ZonesVehicleListener      vehicleListener = new ZonesVehicleListener(this);
-    private final ZonesWeatherListener      weatherListener = new ZonesWeatherListener(this);
+    public final ZonesPlayerListener       playerListener  = new ZonesPlayerListener(this);
+    public final ZonesBlockListener        blockListener   = new ZonesBlockListener(this);
+    public final ZonesVehicleListener      vehicleListener = new ZonesVehicleListener(this);
+    public final ZonesEntityListener       entityListener  = new ZonesEntityListener(this);
+    public final ZonesWeatherListener      weatherListener = new ZonesWeatherListener(this);
 
     private CommandMap                      commandMap;
     
     private WorldEditPlugin                 worldedit;
-    private TextielManager                  textiel;
     private Permission                     permissionsManager;
+    private Economy economy;
 
     private final HashMap<Long, WorldManager> worlds        = new HashMap<Long, WorldManager>(2);
     private final ZoneManager               zoneManager     = new ZoneManager(this);
@@ -73,6 +77,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         pm.registerEvents(playerListener, this);
         pm.registerEvents(vehicleListener, this);
         pm.registerEvents(weatherListener, this);
+        pm.registerEvents(new ZonesStoneProtectListener(this), this);
     }
 
     public void registerWorldEdit() {
@@ -105,15 +110,12 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         database = new Database(this);
         
         resolvePermissions();
+        resolveEconomy();
         
         loadWorlds();
         registerEvents();
         if(ZonesConfig.WORLDEDIT_ENABLED) {
             registerWorldEdit();
-        }
-        if(ZonesConfig.TEXTURE_MANAGER_ENABLED) {
-            textiel = new TextielManager(this);
-            textiel.load();
         }
         log.info("[Zones] Rev " + Rev + " Loaded " + getZoneManager().getZoneCount()  + " zones in " + worlds.size() + " worlds, WorldEditSupport:" + ZonesConfig.WORLDEDIT_ENABLED + ".");
         
@@ -124,11 +126,23 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         permissionsManager = rsp.getProvider();
     }
     
+    private boolean resolveEconomy() {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
+
+        return (economy != null);
+    }
+    
     private void loadWorlds() {
         try {
             worlds.clear();
-            for(World world : getServer().getWorlds())
-                worlds.put(world.getUID().getLeastSignificantBits(),new WorldManager(this,world));
+            for(World world : getServer().getWorlds()) {
+                WorldManager wm = new RegionWorldManager(this, world);
+                worlds.put(world.getUID().getLeastSignificantBits(), wm);
+                getZoneManager().load(wm);
+            }
         } catch(Throwable t) {
             log.warning("[Zones] Error loading worlds.");
             t.printStackTrace();
@@ -138,6 +152,38 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     
     public Permission getPermissions() {
         return permissionsManager;
+    }
+    
+    public boolean hasPermission(Player player, String node) {
+        if(player instanceof VirtualPlayer) {
+            return false;
+        }
+        return getPermissions().playerHas(player, node);
+    }
+    
+    public String getGroup(String world, OfflinePlayer player) {
+        if(player instanceof VirtualPlayer) {
+            return "default";
+        }
+        return getPermissions().getPrimaryGroup(world, player);
+    }
+    
+    public String[] getGroups(String world, OfflinePlayer player) {
+        if(player instanceof VirtualPlayer) {
+            return new String[] {"default"};
+        }
+        return getPermissions().getPlayerGroups(world, player);
+    }
+    
+    public boolean hasPermission(String world, OfflinePlayer player, String node) {
+        if(player instanceof VirtualPlayer) {
+            return false;
+        }
+        return getPermissions().playerHas(world, player, node);
+    }
+    
+    public Economy getEconomy() {
+        return economy;
     }
 
     public WorldEditPlugin getWorldEdit() {
@@ -153,8 +199,9 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     public WorldManager getWorldManager(World world) {
         WorldManager wm = worlds.get(world.getUID().getLeastSignificantBits());
         if(wm == null) {
-            wm = new WorldManager(this,world);
+            wm = new RegionWorldManager(this, world);
             worlds.put(world.getUID().getLeastSignificantBits(), wm);
+            getZoneManager().load(wm);
         }
         return wm;
     }
@@ -163,16 +210,17 @@ public class Zones extends JavaPlugin implements CommandExecutor {
         return worlds.values();
     }
 
-    protected WorldManager getWorldManager(String world) {
-        World w = getServer().getWorld(world);
-        if(w == null) {
-            log.warning("[Zones] Trying to find world '" + world + "' which doesn't exist !");
+    protected WorldManager getWorldManager(String worldName) {
+        World world = getServer().getWorld(worldName);
+        if(world == null) {
+            log.warning("[Zones] Trying to find world '" + worldName + "' which doesn't exist !");
             return null;
         }
-        WorldManager wm = worlds.get(w.getUID().getLeastSignificantBits());
+        WorldManager wm = worlds.get(world.getUID().getLeastSignificantBits());
         if(wm == null) {
-            wm = new WorldManager(this,w);
-            worlds.put(w.getUID().getLeastSignificantBits(), wm);
+            wm = new RegionWorldManager(this, world);
+            worlds.put(world.getUID().getLeastSignificantBits(), wm);
+            getZoneManager().load(wm);
         }
         
         return wm;
@@ -183,7 +231,7 @@ public class Zones extends JavaPlugin implements CommandExecutor {
     }
     
     public boolean reload() {
-        return reloadZonesConfig() && reloadZones() && reloadTextiel();
+        return reloadZonesConfig() && reloadZones();
     }
     
     @Override
@@ -213,18 +261,6 @@ public class Zones extends JavaPlugin implements CommandExecutor {
             return false;
         }
         return true;
-    }
-
-    public boolean reloadTextiel() {
-        if(!ZonesConfig.TEXTURE_MANAGER_ENABLED) return true;
-        textiel.reload();
-        return true;
-    }
-    
-    public void newTexture(Player player, String texturepack) {
-        if(textiel == null) return;
-        if(texturepack == null) textiel.sendReset(player);
-        else textiel.sendNew(player, texturepack);
     }
     
     public Database getMysqlDatabase() {

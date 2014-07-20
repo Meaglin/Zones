@@ -16,13 +16,14 @@ import org.bukkit.entity.Player;
 
 import com.meaglin.json.JSONArray;
 import com.meaglin.json.JSONObject;
-import com.zones.WorldManager;
 import com.zones.Zones;
-import com.zones.accessresolver.AccessResolver;
-import com.zones.accessresolver.interfaces.Resolver;
+import com.zones.backwardscompat.OldZoneVar;
 import com.zones.model.settings.ZoneVar;
+import com.zones.model.settings.ZoneVarType;
 import com.zones.persistence.Zone;
 import com.zones.util.Point;
+import com.zones.world.WorldConfig;
+import com.zones.world.WorldManager;
 
 /**
  * Abstract base class for any zone type Handles basic operations
@@ -58,7 +59,6 @@ public abstract class ZoneBase {
             this.persistence = persistence;
             id = persistence.getId();
             onLoad(persistence);
-            checkAccessResolvers();
         }
     }
     
@@ -103,14 +103,14 @@ public abstract class ZoneBase {
                 return;
             }
             JSONObject set = getConfig().getJSONObject("settings");
-            for(Entry<ZoneVar, Object> obj : settings.getMap().entrySet()) {
+            for(Entry<OldZoneVar, Object> obj : settings.getMap().entrySet()) {
                 if(obj.getValue() == null) {
                     continue;
                 }
                 switch(obj.getKey().getSerializer()) {
                     case ZONEVERTICE:
                         ZoneVertice vert = (ZoneVertice) obj.getValue();
-                        set.put(obj.getKey().getName(), ((new JSONObject()).put("x", vert.getX()).put("y", vert.getY())));
+                        set.put(obj.getKey().getName(), ((new JSONObject()).put("x", vert.getX()).put("y", vert.getZ())));
                         break;
                     case INTEGERLIST:
                         @SuppressWarnings("unchecked")
@@ -179,16 +179,6 @@ public abstract class ZoneBase {
         return getConfig().getJSONObject("settings");
     }
     
-    /*
-     * This check is necessary to make sure the zone won't crash the server.
-     */
-    private void checkAccessResolvers() {
-        for(AccessResolver r : AccessResolver.values())
-            if(getResolver(r) == null || !r.isValid(getResolver(r))) {
-                throw new NullPointerException("Missing or invalid AccessResolver for '" + r.name() + "' in zone " + getName() + "[" + getId() + "] !");
-            }
-                
-    }
     /**
      * @return Returns the id.
      */
@@ -319,8 +309,6 @@ public abstract class ZoneBase {
         return playerList.containsKey(player.getEntityId());
     }
     
-    public abstract Resolver getResolver(AccessResolver access);
-
     protected abstract void onEnter(Player player, Location to);
     protected abstract void onExit(Player player, Location to);
     
@@ -395,27 +383,49 @@ public abstract class ZoneBase {
      * @return the value or default if null.
      */
     public final boolean getFlag(ZoneVar name) {
-        if(!name.getType().equals(Boolean.class)) {
-            return false;
+        if(name.getType() != ZoneVarType.BOOLEAN) {
+            return getSettings().has(name.getName());
         }
-        Object obj = getConfig().getJSONObject("settings").get(name.getName());
-        if(obj == null) {
-            obj = name.getDefault(this);
+        Object obj;
+        if(hasSetting(name)) {
+            obj  = getSettings().get(name.getName());            
+        } else {
+            obj = name.getDefault();
         }
         
         return (Boolean) obj;
     }
     
+    public final boolean hasSetting(ZoneVar name) {
+        return getSettings().has(name.getName());
+    }
+    
     public final String getString(ZoneVar name) {
-        if(!name.getType().equals(String.class)) {
+        if(name.getType() != ZoneVarType.STRING) {
             return "";
         }
-        Object obj = getConfig().getJSONObject("settings").get(name.getName());
-        if(obj == null) {
-            obj = name.getDefault(this);
+        Object obj;
+        if(hasSetting(name)) {
+            obj = getSettings().get(name.getName());
+        } else {
+            if(getWorldConfig().isEnabled(name)) {
+                obj = getWorldConfig().getSetting(name).get("value");
+            } else {
+                obj = name.getDefault();
+            }
         }
         
         return (String) obj;
+    }
+    
+    public final boolean isProtected(ZoneVar var, Material type) {
+        if(var.getType() != ZoneVarType.MATERIALLIST) {
+            return false;
+        }
+        if(!getSettings().has(var.getName())) {
+            return false;
+        }
+        return getSettings().getJSONArray(var.getName()).contains(type.name());
     }
     
     @Override

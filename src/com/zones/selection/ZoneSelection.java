@@ -12,16 +12,15 @@ import org.bukkit.entity.Player;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.regions.Region;
-import com.zones.WorldManager;
 import com.zones.ZoneManager;
 import com.zones.Zones;
 import com.zones.model.GhostBlock;
-import com.zones.model.WorldConfig;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.ZoneVertice;
 import com.zones.model.types.ZoneInherit;
 import com.zones.model.types.ZoneNormal;
+import com.zones.world.WorldConfig;
+import com.zones.world.WorldManager;
 
 public abstract class ZoneSelection {
     
@@ -38,9 +37,9 @@ public abstract class ZoneSelection {
 
     private Selection                   selection     = new CuboidSelection(this);
 
-    protected Class<? extends ZoneBase> type          = ZoneNormal.class;
+    protected Class<? extends ZoneNormal> type          = ZoneNormal.class;
 
-    private ZoneBase                    inheritedZone = null;
+    private ZoneNormal                    inheritedZone = null;
     private List<GhostBlock>            ghostBlocks;
     
     public ZoneSelection(Zones plugin, Player player, String zoneName) {
@@ -50,14 +49,14 @@ public abstract class ZoneSelection {
         ghostBlocks = new ArrayList<GhostBlock>();
     }
     
-    public void setInherited(ZoneBase inheritedZone) {
+    public void setInherited(ZoneNormal inheritedZone) {
         if(inheritedZone == null)return;
         type = ZoneInherit.class;
         this.inheritedZone = inheritedZone;
     }
     public boolean hasInherited() { return inheritedZone != null; }
     
-    public boolean insideInherited(ZoneVertice z) { return insideInherited(z.getX(), z.getY()); }
+    public boolean insideInherited(ZoneVertice z) { return insideInherited(z.getX(), z.getZ()); }
     public boolean insideInherited(Block block) { return insideInherited(block.getX(), block.getZ());}
     public boolean insideInherited(int x, int y) {
         if(!hasInherited()) return true;
@@ -68,7 +67,7 @@ public abstract class ZoneSelection {
     public Zones getPlugin() { return plugin; }
     public Player getPlayer() { return player; }
     public ZoneManager getZoneManager() { return plugin.getZoneManager(); }
-    public ZoneBase getSelectedZone() { return getZoneManager().getSelectedZone(player.getEntityId()); }
+    public ZoneNormal getSelectedZone() { return getZoneManager().getSelectedZone(player.getEntityId()); }
     public WorldManager getWorldManager() { return getPlugin().getWorldManager(getWorld()); }
     public WorldConfig getWorldConfig() { return getWorldManager().getConfig(); }
     
@@ -79,7 +78,7 @@ public abstract class ZoneSelection {
         revertGhostBlocks();
     }
 
-    public Class<? extends ZoneBase> getType() { return type; }
+    public Class<? extends ZoneNormal> getType() { return type; }
     public Class<? extends ZoneForm> getForm() { return getSelection().getType(); }
     
     @SuppressWarnings("unchecked")
@@ -98,18 +97,18 @@ public abstract class ZoneSelection {
                     getPlayer().sendMessage(ChatColor.RED + "You cannot change the zone type when making an subzone.");
                     return;
                 }
-            } else if(!ZoneBase.class.isAssignableFrom(newtype)) {
+            } else if(!ZoneNormal.class.isAssignableFrom(newtype)) {
                 player.sendMessage(ChatColor.RED + "Invalid zone type '" + name + "'!");
                 return;
             }
-            type = (Class<? extends ZoneBase>) newtype;
+            type = (Class<? extends ZoneNormal>) newtype;
             getPlayer().sendMessage(ChatColor.GREEN + "Zone Type successfully changed to " + type.getName() + ".");
         } else {
             getPlayer().sendMessage(ChatColor.RED + "Error changing zone type.");
         }
     }
     
-    protected void setClass(Class<? extends ZoneBase> zoneclass) {
+    protected void setClass(Class<? extends ZoneNormal> zoneclass) {
         this.type = zoneclass;
     }
     
@@ -244,17 +243,17 @@ public abstract class ZoneSelection {
 
     
     public boolean sellectionAllowed() {
-        if(getPlugin().getPermissions().has(getWorld().getName(), getPlayer().getName(), "zones.create"))
+        if(getPlugin().hasPermission(getWorld().getName(), getPlayer(), "zones.create"))
             return true;
         
-        ZoneBase zone = getSelectedZone();
+        ZoneNormal zone = getSelectedZone();
         if(!(zone instanceof ZoneInherit)) return false;
         if(zone instanceof ZoneInherit && ((ZoneInherit)zone).isAdmin(getPlayer()) && zone.getForm().contains(getSelection())) {
             return true;
         }
         
-        List<ZoneBase> zones = ((ZoneInherit)zone).getInheritedZones();
-        for(ZoneBase z : zones) {
+        List<ZoneNormal> zones = ((ZoneInherit)zone).getInheritedZones();
+        for(ZoneNormal z : zones) {
             if(z instanceof ZoneInherit && ((ZoneInherit)z).isAdmin(getPlayer()) && z.getForm().contains(getSelection())) {
                 return true;
             }
@@ -280,7 +279,7 @@ public abstract class ZoneSelection {
         getSelection().onLeftClick(block);
     }
     
-    public abstract ZoneBase save();
+    public abstract ZoneNormal save();
     
     
     public static String getClassName(Class<?> c) {

@@ -1,14 +1,5 @@
 package com.zones;
 
-import com.zones.model.ZoneBase;
-import com.zones.model.forms.ZoneCuboid;
-import com.zones.model.forms.ZoneCylinder;
-import com.zones.model.forms.ZoneNPoly;
-import com.zones.model.forms.ZoneSphere;
-import com.zones.persistence.Vertice;
-import com.zones.persistence.Zone;
-import com.zones.selection.ZoneSelection;
-
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,20 +11,30 @@ import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
 
+import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneCylinder;
+import com.zones.model.forms.ZoneNPoly;
+import com.zones.model.forms.ZoneSphere;
+import com.zones.model.types.ZoneNormal;
+import com.zones.persistence.Vertice;
+import com.zones.persistence.Zone;
+import com.zones.selection.ZoneSelection;
+import com.zones.world.WorldManager;
+
 /**
  * 
  * @author Meaglin
  *
  */
 public class ZoneManager {
-    private HashMap<Integer, ZoneBase>       zones;
+    private HashMap<Integer, ZoneNormal>       zones;
     private HashMap<Integer, ZoneSelection>  selections;
     private HashMap<Integer, Integer>        selectedZones;
     protected static final Logger             log = Logger.getLogger("Minecraft");
     private Zones                             plugin;
     
     protected ZoneManager(Zones plugin) {
-        zones = new HashMap<Integer, ZoneBase>();
+        zones = new HashMap<Integer, ZoneNormal>();
         selections = new HashMap<Integer, ZoneSelection>();
         selectedZones = new HashMap<Integer, Integer>();
         this.plugin = plugin;
@@ -41,20 +42,19 @@ public class ZoneManager {
 
     public void cleanUp(WorldManager world) {
         selectedZones.clear();
-        Iterator<Entry<Integer, ZoneBase>> it = zones.entrySet().iterator();
+        Iterator<Entry<Integer, ZoneNormal>> it = zones.entrySet().iterator();
         while(it.hasNext()) {
-            Entry<Integer, ZoneBase> zone = it.next();
-            if(zone.getValue().getWorldManager().equals(world))
+            Entry<Integer, ZoneNormal> zone = it.next();
+            if(zone.getValue().getWorldManager().equals(world)) {
                 it.remove();
+            }
         }
     }
     public void load(WorldManager world) {
         cleanUp(world);
         try {
             List<Zone> zones = plugin.getMysqlDatabase().get(world.getWorldName());
-            for(Zone zone : zones) {
-                loadFromPersistentData(world, zone);
-            }
+             addZones(world, loadFromPersistentData(world, zones));
         } catch(Exception e) {
             log.warning("[Zones] Error loading world " + world.getWorldName() + ".");
             e.printStackTrace();
@@ -62,9 +62,17 @@ public class ZoneManager {
         }
     }
 
-    public ZoneBase loadFromPersistentData(WorldManager world, Zone zone) {
+    public List<ZoneNormal> loadFromPersistentData(WorldManager world, List<Zone> zones) {
+        List<ZoneNormal> list = new ArrayList<>();
+        for(Zone zone : zones) {
+            list.add(loadFromPersistentData(world, zone));
+        }
+        return list;
+    }
+    
+    public ZoneNormal loadFromPersistentData(WorldManager world, Zone zone) {
         Class<?> newZone = null;
-        ZoneBase temp = null;
+        ZoneNormal temp = null;
         try {
             try {
                 newZone = Class.forName("com.zones.model.types."+zone.getZonetype());
@@ -74,7 +82,7 @@ public class ZoneManager {
             }
             try {
                 Constructor<?> zoneConstructor = newZone.getConstructor();
-                temp = (ZoneBase) zoneConstructor.newInstance();
+                temp = (ZoneNormal) zoneConstructor.newInstance();
             } catch(Exception e) {
                 log.warning("[Zones] Error in constructing zone: " + zone.getId() + ".");
                 e.printStackTrace();
@@ -85,28 +93,28 @@ public class ZoneManager {
             
             if(zone.getFormtype().equalsIgnoreCase("ZoneCuboid")) {
                 if (vertices.size() == 2) {
-                    temp.setForm(new ZoneCuboid(vertices, zone.getMinz(), zone.getMaxz()));
+                    temp.setForm(new ZoneCuboid(vertices, zone.getMiny(), zone.getMaxy()));
                 } else {
                     log.info("[Zones] Missing zone vertex for cuboid zone id: " + zone.getId());
                     return null;
                 }
             } else if(zone.getFormtype().equalsIgnoreCase("ZoneNPoly")) {
                 if (vertices.size() > 2) {
-                    temp.setForm(new ZoneNPoly(vertices, zone.getMinz() , zone.getMaxz()));
+                    temp.setForm(new ZoneNPoly(vertices, zone.getMiny() , zone.getMaxy()));
                 } else {
                     log.warning("[Zones] Bad data for zone: " + zone.getId());
                     return null;
                 }
             } else if(zone.getFormtype().equalsIgnoreCase("ZoneCylinder")) {
                 if (vertices.size() == 2) {
-                    temp.setForm(new ZoneCylinder(vertices, zone.getMinz(), zone.getMaxz()));
+                    temp.setForm(new ZoneCylinder(vertices, zone.getMiny(), zone.getMaxy()));
                 } else {
                     log.info("[Zones] Missing zone vertex for Cylinder zone id: " + zone.getId());
                     return null;
                 }
             } else if(zone.getFormtype().equalsIgnoreCase("ZoneSphere")) {
                 if (vertices.size() == 1) {
-                    temp.setForm(new ZoneSphere(vertices, zone.getMinz(), zone.getMaxz()));
+                    temp.setForm(new ZoneSphere(vertices, zone.getMiny(), zone.getMaxy()));
                 } else {
                     log.info("[Zones] Missing zone vertex for Sphere zone id: " + zone.getId());
                     return null;
@@ -117,20 +125,27 @@ public class ZoneManager {
             e.printStackTrace();
             return null;
         }
-        addZone(temp);
         return temp;
     }
     
-    public void addZone(ZoneBase zone) {
+    public ZoneNormal addZone(ZoneNormal zone) {
         zone.getWorldManager().addZone(zone);
         zones.put(zone.getId(), zone);
+        return zone;
     }
-
-    public ZoneBase getZone(int id) {
+    
+    public void addZones(WorldManager world, List<ZoneNormal> zones) {
+        world.addZones(zones);
+        for(ZoneNormal zone: zones) {
+            this.zones.put(zone.getId(), zone); 
+        }
+    }
+    
+    public ZoneNormal getZone(int id) {
         return zones.get(id);
     }
 
-    public boolean delete(ZoneBase toDelete) {
+    public boolean delete(ZoneNormal toDelete) {
         if (!zones.containsKey(toDelete.getId()))
             return false;
 
@@ -172,7 +187,7 @@ public class ZoneManager {
         return selectedZones.get(playerId);
     }
     
-    public ZoneBase getSelectedZone(int playerId) {
+    public ZoneNormal getSelectedZone(int playerId) {
         return getZone(getSelected(playerId));
     }
 
@@ -180,12 +195,12 @@ public class ZoneManager {
         selectedZones.remove(playerId);
     }
 
-    public Collection<ZoneBase> getAllZones() {
+    public Collection<ZoneNormal> getAllZones() {
         return zones.values();
     }
 
     public void reloadZone(int id) {
-        ZoneBase zone = getZone(id);
+        ZoneNormal zone = getZone(id);
         if(zone != null)
             removeZone(zone);
         
@@ -195,12 +210,12 @@ public class ZoneManager {
             if(wm == null) {
                 log.warning("[Zones] Trying to load zone: " + id + " with invalid world " + persistentZone.getWorld() + "!");
             } else {                
-                loadFromPersistentData(wm, persistentZone);
+                addZone(loadFromPersistentData(wm, persistentZone));
             }
         }
     }
 
-    public void removeZone(ZoneBase zone) {
+    public void removeZone(ZoneNormal zone) {
         zone.getWorldManager().removeZone(zone);
         zones.remove(zone.getId());
     }
@@ -210,30 +225,30 @@ public class ZoneManager {
     }
     
     
-    public List<ZoneBase> matchZone(String search) {
-        List<ZoneBase> list = new ArrayList<ZoneBase>();
+    public List<ZoneNormal> matchZone(String search) {
+        List<ZoneNormal> list = new ArrayList<ZoneNormal>();
         try {
             int index = Integer.parseInt(search);
-            ZoneBase b = getZone(index);
+            ZoneNormal b = getZone(index);
             if(b != null) list.add(b);
         } catch(NumberFormatException e) {
             String var = search.toLowerCase();
-            for(ZoneBase b : getAllZones())
+            for(ZoneNormal b : getAllZones())
                 if(b != null && b.getName().toLowerCase().contains(var))
                     list.add(b);
         }
         return list;
     }
     
-    public List<ZoneBase> matchZone(Player player, String search) {
-        List<ZoneBase> list = new ArrayList<ZoneBase>();
+    public List<ZoneNormal> matchZone(Player player, String search) {
+        List<ZoneNormal> list = new ArrayList<ZoneNormal>();
         try {
             int index = Integer.parseInt(search);
-            ZoneBase b = getZone(index);
+            ZoneNormal b = getZone(index);
             if(b != null && b.canAdministrate(player)) list.add(b);
         } catch(NumberFormatException e) {
             String var = search.toLowerCase();
-            for(ZoneBase b : getAllZones())
+            for(ZoneNormal b : getAllZones())
                 if(b != null && b.getName().toLowerCase().contains(var) && b.canAdministrate(player))
                     list.add(b);
         }

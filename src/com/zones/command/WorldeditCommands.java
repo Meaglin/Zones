@@ -18,13 +18,13 @@ import com.sk89q.worldedit.regions.Polygonal2DRegionSelector;
 import com.sk89q.worldedit.regions.SphereRegionSelector;
 import com.zones.Zones;
 import com.zones.ZonesConfig;
-import com.zones.model.ZoneBase;
 import com.zones.model.ZoneForm;
 import com.zones.model.forms.ZoneCuboid;
 import com.zones.model.forms.ZoneCylinder;
 import com.zones.model.forms.ZoneNPoly;
 import com.zones.model.forms.ZoneSphere;
 import com.zones.model.types.ZoneInherit;
+import com.zones.model.types.ZoneNormal;
 import com.zones.selection.ZoneCreateSelection;
 import com.zones.selection.ZoneEditSelection;
 import com.zones.selection.ZoneSelection;
@@ -46,7 +46,7 @@ public class WorldeditCommands extends CommandsBase {
         requiresPlayer = true
     )
     public void define(Player player, String[] params) {
-        ZoneBase inheritedZone = null;
+        ZoneNormal inheritedZone = null;
         if(!canUseCommand(player,"zones.create")) {
             if(hasSelected(player)) {
                 inheritedZone = getSelectedZone(player);
@@ -92,7 +92,7 @@ public class WorldeditCommands extends CommandsBase {
         
 
         if(inheritedZone != null) selection.setClass("ZoneInherit");
-        ZoneBase zone = selection.save();
+        ZoneNormal zone = selection.save();
         if(zone != null) {
             player.sendMessage(ChatColor.GREEN + "Zone '" + name + "' saved.");
             Log.info(player.getName() + " created zone " + zone.getName() + "[" + zone.getId() + "]");
@@ -114,7 +114,7 @@ public class WorldeditCommands extends CommandsBase {
             return;
         }
         
-        ZoneBase zone = getSelectedZone(player);
+        ZoneNormal zone = getSelectedZone(player);
         ZoneSelection selection = new ZoneEditSelection(getPlugin(),player,zone.getName());
         if(!selection.importWorldeditSelection()) {
             player.sendMessage(ChatColor.RED + "Invalid/Missing worldedit Selection");
@@ -126,7 +126,7 @@ public class WorldeditCommands extends CommandsBase {
             return;
         }
 
-        ZoneBase save = selection.save();
+        ZoneNormal save = selection.save();
         if(save != null) {
             player.sendMessage(ChatColor.GREEN + "Zone '" + save.getName() + "' redefined.");
         } else {
@@ -151,12 +151,12 @@ public class WorldeditCommands extends CommandsBase {
         LocalSession local = getPlugin().getWorldEdit().getWorldEdit().getSession(localPlayer);
         LocalWorld localWorld = localPlayer.getWorld();
         
-        ZoneBase zone = getSelectedZone(player);
+        ZoneNormal zone = getSelectedZone(player);
         ZoneForm form = zone.getForm();
         if(form instanceof ZoneCuboid) {
             CuboidRegionSelector cuboid = new CuboidRegionSelector(localWorld);
-            Vector pt1 = new Vector(form.getLowX(),form.getLowZ(),form.getLowY());
-            Vector pt2 = new Vector(form.getHighX(),form.getHighZ(),form.getHighY());
+            Vector pt1 = new Vector(form.getLowX(),form.getLowY(),form.getLowZ());
+            Vector pt2 = new Vector(form.getHighX(),form.getHighY(),form.getHighZ());
             cuboid.selectPrimary(pt1);
             cuboid.selectSecondary(pt2);
             
@@ -167,10 +167,10 @@ public class WorldeditCommands extends CommandsBase {
             ZoneNPoly poly = (ZoneNPoly) form;
             List<BlockVector2D> points = new ArrayList<BlockVector2D>();
             for(int i = 0; i < poly.getPointsSize(); i ++) {
-                points.add(new BlockVector2D(poly.getX()[i], poly.getY()[i]));
+                points.add(new BlockVector2D(poly.getX()[i], poly.getZ()[i]));
             }
             
-            Polygonal2DRegionSelector npoly = new Polygonal2DRegionSelector(localWorld, points, poly.getLowZ(), poly.getHighZ());
+            Polygonal2DRegionSelector npoly = new Polygonal2DRegionSelector(localWorld, points, poly.getLowY(), poly.getHighY());
             
             local.setRegionSelector(localWorld, npoly);
             local.dispatchCUISelection(localPlayer);
@@ -179,10 +179,10 @@ public class WorldeditCommands extends CommandsBase {
             ZoneCylinder cyl = (ZoneCylinder) form; 
             
             CylinderRegionSelector cylinder = new CylinderRegionSelector(localWorld);
-            cylinder.getIncompleteRegion().setCenter(new Vector(cyl.getCenterX(), cyl.getHighZ(), cyl.getCenterY()));
+            cylinder.getIncompleteRegion().setCenter(new Vector(cyl.getCenterX(), cyl.getHighY(), cyl.getCenterZ()));
             cylinder.getIncompleteRegion().setRadius(new Vector2D(cyl.getRadius(), cyl.getRadius()));
-            cylinder.getIncompleteRegion().setMinimumY(cyl.getLowZ());
-            cylinder.getIncompleteRegion().setMaximumY(cyl.getHighZ());
+            cylinder.getIncompleteRegion().setMinimumY(cyl.getLowY());
+            cylinder.getIncompleteRegion().setMaximumY(cyl.getHighY());
             
             local.setRegionSelector(localWorld, cylinder);
             local.dispatchCUISelection(localPlayer);

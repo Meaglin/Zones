@@ -51,7 +51,7 @@ public class CUIHandler {
     }
     
     private void sendCUIPoint(int index, ZoneVertice point,int height, long size) {
-        getPlayer().sendRawMessage(CUI + join("|","p",index,point.getX(),height,point.getY(),size));
+        getPlayer().sendRawMessage(CUI + join("|","p",index,point.getX(),height,point.getZ(),size));
     }
     
     private static String join(String del,Object... o) {

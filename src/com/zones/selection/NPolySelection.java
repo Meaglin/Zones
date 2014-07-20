@@ -53,10 +53,10 @@ public class NPolySelection extends Selection {
         int size = 0;
         for (int i = 0, j = points.size() - 1; i < points.size(); j = i++) {
             int x0 = points.get(j).getX();
-            int y0 = points.get(j).getY();
+            int z0 = points.get(j).getZ();
             int x1 = points.get(i).getX();
-            int y1 = points.get(i).getY();
-            size += x0 * y1 - x1 * y0;
+            int z1 = points.get(i).getZ();
+            size += x0 * z1 - x1 * z0;
         }
         return Math.round(Math.abs(size) * 0.5) * ((long)(getHeight().getMax() - getHeight().getMin() + 1));
     }

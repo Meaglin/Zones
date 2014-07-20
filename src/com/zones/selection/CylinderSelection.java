@@ -26,7 +26,7 @@ public class CylinderSelection extends Selection {
     @Override
     public void onRightClick(Block block) {
         if(p2 != null) {
-            getSelection().removeGhostBlock(p2.getX(), p2.getY());
+            getSelection().removeGhostBlock(p2.getX(), p2.getZ());
         }
         getSelection().addGhostBlock(block);
         p2 = new ZoneVertice(block.getX(),block.getZ());
@@ -36,7 +36,7 @@ public class CylinderSelection extends Selection {
     @Override
     public void onLeftClick(Block block) {
         if(p1 != null) {
-            getSelection().removeGhostBlock(p1.getX(), p1.getY());
+            getSelection().removeGhostBlock(p1.getX(), p1.getZ());
         }
         getSelection().addGhostBlock(block);
         p1 = new ZoneVertice(block.getX(),block.getZ());
@@ -47,9 +47,9 @@ public class CylinderSelection extends Selection {
     public long getSize() {
         if(p1 != null && p2 != null) {
             double xdiff = p1.getX() - p2.getX();
-            double ydiff = p1.getY() - p2.getY();
+            double zdiff = p1.getZ() - p2.getZ();
             
-            long size = (long) ((xdiff * xdiff + ydiff * ydiff) + 1);
+            long size = (long) ((xdiff * xdiff + zdiff * zdiff) + 1);
             size *= Math.PI;
             size *= (getHeight().getMax() - getHeight().getMin() + 1);
             return size;

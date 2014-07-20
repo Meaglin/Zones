@@ -117,8 +117,8 @@ public class Database {
                 z.setAdmins(    rs.getString("admins"));
                 z.setUsers(     rs.getString("users"));
                 z.setSettings(  rs.getString("settings"));
-                z.setMinz(      rs.getInt("minz"));
-                z.setMaxz(      rs.getInt("maxz"));
+                z.setMinY(      rs.getInt("minz"));
+                z.setMaxY(      rs.getInt("maxz"));
                 z.setSize(      rs.getInt("size"));
                 z.setConfig( rs.getString("config"));
                 z.setVertices(get(z));
@@ -152,7 +152,7 @@ public class Database {
                 v.setId(rs.getInt(1));
                 v.setVertexorder(rs.getInt(2));
                 v.setX(rs.getInt(3));
-                v.setY(rs.getInt(4));
+                v.setZ(rs.getInt(4));
                 vertices.add(v);
             }
         } catch(Exception e) {
@@ -187,8 +187,8 @@ public class Database {
                 z.setAdmins(    rs.getString("admins"));
                 z.setUsers(     rs.getString("users"));
                 z.setSettings(  rs.getString("settings"));
-                z.setMinz(      rs.getInt("minz"));
-                z.setMaxz(      rs.getInt("maxz"));
+                z.setMinY(      rs.getInt("minz"));
+                z.setMaxY(      rs.getInt("maxz"));
                 z.setSize(      rs.getInt("size"));
                 z.setConfig( rs.getString("config"));
                 z.setVertices(get(z));
@@ -221,8 +221,8 @@ public class Database {
             st.setString(5, zone.getAdmins());
             st.setString(6, zone.getUsers());
             st.setString(7, zone.getSettings());
-            st.setInt(8,    zone.getMinz());
-            st.setInt(9,    zone.getMaxz());
+            st.setInt(8,    zone.getMiny());
+            st.setInt(9,    zone.getMaxy());
             st.setInt(10,   zone.getSize());
             st.setString(11, zone.getConfig().toString());
             st.execute();
@@ -259,7 +259,7 @@ public class Database {
             st.setInt(1, vertice.getId());
             st.setInt(2, vertice.getVertexorder());
             st.setInt(3, vertice.getX());
-            st.setInt(4, vertice.getY());
+            st.setInt(4, vertice.getZ());
             st.execute();
         } catch(Exception e) {
             Zones.log.warning("[Zones]Error saving vertices " + vertice.getId() + "[" + vertice.getVertexorder() + "] :");
@@ -289,8 +289,8 @@ public class Database {
             st.setString(5, zone.getAdmins());
             st.setString(6, zone.getUsers());
             st.setString(7, zone.getSettings());
-            st.setInt(8, zone.getMinz());
-            st.setInt(9, zone.getMaxz());
+            st.setInt(8, zone.getMiny());
+            st.setInt(9, zone.getMaxy());
             st.setInt(10, zone.getSize());
             st.setString(11, zone.getConfig().toString());
             st.setInt(12, zone.getId());

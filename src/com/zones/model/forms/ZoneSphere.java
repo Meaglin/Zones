@@ -19,18 +19,18 @@ public class ZoneSphere extends ZoneForm {
     private long size;
     
     
-    public ZoneSphere(int x, int y, int z, int z2) {
+    public ZoneSphere(int x, int z, int y, int y2) {
         _x = x;
         _y = y;
         
-        radius = Math.abs(z2 - z);
+        radius = Math.abs(y2 - y);
         radiusSqr = radius * radius;
         size = (long) (( 4L / 3L) * Math.PI * ((long)radiusSqr) * ((long)radius));
         _z = z;
     }
     
     public ZoneSphere(List<Vertice> vertices, int minz, int maxz) {
-        this(vertices.get(0).getX(), vertices.get(0).getY(), minz, maxz);
+        this(vertices.get(0).getX(), vertices.get(0).getZ(), minz, maxz);
     }
     
     @Override
@@ -41,37 +41,37 @@ public class ZoneSphere extends ZoneForm {
     }
     
     @Override
-    public boolean isInsideZone(int x, int y) {
-        if ((((_x - x) * (_x - x)) + ((_y - y) * (_y - y))) > radiusSqr)
+    public boolean isInsideZone(int x, int z) {
+        if ((((_x - x) * (_x - x)) + ((_z - z) * (_z - z))) > radiusSqr)
             return false;
         return true;
     }
 
     @Override
-    public boolean intersectsRectangle(int ax1, int ax2, int ay1, int ay2) {
+    public boolean intersectsRectangle(int ax1, int ax2, int az1, int az2) {
      // Circles point inside the rectangle?
-        if (_x > ax1 && _x < ax2 && _y > ay1 && _y < ay2)
+        if (_x > ax1 && _x < ax2 && _z > az1 && _z < az2)
             return true;
         
         // Any point of the rectangle intersecting the Circle?
-        if ((Math.pow(ax1 - _x, 2) + Math.pow(ay1 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax1 - _x, 2) + Math.pow(az1 - _z, 2)) < radiusSqr)
             return true;
-        if ((Math.pow(ax1 - _x, 2) + Math.pow(ay2 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax1 - _x, 2) + Math.pow(az2 - _z, 2)) < radiusSqr)
             return true;
-        if ((Math.pow(ax2 - _x, 2) + Math.pow(ay1 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax2 - _x, 2) + Math.pow(az1 - _z, 2)) < radiusSqr)
             return true;
-        if ((Math.pow(ax2 - _x, 2) + Math.pow(ay2 - _y, 2)) < radiusSqr)
+        if ((Math.pow(ax2 - _x, 2) + Math.pow(az2 - _z, 2)) < radiusSqr)
             return true;
         
         // Collision on any side of the rectangle?
         if (_x > ax1 && _x < ax2)
         {
-            if (Math.abs(_y - ay2) < radiusSqr)
+            if (Math.abs(_z - az2) < radiusSqr)
                 return true;
-            if (Math.abs(_y - ay1) < radiusSqr)
+            if (Math.abs(_z - az1) < radiusSqr)
                 return true;
         }
-        if (_y > ay1 && _y < ay2)
+        if (_z > az1 && _z < az2)
         {
             if (Math.abs(_x - ax2) < radiusSqr)
                 return true;
@@ -83,8 +83,8 @@ public class ZoneSphere extends ZoneForm {
     }
 
     @Override
-    public double getDistanceToZone(int x, int y) {
-        return (Math.sqrt((Math.pow(_x - x, 2) + Math.pow(_y - y, 2))) - radius);
+    public double getDistanceToZone(int x, int z) {
+        return (Math.sqrt((Math.pow(_x - x, 2) + Math.pow(_z - z, 2))) - radius);
     }
 
     /*
@@ -130,7 +130,7 @@ public class ZoneSphere extends ZoneForm {
 
     @Override
     public int[][] getPoints() {
-        return new int[][] { new int[] { getLowX() , getHighX() } , new int[] { getLowY() , getHighY() }  };
+        return new int[][] { new int[] { getLowX() , getHighX() } , new int[] { getLowZ() , getHighZ() }  };
     }
 
     @Override

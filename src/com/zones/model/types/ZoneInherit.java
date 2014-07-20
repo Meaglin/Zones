@@ -5,51 +5,49 @@ import java.util.List;
 
 import org.bukkit.OfflinePlayer;
 
-import com.zones.model.ZoneBase;
-
 public class ZoneInherit extends ZoneNormal {
 
-    private List<ZoneBase> inheritedZones;
+    private List<ZoneNormal> inheritedZones;
     /**
      * Warning: this list only contains zones that have this zone as inherited zone.
      */
-    private List<ZoneBase> subZones;
+    private List<ZoneNormal> subZones;
     
     public ZoneInherit() {
         super();
-        inheritedZones = new ArrayList<ZoneBase>();
-        subZones = new ArrayList<ZoneBase>();
+        inheritedZones = new ArrayList<ZoneNormal>();
+        subZones = new ArrayList<ZoneNormal>();
     }
     
-    public void addInherited(ZoneBase b) {
+    public void addInherited(ZoneNormal b) {
         inheritedZones.add(b);
     }
     
-    public void removeInherited(ZoneBase b) {
+    public void removeInherited(ZoneNormal b) {
         inheritedZones.remove(b);
     }
 
-    public boolean containsInherited(ZoneBase b) {
+    public boolean containsInherited(ZoneNormal b) {
         return inheritedZones.contains(b);
     }
     
-    public List<ZoneBase> getInheritedZones() {
+    public List<ZoneNormal> getInheritedZones() {
         return inheritedZones;
     }
     
-    public void addSub(ZoneBase b) {
+    public void addSub(ZoneNormal b) {
         subZones.add(b);
     }
     
-    public void removeSub(ZoneBase b) {
+    public void removeSub(ZoneNormal b) {
         subZones.remove(b);
     }
 
-    public boolean containsSub(ZoneBase b) {
+    public boolean containsSub(ZoneNormal b) {
         return subZones.contains(b);
     }
     
-    public List<ZoneBase> getSubZones() {
+    public List<ZoneNormal> getSubZones() {
         return subZones;
     }
     
@@ -68,12 +66,12 @@ public class ZoneInherit extends ZoneNormal {
     }
     
     public boolean isInheritAdmin(OfflinePlayer player) {
-        if (getPermissions().has(getWorld().getName(), player.getName(), "zones.admin"))
+        if (getPermissions().playerHas(getWorld().getName(), player, "zones.admin"))
             return true;
         
-        for(ZoneBase b : inheritedZones) {
+        for(ZoneNormal b : inheritedZones) {
             if(b instanceof ZoneNormal) {
-                if(((ZoneNormal)b).isAdmin(player))
+                if(b.isAdmin(player))
                     return true;
             } else {
                 if(b.canAdministrate(player))
