@@ -100,6 +100,10 @@ public class ZonesEntityListener implements Listener {
                 sub = ZoneVar.PLAYER_CONTACT_DAMAGE;
                 break;
             case ENTITY_ATTACK:
+                if(attacker instanceof Player) {
+                    sub = ZoneVar.PLAYER_PVP_DAMAGE;
+                    break;
+                }
                 sub = ZoneVar.PLAYER_ENTITY_DAMAGE;
                 break;
             case SUFFOCATION:
@@ -130,6 +134,8 @@ public class ZonesEntityListener implements Listener {
                 sub = ZoneVar.PLAYER_VOID_DAMAGE;
                 break;
         }
+        
+        // TODO: check for unknown types.
         if((sub == null && !wm.testFlag(defender.getLocation(), ZoneVar.HEALTH)) ||
                 !wm.canReceiveDamage((Player) defender, sub)) {
             event.setCancelled(true);

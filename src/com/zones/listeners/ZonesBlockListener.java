@@ -184,7 +184,7 @@ public class ZonesBlockListener implements Listener {
         Material mat = block.getType();
         
         switch(mat) {
-            case SNOW: case ICE: break;
+            case SNOW: case ICE: case SOIL:break;
             default: return;
         }
         
@@ -201,6 +201,11 @@ public class ZonesBlockListener implements Listener {
                     event.setCancelled(true);
                 }
                 break;
+            case SOIL:
+                if(!wm.testFlag(event.getBlock(), ZoneVar.SOIL_DRY)) {
+                    event.setCancelled(true);
+                }
+                break;
         }
     }
     
@@ -211,6 +216,7 @@ public class ZonesBlockListener implements Listener {
             case BROWN_MUSHROOM: 
             case RED_MUSHROOM:
             case VINE: 
+            case MYCEL:
                 break;
             default: return;
         }
@@ -231,6 +237,11 @@ public class ZonesBlockListener implements Listener {
                 break;
             case VINE:
                 if(!wm.testFlag(event.getBlock(), ZoneVar.VINES_GROWTH)) {
+                    event.setCancelled(true);
+                }
+                break;
+            case MYCEL:
+                if(!wm.testFlag(event.getBlock(), ZoneVar.MYCELIUM_SPREAD)) {
                     event.setCancelled(true);
                 }
                 break;

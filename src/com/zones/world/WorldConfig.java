@@ -115,6 +115,31 @@ public class WorldConfig {
         return settings.getJSONObject(var.getName()).getBoolean("value");
     }
     
+    public boolean getFlagEnabledEnforced(ZoneVar var) {
+        if(!var.inScope(ZoneVarScope.WORLD)) {
+            return false;
+        }
+        JSONObject obj = settings.getJSONObject(var.getName());
+        if(!obj.getBoolean("enabled")) {
+            return (boolean) var.getDefault();
+        }
+        if(!obj.getBoolean("enforced")) {
+            return (boolean) var.getDefault();
+        }
+        return obj.getBoolean("value");
+    }
+
+    public boolean getFlagEnabled(ZoneVar var) {
+        if(!var.inScope(ZoneVarScope.WORLD)) {
+            return false;
+        }
+        JSONObject obj = settings.getJSONObject(var.getName());
+        if(!obj.getBoolean("enabled")) {
+            return (boolean) var.getDefault();
+        }
+        return obj.getBoolean("value");
+    }
+    
     public void setFlag(ZoneVar var, boolean set) {
         if(!var.inScope(ZoneVarScope.WORLD)) {
             return;

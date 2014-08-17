@@ -9,6 +9,7 @@ import com.meaglin.json.JSONObject;
 
 public enum ZoneVar {
     TELEPORT("TeleportEnabled", ZoneVarType.BOOLEAN, true) {},
+    ENDERPEARL("EnderPearl", ZoneVarType.BOOLEAN, true),
     
     LIGHTER("LighterEnabled", ZoneVarType.BOOLEAN, true) {},
     FIRE("FireEnabled", ZoneVarType.BOOLEAN, true) {},
@@ -24,6 +25,7 @@ public enum ZoneVar {
     
     HEALTH("HealthEnabled", ZoneVarType.BOOLEAN, true) {},
     PLAYER_ENTITY_DAMAGE("PlayerEntityDamageEnabled", ZoneVarType.BOOLEAN, true),
+    PLAYER_PVP_DAMAGE("PlayerPVPDamageEnabled", ZoneVarType.BOOLEAN, true),
     PLAYER_FALL_DAMAGE("PlayerFallDamageEnabled", ZoneVarType.BOOLEAN, true),
     PLAYER_LAVA_DAMAGE("PlayerLavaDamageEnabled", ZoneVarType.BOOLEAN, true),
     PLAYER_SUFFOCATION_DAMAGE("PlayerSuffocationDamageEnabled", ZoneVarType.BOOLEAN, true),
@@ -41,6 +43,7 @@ public enum ZoneVar {
     EXPLOSION_PROTECT_ENTITIES("ExplosionProtectEntites", ZoneVarType.BOOLEAN, false),
     EXPLOSION_PROTECTED_BLOCKS("ExplosionProtectedBlocks", ZoneVarType.MATERIALLIST, new JSONArray()),
     
+    SOIL_DRY("SoilDry", ZoneVarType.BOOLEAN, true),
     PHYSICS("PhysicsEnabled", ZoneVarType.BOOLEAN, true) {},
     NOTIFY("NotifyEnabled", ZoneVarType.BOOLEAN, false) {},
     CROP_PROTECTION("CropProtectionEnabled", ZoneVarType.BOOLEAN, false) {},
@@ -54,6 +57,7 @@ public enum ZoneVar {
     VINES_GROWTH("VinesGrowth", ZoneVarType.BOOLEAN, true) {},
     GRASS_GROWTH("GrassGrowth", ZoneVarType.BOOLEAN, true) {},
     TREE_GROWTH("TreeGrowth", ZoneVarType.BOOLEAN, true) {},
+    MYCELIUM_SPREAD("MyceliumSpread", ZoneVarType.BOOLEAN, true) {},
     
     PLACE_BLOCKS("ProtectedPlaceMaterials", ZoneVarType.MATERIALLIST, new JSONArray()) {},
     BREAK_BLOCKS("ProtectedBreakMaterials", ZoneVarType.MATERIALLIST, new JSONArray()) {},
@@ -67,6 +71,9 @@ public enum ZoneVar {
     RESOURCE_PACK("ResourcePack", ZoneVarType.STRING, "") {},
     ENTER_MESSAGE("EnterMessage", ZoneVarType.STRING, "You've entered {zone}[{access}]") {},
     LEAVE_MESSAGE("LeaveMessage", ZoneVarType.STRING, "You've left {zone}.") {},
+    
+    
+    LIGHTNING("LightningStrike", ZoneVarType.BOOLEAN, true),
     
     RAIN("RainEnabled", ZoneVarType.BOOLEAN, ZoneVarScope.WORLD, true),
     RAIN_DIVIDER("RainDivider", ZoneVarType.INTEGER, ZoneVarScope.WORLD, 1),
@@ -89,6 +96,9 @@ public enum ZoneVar {
         .put("radiusX", 1)
         .put("radiusY", 1)
         .put("radiusZ", 1)
+        .put("radiusUpgradeX", 1)
+        .put("radiusUpgradeY", 1)
+        .put("radiusUpgradeZ", 1)
     )),
     
     SPAWN_LOCATION("SpawnLocation", ZoneVarType.LOCATION, ZoneVarScope.LOCAL, new JSONObject()) {},

@@ -18,8 +18,13 @@ import com.meaglin.json.JSONArray;
 import com.meaglin.json.JSONObject;
 import com.zones.Zones;
 import com.zones.backwardscompat.OldZoneVar;
+import com.zones.model.forms.ZoneCuboid;
+import com.zones.model.forms.ZoneCylinder;
+import com.zones.model.forms.ZoneNPoly;
+import com.zones.model.forms.ZoneSphere;
 import com.zones.model.settings.ZoneVar;
 import com.zones.model.settings.ZoneVarType;
+import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
 import com.zones.util.Point;
 import com.zones.world.WorldConfig;
@@ -60,6 +65,45 @@ public abstract class ZoneBase {
             id = persistence.getId();
             onLoad(persistence);
         }
+    }
+    
+    public boolean loadForm() {
+        Zone zone = getPersistence();
+        List<Vertice> vertices = getPersistence().getVertices();
+        
+        if(zone.getFormtype().equalsIgnoreCase("ZoneCuboid")) {
+            if (vertices.size() == 2) {
+                setForm(new ZoneCuboid(vertices, zone.getMiny(), zone.getMaxy()));
+            } else {
+                log.info("[Zones] Missing zone vertex for cuboid zone id: " + zone.getId());
+                return false;
+            }
+        } else if(zone.getFormtype().equalsIgnoreCase("ZoneNPoly")) {
+            if (vertices.size() > 2) {
+                setForm(new ZoneNPoly(vertices, zone.getMiny() , zone.getMaxy()));
+            } else {
+                log.warning("[Zones] Bad data for zone: " + zone.getId());
+                return false;
+            }
+        } else if(zone.getFormtype().equalsIgnoreCase("ZoneCylinder")) {
+            if (vertices.size() == 2) {
+                setForm(new ZoneCylinder(vertices, zone.getMiny(), zone.getMaxy()));
+            } else {
+                log.info("[Zones] Missing zone vertex for Cylinder zone id: " + zone.getId());
+                return false;
+            }
+        } else if(zone.getFormtype().equalsIgnoreCase("ZoneSphere")) {
+            if (vertices.size() == 1) {
+                setForm(new ZoneSphere(vertices, zone.getMiny(), zone.getMaxy()));
+            } else {
+                log.info("[Zones] Missing zone vertex for Sphere zone id: " + zone.getId());
+                return false;
+            }
+        } else {
+            log.info("[Zones] Unknown zoneForm " + zone.getFormtype() + " zone id: " + zone.getId());
+            return false;
+        }
+        return true;
     }
     
     protected void onLoad(Zone persistence) {

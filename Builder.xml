@@ -11,7 +11,7 @@
 	<path id="classpath">
 		<fileset dir="libs">
 			<include name="craftbukkit.jar" />
-			<include name="WorldEdit.jar" />
+			<include name="worldedit-5.6.3.jar" />
 			<include name="Vault-1.4.1.jar" />
 			<include name="WorldGuard.jar" />
 			<include name="VirtualPlayers.jar" />
@@ -63,7 +63,7 @@
 				<exclude name="META-INF/*" />
 			</zipfileset>
 		</jar>
-		<zip destfile="../Zones-3.0b2.zip" >
+		<zip destfile="../Zones-3.0b3.zip" >
 		  <fileset dir=".." includes="Zones.jar" />
 		  <zipfileset dir="${src}/com/zones/config/" >
                 <include name="*.properties" />

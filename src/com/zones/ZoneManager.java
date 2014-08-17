@@ -11,12 +11,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
 
-import com.zones.model.forms.ZoneCuboid;
-import com.zones.model.forms.ZoneCylinder;
-import com.zones.model.forms.ZoneNPoly;
-import com.zones.model.forms.ZoneSphere;
 import com.zones.model.types.ZoneNormal;
-import com.zones.persistence.Vertice;
 import com.zones.persistence.Zone;
 import com.zones.selection.ZoneSelection;
 import com.zones.world.WorldManager;
@@ -53,7 +48,7 @@ public class ZoneManager {
     public void load(WorldManager world) {
         cleanUp(world);
         try {
-            List<Zone> zones = plugin.getMysqlDatabase().get(world.getWorldName());
+            List<Zone> zones = plugin.getMysqlDatabase().getWorld(world.getWorldName());
              addZones(world, loadFromPersistentData(world, zones));
         } catch(Exception e) {
             log.warning("[Zones] Error loading world " + world.getWorldName() + ".");
@@ -89,36 +84,8 @@ public class ZoneManager {
                 return null;
             }
             temp.initialize(plugin, world, zone);
-            List<Vertice> vertices = zone.getVertices();
-            
-            if(zone.getFormtype().equalsIgnoreCase("ZoneCuboid")) {
-                if (vertices.size() == 2) {
-                    temp.setForm(new ZoneCuboid(vertices, zone.getMiny(), zone.getMaxy()));
-                } else {
-                    log.info("[Zones] Missing zone vertex for cuboid zone id: " + zone.getId());
-                    return null;
-                }
-            } else if(zone.getFormtype().equalsIgnoreCase("ZoneNPoly")) {
-                if (vertices.size() > 2) {
-                    temp.setForm(new ZoneNPoly(vertices, zone.getMiny() , zone.getMaxy()));
-                } else {
-                    log.warning("[Zones] Bad data for zone: " + zone.getId());
-                    return null;
-                }
-            } else if(zone.getFormtype().equalsIgnoreCase("ZoneCylinder")) {
-                if (vertices.size() == 2) {
-                    temp.setForm(new ZoneCylinder(vertices, zone.getMiny(), zone.getMaxy()));
-                } else {
-                    log.info("[Zones] Missing zone vertex for Cylinder zone id: " + zone.getId());
-                    return null;
-                }
-            } else if(zone.getFormtype().equalsIgnoreCase("ZoneSphere")) {
-                if (vertices.size() == 1) {
-                    temp.setForm(new ZoneSphere(vertices, zone.getMiny(), zone.getMaxy()));
-                } else {
-                    log.info("[Zones] Missing zone vertex for Sphere zone id: " + zone.getId());
-                    return null;
-                }
+            if(!temp.loadForm()) {
+                return null;
             }
         } catch(Exception e) {
             log.warning("[Zones] Error loading zone " + zone.getId() + ".");

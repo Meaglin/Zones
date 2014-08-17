@@ -1,8 +1,12 @@
 package com.zones.persistence;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
 import com.avaje.ebean.validation.NotNull;
 
 
@@ -27,6 +31,16 @@ public class Vertice {
     private int x;
     
     private int z;
+    
+    
+    public static Vertice from(Zone zone, ResultSet set) throws SQLException {
+        Vertice v = new Vertice();
+        v.setZone(zone);
+        v.setVertexorder(set.getInt("vertexorder"));
+        v.setX(set.getInt("vertexx"));
+        v.setZ(set.getInt("vertexz"));
+        return v;
+    }
 
     public Zone getZone() {
         return zone;
@@ -50,6 +64,7 @@ public class Vertice {
 
     public void setZone(Zone zone) {
         this.zone = zone;
+        this.id = zone.getId();
     }
 
     public void setId(int id) {

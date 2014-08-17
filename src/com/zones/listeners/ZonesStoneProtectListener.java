@@ -52,6 +52,7 @@ public class ZonesStoneProtectListener implements Listener {
             ZoneStone stone = (ZoneStone) zone;
             if(stone.isCenter(b)) {
                 if(stone.canAdministrate(p)) {
+                    stone.removeCenter(p, b);
                     plugin.getZoneManager().delete(stone);
                     stone.sendMarkupMessage(ZonesConfig.PROTECTED_ZONE_DELETED, p);
                     return;
@@ -62,8 +63,9 @@ public class ZonesStoneProtectListener implements Listener {
             }
             if(stone.isCenterUpgrade(b)) {
                 if(stone.canAdministrate(p)) {
-                    stone.removeUpgrade(b);
-                    stone.sendMarkupMessage(ZonesConfig.PROTECTED_ZONE_DELETED, p);
+                    stone.removeUpgrade(p, b);
+                    stone.sendMarkupMessage(ZonesConfig.PROTECTED_ZONE_DEGRADED, p);
+                    event.setCancelled(true);
                     return;
                 }
                 stone.sendMarkupMessage(ZonesConfig.PROTECTED_CANNOT_DEGRADE, p);
@@ -75,40 +77,61 @@ public class ZonesStoneProtectListener implements Listener {
     
     @EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
     public void onBlockPlace(BlockPlaceEvent event) {
-        Block b = event.getBlock(); Player p = event.getPlayer();
-        WorldManager wm = plugin.getWorldManager(b.getWorld());
+        Block block = event.getBlock(); Player player = event.getPlayer();
+        WorldManager wm = plugin.getWorldManager(block.getWorld());
         if(!wm.getConfig().isEnabled(ZoneVar.PROTECT_STONE)) {
             return;
         }
         JSONObject val = wm.getConfig().getSetting(ZoneVar.PROTECT_STONE).getJSONObject("value");
-        Material mat = b.getType();
+        Material mat = block.getType();
         if(!val.has(mat.name())) {
             return;
         }
-        if(!plugin.hasPermission(p, "zones.protectionstone." + mat.name())) {
-            p.sendMessage(ChatColor.RED + "You are not allowed to create a protectionstone area.");
+        if(!plugin.hasPermission(player, "zones.protectionstone." + mat.name())) {
+            player.sendMessage(ChatColor.RED + "You are not allowed to create a protectionstone area.");
+            event.setCancelled(true);
             return;
         }
         JSONObject obj = val.getJSONObject(mat.name());
         
-        int minX = b.getX() - obj.getInt("radiusX"), maxX = b.getX() + obj.getInt("radiusX"), 
-        minY = b.getY() - obj.getInt("radiusY"), maxY = b.getY() + obj.getInt("radiusY"), 
-        minZ = b.getZ() - obj.getInt("radiusZ"), maxZ = b.getZ() + obj.getInt("radiusZ");
+        int rx = obj.getInt("radiusX"), ry = obj.getInt("radiusY"), rz = obj.getInt("radiusZ");
+        
+        int minX = block.getX() - rx, maxX = block.getX() + rx, 
+        minY = block.getY() - ry, maxY = block.getY() + ry, 
+        minZ = block.getZ() - rz, maxZ = block.getZ() + rz;
         
         List<ZoneNormal> list = wm.getZones(minX - 1, maxX + 1, minY - 1, maxY + 1, minZ - 1, maxZ + 1);
         for(ZoneNormal zone : list) {
-            if(!zone.canAdministrate(p)) {
-                zone.sendMarkupMessage(ZonesConfig.PROTECTED_AREA_CONFLICTS, p);
+            if(!zone.canAdministrate(player)) {
+                zone.sendMarkupMessage(ZonesConfig.PROTECTED_AREA_CONFLICTS, player);
                 event.setCancelled(true);
                 return;
+            }
+            if(zone instanceof ZoneStone) {
+                ZoneStone stone = (ZoneStone) zone;
+                if(stone.isNearCenter(block, 3)) {
+                    if(!plugin.hasPermission(player, "zones.protectionstoneupgrade." + mat.name())) {
+                        player.sendMessage(ChatColor.RED + "You are not allowed to upgrade a protectionstone area.");
+                        event.setCancelled(true);
+                        return;
+                    }
+                    if(!stone.canUpgrade(obj)) {
+                        player.sendMessage(ChatColor.RED + "Upgrading this zone would conflict with an other zone.");
+                        event.setCancelled(true);
+                        return;
+                    }
+                    stone.addUpgrade(block, obj);
+                    stone.sendMarkupMessage(ZonesConfig.PROTECTED_ZONE_UPGRADED, player);
+                    return;
+                }
             }
         }
         
         Zone zoneCfg = new Zone();
-        zoneCfg.setName(p.getName() + "'s zone");
+        zoneCfg.setName(player.getName() + "'s zone");
         zoneCfg.setZonetype("ZoneNormal");
         zoneCfg.setFormtype("ZoneCuboid");
-        zoneCfg.setWorld(p.getWorld().getName());
+        zoneCfg.setWorld(player.getWorld().getName());
         zoneCfg.setSize(2);
         zoneCfg.getConfig().put("version", 1);
         zoneCfg.setMinY(minY);
@@ -129,13 +152,16 @@ public class ZonesStoneProtectListener implements Listener {
         JSONObject user = new JSONObject();
         user.put("admin", true);
         user.put("access", "*");
-        user.put("name", p.getName());
-        user.put("uuid", p.getUniqueId().toString());
-        zoneCfg.getConfig().getJSONObject("users").put(p.getUniqueId().toString(), user);
+        user.put("name", player.getName());
+        user.put("uuid", player.getUniqueId().toString());
+        zoneCfg.getConfig().getJSONObject("users").put(player.getUniqueId().toString(), user);
         zoneCfg.getConfig().put("center", (new JSONObject())
-                .put("x", b.getX())
-                .put("y", b.getY())
-                .put("z", b.getZ())
+                .put("x", block.getX())
+                .put("y", block.getY())
+                .put("z", block.getZ())
+                .put("xChange", rx)
+                .put("yChange", ry)
+                .put("zChange", rz)
         );
         zoneCfg.saveConfig();
         

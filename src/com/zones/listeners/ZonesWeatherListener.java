@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.weather.LightningStrikeEvent;
 
 import com.zones.Zones;
 import com.zones.model.settings.ZoneVar;
@@ -16,6 +17,14 @@ public class ZonesWeatherListener implements Listener {
     
     public ZonesWeatherListener(Zones plugin) {
         this.plugin = plugin;
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onLightninghStrike(LightningStrikeEvent event) {
+        WorldManager wm = plugin.getWorldManager(event.getWorld());
+        if(!wm.getConfig().getFlag(ZoneVar.LIGHTNING)) {
+            event.setCancelled(true);
+        }
     }
     
     @EventHandler(ignoreCancelled = true)

@@ -3,6 +3,7 @@ package com.zones.listeners;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -34,6 +35,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -75,8 +77,7 @@ public class ZonesPlayerListener implements Listener {
                        break;
                    }
                }
-               if(!contains
-                       && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
+               if(!contains && !plugin.hasPermission(event.getPlayer(), "zones.override.command")) {
                    event.getPlayer().sendMessage(ZonesConfig.PLAYER_CANT_USE_COMMAND_IN_WORLD);
                    event.setCancelled(true);
                    return;
@@ -269,9 +270,23 @@ public class ZonesPlayerListener implements Listener {
         ZoneNormal aZone = wmfrom.getActiveZone(from);
         ZoneNormal bZone = wmto.getActiveZone(to);
         
+        if(event.getCause() == TeleportCause.ENDER_PEARL
+                && !wmto.getConfig().getFlagEnabledEnforced(ZoneVar.ENDERPEARL)) {
+            player.sendMessage(ChatColor.RED + "Enderpearls are disabled in this world.");
+            event.setCancelled(true);
+            return;
+        }
+        
         if(aZone != null) {
             if(!aZone.getFlag(ZoneVar.TELEPORT) && !aZone.canAdministrate(player)) {
                 aZone.sendMarkupMessage(ZonesConfig.TELEPORT_INTO_ZONE_DISABLED, player);
+                event.setCancelled(true);
+                return;
+            }
+            if(event.getCause() == TeleportCause.ENDER_PEARL
+                    && aZone.hasSetting(ZoneVar.ENDERPEARL)
+                    && !aZone.getFlag(ZoneVar.ENDERPEARL)) {
+                aZone.sendMarkupMessage(ChatColor.RED + "Cannot use an enderpearl inside {zname}.", player);
                 event.setCancelled(true);
                 return;
             }
@@ -287,6 +302,13 @@ public class ZonesPlayerListener implements Listener {
                 event.setCancelled(false);
                 return;
             }
+            if(event.getCause() == TeleportCause.ENDER_PEARL
+                    && bZone.hasSetting(ZoneVar.ENDERPEARL)
+                    && !bZone.getFlag(ZoneVar.ENDERPEARL)) {
+                bZone.sendMarkupMessage(ChatColor.RED + "Cannot use an enderpearl to teleport into {zname}.", player);
+                event.setCancelled(true);
+                return;
+            }
             if (wmto.getFlag(ZoneVar.BORDER) 
                     && wmto.getConfig().isEnforced(ZoneVar.BORDER)
                     && wmto.getConfig().isOutsideBorder(to)
@@ -297,6 +319,11 @@ public class ZonesPlayerListener implements Listener {
                 event.setCancelled(false);
                 return;
             }
+        } else if(event.getCause() == TeleportCause.ENDER_PEARL
+                && !wmto.getConfig().getFlagEnabled(ZoneVar.ENDERPEARL)) {
+            player.sendMessage(ChatColor.RED + "Enderpearls are disabled in this world.");
+            event.setCancelled(true);
+            return;
         } else if (wmto.getFlag(ZoneVar.BORDER) 
                 && wmto.getConfig().isOutsideBorder(to)
                 && (!wmto.getFlag(ZoneVar.BORDER_EXCEMPT_ADMIN) || plugin.hasPermission(wmto.getWorldName(), player, "zones.override.border"))

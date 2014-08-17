@@ -30,10 +30,13 @@ public class Database {
     		"`users` = ?, `settings` = ?, `minz` = ?, `maxz` = ?, size = ?, config = ? " +
     		"WHERE id = ? LIMIT 1";
     
+    public static final String UPDATE_VERTICE = "";
+    
     public static final String DELETE_ZONE =    "DELETE FROM `zones` WHERE id = ? LIMIT 1";
     public static final String DELETE_VERTICE = "DELETE FROM `zones_vertices` WHERE id = ?";
     
     public static final String SELECT_WORLD =   "SELECT * FROM `zones` WHERE world = ? ";
+    public static final String SELECT_ZONES = "SELECT z.*, v.vertexorder as vertexorder, v.x as vertexx, v.y as vertexz FROM `zones` as z LEFT JOIN `zones_vertices` as v ON v.id = z.id WHERE world = ? ORDER BY z.id ASC, v.vertexorder ASC";
     public static final String SELECT_VERTICE = "SELECT * FROM `zones_vertices` WHERE id = ? ORDER BY `vertexorder` ASC ";
     public static final String SELECT_ZONE =    "SELECT * FROM `zones` WHERE id = ? LIMIT 1";
     
@@ -97,6 +100,54 @@ public class Database {
         return DriverManager.getConnection(url, username, password);
     }
     
+    public List<Zone> getWorld(String world) {
+        Connection conn = null;
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        List<Zone> zones = new ArrayList<Zone>();
+        try {
+            conn = getConnection();
+            st = conn.prepareStatement(SELECT_ZONES);
+            st.setString(1, world);
+            rs = st.executeQuery();
+            Zone z = null;
+            while(rs.next()) {
+                if(z == null || z.getId() != rs.getInt("id")) {
+                    if(z != null) {
+                        zones.add(z);
+                    }
+                    z = new Zone();
+                    z.setId(        rs.getInt("id"));
+                    z.setName(      rs.getString("name"));
+                    z.setZonetype(  rs.getString("zonetype"));
+                    z.setFormtype(  rs.getString("formtype"));
+                    z.setWorld(     rs.getString("world"));
+                    z.setAdmins(    rs.getString("admins"));
+                    z.setUsers(     rs.getString("users"));
+                    z.setSettings(  rs.getString("settings"));
+                    z.setMinY(      rs.getInt("minz"));
+                    z.setMaxY(      rs.getInt("maxz"));
+                    z.setSize(      rs.getInt("size"));
+                    z.setConfig( rs.getString("config"));
+                }
+                z.addVertice(Vertice.from(z, rs));
+            }
+            if(z != null) {
+                zones.add(z);
+            }
+        } catch(Exception e) {
+            Zones.log.warning("[Zones]Error loading zones of world " + world + ":");
+            e.printStackTrace();
+        } finally {
+            try{
+                if(conn != null) conn.close();
+                if(st != null) st.close();
+                if(rs != null) rs.close();
+            } catch(Exception e) {}
+        }
+        return zones;
+    }
+    
     public List<Zone> get(String world) {
         Connection conn = null;
         PreparedStatement st = null;
@@ -109,7 +160,7 @@ public class Database {
             rs = st.executeQuery();
             while(rs.next()) {
                 Zone z = new Zone();
-                z.setId(        rs.getInt(1));
+                z.setId(        rs.getInt("id"));
                 z.setName(      rs.getString("name"));
                 z.setZonetype(  rs.getString("zonetype"));
                 z.setFormtype(  rs.getString("formtype"));

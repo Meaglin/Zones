@@ -43,6 +43,7 @@ public class ZonesConfig {
     public static final String PROTECTED_CANNOT_DEGRADE = ChatColor.RED + "You cannot remove this upgrade from the zone.";
     
     public static final String PROTECTED_ZONE_UPGRADED = ChatColor.GREEN + "Zone {zname} upgraded.";
+    public static final String PROTECTED_ZONE_DEGRADED = ChatColor.GREEN + "Zone {zname} degraded.";
     public static final String PROTECTED_CANNOT_UPGRADE = ChatColor.RED + "You cannot upgrade this zone.";
     
     public static final String PLAYER_CANT_USE_COMMAND_IN_ZONE = ChatColor.RED + "You cannot use this command in zone '{zname}' !";

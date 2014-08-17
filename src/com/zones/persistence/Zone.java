@@ -147,10 +147,16 @@ public class Zone {
     }
 
     public void setMinY(int minz) {
+        if(minz < 0) {
+            minz = 0;
+        }
         this.miny = minz;
     }
 
     public void setMaxY(int maxz) {
+        if(maxz > 260) {
+            maxz = 260;
+        }
         this.maxy = maxz;
     }
 
